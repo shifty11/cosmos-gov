@@ -108,7 +108,7 @@ func UpdatedAt(v time.Time) predicate.User {
 }
 
 // ChatID applies equality check predicate on the "chat_id" field. It's identical to ChatIDEQ.
-func ChatID(v int) predicate.User {
+func ChatID(v int64) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldChatID), v))
 	})
@@ -267,21 +267,21 @@ func UpdatedAtLTE(v time.Time) predicate.User {
 }
 
 // ChatIDEQ applies the EQ predicate on the "chat_id" field.
-func ChatIDEQ(v int) predicate.User {
+func ChatIDEQ(v int64) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldChatID), v))
 	})
 }
 
 // ChatIDNEQ applies the NEQ predicate on the "chat_id" field.
-func ChatIDNEQ(v int) predicate.User {
+func ChatIDNEQ(v int64) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldChatID), v))
 	})
 }
 
 // ChatIDIn applies the In predicate on the "chat_id" field.
-func ChatIDIn(vs ...int) predicate.User {
+func ChatIDIn(vs ...int64) predicate.User {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -298,7 +298,7 @@ func ChatIDIn(vs ...int) predicate.User {
 }
 
 // ChatIDNotIn applies the NotIn predicate on the "chat_id" field.
-func ChatIDNotIn(vs ...int) predicate.User {
+func ChatIDNotIn(vs ...int64) predicate.User {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -315,28 +315,28 @@ func ChatIDNotIn(vs ...int) predicate.User {
 }
 
 // ChatIDGT applies the GT predicate on the "chat_id" field.
-func ChatIDGT(v int) predicate.User {
+func ChatIDGT(v int64) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldChatID), v))
 	})
 }
 
 // ChatIDGTE applies the GTE predicate on the "chat_id" field.
-func ChatIDGTE(v int) predicate.User {
+func ChatIDGTE(v int64) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldChatID), v))
 	})
 }
 
 // ChatIDLT applies the LT predicate on the "chat_id" field.
-func ChatIDLT(v int) predicate.User {
+func ChatIDLT(v int64) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldChatID), v))
 	})
 }
 
 // ChatIDLTE applies the LTE predicate on the "chat_id" field.
-func ChatIDLTE(v int) predicate.User {
+func ChatIDLTE(v int64) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldChatID), v))
 	})

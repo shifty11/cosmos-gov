@@ -27,7 +27,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "chat_id", Type: field.TypeInt, Unique: true},
+		{Name: "chat_id", Type: field.TypeInt64, Unique: true},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{

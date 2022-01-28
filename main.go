@@ -9,7 +9,7 @@ import (
 )
 
 func initDatabase() {
-	var chains = []database.Chain{
+	var chains = []database.ChainBase{
 		{ChainId: "cosmos-1", Name: "Cosmos"},
 		{ChainId: "osmosis-1", Name: "Osmosis"},
 	}

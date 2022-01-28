@@ -28,7 +28,7 @@ func createKeyboard(buttons [][]Button) tgbotapi.InlineKeyboardMarkup {
 	return tgbotapi.InlineKeyboardMarkup{InlineKeyboard: keyboard}
 }
 
-func getChatId(update tgbotapi.Update) int64 {
+func getChatId(update *tgbotapi.Update) int64 {
 	if update.CallbackQuery != nil {
 		return update.CallbackQuery.Message.Chat.ID
 	}

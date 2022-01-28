@@ -20,7 +20,7 @@ func (User) Fields() []ent.Field {
 		field.Time("updated_at").
 			Default(time.Now).
 			UpdateDefault(time.Now),
-		field.Int("chat_id").
+		field.Int64("chat_id").
 			Unique(),
 	}
 }

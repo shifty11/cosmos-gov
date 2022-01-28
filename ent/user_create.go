@@ -50,7 +50,7 @@ func (uc *UserCreate) SetNillableUpdatedAt(t *time.Time) *UserCreate {
 }
 
 // SetChatID sets the "chat_id" field.
-func (uc *UserCreate) SetChatID(i int) *UserCreate {
+func (uc *UserCreate) SetChatID(i int64) *UserCreate {
 	uc.mutation.SetChatID(i)
 	return uc
 }
@@ -207,7 +207,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := uc.mutation.ChatID(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeInt64,
 			Value:  value,
 			Column: user.FieldChatID,
 		})

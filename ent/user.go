@@ -21,7 +21,7 @@ type User struct {
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// ChatID holds the value of the "chat_id" field.
-	ChatID int `json:"chat_id,omitempty"`
+	ChatID int64 `json:"chat_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges UserEdges `json:"edges"`
@@ -91,7 +91,7 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field chat_id", values[i])
 			} else if value.Valid {
-				u.ChatID = int(value.Int64)
+				u.ChatID = value.Int64
 			}
 		}
 	}

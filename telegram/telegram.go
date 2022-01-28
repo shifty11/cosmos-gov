@@ -2,6 +2,7 @@ package telegram
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/log"
 	"os"
 )
@@ -23,17 +24,45 @@ func getApi() *tgbotapi.BotAPI {
 	return api
 }
 
-func sendMainCommands(update tgbotapi.Update) {
-	replyMarkup := createKeyboard([][]Button{{
-		NewButton("Cosmos", "Cosmos"),
-		NewButton("Osmosis", "Osmosis"),
-	}},
-	)
-
+func sendMenu(update *tgbotapi.Update) {
 	chatId := getChatId(update)
-	msg := tgbotapi.NewMessage(chatId, "Select the projects that you want to follow and receive notifications about new governance proposals")
-	msg.ReplyMarkup = replyMarkup
-	sendMessage(msg)
+	chains := database.GetChainsForUser(chatId)
+
+	var buttons []Button
+	for _, c := range chains {
+		symbol := "❌ "
+		if c.Notify {
+			symbol = "✅ "
+		}
+		buttons = append(buttons, NewButton(c.ChainId, symbol+c.Name))
+	}
+	replyMarkup := createKeyboard([][]Button{buttons})
+
+	if update.CallbackQuery == nil {
+		msg := tgbotapi.NewMessage(chatId, menuInfoMsg)
+		msg.ReplyMarkup = replyMarkup
+		sendMessage(msg)
+	} else {
+		msg := tgbotapi.EditMessageTextConfig{
+			BaseEdit: tgbotapi.BaseEdit{ChatID: chatId,
+				MessageID:   update.CallbackQuery.Message.MessageID,
+				ReplyMarkup: &replyMarkup,
+			},
+			Text: menuInfoMsg,
+		}
+		sendMessage(msg)
+	}
+}
+
+func updateNotification(update *tgbotapi.Update) {
+	if update.CallbackQuery != nil {
+		chatId := getChatId(update)
+		chainId := update.CallbackQuery.Data
+		err := database.AddOrRemoveChainForUser(chatId, chainId)
+		if err != nil {
+			log.Sugar.Error("Error while toggle chain for user %v", chatId)
+		}
+	}
 }
 
 func Listen() {
@@ -48,6 +77,11 @@ func Listen() {
 	}
 
 	for update := range updates {
-		sendMainCommands(update)
+		if update.CallbackQuery != nil {
+			updateNotification(&update)
+			sendMenu(&update)
+		} else {
+			sendMenu(&update)
+		}
 	}
 }

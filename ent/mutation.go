@@ -603,8 +603,8 @@ type UserMutation struct {
 	id            *int
 	created_at    *time.Time
 	updated_at    *time.Time
-	chat_id       *int
-	addchat_id    *int
+	chat_id       *int64
+	addchat_id    *int64
 	clearedFields map[string]struct{}
 	chains        map[int]struct{}
 	removedchains map[int]struct{}
@@ -785,13 +785,13 @@ func (m *UserMutation) ResetUpdatedAt() {
 }
 
 // SetChatID sets the "chat_id" field.
-func (m *UserMutation) SetChatID(i int) {
+func (m *UserMutation) SetChatID(i int64) {
 	m.chat_id = &i
 	m.addchat_id = nil
 }
 
 // ChatID returns the value of the "chat_id" field in the mutation.
-func (m *UserMutation) ChatID() (r int, exists bool) {
+func (m *UserMutation) ChatID() (r int64, exists bool) {
 	v := m.chat_id
 	if v == nil {
 		return
@@ -802,7 +802,7 @@ func (m *UserMutation) ChatID() (r int, exists bool) {
 // OldChatID returns the old "chat_id" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldChatID(ctx context.Context) (v int, err error) {
+func (m *UserMutation) OldChatID(ctx context.Context) (v int64, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldChatID is only allowed on UpdateOne operations")
 	}
@@ -817,7 +817,7 @@ func (m *UserMutation) OldChatID(ctx context.Context) (v int, err error) {
 }
 
 // AddChatID adds i to the "chat_id" field.
-func (m *UserMutation) AddChatID(i int) {
+func (m *UserMutation) AddChatID(i int64) {
 	if m.addchat_id != nil {
 		*m.addchat_id += i
 	} else {
@@ -826,7 +826,7 @@ func (m *UserMutation) AddChatID(i int) {
 }
 
 // AddedChatID returns the value that was added to the "chat_id" field in this mutation.
-func (m *UserMutation) AddedChatID() (r int, exists bool) {
+func (m *UserMutation) AddedChatID() (r int64, exists bool) {
 	v := m.addchat_id
 	if v == nil {
 		return
@@ -976,7 +976,7 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		m.SetUpdatedAt(v)
 		return nil
 	case user.FieldChatID:
-		v, ok := value.(int)
+		v, ok := value.(int64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -1013,7 +1013,7 @@ func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
 func (m *UserMutation) AddField(name string, value ent.Value) error {
 	switch name {
 	case user.FieldChatID:
-		v, ok := value.(int)
+		v, ok := value.(int64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}

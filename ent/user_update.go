@@ -50,14 +50,14 @@ func (uu *UserUpdate) SetUpdatedAt(t time.Time) *UserUpdate {
 }
 
 // SetChatID sets the "chat_id" field.
-func (uu *UserUpdate) SetChatID(i int) *UserUpdate {
+func (uu *UserUpdate) SetChatID(i int64) *UserUpdate {
 	uu.mutation.ResetChatID()
 	uu.mutation.SetChatID(i)
 	return uu
 }
 
 // AddChatID adds i to the "chat_id" field.
-func (uu *UserUpdate) AddChatID(i int) *UserUpdate {
+func (uu *UserUpdate) AddChatID(i int64) *UserUpdate {
 	uu.mutation.AddChatID(i)
 	return uu
 }
@@ -200,14 +200,14 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := uu.mutation.ChatID(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeInt64,
 			Value:  value,
 			Column: user.FieldChatID,
 		})
 	}
 	if value, ok := uu.mutation.AddedChatID(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeInt64,
 			Value:  value,
 			Column: user.FieldChatID,
 		})
@@ -306,14 +306,14 @@ func (uuo *UserUpdateOne) SetUpdatedAt(t time.Time) *UserUpdateOne {
 }
 
 // SetChatID sets the "chat_id" field.
-func (uuo *UserUpdateOne) SetChatID(i int) *UserUpdateOne {
+func (uuo *UserUpdateOne) SetChatID(i int64) *UserUpdateOne {
 	uuo.mutation.ResetChatID()
 	uuo.mutation.SetChatID(i)
 	return uuo
 }
 
 // AddChatID adds i to the "chat_id" field.
-func (uuo *UserUpdateOne) AddChatID(i int) *UserUpdateOne {
+func (uuo *UserUpdateOne) AddChatID(i int64) *UserUpdateOne {
 	uuo.mutation.AddChatID(i)
 	return uuo
 }
@@ -480,14 +480,14 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	if value, ok := uuo.mutation.ChatID(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeInt64,
 			Value:  value,
 			Column: user.FieldChatID,
 		})
 	}
 	if value, ok := uuo.mutation.AddedChatID(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeInt64,
 			Value:  value,
 			Column: user.FieldChatID,
 		})
