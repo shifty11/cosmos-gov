@@ -17,3 +17,5 @@
 
 # Project files
 log.txt
+.env
+data/

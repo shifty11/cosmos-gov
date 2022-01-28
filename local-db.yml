@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:12.3
+    container_name: cosmosgov_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - data:/var/lib/postgresql/data/
+    env_file:
+      - data/.env.dev
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: cosmosgov_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+    logging:
+      driver: "none"
+    volumes:
+       - pgadmin:/root/.pgadmin
+       - ${PWD}/data/db-connection.json:/tmp/db-connection.json
+    ports:
+      - "5050:80"
+    restart: unless-stopped
+
+volumes:
+  data:
+    name: cosmosgov_data
+  pgadmin:
