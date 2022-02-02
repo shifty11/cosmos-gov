@@ -11,6 +11,7 @@ import (
 
 	"github.com/shifty11/cosmos-gov/ent/chain"
 	"github.com/shifty11/cosmos-gov/ent/predicate"
+	"github.com/shifty11/cosmos-gov/ent/proposal"
 	"github.com/shifty11/cosmos-gov/ent/user"
 
 	"entgo.io/ent"
@@ -25,27 +26,31 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeChain = "Chain"
-	TypeUser  = "User"
+	TypeChain    = "Chain"
+	TypeProposal = "Proposal"
+	TypeUser     = "User"
 )
 
 // ChainMutation represents an operation that mutates the Chain nodes in the graph.
 type ChainMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	created_at    *time.Time
-	updated_at    *time.Time
-	name          *string
-	chain_id      *string
-	clearedFields map[string]struct{}
-	users         map[int]struct{}
-	removedusers  map[int]struct{}
-	clearedusers  bool
-	done          bool
-	oldValue      func(context.Context) (*Chain, error)
-	predicates    []predicate.Chain
+	op               Op
+	typ              string
+	id               *int
+	created_at       *time.Time
+	updated_at       *time.Time
+	name             *string
+	chain_id         *string
+	clearedFields    map[string]struct{}
+	users            map[int]struct{}
+	removedusers     map[int]struct{}
+	clearedusers     bool
+	proposals        map[int]struct{}
+	removedproposals map[int]struct{}
+	clearedproposals bool
+	done             bool
+	oldValue         func(context.Context) (*Chain, error)
+	predicates       []predicate.Chain
 }
 
 var _ ent.Mutation = (*ChainMutation)(nil)
@@ -344,6 +349,60 @@ func (m *ChainMutation) ResetUsers() {
 	m.removedusers = nil
 }
 
+// AddProposalIDs adds the "proposals" edge to the Proposal entity by ids.
+func (m *ChainMutation) AddProposalIDs(ids ...int) {
+	if m.proposals == nil {
+		m.proposals = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.proposals[ids[i]] = struct{}{}
+	}
+}
+
+// ClearProposals clears the "proposals" edge to the Proposal entity.
+func (m *ChainMutation) ClearProposals() {
+	m.clearedproposals = true
+}
+
+// ProposalsCleared reports if the "proposals" edge to the Proposal entity was cleared.
+func (m *ChainMutation) ProposalsCleared() bool {
+	return m.clearedproposals
+}
+
+// RemoveProposalIDs removes the "proposals" edge to the Proposal entity by IDs.
+func (m *ChainMutation) RemoveProposalIDs(ids ...int) {
+	if m.removedproposals == nil {
+		m.removedproposals = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.proposals, ids[i])
+		m.removedproposals[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedProposals returns the removed IDs of the "proposals" edge to the Proposal entity.
+func (m *ChainMutation) RemovedProposalsIDs() (ids []int) {
+	for id := range m.removedproposals {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ProposalsIDs returns the "proposals" edge IDs in the mutation.
+func (m *ChainMutation) ProposalsIDs() (ids []int) {
+	for id := range m.proposals {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetProposals resets all changes to the "proposals" edge.
+func (m *ChainMutation) ResetProposals() {
+	m.proposals = nil
+	m.clearedproposals = false
+	m.removedproposals = nil
+}
+
 // Where appends a list predicates to the ChainMutation builder.
 func (m *ChainMutation) Where(ps ...predicate.Chain) {
 	m.predicates = append(m.predicates, ps...)
@@ -513,9 +572,12 @@ func (m *ChainMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ChainMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.users != nil {
 		edges = append(edges, chain.EdgeUsers)
+	}
+	if m.proposals != nil {
+		edges = append(edges, chain.EdgeProposals)
 	}
 	return edges
 }
@@ -530,15 +592,24 @@ func (m *ChainMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case chain.EdgeProposals:
+		ids := make([]ent.Value, 0, len(m.proposals))
+		for id := range m.proposals {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ChainMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.removedusers != nil {
 		edges = append(edges, chain.EdgeUsers)
+	}
+	if m.removedproposals != nil {
+		edges = append(edges, chain.EdgeProposals)
 	}
 	return edges
 }
@@ -553,15 +624,24 @@ func (m *ChainMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case chain.EdgeProposals:
+		ids := make([]ent.Value, 0, len(m.removedproposals))
+		for id := range m.removedproposals {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ChainMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.clearedusers {
 		edges = append(edges, chain.EdgeUsers)
+	}
+	if m.clearedproposals {
+		edges = append(edges, chain.EdgeProposals)
 	}
 	return edges
 }
@@ -572,6 +652,8 @@ func (m *ChainMutation) EdgeCleared(name string) bool {
 	switch name {
 	case chain.EdgeUsers:
 		return m.clearedusers
+	case chain.EdgeProposals:
+		return m.clearedproposals
 	}
 	return false
 }
@@ -591,8 +673,805 @@ func (m *ChainMutation) ResetEdge(name string) error {
 	case chain.EdgeUsers:
 		m.ResetUsers()
 		return nil
+	case chain.EdgeProposals:
+		m.ResetProposals()
+		return nil
 	}
 	return fmt.Errorf("unknown Chain edge %s", name)
+}
+
+// ProposalMutation represents an operation that mutates the Proposal nodes in the graph.
+type ProposalMutation struct {
+	config
+	op                Op
+	typ               string
+	id                *int
+	created_at        *time.Time
+	updated_at        *time.Time
+	proposal_id       *int
+	addproposal_id    *int
+	title             *string
+	description       *string
+	voting_start_time *time.Time
+	voting_end_time   *time.Time
+	status            *string
+	clearedFields     map[string]struct{}
+	chain             *int
+	clearedchain      bool
+	done              bool
+	oldValue          func(context.Context) (*Proposal, error)
+	predicates        []predicate.Proposal
+}
+
+var _ ent.Mutation = (*ProposalMutation)(nil)
+
+// proposalOption allows management of the mutation configuration using functional options.
+type proposalOption func(*ProposalMutation)
+
+// newProposalMutation creates new mutation for the Proposal entity.
+func newProposalMutation(c config, op Op, opts ...proposalOption) *ProposalMutation {
+	m := &ProposalMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeProposal,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withProposalID sets the ID field of the mutation.
+func withProposalID(id int) proposalOption {
+	return func(m *ProposalMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Proposal
+		)
+		m.oldValue = func(ctx context.Context) (*Proposal, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Proposal.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withProposal sets the old Proposal of the mutation.
+func withProposal(node *Proposal) proposalOption {
+	return func(m *ProposalMutation) {
+		m.oldValue = func(context.Context) (*Proposal, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m ProposalMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m ProposalMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *ProposalMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *ProposalMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Proposal.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *ProposalMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *ProposalMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the Proposal entity.
+// If the Proposal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProposalMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *ProposalMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *ProposalMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *ProposalMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the Proposal entity.
+// If the Proposal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProposalMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *ProposalMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetProposalID sets the "proposal_id" field.
+func (m *ProposalMutation) SetProposalID(i int) {
+	m.proposal_id = &i
+	m.addproposal_id = nil
+}
+
+// ProposalID returns the value of the "proposal_id" field in the mutation.
+func (m *ProposalMutation) ProposalID() (r int, exists bool) {
+	v := m.proposal_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProposalID returns the old "proposal_id" field's value of the Proposal entity.
+// If the Proposal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProposalMutation) OldProposalID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProposalID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProposalID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProposalID: %w", err)
+	}
+	return oldValue.ProposalID, nil
+}
+
+// AddProposalID adds i to the "proposal_id" field.
+func (m *ProposalMutation) AddProposalID(i int) {
+	if m.addproposal_id != nil {
+		*m.addproposal_id += i
+	} else {
+		m.addproposal_id = &i
+	}
+}
+
+// AddedProposalID returns the value that was added to the "proposal_id" field in this mutation.
+func (m *ProposalMutation) AddedProposalID() (r int, exists bool) {
+	v := m.addproposal_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetProposalID resets all changes to the "proposal_id" field.
+func (m *ProposalMutation) ResetProposalID() {
+	m.proposal_id = nil
+	m.addproposal_id = nil
+}
+
+// SetTitle sets the "title" field.
+func (m *ProposalMutation) SetTitle(s string) {
+	m.title = &s
+}
+
+// Title returns the value of the "title" field in the mutation.
+func (m *ProposalMutation) Title() (r string, exists bool) {
+	v := m.title
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTitle returns the old "title" field's value of the Proposal entity.
+// If the Proposal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProposalMutation) OldTitle(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTitle is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTitle requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTitle: %w", err)
+	}
+	return oldValue.Title, nil
+}
+
+// ResetTitle resets all changes to the "title" field.
+func (m *ProposalMutation) ResetTitle() {
+	m.title = nil
+}
+
+// SetDescription sets the "description" field.
+func (m *ProposalMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the value of the "description" field in the mutation.
+func (m *ProposalMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old "description" field's value of the Proposal entity.
+// If the Proposal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProposalMutation) OldDescription(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ResetDescription resets all changes to the "description" field.
+func (m *ProposalMutation) ResetDescription() {
+	m.description = nil
+}
+
+// SetVotingStartTime sets the "voting_start_time" field.
+func (m *ProposalMutation) SetVotingStartTime(t time.Time) {
+	m.voting_start_time = &t
+}
+
+// VotingStartTime returns the value of the "voting_start_time" field in the mutation.
+func (m *ProposalMutation) VotingStartTime() (r time.Time, exists bool) {
+	v := m.voting_start_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVotingStartTime returns the old "voting_start_time" field's value of the Proposal entity.
+// If the Proposal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProposalMutation) OldVotingStartTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVotingStartTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVotingStartTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVotingStartTime: %w", err)
+	}
+	return oldValue.VotingStartTime, nil
+}
+
+// ResetVotingStartTime resets all changes to the "voting_start_time" field.
+func (m *ProposalMutation) ResetVotingStartTime() {
+	m.voting_start_time = nil
+}
+
+// SetVotingEndTime sets the "voting_end_time" field.
+func (m *ProposalMutation) SetVotingEndTime(t time.Time) {
+	m.voting_end_time = &t
+}
+
+// VotingEndTime returns the value of the "voting_end_time" field in the mutation.
+func (m *ProposalMutation) VotingEndTime() (r time.Time, exists bool) {
+	v := m.voting_end_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVotingEndTime returns the old "voting_end_time" field's value of the Proposal entity.
+// If the Proposal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProposalMutation) OldVotingEndTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVotingEndTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVotingEndTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVotingEndTime: %w", err)
+	}
+	return oldValue.VotingEndTime, nil
+}
+
+// ResetVotingEndTime resets all changes to the "voting_end_time" field.
+func (m *ProposalMutation) ResetVotingEndTime() {
+	m.voting_end_time = nil
+}
+
+// SetStatus sets the "status" field.
+func (m *ProposalMutation) SetStatus(s string) {
+	m.status = &s
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *ProposalMutation) Status() (r string, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the Proposal entity.
+// If the Proposal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProposalMutation) OldStatus(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *ProposalMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetChainID sets the "chain" edge to the Chain entity by id.
+func (m *ProposalMutation) SetChainID(id int) {
+	m.chain = &id
+}
+
+// ClearChain clears the "chain" edge to the Chain entity.
+func (m *ProposalMutation) ClearChain() {
+	m.clearedchain = true
+}
+
+// ChainCleared reports if the "chain" edge to the Chain entity was cleared.
+func (m *ProposalMutation) ChainCleared() bool {
+	return m.clearedchain
+}
+
+// ChainID returns the "chain" edge ID in the mutation.
+func (m *ProposalMutation) ChainID() (id int, exists bool) {
+	if m.chain != nil {
+		return *m.chain, true
+	}
+	return
+}
+
+// ChainIDs returns the "chain" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ChainID instead. It exists only for internal usage by the builders.
+func (m *ProposalMutation) ChainIDs() (ids []int) {
+	if id := m.chain; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetChain resets all changes to the "chain" edge.
+func (m *ProposalMutation) ResetChain() {
+	m.chain = nil
+	m.clearedchain = false
+}
+
+// Where appends a list predicates to the ProposalMutation builder.
+func (m *ProposalMutation) Where(ps ...predicate.Proposal) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// Op returns the operation name.
+func (m *ProposalMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (Proposal).
+func (m *ProposalMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *ProposalMutation) Fields() []string {
+	fields := make([]string, 0, 8)
+	if m.created_at != nil {
+		fields = append(fields, proposal.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, proposal.FieldUpdatedAt)
+	}
+	if m.proposal_id != nil {
+		fields = append(fields, proposal.FieldProposalID)
+	}
+	if m.title != nil {
+		fields = append(fields, proposal.FieldTitle)
+	}
+	if m.description != nil {
+		fields = append(fields, proposal.FieldDescription)
+	}
+	if m.voting_start_time != nil {
+		fields = append(fields, proposal.FieldVotingStartTime)
+	}
+	if m.voting_end_time != nil {
+		fields = append(fields, proposal.FieldVotingEndTime)
+	}
+	if m.status != nil {
+		fields = append(fields, proposal.FieldStatus)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *ProposalMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case proposal.FieldCreatedAt:
+		return m.CreatedAt()
+	case proposal.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case proposal.FieldProposalID:
+		return m.ProposalID()
+	case proposal.FieldTitle:
+		return m.Title()
+	case proposal.FieldDescription:
+		return m.Description()
+	case proposal.FieldVotingStartTime:
+		return m.VotingStartTime()
+	case proposal.FieldVotingEndTime:
+		return m.VotingEndTime()
+	case proposal.FieldStatus:
+		return m.Status()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *ProposalMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case proposal.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case proposal.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case proposal.FieldProposalID:
+		return m.OldProposalID(ctx)
+	case proposal.FieldTitle:
+		return m.OldTitle(ctx)
+	case proposal.FieldDescription:
+		return m.OldDescription(ctx)
+	case proposal.FieldVotingStartTime:
+		return m.OldVotingStartTime(ctx)
+	case proposal.FieldVotingEndTime:
+		return m.OldVotingEndTime(ctx)
+	case proposal.FieldStatus:
+		return m.OldStatus(ctx)
+	}
+	return nil, fmt.Errorf("unknown Proposal field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ProposalMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case proposal.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case proposal.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case proposal.FieldProposalID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProposalID(v)
+		return nil
+	case proposal.FieldTitle:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTitle(v)
+		return nil
+	case proposal.FieldDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescription(v)
+		return nil
+	case proposal.FieldVotingStartTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVotingStartTime(v)
+		return nil
+	case proposal.FieldVotingEndTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVotingEndTime(v)
+		return nil
+	case proposal.FieldStatus:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Proposal field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *ProposalMutation) AddedFields() []string {
+	var fields []string
+	if m.addproposal_id != nil {
+		fields = append(fields, proposal.FieldProposalID)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *ProposalMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case proposal.FieldProposalID:
+		return m.AddedProposalID()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ProposalMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case proposal.FieldProposalID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddProposalID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Proposal numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *ProposalMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *ProposalMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *ProposalMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Proposal nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *ProposalMutation) ResetField(name string) error {
+	switch name {
+	case proposal.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case proposal.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case proposal.FieldProposalID:
+		m.ResetProposalID()
+		return nil
+	case proposal.FieldTitle:
+		m.ResetTitle()
+		return nil
+	case proposal.FieldDescription:
+		m.ResetDescription()
+		return nil
+	case proposal.FieldVotingStartTime:
+		m.ResetVotingStartTime()
+		return nil
+	case proposal.FieldVotingEndTime:
+		m.ResetVotingEndTime()
+		return nil
+	case proposal.FieldStatus:
+		m.ResetStatus()
+		return nil
+	}
+	return fmt.Errorf("unknown Proposal field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *ProposalMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.chain != nil {
+		edges = append(edges, proposal.EdgeChain)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *ProposalMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case proposal.EdgeChain:
+		if id := m.chain; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *ProposalMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *ProposalMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *ProposalMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedchain {
+		edges = append(edges, proposal.EdgeChain)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *ProposalMutation) EdgeCleared(name string) bool {
+	switch name {
+	case proposal.EdgeChain:
+		return m.clearedchain
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *ProposalMutation) ClearEdge(name string) error {
+	switch name {
+	case proposal.EdgeChain:
+		m.ClearChain()
+		return nil
+	}
+	return fmt.Errorf("unknown Proposal unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *ProposalMutation) ResetEdge(name string) error {
+	switch name {
+	case proposal.EdgeChain:
+		m.ResetChain()
+		return nil
+	}
+	return fmt.Errorf("unknown Proposal edge %s", name)
 }
 
 // UserMutation represents an operation that mutates the User nodes in the graph.

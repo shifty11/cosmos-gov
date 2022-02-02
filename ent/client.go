@@ -10,6 +10,7 @@ import (
 	"github.com/shifty11/cosmos-gov/ent/migrate"
 
 	"github.com/shifty11/cosmos-gov/ent/chain"
+	"github.com/shifty11/cosmos-gov/ent/proposal"
 	"github.com/shifty11/cosmos-gov/ent/user"
 
 	"entgo.io/ent/dialect"
@@ -24,6 +25,8 @@ type Client struct {
 	Schema *migrate.Schema
 	// Chain is the client for interacting with the Chain builders.
 	Chain *ChainClient
+	// Proposal is the client for interacting with the Proposal builders.
+	Proposal *ProposalClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 }
@@ -40,6 +43,7 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Chain = NewChainClient(c.config)
+	c.Proposal = NewProposalClient(c.config)
 	c.User = NewUserClient(c.config)
 }
 
@@ -72,10 +76,11 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:    ctx,
-		config: cfg,
-		Chain:  NewChainClient(cfg),
-		User:   NewUserClient(cfg),
+		ctx:      ctx,
+		config:   cfg,
+		Chain:    NewChainClient(cfg),
+		Proposal: NewProposalClient(cfg),
+		User:     NewUserClient(cfg),
 	}, nil
 }
 
@@ -93,10 +98,11 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:    ctx,
-		config: cfg,
-		Chain:  NewChainClient(cfg),
-		User:   NewUserClient(cfg),
+		ctx:      ctx,
+		config:   cfg,
+		Chain:    NewChainClient(cfg),
+		Proposal: NewProposalClient(cfg),
+		User:     NewUserClient(cfg),
 	}, nil
 }
 
@@ -127,6 +133,7 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	c.Chain.Use(hooks...)
+	c.Proposal.Use(hooks...)
 	c.User.Use(hooks...)
 }
 
@@ -231,9 +238,131 @@ func (c *ChainClient) QueryUsers(ch *Chain) *UserQuery {
 	return query
 }
 
+// QueryProposals queries the proposals edge of a Chain.
+func (c *ChainClient) QueryProposals(ch *Chain) *ProposalQuery {
+	query := &ProposalQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ch.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(chain.Table, chain.FieldID, id),
+			sqlgraph.To(proposal.Table, proposal.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, chain.ProposalsTable, chain.ProposalsColumn),
+		)
+		fromV = sqlgraph.Neighbors(ch.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *ChainClient) Hooks() []Hook {
 	return c.hooks.Chain
+}
+
+// ProposalClient is a client for the Proposal schema.
+type ProposalClient struct {
+	config
+}
+
+// NewProposalClient returns a client for the Proposal from the given config.
+func NewProposalClient(c config) *ProposalClient {
+	return &ProposalClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `proposal.Hooks(f(g(h())))`.
+func (c *ProposalClient) Use(hooks ...Hook) {
+	c.hooks.Proposal = append(c.hooks.Proposal, hooks...)
+}
+
+// Create returns a create builder for Proposal.
+func (c *ProposalClient) Create() *ProposalCreate {
+	mutation := newProposalMutation(c.config, OpCreate)
+	return &ProposalCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Proposal entities.
+func (c *ProposalClient) CreateBulk(builders ...*ProposalCreate) *ProposalCreateBulk {
+	return &ProposalCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Proposal.
+func (c *ProposalClient) Update() *ProposalUpdate {
+	mutation := newProposalMutation(c.config, OpUpdate)
+	return &ProposalUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ProposalClient) UpdateOne(pr *Proposal) *ProposalUpdateOne {
+	mutation := newProposalMutation(c.config, OpUpdateOne, withProposal(pr))
+	return &ProposalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ProposalClient) UpdateOneID(id int) *ProposalUpdateOne {
+	mutation := newProposalMutation(c.config, OpUpdateOne, withProposalID(id))
+	return &ProposalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Proposal.
+func (c *ProposalClient) Delete() *ProposalDelete {
+	mutation := newProposalMutation(c.config, OpDelete)
+	return &ProposalDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *ProposalClient) DeleteOne(pr *Proposal) *ProposalDeleteOne {
+	return c.DeleteOneID(pr.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *ProposalClient) DeleteOneID(id int) *ProposalDeleteOne {
+	builder := c.Delete().Where(proposal.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ProposalDeleteOne{builder}
+}
+
+// Query returns a query builder for Proposal.
+func (c *ProposalClient) Query() *ProposalQuery {
+	return &ProposalQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Proposal entity by its id.
+func (c *ProposalClient) Get(ctx context.Context, id int) (*Proposal, error) {
+	return c.Query().Where(proposal.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ProposalClient) GetX(ctx context.Context, id int) *Proposal {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryChain queries the chain edge of a Proposal.
+func (c *ProposalClient) QueryChain(pr *Proposal) *ChainQuery {
+	query := &ChainQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := pr.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(proposal.Table, proposal.FieldID, id),
+			sqlgraph.To(chain.Table, chain.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, proposal.ChainTable, proposal.ChainColumn),
+		)
+		fromV = sqlgraph.Neighbors(pr.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ProposalClient) Hooks() []Hook {
+	return c.hooks.Proposal
 }
 
 // UserClient is a client for the User schema.

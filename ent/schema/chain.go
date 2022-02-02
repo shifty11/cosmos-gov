@@ -32,5 +32,6 @@ func (Chain) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("users", User.Type).
 			Ref("chains"),
+		edge.To("proposals", Proposal.Type),
 	}
 }

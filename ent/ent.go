@@ -9,6 +9,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/shifty11/cosmos-gov/ent/chain"
+	"github.com/shifty11/cosmos-gov/ent/proposal"
 	"github.com/shifty11/cosmos-gov/ent/user"
 )
 
@@ -30,8 +31,9 @@ type OrderFunc func(*sql.Selector)
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
-		chain.Table: chain.ValidColumn,
-		user.Table:  user.ValidColumn,
+		chain.Table:    chain.ValidColumn,
+		proposal.Table: proposal.ValidColumn,
+		user.Table:     user.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {

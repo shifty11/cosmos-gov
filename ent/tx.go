@@ -14,6 +14,8 @@ type Tx struct {
 	config
 	// Chain is the client for interacting with the Chain builders.
 	Chain *ChainClient
+	// Proposal is the client for interacting with the Proposal builders.
+	Proposal *ProposalClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 
@@ -152,6 +154,7 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Chain = NewChainClient(tx.config)
+	tx.Proposal = NewProposalClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }
 

@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/shifty11/cosmos-gov/ent/chain"
 	"github.com/shifty11/cosmos-gov/ent/predicate"
+	"github.com/shifty11/cosmos-gov/ent/proposal"
 	"github.com/shifty11/cosmos-gov/ent/user"
 )
 
@@ -76,6 +77,21 @@ func (cu *ChainUpdate) AddUsers(u ...*User) *ChainUpdate {
 	return cu.AddUserIDs(ids...)
 }
 
+// AddProposalIDs adds the "proposals" edge to the Proposal entity by IDs.
+func (cu *ChainUpdate) AddProposalIDs(ids ...int) *ChainUpdate {
+	cu.mutation.AddProposalIDs(ids...)
+	return cu
+}
+
+// AddProposals adds the "proposals" edges to the Proposal entity.
+func (cu *ChainUpdate) AddProposals(p ...*Proposal) *ChainUpdate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return cu.AddProposalIDs(ids...)
+}
+
 // Mutation returns the ChainMutation object of the builder.
 func (cu *ChainUpdate) Mutation() *ChainMutation {
 	return cu.mutation
@@ -100,6 +116,27 @@ func (cu *ChainUpdate) RemoveUsers(u ...*User) *ChainUpdate {
 		ids[i] = u[i].ID
 	}
 	return cu.RemoveUserIDs(ids...)
+}
+
+// ClearProposals clears all "proposals" edges to the Proposal entity.
+func (cu *ChainUpdate) ClearProposals() *ChainUpdate {
+	cu.mutation.ClearProposals()
+	return cu
+}
+
+// RemoveProposalIDs removes the "proposals" edge to Proposal entities by IDs.
+func (cu *ChainUpdate) RemoveProposalIDs(ids ...int) *ChainUpdate {
+	cu.mutation.RemoveProposalIDs(ids...)
+	return cu
+}
+
+// RemoveProposals removes "proposals" edges to Proposal entities.
+func (cu *ChainUpdate) RemoveProposals(p ...*Proposal) *ChainUpdate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return cu.RemoveProposalIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -265,6 +302,60 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if cu.mutation.ProposalsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.ProposalsTable,
+			Columns: []string{chain.ProposalsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: proposal.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.RemovedProposalsIDs(); len(nodes) > 0 && !cu.mutation.ProposalsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.ProposalsTable,
+			Columns: []string{chain.ProposalsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: proposal.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.ProposalsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.ProposalsTable,
+			Columns: []string{chain.ProposalsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: proposal.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{chain.Label}
@@ -331,6 +422,21 @@ func (cuo *ChainUpdateOne) AddUsers(u ...*User) *ChainUpdateOne {
 	return cuo.AddUserIDs(ids...)
 }
 
+// AddProposalIDs adds the "proposals" edge to the Proposal entity by IDs.
+func (cuo *ChainUpdateOne) AddProposalIDs(ids ...int) *ChainUpdateOne {
+	cuo.mutation.AddProposalIDs(ids...)
+	return cuo
+}
+
+// AddProposals adds the "proposals" edges to the Proposal entity.
+func (cuo *ChainUpdateOne) AddProposals(p ...*Proposal) *ChainUpdateOne {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return cuo.AddProposalIDs(ids...)
+}
+
 // Mutation returns the ChainMutation object of the builder.
 func (cuo *ChainUpdateOne) Mutation() *ChainMutation {
 	return cuo.mutation
@@ -355,6 +461,27 @@ func (cuo *ChainUpdateOne) RemoveUsers(u ...*User) *ChainUpdateOne {
 		ids[i] = u[i].ID
 	}
 	return cuo.RemoveUserIDs(ids...)
+}
+
+// ClearProposals clears all "proposals" edges to the Proposal entity.
+func (cuo *ChainUpdateOne) ClearProposals() *ChainUpdateOne {
+	cuo.mutation.ClearProposals()
+	return cuo
+}
+
+// RemoveProposalIDs removes the "proposals" edge to Proposal entities by IDs.
+func (cuo *ChainUpdateOne) RemoveProposalIDs(ids ...int) *ChainUpdateOne {
+	cuo.mutation.RemoveProposalIDs(ids...)
+	return cuo
+}
+
+// RemoveProposals removes "proposals" edges to Proposal entities.
+func (cuo *ChainUpdateOne) RemoveProposals(p ...*Proposal) *ChainUpdateOne {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return cuo.RemoveProposalIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -536,6 +663,60 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if cuo.mutation.ProposalsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.ProposalsTable,
+			Columns: []string{chain.ProposalsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: proposal.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.RemovedProposalsIDs(); len(nodes) > 0 && !cuo.mutation.ProposalsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.ProposalsTable,
+			Columns: []string{chain.ProposalsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: proposal.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.ProposalsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.ProposalsTable,
+			Columns: []string{chain.ProposalsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: proposal.FieldID,
 				},
 			},
 		}

@@ -21,6 +21,8 @@ const (
 	FieldChainID = "chain_id"
 	// EdgeUsers holds the string denoting the users edge name in mutations.
 	EdgeUsers = "users"
+	// EdgeProposals holds the string denoting the proposals edge name in mutations.
+	EdgeProposals = "proposals"
 	// Table holds the table name of the chain in the database.
 	Table = "chains"
 	// UsersTable is the table that holds the users relation/edge. The primary key declared below.
@@ -28,6 +30,13 @@ const (
 	// UsersInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	UsersInverseTable = "users"
+	// ProposalsTable is the table that holds the proposals relation/edge.
+	ProposalsTable = "proposals"
+	// ProposalsInverseTable is the table name for the Proposal entity.
+	// It exists in this package in order to avoid circular dependency with the "proposal" package.
+	ProposalsInverseTable = "proposals"
+	// ProposalsColumn is the table column denoting the proposals relation/edge.
+	ProposalsColumn = "chain_proposals"
 )
 
 // Columns holds all SQL columns for chain fields.

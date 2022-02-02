@@ -33,9 +33,11 @@ type Chain struct {
 type ChainEdges struct {
 	// Users holds the value of the users edge.
 	Users []*User `json:"users,omitempty"`
+	// Proposals holds the value of the proposals edge.
+	Proposals []*Proposal `json:"proposals,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // UsersOrErr returns the Users value or an error if the edge
@@ -45,6 +47,15 @@ func (e ChainEdges) UsersOrErr() ([]*User, error) {
 		return e.Users, nil
 	}
 	return nil, &NotLoadedError{edge: "users"}
+}
+
+// ProposalsOrErr returns the Proposals value or an error if the edge
+// was not loaded in eager-loading.
+func (e ChainEdges) ProposalsOrErr() ([]*Proposal, error) {
+	if e.loadedTypes[1] {
+		return e.Proposals, nil
+	}
+	return nil, &NotLoadedError{edge: "proposals"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -111,6 +122,11 @@ func (c *Chain) assignValues(columns []string, values []interface{}) error {
 // QueryUsers queries the "users" edge of the Chain entity.
 func (c *Chain) QueryUsers() *UserQuery {
 	return (&ChainClient{config: c.config}).QueryUsers(c)
+}
+
+// QueryProposals queries the "proposals" edge of the Chain entity.
+func (c *Chain) QueryProposals() *ProposalQuery {
+	return (&ChainClient{config: c.config}).QueryProposals(c)
 }
 
 // Update returns a builder for updating this Chain.

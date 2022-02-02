@@ -3,9 +3,8 @@ package main
 import (
 	_ "github.com/lib/pq"
 	"github.com/shifty11/cosmos-gov/database"
+	"github.com/shifty11/cosmos-gov/datasource"
 	"github.com/shifty11/cosmos-gov/log"
-	"github.com/shifty11/cosmos-gov/telegram"
-	"time"
 )
 
 func initDatabase() {
@@ -24,6 +23,8 @@ func main() {
 	defer database.Close()
 
 	initDatabase()
-	go telegram.Listen()
-	time.Sleep(time.Duration(1<<63 - 1))
+	datasource.FetchProposals()
+	//go datasource.PerformLensQuery()
+	//go telegram.Listen()
+	//time.Sleep(time.Duration(1<<63 - 1))
 }
