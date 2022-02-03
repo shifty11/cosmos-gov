@@ -107,6 +107,7 @@ func SendProposal(proposalText string, chatIds []int) map[int]struct{} {
 	for _, chatId := range chatIds {
 		msg := tgbotapi.NewMessage(int64(chatId), proposalText)
 		msg.ParseMode = "markdown"
+		log.Sugar.Debugf("Send proposal to chat #%v", chatId)
 		err := sendMessage(msg)
 		if err != nil {
 			errIds[chatId] = exists

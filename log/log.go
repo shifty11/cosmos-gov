@@ -34,6 +34,9 @@ var logger *zap.Logger
 func InitLogger() {
 	if logger == nil {
 		logger, err := zap.NewProduction()
+		if os.Getenv("DEBUG") == "true" {
+			logger, err = zap.NewDevelopment()
+		}
 		if err != nil {
 			fmt.Println(err)
 		}

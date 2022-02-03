@@ -20,6 +20,7 @@ func fetchProposals(query string) (*dtos.Proposals, error) {
 
 	rootCmd := cmd.NewRootCmd()
 	rootCmd.SetArgs(strings.Fields(query))
+	log.Sugar.Debug(query)
 	err := rootCmd.Execute()
 	if err != nil {
 		log.Sugar.Errorf("Error while querying '%v': %v", query, err)
@@ -35,6 +36,7 @@ func fetchProposals(query string) (*dtos.Proposals, error) {
 		log.Sugar.Errorf("Error while decoding response for query '%v': %v", query, err)
 		return nil, err
 	}
+	log.Sugar.Debugf("Got %v proposals", len(proposals.Proposals))
 	return &proposals, nil
 }
 

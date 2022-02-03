@@ -17,6 +17,7 @@ func CreateProposalIfNotExists(prop *dtos.Proposal, chainDb *ent.Chain) *ent.Pro
 		log.Sugar.Panicf("Error while checking for proposal #%v: %v", prop.ProposalId, err)
 	}
 	if !exist {
+		log.Sugar.Debugf("Save proposal #%v on chain %v", prop.ProposalId, chainDb.DisplayName)
 		propDb, err := client.Proposal.
 			Create().
 			SetProposalID(prop.ProposalId).
