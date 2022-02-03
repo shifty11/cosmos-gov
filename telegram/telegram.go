@@ -42,7 +42,7 @@ func sendMenu(update *tgbotapi.Update) {
 			symbol = "✅ "
 		}
 		buttonRow = append(buttonRow, NewButton(c.Name, symbol+c.DisplayName))
-		if ix != 0 && ix%(NbrOfButtonsPerRow-1) == 0 || ix == len(chains)-1 {
+		if (ix+1)%NbrOfButtonsPerRow == 0 || ix == len(chains)-1 {
 			buttons = append(buttons, buttonRow)
 			buttonRow = []Button{}
 		}
