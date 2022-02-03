@@ -1,34 +1,21 @@
 package datasource
 
 import (
+	"fmt"
 	"github.com/PumpkinSeed/cage"
 	"github.com/liamylian/jsontime"
+	"github.com/shifty11/cosmos-gov/database"
+	"github.com/shifty11/cosmos-gov/dtos"
+	"github.com/shifty11/cosmos-gov/ent"
 	"github.com/shifty11/cosmos-gov/log"
+	"github.com/shifty11/cosmos-gov/telegram"
 	"github.com/strangelove-ventures/lens/cmd"
 	"strings"
-	"time"
 )
-
-type ProposalContent struct {
-	Title       string `json:"title"`
-	Description string `json:"description"`
-}
-
-type Proposal struct {
-	ProposalId      int             `json:"proposal_id,string"`
-	Content         ProposalContent `json:"content"`
-	VotingStartTime time.Time       `json:"voting_start_time"`
-	VotingEndTime   time.Time       `json:"voting_end_time"`
-	Status          string          `json:"status"`
-}
-
-type Proposals struct {
-	Proposals []Proposal `json:"proposals"`
-}
 
 var json = jsontime.ConfigWithCustomTimeFormat
 
-func fetchProposals(query string) (*Proposals, error) {
+func fetchProposals(query string) (*dtos.Proposals, error) {
 	c := cage.Start() // start capturing output from stdout
 
 	rootCmd := cmd.NewRootCmd()
@@ -41,7 +28,7 @@ func fetchProposals(query string) (*Proposals, error) {
 
 	cage.Stop(c) // stop capturing output from stdout
 
-	var proposals Proposals
+	var proposals dtos.Proposals
 	dataBytes := []byte(strings.Join(c.Data, ""))
 	err = json.Unmarshal(dataBytes, &proposals)
 	if err != nil {
@@ -51,21 +38,31 @@ func fetchProposals(query string) (*Proposals, error) {
 	return &proposals, nil
 }
 
-func saveProposals(*Proposals) {
-
+func saveAndSendProposals(props *dtos.Proposals, chainDb *ent.Chain) {
+	for _, prop := range props.Proposals {
+		errIds := make(map[int]struct{})
+		propDb := database.CreateProposalIfNotExists(&prop, chainDb)
+		if propDb != nil {
+			chatIds := database.GetUsers(chainDb)
+			text := fmt.Sprintf("*%v*\n*#%v - %v*\n%v", chainDb.DisplayName, propDb.ProposalID, propDb.Title, propDb.Description)
+			errIds = telegram.SendProposal(text, chatIds)
+		}
+		if len(errIds) != 0 {
+			database.DeleteUsers(errIds)
+		}
+	}
 }
 
-var queries = [...]string{
-	//"query governance proposals --chain cosmoshub --status voting_period",
-	//"query governance proposals --chain osmosis --status voting_period",
-	"query governance proposals --chain juno",
-}
+const filter = "--limit 1"
+
+//const filter = "--status voting_period"
 
 func FetchProposals() {
-	for _, query := range queries {
+	for _, chain := range database.GetChains() {
+		query := fmt.Sprintf("query governance proposals %v --chain %v", filter, chain.Name)
 		proposals, err := fetchProposals(query)
 		if err == nil {
-			saveProposals(proposals)
+			saveAndSendProposals(proposals, chain)
 		}
 	}
 }

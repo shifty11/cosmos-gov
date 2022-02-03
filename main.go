@@ -5,15 +5,16 @@ import (
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/datasource"
 	"github.com/shifty11/cosmos-gov/log"
+	"github.com/shifty11/cosmos-gov/telegram"
+	"time"
 )
 
 func initDatabase() {
-	var chains = []database.ChainBase{
-		{ChainId: "cosmos-1", Name: "Cosmos"},
-		{ChainId: "osmosis-1", Name: "Osmosis"},
-	}
 	database.MigrateDatabase()
+	//database.DropChains()
+	chains := datasource.ReadLensConfig("/home/rapha/.lens/config.yaml")
 	database.CreateChains(chains)
+	//database.DropProposals() // only testing
 }
 
 func main() {
@@ -23,8 +24,7 @@ func main() {
 	defer database.Close()
 
 	initDatabase()
-	datasource.FetchProposals()
-	//go datasource.PerformLensQuery()
-	//go telegram.Listen()
-	//time.Sleep(time.Duration(1<<63 - 1))
+	go datasource.FetchProposals()
+	go telegram.Listen()
+	time.Sleep(time.Duration(1<<63 - 1))
 }

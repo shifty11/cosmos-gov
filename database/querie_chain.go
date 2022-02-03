@@ -1,51 +1,32 @@
 package database
 
 import (
+	"github.com/shifty11/cosmos-gov/dtos"
 	"github.com/shifty11/cosmos-gov/ent"
 	"github.com/shifty11/cosmos-gov/ent/chain"
-	"github.com/shifty11/cosmos-gov/ent/migrate"
 	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/log"
+	"strings"
 )
 
-func getOrCreateUser(chatId int64) *ent.User {
-	client, ctx := connect()
-	var userDto *ent.User
-	var err error
-	userDto, err = client.User.
-		Query().
-		Where(user.ChatIDEQ(chatId)).
-		Only(ctx)
-	if err != nil {
-		userDto, err = client.User.
-			Create().
-			SetChatID(chatId).
-			Save(ctx)
-		if err != nil {
-			log.Sugar.Panic("Error while creating user: %v", err)
-		}
-	}
-	return userDto
-}
-
-func getChainByChainId(chainId string) (*ent.Chain, error) {
+func getChainByName(name string) (*ent.Chain, error) {
 	client, ctx := connect()
 	return client.Chain.
 		Query().
-		Where(chain.ChainID(chainId)).
+		Where(chain.NameEQ(name)).
 		Only(ctx)
 }
 
-func AddOrRemoveChainForUser(chatId int64, chainId string) error {
+func AddOrRemoveChainForUser(chatId int64, chainName string) error {
 	_, ctx := connect()
 	var userDto = getOrCreateUser(chatId)
-	chainDto, err := getChainByChainId(chainId)
+	chainDto, err := getChainByName(chainName)
 	if err != nil {
 		return err
 	}
 	exists, err := userDto.
 		QueryChains().
-		Where(chain.ID(chainDto.ID)).
+		Where(chain.IDEQ(chainDto.ID)).
 		Exist(ctx)
 	if err != nil {
 		return err
@@ -70,13 +51,7 @@ func AddOrRemoveChainForUser(chatId int64, chainId string) error {
 	return nil
 }
 
-type Chain struct {
-	Name    string
-	ChainId string
-	Notify  bool
-}
-
-func GetChainsForUser(chatId int64) []Chain {
+func GetChainsForUser(chatId int64) []dtos.Chain {
 	client, ctx := connect()
 	var userDto = getOrCreateUser(chatId)
 	chainsOfUser, err := client.Chain.
@@ -88,10 +63,11 @@ func GetChainsForUser(chatId int64) []Chain {
 	}
 	allChains, err := client.Chain.
 		Query().
+		Order(ent.Asc(chain.FieldDisplayName)).
 		All(ctx)
-	var chains []Chain
+	var chains []dtos.Chain
 	for _, c := range allChains {
-		var chainEntry = Chain{Name: c.Name, ChainId: c.ChainID, Notify: false}
+		var chainEntry = dtos.Chain{Name: c.Name, DisplayName: c.DisplayName, Notify: false}
 		for _, nc := range chainsOfUser { // check if user gets notified for this chain (c)
 			if nc.ID == c.ID {
 				chainEntry.Notify = true
@@ -102,23 +78,18 @@ func GetChainsForUser(chatId int64) []Chain {
 	return chains
 }
 
-type ChainBase struct {
-	Name    string
-	ChainId string
-}
-
-func CreateChains(chains []ChainBase) {
+func CreateChains(chains []string) {
 	client, ctx := connect()
-	for _, c := range chains {
+	for _, chainName := range chains {
 		_, err := client.Chain.
 			Query().
-			Where(chain.ChainIDEQ(c.ChainId)).
+			Where(chain.NameEQ(chainName)).
 			Only(ctx)
 		if err != nil {
 			_, err = client.Chain.
 				Create().
-				SetName(c.Name).
-				SetChainID(c.ChainId).
+				SetName(chainName).
+				SetDisplayName(strings.Title(chainName)).
 				Save(ctx)
 			if err != nil {
 				log.Sugar.Panic("Error while creating chains: %v", err)
@@ -127,14 +98,20 @@ func CreateChains(chains []ChainBase) {
 	}
 }
 
-func MigrateDatabase() {
+func GetChains() []*ent.Chain {
 	client, ctx := connect()
-	err := client.Schema.Create(
-		ctx,
-		migrate.WithDropIndex(true),
-		migrate.WithDropColumn(true),
-	)
+	chains, err := client.Chain.
+		Query().
+		All(ctx)
 	if err != nil {
-		log.Sugar.Panic("Failed creating schema resources: %v", err)
+		log.Sugar.Panic("Error while querying chains: %v", err)
 	}
+	return chains
+}
+
+func DropChains() {
+	client, ctx := connect()
+	client.Chain.
+		Delete().
+		ExecX(ctx)
 }

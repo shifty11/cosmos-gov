@@ -114,10 +114,10 @@ func Name(v string) predicate.Chain {
 	})
 }
 
-// ChainID applies equality check predicate on the "chain_id" field. It's identical to ChainIDEQ.
-func ChainID(v string) predicate.Chain {
+// DisplayName applies equality check predicate on the "display_name" field. It's identical to DisplayNameEQ.
+func DisplayName(v string) predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldChainID), v))
+		s.Where(sql.EQ(s.C(FieldDisplayName), v))
 	})
 }
 
@@ -384,22 +384,22 @@ func NameContainsFold(v string) predicate.Chain {
 	})
 }
 
-// ChainIDEQ applies the EQ predicate on the "chain_id" field.
-func ChainIDEQ(v string) predicate.Chain {
+// DisplayNameEQ applies the EQ predicate on the "display_name" field.
+func DisplayNameEQ(v string) predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldChainID), v))
+		s.Where(sql.EQ(s.C(FieldDisplayName), v))
 	})
 }
 
-// ChainIDNEQ applies the NEQ predicate on the "chain_id" field.
-func ChainIDNEQ(v string) predicate.Chain {
+// DisplayNameNEQ applies the NEQ predicate on the "display_name" field.
+func DisplayNameNEQ(v string) predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldChainID), v))
+		s.Where(sql.NEQ(s.C(FieldDisplayName), v))
 	})
 }
 
-// ChainIDIn applies the In predicate on the "chain_id" field.
-func ChainIDIn(vs ...string) predicate.Chain {
+// DisplayNameIn applies the In predicate on the "display_name" field.
+func DisplayNameIn(vs ...string) predicate.Chain {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -411,12 +411,12 @@ func ChainIDIn(vs ...string) predicate.Chain {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.In(s.C(FieldChainID), v...))
+		s.Where(sql.In(s.C(FieldDisplayName), v...))
 	})
 }
 
-// ChainIDNotIn applies the NotIn predicate on the "chain_id" field.
-func ChainIDNotIn(vs ...string) predicate.Chain {
+// DisplayNameNotIn applies the NotIn predicate on the "display_name" field.
+func DisplayNameNotIn(vs ...string) predicate.Chain {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -428,70 +428,70 @@ func ChainIDNotIn(vs ...string) predicate.Chain {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.NotIn(s.C(FieldChainID), v...))
+		s.Where(sql.NotIn(s.C(FieldDisplayName), v...))
 	})
 }
 
-// ChainIDGT applies the GT predicate on the "chain_id" field.
-func ChainIDGT(v string) predicate.Chain {
+// DisplayNameGT applies the GT predicate on the "display_name" field.
+func DisplayNameGT(v string) predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldChainID), v))
+		s.Where(sql.GT(s.C(FieldDisplayName), v))
 	})
 }
 
-// ChainIDGTE applies the GTE predicate on the "chain_id" field.
-func ChainIDGTE(v string) predicate.Chain {
+// DisplayNameGTE applies the GTE predicate on the "display_name" field.
+func DisplayNameGTE(v string) predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldChainID), v))
+		s.Where(sql.GTE(s.C(FieldDisplayName), v))
 	})
 }
 
-// ChainIDLT applies the LT predicate on the "chain_id" field.
-func ChainIDLT(v string) predicate.Chain {
+// DisplayNameLT applies the LT predicate on the "display_name" field.
+func DisplayNameLT(v string) predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldChainID), v))
+		s.Where(sql.LT(s.C(FieldDisplayName), v))
 	})
 }
 
-// ChainIDLTE applies the LTE predicate on the "chain_id" field.
-func ChainIDLTE(v string) predicate.Chain {
+// DisplayNameLTE applies the LTE predicate on the "display_name" field.
+func DisplayNameLTE(v string) predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldChainID), v))
+		s.Where(sql.LTE(s.C(FieldDisplayName), v))
 	})
 }
 
-// ChainIDContains applies the Contains predicate on the "chain_id" field.
-func ChainIDContains(v string) predicate.Chain {
+// DisplayNameContains applies the Contains predicate on the "display_name" field.
+func DisplayNameContains(v string) predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldChainID), v))
+		s.Where(sql.Contains(s.C(FieldDisplayName), v))
 	})
 }
 
-// ChainIDHasPrefix applies the HasPrefix predicate on the "chain_id" field.
-func ChainIDHasPrefix(v string) predicate.Chain {
+// DisplayNameHasPrefix applies the HasPrefix predicate on the "display_name" field.
+func DisplayNameHasPrefix(v string) predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldChainID), v))
+		s.Where(sql.HasPrefix(s.C(FieldDisplayName), v))
 	})
 }
 
-// ChainIDHasSuffix applies the HasSuffix predicate on the "chain_id" field.
-func ChainIDHasSuffix(v string) predicate.Chain {
+// DisplayNameHasSuffix applies the HasSuffix predicate on the "display_name" field.
+func DisplayNameHasSuffix(v string) predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldChainID), v))
+		s.Where(sql.HasSuffix(s.C(FieldDisplayName), v))
 	})
 }
 
-// ChainIDEqualFold applies the EqualFold predicate on the "chain_id" field.
-func ChainIDEqualFold(v string) predicate.Chain {
+// DisplayNameEqualFold applies the EqualFold predicate on the "display_name" field.
+func DisplayNameEqualFold(v string) predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldChainID), v))
+		s.Where(sql.EqualFold(s.C(FieldDisplayName), v))
 	})
 }
 
-// ChainIDContainsFold applies the ContainsFold predicate on the "chain_id" field.
-func ChainIDContainsFold(v string) predicate.Chain {
+// DisplayNameContainsFold applies the ContainsFold predicate on the "display_name" field.
+func DisplayNameContainsFold(v string) predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldChainID), v))
+		s.Where(sql.ContainsFold(s.C(FieldDisplayName), v))
 	})
 }
 

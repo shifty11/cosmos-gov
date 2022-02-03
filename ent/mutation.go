@@ -40,7 +40,7 @@ type ChainMutation struct {
 	created_at       *time.Time
 	updated_at       *time.Time
 	name             *string
-	chain_id         *string
+	display_name     *string
 	clearedFields    map[string]struct{}
 	users            map[int]struct{}
 	removedusers     map[int]struct{}
@@ -259,40 +259,40 @@ func (m *ChainMutation) ResetName() {
 	m.name = nil
 }
 
-// SetChainID sets the "chain_id" field.
-func (m *ChainMutation) SetChainID(s string) {
-	m.chain_id = &s
+// SetDisplayName sets the "display_name" field.
+func (m *ChainMutation) SetDisplayName(s string) {
+	m.display_name = &s
 }
 
-// ChainID returns the value of the "chain_id" field in the mutation.
-func (m *ChainMutation) ChainID() (r string, exists bool) {
-	v := m.chain_id
+// DisplayName returns the value of the "display_name" field in the mutation.
+func (m *ChainMutation) DisplayName() (r string, exists bool) {
+	v := m.display_name
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldChainID returns the old "chain_id" field's value of the Chain entity.
+// OldDisplayName returns the old "display_name" field's value of the Chain entity.
 // If the Chain object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ChainMutation) OldChainID(ctx context.Context) (v string, err error) {
+func (m *ChainMutation) OldDisplayName(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldChainID is only allowed on UpdateOne operations")
+		return v, errors.New("OldDisplayName is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldChainID requires an ID field in the mutation")
+		return v, errors.New("OldDisplayName requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldChainID: %w", err)
+		return v, fmt.Errorf("querying old value for OldDisplayName: %w", err)
 	}
-	return oldValue.ChainID, nil
+	return oldValue.DisplayName, nil
 }
 
-// ResetChainID resets all changes to the "chain_id" field.
-func (m *ChainMutation) ResetChainID() {
-	m.chain_id = nil
+// ResetDisplayName resets all changes to the "display_name" field.
+func (m *ChainMutation) ResetDisplayName() {
+	m.display_name = nil
 }
 
 // AddUserIDs adds the "users" edge to the User entity by ids.
@@ -432,8 +432,8 @@ func (m *ChainMutation) Fields() []string {
 	if m.name != nil {
 		fields = append(fields, chain.FieldName)
 	}
-	if m.chain_id != nil {
-		fields = append(fields, chain.FieldChainID)
+	if m.display_name != nil {
+		fields = append(fields, chain.FieldDisplayName)
 	}
 	return fields
 }
@@ -449,8 +449,8 @@ func (m *ChainMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedAt()
 	case chain.FieldName:
 		return m.Name()
-	case chain.FieldChainID:
-		return m.ChainID()
+	case chain.FieldDisplayName:
+		return m.DisplayName()
 	}
 	return nil, false
 }
@@ -466,8 +466,8 @@ func (m *ChainMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldUpdatedAt(ctx)
 	case chain.FieldName:
 		return m.OldName(ctx)
-	case chain.FieldChainID:
-		return m.OldChainID(ctx)
+	case chain.FieldDisplayName:
+		return m.OldDisplayName(ctx)
 	}
 	return nil, fmt.Errorf("unknown Chain field %s", name)
 }
@@ -498,12 +498,12 @@ func (m *ChainMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetName(v)
 		return nil
-	case chain.FieldChainID:
+	case chain.FieldDisplayName:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetChainID(v)
+		m.SetDisplayName(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Chain field %s", name)
@@ -563,8 +563,8 @@ func (m *ChainMutation) ResetField(name string) error {
 	case chain.FieldName:
 		m.ResetName()
 		return nil
-	case chain.FieldChainID:
-		m.ResetChainID()
+	case chain.FieldDisplayName:
+		m.ResetDisplayName()
 		return nil
 	}
 	return fmt.Errorf("unknown Chain field %s", name)

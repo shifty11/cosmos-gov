@@ -22,7 +22,7 @@ func (Chain) Fields() []ent.Field {
 			UpdateDefault(time.Now),
 		field.String("name").
 			Unique(),
-		field.String("chain_id").
+		field.String("display_name").
 			Unique(),
 	}
 }

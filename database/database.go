@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"github.com/shifty11/cosmos-gov/ent/migrate"
 	"os"
 
 	"github.com/shifty11/cosmos-gov/ent"
@@ -32,5 +33,17 @@ func Close() {
 		if err != nil {
 			log.Sugar.Error(err)
 		}
+	}
+}
+
+func MigrateDatabase() {
+	client, ctx := connect()
+	err := client.Schema.Create(
+		ctx,
+		migrate.WithDropIndex(true),
+		migrate.WithDropColumn(true),
+	)
+	if err != nil {
+		log.Sugar.Panic("Failed creating schema resources: %v", err)
 	}
 }

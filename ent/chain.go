@@ -22,8 +22,8 @@ type Chain struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
-	// ChainID holds the value of the "chain_id" field.
-	ChainID string `json:"chain_id,omitempty"`
+	// DisplayName holds the value of the "display_name" field.
+	DisplayName string `json:"display_name,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ChainQuery when eager-loading is set.
 	Edges ChainEdges `json:"edges"`
@@ -65,7 +65,7 @@ func (*Chain) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case chain.FieldID:
 			values[i] = new(sql.NullInt64)
-		case chain.FieldName, chain.FieldChainID:
+		case chain.FieldName, chain.FieldDisplayName:
 			values[i] = new(sql.NullString)
 		case chain.FieldCreatedAt, chain.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -108,11 +108,11 @@ func (c *Chain) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				c.Name = value.String
 			}
-		case chain.FieldChainID:
+		case chain.FieldDisplayName:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field chain_id", values[i])
+				return fmt.Errorf("unexpected type %T for field display_name", values[i])
 			} else if value.Valid {
-				c.ChainID = value.String
+				c.DisplayName = value.String
 			}
 		}
 	}
@@ -158,8 +158,8 @@ func (c *Chain) String() string {
 	builder.WriteString(c.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", name=")
 	builder.WriteString(c.Name)
-	builder.WriteString(", chain_id=")
-	builder.WriteString(c.ChainID)
+	builder.WriteString(", display_name=")
+	builder.WriteString(c.DisplayName)
 	builder.WriteByte(')')
 	return builder.String()
 }

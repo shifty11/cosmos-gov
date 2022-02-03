@@ -56,9 +56,9 @@ func (cc *ChainCreate) SetName(s string) *ChainCreate {
 	return cc
 }
 
-// SetChainID sets the "chain_id" field.
-func (cc *ChainCreate) SetChainID(s string) *ChainCreate {
-	cc.mutation.SetChainID(s)
+// SetDisplayName sets the "display_name" field.
+func (cc *ChainCreate) SetDisplayName(s string) *ChainCreate {
+	cc.mutation.SetDisplayName(s)
 	return cc
 }
 
@@ -184,8 +184,8 @@ func (cc *ChainCreate) check() error {
 	if _, ok := cc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Chain.name"`)}
 	}
-	if _, ok := cc.mutation.ChainID(); !ok {
-		return &ValidationError{Name: "chain_id", err: errors.New(`ent: missing required field "Chain.chain_id"`)}
+	if _, ok := cc.mutation.DisplayName(); !ok {
+		return &ValidationError{Name: "display_name", err: errors.New(`ent: missing required field "Chain.display_name"`)}
 	}
 	return nil
 }
@@ -238,13 +238,13 @@ func (cc *ChainCreate) createSpec() (*Chain, *sqlgraph.CreateSpec) {
 		})
 		_node.Name = value
 	}
-	if value, ok := cc.mutation.ChainID(); ok {
+	if value, ok := cc.mutation.DisplayName(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: chain.FieldChainID,
+			Column: chain.FieldDisplayName,
 		})
-		_node.ChainID = value
+		_node.DisplayName = value
 	}
 	if nodes := cc.mutation.UsersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

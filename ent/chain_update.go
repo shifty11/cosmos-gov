@@ -56,9 +56,9 @@ func (cu *ChainUpdate) SetName(s string) *ChainUpdate {
 	return cu
 }
 
-// SetChainID sets the "chain_id" field.
-func (cu *ChainUpdate) SetChainID(s string) *ChainUpdate {
-	cu.mutation.SetChainID(s)
+// SetDisplayName sets the "display_name" field.
+func (cu *ChainUpdate) SetDisplayName(s string) *ChainUpdate {
+	cu.mutation.SetDisplayName(s)
 	return cu
 }
 
@@ -241,11 +241,11 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: chain.FieldName,
 		})
 	}
-	if value, ok := cu.mutation.ChainID(); ok {
+	if value, ok := cu.mutation.DisplayName(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: chain.FieldChainID,
+			Column: chain.FieldDisplayName,
 		})
 	}
 	if cu.mutation.UsersCleared() {
@@ -401,9 +401,9 @@ func (cuo *ChainUpdateOne) SetName(s string) *ChainUpdateOne {
 	return cuo
 }
 
-// SetChainID sets the "chain_id" field.
-func (cuo *ChainUpdateOne) SetChainID(s string) *ChainUpdateOne {
-	cuo.mutation.SetChainID(s)
+// SetDisplayName sets the "display_name" field.
+func (cuo *ChainUpdateOne) SetDisplayName(s string) *ChainUpdateOne {
+	cuo.mutation.SetDisplayName(s)
 	return cuo
 }
 
@@ -610,11 +610,11 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 			Column: chain.FieldName,
 		})
 	}
-	if value, ok := cuo.mutation.ChainID(); ok {
+	if value, ok := cuo.mutation.DisplayName(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: chain.FieldChainID,
+			Column: chain.FieldDisplayName,
 		})
 	}
 	if cuo.mutation.UsersCleared() {

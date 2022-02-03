@@ -1,6 +1,7 @@
 package telegram
 
 import (
+	"errors"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/shifty11/cosmos-gov/log"
 )
@@ -28,17 +29,26 @@ func createKeyboard(buttons [][]Button) tgbotapi.InlineKeyboardMarkup {
 	return tgbotapi.InlineKeyboardMarkup{InlineKeyboard: keyboard}
 }
 
-func getChatId(update *tgbotapi.Update) int64 {
+func getChatId(update *tgbotapi.Update) (int64, error) {
 	if update.CallbackQuery != nil {
-		return update.CallbackQuery.Message.Chat.ID
+		return update.CallbackQuery.Message.Chat.ID, nil
 	}
-	return update.Message.Chat.ID
+	if update.Message != nil {
+		return update.Message.Chat.ID, nil
+	}
+	return 0, errors.New("no chat ID in telegram update present")
 }
 
-func sendMessage(message tgbotapi.Chattable) {
+func sendMessageX(message tgbotapi.Chattable) {
 	api := getApi()
 	_, err := api.Send(message)
 	if err != nil {
 		log.Sugar.Panic(err)
 	}
+}
+
+func sendMessage(message tgbotapi.Chattable) error {
+	api := getApi()
+	_, err := api.Send(message)
+	return err
 }

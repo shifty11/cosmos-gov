@@ -17,8 +17,8 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// FieldChainID holds the string denoting the chain_id field in the database.
-	FieldChainID = "chain_id"
+	// FieldDisplayName holds the string denoting the display_name field in the database.
+	FieldDisplayName = "display_name"
 	// EdgeUsers holds the string denoting the users edge name in mutations.
 	EdgeUsers = "users"
 	// EdgeProposals holds the string denoting the proposals edge name in mutations.
@@ -45,7 +45,7 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldName,
-	FieldChainID,
+	FieldDisplayName,
 }
 
 var (

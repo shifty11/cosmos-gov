@@ -24,24 +24,35 @@ func getApi() *tgbotapi.BotAPI {
 	return api
 }
 
+const NbrOfButtonsPerRow = 3
+
 func sendMenu(update *tgbotapi.Update) {
-	chatId := getChatId(update)
+	chatId, err := getChatId(update)
+	if err != nil {
+		log.Sugar.Error(err)
+		return
+	}
 	chains := database.GetChainsForUser(chatId)
 
-	var buttons []Button
-	for _, c := range chains {
+	var buttons [][]Button
+	var buttonRow []Button
+	for ix, c := range chains {
 		symbol := "❌ "
 		if c.Notify {
 			symbol = "✅ "
 		}
-		buttons = append(buttons, NewButton(c.ChainId, symbol+c.Name))
+		buttonRow = append(buttonRow, NewButton(c.Name, symbol+c.DisplayName))
+		if ix != 0 && ix%(NbrOfButtonsPerRow-1) == 0 || ix == len(chains)-1 {
+			buttons = append(buttons, buttonRow)
+			buttonRow = []Button{}
+		}
 	}
-	replyMarkup := createKeyboard([][]Button{buttons})
+	replyMarkup := createKeyboard(buttons)
 
 	if update.CallbackQuery == nil {
 		msg := tgbotapi.NewMessage(chatId, menuInfoMsg)
 		msg.ReplyMarkup = replyMarkup
-		sendMessage(msg)
+		sendMessageX(msg)
 	} else {
 		msg := tgbotapi.EditMessageTextConfig{
 			BaseEdit: tgbotapi.BaseEdit{ChatID: chatId,
@@ -50,15 +61,19 @@ func sendMenu(update *tgbotapi.Update) {
 			},
 			Text: menuInfoMsg,
 		}
-		sendMessage(msg)
+		sendMessageX(msg)
 	}
 }
 
 func updateNotification(update *tgbotapi.Update) {
 	if update.CallbackQuery != nil {
-		chatId := getChatId(update)
-		chainId := update.CallbackQuery.Data
-		err := database.AddOrRemoveChainForUser(chatId, chainId)
+		chatId, err := getChatId(update)
+		if err != nil {
+			log.Sugar.Error(err)
+			return
+		}
+		chain := update.CallbackQuery.Data
+		err = database.AddOrRemoveChainForUser(chatId, chain)
 		if err != nil {
 			log.Sugar.Error("Error while toggle chain for user %v", chatId)
 		}
@@ -84,4 +99,18 @@ func Listen() {
 			sendMenu(&update)
 		}
 	}
+}
+
+func SendProposal(proposalText string, chatIds []int) map[int]struct{} {
+	errIds := make(map[int]struct{})
+	var exists = struct{}{}
+	for _, chatId := range chatIds {
+		msg := tgbotapi.NewMessage(int64(chatId), proposalText)
+		msg.ParseMode = "markdown"
+		err := sendMessage(msg)
+		if err != nil {
+			errIds[chatId] = exists
+		}
+	}
+	return errIds
 }

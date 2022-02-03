@@ -14,7 +14,7 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "name", Type: field.TypeString, Unique: true},
-		{Name: "chain_id", Type: field.TypeString, Unique: true},
+		{Name: "display_name", Type: field.TypeString, Unique: true},
 	}
 	// ChainsTable holds the schema information for the "chains" table.
 	ChainsTable = &schema.Table{
