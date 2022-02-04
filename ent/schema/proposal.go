@@ -4,6 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"github.com/cosmos/cosmos-sdk/x/gov/types"
 	"time"
 )
 
@@ -14,6 +15,10 @@ type Proposal struct {
 
 // Fields of the Proposal.
 func (Proposal) Fields() []ent.Field {
+	var statusValues []string
+	for _, status := range types.ProposalStatus_name {
+		statusValues = append(statusValues, status)
+	}
 	return []ent.Field{
 		field.Time("created_at").
 			Default(time.Now),
@@ -25,7 +30,8 @@ func (Proposal) Fields() []ent.Field {
 		field.String("description"),
 		field.Time("voting_start_time"),
 		field.Time("voting_end_time"),
-		field.String("status"),
+		field.Enum("status").
+			Values(statusValues...),
 	}
 }
 

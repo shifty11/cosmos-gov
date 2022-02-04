@@ -1,6 +1,8 @@
 package dtos
 
-import "time"
+import (
+	"time"
+)
 
 type Proposal struct {
 	ProposalId int `json:"proposal_id,string"`

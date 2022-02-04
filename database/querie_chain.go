@@ -108,10 +108,3 @@ func GetChains() []*ent.Chain {
 	}
 	return chains
 }
-
-func DropChains() {
-	client, ctx := connect()
-	client.Chain.
-		Delete().
-		ExecX(ctx)
-}

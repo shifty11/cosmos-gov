@@ -694,7 +694,7 @@ type ProposalMutation struct {
 	description       *string
 	voting_start_time *time.Time
 	voting_end_time   *time.Time
-	status            *string
+	status            *proposal.Status
 	clearedFields     map[string]struct{}
 	chain             *int
 	clearedchain      bool
@@ -1074,12 +1074,12 @@ func (m *ProposalMutation) ResetVotingEndTime() {
 }
 
 // SetStatus sets the "status" field.
-func (m *ProposalMutation) SetStatus(s string) {
-	m.status = &s
+func (m *ProposalMutation) SetStatus(pr proposal.Status) {
+	m.status = &pr
 }
 
 // Status returns the value of the "status" field in the mutation.
-func (m *ProposalMutation) Status() (r string, exists bool) {
+func (m *ProposalMutation) Status() (r proposal.Status, exists bool) {
 	v := m.status
 	if v == nil {
 		return
@@ -1090,7 +1090,7 @@ func (m *ProposalMutation) Status() (r string, exists bool) {
 // OldStatus returns the old "status" field's value of the Proposal entity.
 // If the Proposal object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ProposalMutation) OldStatus(ctx context.Context) (v string, err error) {
+func (m *ProposalMutation) OldStatus(ctx context.Context) (v proposal.Status, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
 	}
@@ -1300,7 +1300,7 @@ func (m *ProposalMutation) SetField(name string, value ent.Value) error {
 		m.SetVotingEndTime(v)
 		return nil
 	case proposal.FieldStatus:
-		v, ok := value.(string)
+		v, ok := value.(proposal.Status)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}

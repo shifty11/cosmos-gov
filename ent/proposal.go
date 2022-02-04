@@ -32,7 +32,7 @@ type Proposal struct {
 	// VotingEndTime holds the value of the "voting_end_time" field.
 	VotingEndTime time.Time `json:"voting_end_time,omitempty"`
 	// Status holds the value of the "status" field.
-	Status string `json:"status,omitempty"`
+	Status proposal.Status `json:"status,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ProposalQuery when eager-loading is set.
 	Edges           ProposalEdges `json:"edges"`
@@ -142,7 +142,7 @@ func (pr *Proposal) assignValues(columns []string, values []interface{}) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field status", values[i])
 			} else if value.Valid {
-				pr.Status = value.String
+				pr.Status = proposal.Status(value.String)
 			}
 		case proposal.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -199,7 +199,7 @@ func (pr *Proposal) String() string {
 	builder.WriteString(", voting_end_time=")
 	builder.WriteString(pr.VotingEndTime.Format(time.ANSIC))
 	builder.WriteString(", status=")
-	builder.WriteString(pr.Status)
+	builder.WriteString(fmt.Sprintf("%v", pr.Status))
 	builder.WriteByte(')')
 	return builder.String()
 }

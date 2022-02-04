@@ -80,8 +80,8 @@ func (pc *ProposalCreate) SetVotingEndTime(t time.Time) *ProposalCreate {
 }
 
 // SetStatus sets the "status" field.
-func (pc *ProposalCreate) SetStatus(s string) *ProposalCreate {
-	pc.mutation.SetStatus(s)
+func (pc *ProposalCreate) SetStatus(pr proposal.Status) *ProposalCreate {
+	pc.mutation.SetStatus(pr)
 	return pc
 }
 
@@ -211,6 +211,11 @@ func (pc *ProposalCreate) check() error {
 	if _, ok := pc.mutation.Status(); !ok {
 		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "Proposal.status"`)}
 	}
+	if v, ok := pc.mutation.Status(); ok {
+		if err := proposal.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Proposal.status": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -296,7 +301,7 @@ func (pc *ProposalCreate) createSpec() (*Proposal, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := pc.mutation.Status(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeEnum,
 			Value:  value,
 			Column: proposal.FieldStatus,
 		})

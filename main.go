@@ -2,6 +2,7 @@ package main
 
 import (
 	_ "github.com/lib/pq"
+	"github.com/robfig/cron/v3"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/datasource"
 	"github.com/shifty11/cosmos-gov/log"
@@ -11,10 +12,22 @@ import (
 
 func initDatabase() {
 	database.MigrateDatabase()
-	//database.DropChains()
 	chains := datasource.ReadLensConfig("/home/rapha/.lens/config.yaml")
 	database.CreateChains(chains)
-	//database.DropProposals() // only testing
+}
+
+func startProposalFetching() {
+	c := cron.New()
+	_, err := c.AddFunc("@every 5m", func() { datasource.FetchProposals() })
+	if err != nil {
+		log.Sugar.Errorf("while executing 'datasource.FetchProposals()' via cron: %v", err)
+	}
+	c.Start()
+	//go datasource.FetchProposals()
+}
+
+func startTelegramServer() {
+	go telegram.Listen()
 }
 
 func main() {
@@ -24,7 +37,7 @@ func main() {
 	defer database.Close()
 
 	initDatabase()
-	go datasource.FetchProposals()
-	go telegram.Listen()
+	startProposalFetching()
+	startTelegramServer()
 	time.Sleep(time.Duration(1<<63 - 1))
 }

@@ -87,8 +87,8 @@ func (pu *ProposalUpdate) SetVotingEndTime(t time.Time) *ProposalUpdate {
 }
 
 // SetStatus sets the "status" field.
-func (pu *ProposalUpdate) SetStatus(s string) *ProposalUpdate {
-	pu.mutation.SetStatus(s)
+func (pu *ProposalUpdate) SetStatus(pr proposal.Status) *ProposalUpdate {
+	pu.mutation.SetStatus(pr)
 	return pu
 }
 
@@ -130,12 +130,18 @@ func (pu *ProposalUpdate) Save(ctx context.Context) (int, error) {
 	)
 	pu.defaults()
 	if len(pu.hooks) == 0 {
+		if err = pu.check(); err != nil {
+			return 0, err
+		}
 		affected, err = pu.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*ProposalMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = pu.check(); err != nil {
+				return 0, err
 			}
 			pu.mutation = mutation
 			affected, err = pu.sqlSave(ctx)
@@ -183,6 +189,16 @@ func (pu *ProposalUpdate) defaults() {
 		v := proposal.UpdateDefaultUpdatedAt()
 		pu.mutation.SetUpdatedAt(v)
 	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (pu *ProposalUpdate) check() error {
+	if v, ok := pu.mutation.Status(); ok {
+		if err := proposal.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Proposal.status": %w`, err)}
+		}
+	}
+	return nil
 }
 
 func (pu *ProposalUpdate) sqlSave(ctx context.Context) (n int, err error) {
@@ -261,7 +277,7 @@ func (pu *ProposalUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := pu.mutation.Status(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeEnum,
 			Value:  value,
 			Column: proposal.FieldStatus,
 		})
@@ -378,8 +394,8 @@ func (puo *ProposalUpdateOne) SetVotingEndTime(t time.Time) *ProposalUpdateOne {
 }
 
 // SetStatus sets the "status" field.
-func (puo *ProposalUpdateOne) SetStatus(s string) *ProposalUpdateOne {
-	puo.mutation.SetStatus(s)
+func (puo *ProposalUpdateOne) SetStatus(pr proposal.Status) *ProposalUpdateOne {
+	puo.mutation.SetStatus(pr)
 	return puo
 }
 
@@ -428,12 +444,18 @@ func (puo *ProposalUpdateOne) Save(ctx context.Context) (*Proposal, error) {
 	)
 	puo.defaults()
 	if len(puo.hooks) == 0 {
+		if err = puo.check(); err != nil {
+			return nil, err
+		}
 		node, err = puo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*ProposalMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = puo.check(); err != nil {
+				return nil, err
 			}
 			puo.mutation = mutation
 			node, err = puo.sqlSave(ctx)
@@ -481,6 +503,16 @@ func (puo *ProposalUpdateOne) defaults() {
 		v := proposal.UpdateDefaultUpdatedAt()
 		puo.mutation.SetUpdatedAt(v)
 	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (puo *ProposalUpdateOne) check() error {
+	if v, ok := puo.mutation.Status(); ok {
+		if err := proposal.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Proposal.status": %w`, err)}
+		}
+	}
+	return nil
 }
 
 func (puo *ProposalUpdateOne) sqlSave(ctx context.Context) (_node *Proposal, err error) {
@@ -576,7 +608,7 @@ func (puo *ProposalUpdateOne) sqlSave(ctx context.Context) (_node *Proposal, err
 	}
 	if value, ok := puo.mutation.Status(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeEnum,
 			Value:  value,
 			Column: proposal.FieldStatus,
 		})

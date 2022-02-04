@@ -1,6 +1,7 @@
 package database
 
 import (
+	"github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/shifty11/cosmos-gov/dtos"
 	"github.com/shifty11/cosmos-gov/ent"
 	"github.com/shifty11/cosmos-gov/ent/proposal"
@@ -18,6 +19,10 @@ func CreateProposalIfNotExists(prop *dtos.Proposal, chainDb *ent.Chain) *ent.Pro
 	}
 	if !exist {
 		log.Sugar.Debugf("Save proposal #%v on chain %v", prop.ProposalId, chainDb.DisplayName)
+		status, err := types.ProposalStatusFromString(prop.Status)
+		if err != nil {
+			log.Sugar.Panicf("Error while reading proposal status of proposal #%v: %v", prop.ProposalId, err)
+		}
 		propDb, err := client.Proposal.
 			Create().
 			SetProposalID(prop.ProposalId).
@@ -26,7 +31,7 @@ func CreateProposalIfNotExists(prop *dtos.Proposal, chainDb *ent.Chain) *ent.Pro
 			SetVotingStartTime(prop.VotingStartTime).
 			SetVotingEndTime(prop.VotingEndTime).
 			SetChainID(chainDb.ID).
-			SetStatus(prop.Status).
+			SetStatus(proposal.Status(status.String())).
 			Save(ctx)
 		if err != nil {
 			log.Sugar.Panicf("Error while creating proposal #%v: %v", prop.ProposalId, err)
@@ -46,11 +51,4 @@ func GetUsers(chainDb *ent.Chain) []int {
 		log.Sugar.Panicf("Error while querying chatIds for chain %v: %v", chainDb.Name, err)
 	}
 	return chatIds
-}
-
-func DropProposals() {
-	client, ctx := connect()
-	client.Proposal.
-		Delete().
-		ExecX(ctx)
 }

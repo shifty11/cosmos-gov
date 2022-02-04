@@ -59,11 +59,24 @@ const filter = "--limit 1"
 
 //const filter = "--status voting_period"
 
+const maxFetchErrors = 10 // max fetch errors until fetching will be skipped
+
+var fetchErrors = make(map[int]int) // map of chain and number of errors
+
 func FetchProposals() {
 	for _, chain := range database.GetChains() {
+		if fetchErrors[chain.ID] >= maxFetchErrors {
+			continue
+		}
 		query := fmt.Sprintf("query governance proposals %v --chain %v", filter, chain.Name)
 		proposals, err := fetchProposals(query)
-		if err == nil {
+		if err != nil {
+			fetchErrors[chain.ID] += 1
+			if fetchErrors[chain.ID] >= maxFetchErrors {
+				log.Sugar.Error("Chain '%v' has %v errors", chain.DisplayName, fetchErrors[chain.ID])
+			}
+		} else {
+			fetchErrors[chain.ID] = 0
 			saveAndSendProposals(proposals, chain)
 		}
 	}
