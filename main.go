@@ -7,12 +7,18 @@ import (
 	"github.com/shifty11/cosmos-gov/datasource"
 	"github.com/shifty11/cosmos-gov/log"
 	"github.com/shifty11/cosmos-gov/telegram"
+	"os"
 	"time"
 )
 
 func initDatabase() {
+	lensConfig := os.Getenv("LENS_CONFIG")
+	if lensConfig == "" {
+		log.Sugar.Panicf("LENS_CONFIG is not set. Please provide the path to the lens config.yaml.")
+	}
+
 	database.MigrateDatabase()
-	chains := datasource.ReadLensConfig("/home/rapha/.lens/config.yaml")
+	chains := datasource.ReadLensConfig(lensConfig)
 	database.CreateChains(chains)
 }
 

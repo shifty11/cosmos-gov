@@ -55,9 +55,9 @@ func saveAndSendProposals(props *dtos.Proposals, chainDb *ent.Chain) {
 	}
 }
 
-const filter = "--limit 1"
+//const filter = "--limit 1"
 
-//const filter = "--status voting_period"
+const filter = "--status voting_period"
 
 const maxFetchErrors = 10 // max fetch errors until fetching will be skipped
 
