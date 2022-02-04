@@ -73,6 +73,7 @@ func updateNotification(update *tgbotapi.Update) {
 			return
 		}
 		chain := update.CallbackQuery.Data
+		log.Sugar.Debugf("Toggle chain %v for user #%v", chain, chatId)
 		err = database.AddOrRemoveChainForUser(chatId, chain)
 		if err != nil {
 			log.Sugar.Error("Error while toggle chain for user %v", chatId)
