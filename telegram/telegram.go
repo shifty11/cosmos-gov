@@ -1,6 +1,7 @@
 package telegram
 
 import (
+	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/log"
@@ -81,6 +82,14 @@ func updateNotification(update *tgbotapi.Update) {
 	}
 }
 
+func isNotificationCommand(update *tgbotapi.Update) bool {
+	api := getApi()
+	return update.Message != nil &&
+		(update.Message.Text == "/start" ||
+			update.Message.Text == "/notifications" ||
+			update.Message.Text == fmt.Sprintf("/notifications@%v", api.Self.UserName))
+}
+
 func Listen() {
 	log.Sugar.Info("Start listening for commands")
 	api := getApi()
@@ -96,7 +105,7 @@ func Listen() {
 		if update.CallbackQuery != nil {
 			updateNotification(&update)
 			sendMenu(&update)
-		} else {
+		} else if isNotificationCommand(&update) {
 			sendMenu(&update)
 		}
 	}
