@@ -116,11 +116,15 @@ func SendProposal(proposalText string, chatIds []int) map[int]struct{} {
 	var exists = struct{}{}
 	for _, chatId := range chatIds {
 		msg := tgbotapi.NewMessage(int64(chatId), proposalText)
-		msg.ParseMode = "markdown"
+		msg.ParseMode = "html"
 		log.Sugar.Debugf("Send proposal to chat #%v", chatId)
 		err := sendMessage(msg)
 		if err != nil {
-			errIds[chatId] = exists
+			if err.Error() == "Forbidden: bot was blocked by the user" {
+				errIds[chatId] = exists
+			} else {
+				log.Sugar.Errorf("Error while sending message: %v", err)
+			}
 		}
 	}
 	return errIds

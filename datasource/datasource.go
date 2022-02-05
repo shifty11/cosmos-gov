@@ -46,7 +46,7 @@ func saveAndSendProposals(props *dtos.Proposals, chainDb *ent.Chain) {
 		propDb := database.CreateProposalIfNotExists(&prop, chainDb)
 		if propDb != nil {
 			chatIds := database.GetUsers(chainDb)
-			text := fmt.Sprintf("*%v*\n*#%v - %v*\n%v", chainDb.DisplayName, propDb.ProposalID, propDb.Title, propDb.Description)
+			text := fmt.Sprintf("<b>%v\n#%v - %v</b>\n%v", chainDb.DisplayName, propDb.ProposalID, propDb.Title, propDb.Description)
 			errIds = telegram.SendProposal(text, chatIds)
 		}
 		if len(errIds) != 0 {
