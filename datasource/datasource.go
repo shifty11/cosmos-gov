@@ -23,7 +23,7 @@ func fetchProposals(query string) (*dtos.Proposals, error) {
 	log.Sugar.Debug(query)
 	err := rootCmd.Execute()
 	if err != nil {
-		log.Sugar.Errorf("Error while querying '%v': %v", query, err)
+		log.Sugar.Infof("Error while querying '%v': %v", query, err)
 		return nil, err
 	}
 
@@ -59,21 +59,18 @@ func saveAndSendProposals(props *dtos.Proposals, chainDb *ent.Chain) {
 
 const filter = "--status voting_period"
 
-const maxFetchErrors = 10 // max fetch errors until fetching will be skipped
+const maxFetchErrors = 10 // max fetch errors until fetching will be reported
 
 var fetchErrors = make(map[int]int) // map of chain and number of errors
 
 func FetchProposals() {
 	for _, chain := range database.GetChains() {
-		if fetchErrors[chain.ID] >= maxFetchErrors {
-			continue
-		}
 		query := fmt.Sprintf("query governance proposals %v --chain %v", filter, chain.Name)
 		proposals, err := fetchProposals(query)
 		if err != nil {
 			fetchErrors[chain.ID] += 1
 			if fetchErrors[chain.ID] >= maxFetchErrors {
-				log.Sugar.Error("Chain '%v' has %v errors", chain.DisplayName, fetchErrors[chain.ID])
+				log.Sugar.Errorf("Chain '%v' has %v errors", chain.DisplayName, fetchErrors[chain.ID])
 			}
 		} else {
 			fetchErrors[chain.ID] = 0
