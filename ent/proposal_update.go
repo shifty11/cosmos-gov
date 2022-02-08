@@ -50,15 +50,15 @@ func (pu *ProposalUpdate) SetUpdatedAt(t time.Time) *ProposalUpdate {
 }
 
 // SetProposalID sets the "proposal_id" field.
-func (pu *ProposalUpdate) SetProposalID(i int) *ProposalUpdate {
+func (pu *ProposalUpdate) SetProposalID(u uint64) *ProposalUpdate {
 	pu.mutation.ResetProposalID()
-	pu.mutation.SetProposalID(i)
+	pu.mutation.SetProposalID(u)
 	return pu
 }
 
-// AddProposalID adds i to the "proposal_id" field.
-func (pu *ProposalUpdate) AddProposalID(i int) *ProposalUpdate {
-	pu.mutation.AddProposalID(i)
+// AddProposalID adds u to the "proposal_id" field.
+func (pu *ProposalUpdate) AddProposalID(u int64) *ProposalUpdate {
+	pu.mutation.AddProposalID(u)
 	return pu
 }
 
@@ -235,14 +235,14 @@ func (pu *ProposalUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := pu.mutation.ProposalID(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeUint64,
 			Value:  value,
 			Column: proposal.FieldProposalID,
 		})
 	}
 	if value, ok := pu.mutation.AddedProposalID(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeUint64,
 			Value:  value,
 			Column: proposal.FieldProposalID,
 		})
@@ -357,15 +357,15 @@ func (puo *ProposalUpdateOne) SetUpdatedAt(t time.Time) *ProposalUpdateOne {
 }
 
 // SetProposalID sets the "proposal_id" field.
-func (puo *ProposalUpdateOne) SetProposalID(i int) *ProposalUpdateOne {
+func (puo *ProposalUpdateOne) SetProposalID(u uint64) *ProposalUpdateOne {
 	puo.mutation.ResetProposalID()
-	puo.mutation.SetProposalID(i)
+	puo.mutation.SetProposalID(u)
 	return puo
 }
 
-// AddProposalID adds i to the "proposal_id" field.
-func (puo *ProposalUpdateOne) AddProposalID(i int) *ProposalUpdateOne {
-	puo.mutation.AddProposalID(i)
+// AddProposalID adds u to the "proposal_id" field.
+func (puo *ProposalUpdateOne) AddProposalID(u int64) *ProposalUpdateOne {
+	puo.mutation.AddProposalID(u)
 	return puo
 }
 
@@ -566,14 +566,14 @@ func (puo *ProposalUpdateOne) sqlSave(ctx context.Context) (_node *Proposal, err
 	}
 	if value, ok := puo.mutation.ProposalID(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeUint64,
 			Value:  value,
 			Column: proposal.FieldProposalID,
 		})
 	}
 	if value, ok := puo.mutation.AddedProposalID(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeUint64,
 			Value:  value,
 			Column: proposal.FieldProposalID,
 		})

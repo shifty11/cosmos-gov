@@ -4,7 +4,6 @@ go 1.17
 
 require (
 	entgo.io/ent v0.10.0
-	github.com/PumpkinSeed/cage v0.1.0
 	github.com/TheZeroSlave/zapsentry v1.9.0
 	github.com/cosmos/cosmos-sdk v0.44.5
 	github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible
@@ -136,4 +135,4 @@ replace google.golang.org/grpc => google.golang.org/grpc v1.33.2
 
 replace github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
 
-replace github.com/strangelove-ventures/lens => github.com/shifty11/lens v1.0.0
+replace github.com/strangelove-ventures/lens => github.com/shifty11/lens v1.1.0

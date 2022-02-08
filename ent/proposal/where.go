@@ -108,7 +108,7 @@ func UpdatedAt(v time.Time) predicate.Proposal {
 }
 
 // ProposalID applies equality check predicate on the "proposal_id" field. It's identical to ProposalIDEQ.
-func ProposalID(v int) predicate.Proposal {
+func ProposalID(v uint64) predicate.Proposal {
 	return predicate.Proposal(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldProposalID), v))
 	})
@@ -295,21 +295,21 @@ func UpdatedAtLTE(v time.Time) predicate.Proposal {
 }
 
 // ProposalIDEQ applies the EQ predicate on the "proposal_id" field.
-func ProposalIDEQ(v int) predicate.Proposal {
+func ProposalIDEQ(v uint64) predicate.Proposal {
 	return predicate.Proposal(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldProposalID), v))
 	})
 }
 
 // ProposalIDNEQ applies the NEQ predicate on the "proposal_id" field.
-func ProposalIDNEQ(v int) predicate.Proposal {
+func ProposalIDNEQ(v uint64) predicate.Proposal {
 	return predicate.Proposal(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldProposalID), v))
 	})
 }
 
 // ProposalIDIn applies the In predicate on the "proposal_id" field.
-func ProposalIDIn(vs ...int) predicate.Proposal {
+func ProposalIDIn(vs ...uint64) predicate.Proposal {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -326,7 +326,7 @@ func ProposalIDIn(vs ...int) predicate.Proposal {
 }
 
 // ProposalIDNotIn applies the NotIn predicate on the "proposal_id" field.
-func ProposalIDNotIn(vs ...int) predicate.Proposal {
+func ProposalIDNotIn(vs ...uint64) predicate.Proposal {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -343,28 +343,28 @@ func ProposalIDNotIn(vs ...int) predicate.Proposal {
 }
 
 // ProposalIDGT applies the GT predicate on the "proposal_id" field.
-func ProposalIDGT(v int) predicate.Proposal {
+func ProposalIDGT(v uint64) predicate.Proposal {
 	return predicate.Proposal(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldProposalID), v))
 	})
 }
 
 // ProposalIDGTE applies the GTE predicate on the "proposal_id" field.
-func ProposalIDGTE(v int) predicate.Proposal {
+func ProposalIDGTE(v uint64) predicate.Proposal {
 	return predicate.Proposal(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldProposalID), v))
 	})
 }
 
 // ProposalIDLT applies the LT predicate on the "proposal_id" field.
-func ProposalIDLT(v int) predicate.Proposal {
+func ProposalIDLT(v uint64) predicate.Proposal {
 	return predicate.Proposal(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldProposalID), v))
 	})
 }
 
 // ProposalIDLTE applies the LTE predicate on the "proposal_id" field.
-func ProposalIDLTE(v int) predicate.Proposal {
+func ProposalIDLTE(v uint64) predicate.Proposal {
 	return predicate.Proposal(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldProposalID), v))
 	})

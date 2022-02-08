@@ -118,6 +118,7 @@ func SendProposal(proposalText string, chatIds []int) map[int]struct{} {
 	for _, chatId := range chatIds {
 		msg := tgbotapi.NewMessage(int64(chatId), proposalText)
 		msg.ParseMode = "html"
+		msg.DisableWebPagePreview = true
 		log.Sugar.Debugf("Send proposal to chat #%v", chatId)
 		err := sendMessage(msg)
 		if err != nil {

@@ -4,15 +4,17 @@ import (
 	"time"
 )
 
+type ProposalContent struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+}
+
 type Proposal struct {
-	ProposalId int `json:"proposal_id,string"`
-	Content    struct {
-		Title       string `json:"title"`
-		Description string `json:"description"`
-	}
-	VotingStartTime time.Time `json:"voting_start_time"`
-	VotingEndTime   time.Time `json:"voting_end_time"`
-	Status          string    `json:"status"`
+	ProposalId      uint64          `json:"proposal_id,string"`
+	Content         ProposalContent `json:"content"`
+	VotingStartTime time.Time       `json:"voting_start_time"`
+	VotingEndTime   time.Time       `json:"voting_end_time"`
+	Status          string          `json:"status"`
 }
 
 type Proposals struct {

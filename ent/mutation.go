@@ -688,8 +688,8 @@ type ProposalMutation struct {
 	id                *int
 	created_at        *time.Time
 	updated_at        *time.Time
-	proposal_id       *int
-	addproposal_id    *int
+	proposal_id       *uint64
+	addproposal_id    *int64
 	title             *string
 	description       *string
 	voting_start_time *time.Time
@@ -874,13 +874,13 @@ func (m *ProposalMutation) ResetUpdatedAt() {
 }
 
 // SetProposalID sets the "proposal_id" field.
-func (m *ProposalMutation) SetProposalID(i int) {
-	m.proposal_id = &i
+func (m *ProposalMutation) SetProposalID(u uint64) {
+	m.proposal_id = &u
 	m.addproposal_id = nil
 }
 
 // ProposalID returns the value of the "proposal_id" field in the mutation.
-func (m *ProposalMutation) ProposalID() (r int, exists bool) {
+func (m *ProposalMutation) ProposalID() (r uint64, exists bool) {
 	v := m.proposal_id
 	if v == nil {
 		return
@@ -891,7 +891,7 @@ func (m *ProposalMutation) ProposalID() (r int, exists bool) {
 // OldProposalID returns the old "proposal_id" field's value of the Proposal entity.
 // If the Proposal object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ProposalMutation) OldProposalID(ctx context.Context) (v int, err error) {
+func (m *ProposalMutation) OldProposalID(ctx context.Context) (v uint64, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldProposalID is only allowed on UpdateOne operations")
 	}
@@ -905,17 +905,17 @@ func (m *ProposalMutation) OldProposalID(ctx context.Context) (v int, err error)
 	return oldValue.ProposalID, nil
 }
 
-// AddProposalID adds i to the "proposal_id" field.
-func (m *ProposalMutation) AddProposalID(i int) {
+// AddProposalID adds u to the "proposal_id" field.
+func (m *ProposalMutation) AddProposalID(u int64) {
 	if m.addproposal_id != nil {
-		*m.addproposal_id += i
+		*m.addproposal_id += u
 	} else {
-		m.addproposal_id = &i
+		m.addproposal_id = &u
 	}
 }
 
 // AddedProposalID returns the value that was added to the "proposal_id" field in this mutation.
-func (m *ProposalMutation) AddedProposalID() (r int, exists bool) {
+func (m *ProposalMutation) AddedProposalID() (r int64, exists bool) {
 	v := m.addproposal_id
 	if v == nil {
 		return
@@ -1265,7 +1265,7 @@ func (m *ProposalMutation) SetField(name string, value ent.Value) error {
 		m.SetUpdatedAt(v)
 		return nil
 	case proposal.FieldProposalID:
-		v, ok := value.(int)
+		v, ok := value.(uint64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -1337,7 +1337,7 @@ func (m *ProposalMutation) AddedField(name string) (ent.Value, bool) {
 func (m *ProposalMutation) AddField(name string, value ent.Value) error {
 	switch name {
 	case proposal.FieldProposalID:
-		v, ok := value.(int)
+		v, ok := value.(int64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}

@@ -22,7 +22,7 @@ type Proposal struct {
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// ProposalID holds the value of the "proposal_id" field.
-	ProposalID int `json:"proposal_id,omitempty"`
+	ProposalID uint64 `json:"proposal_id,omitempty"`
 	// Title holds the value of the "title" field.
 	Title string `json:"title,omitempty"`
 	// Description holds the value of the "description" field.
@@ -112,7 +112,7 @@ func (pr *Proposal) assignValues(columns []string, values []interface{}) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field proposal_id", values[i])
 			} else if value.Valid {
-				pr.ProposalID = int(value.Int64)
+				pr.ProposalID = uint64(value.Int64)
 			}
 		case proposal.FieldTitle:
 			if value, ok := values[i].(*sql.NullString); !ok {

@@ -25,7 +25,7 @@ func (Proposal) Fields() []ent.Field {
 		field.Time("updated_at").
 			Default(time.Now).
 			UpdateDefault(time.Now),
-		field.Int("proposal_id"),
+		field.Uint64("proposal_id"),
 		field.String("title"),
 		field.String("description"),
 		field.Time("voting_start_time"),

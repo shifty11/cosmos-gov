@@ -1,42 +1,99 @@
 package datasource
 
 import (
+	"errors"
 	"fmt"
-	"github.com/PumpkinSeed/cage"
+	"github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/liamylian/jsontime"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/dtos"
 	"github.com/shifty11/cosmos-gov/ent"
 	"github.com/shifty11/cosmos-gov/log"
 	"github.com/shifty11/cosmos-gov/telegram"
+	"github.com/strangelove-ventures/lens/client"
 	"github.com/strangelove-ventures/lens/cmd"
+	"regexp"
 	"strings"
 )
 
 var json = jsontime.ConfigWithCustomTimeFormat
 
-func fetchProposals(query string) (*dtos.Proposals, error) {
-	c := cage.Start() // start capturing output from stdout
+func extractContentByRegEx(value []byte) (*dtos.ProposalContent, error) {
+	r := regexp.MustCompile("[ -~]+") // search for all printable characters
+	result := r.FindAll(value[1:], -1)
+	if len(result) >= 2 {
+		desc := strings.Replace(string(result[1]), "\\n", "\n", -1)
+		return &dtos.ProposalContent{
+			Title:       string(result[0])[1:],
+			Description: desc,
+		}, nil
+	}
+	return nil, errors.New(fmt.Sprintf("Length of regex result is %v", len(result)))
+}
 
-	rootCmd := cmd.NewRootCmd()
-	rootCmd.SetArgs(strings.Fields(query))
-	log.Sugar.Debug(query)
-	err := rootCmd.Execute()
-	if err != nil {
-		log.Sugar.Infof("Error while querying '%v': %v", query, err)
-		return nil, err
+// This is a bit a hack. The reason for this is because lens doesn't support chain specific proposals
+func extractContent(cl *client.ChainClient, response types.QueryProposalsResponse, proposalId uint64) (*dtos.ProposalContent, error) {
+	// We want just the proposal with proposalId
+	for _, prop := range response.Proposals {
+		if prop.ProposalId != proposalId {
+			response.Proposals = []types.Proposal{prop}
+			break
+		}
 	}
 
-	cage.Stop(c) // stop capturing output from stdout
+	proto, err := cl.MarshalProto(&response) // this will use the correct type to produce json []byte
+	if err != nil {                          // it will fail if there is a chain specific proposal
+		return extractContentByRegEx(response.Proposals[0].Content.Value) // extract content by regex in this case
+	}
 
 	var proposals dtos.Proposals
-	dataBytes := []byte(strings.Join(c.Data, ""))
-	err = json.Unmarshal(dataBytes, &proposals)
+	err = json.Unmarshal(proto, &proposals) // transform the json []byte to our proposal structure
 	if err != nil {
-		log.Sugar.Errorf("Error while decoding response for query '%v': %v", query, err)
 		return nil, err
 	}
-	log.Sugar.Debugf("Got %v proposals", len(proposals.Proposals))
+	if len(proposals.Proposals) == 1 {
+		return &dtos.ProposalContent{ // We just need the content
+			Title:       proposals.Proposals[0].Content.Title,
+			Description: proposals.Proposals[0].Content.Description,
+		}, nil
+	}
+	return nil, errors.New(fmt.Sprintf("Length of proposals is %v. This should never happen!", len(proposals.Proposals)))
+}
+
+func fetchProposals(chainId string) (*dtos.Proposals, error) {
+	config, err := cmd.GetConfig()
+	if err != nil {
+		log.Sugar.Panicf("Error while reading config %v", err)
+	}
+	cl := config.GetClient(chainId)
+	if cl == nil {
+		log.Sugar.Panicf("Chain client '%v' not found ", chainId)
+	}
+	var proposalStatus = types.StatusVotingPeriod
+
+	response, err := cl.QueryGovernanceProposals(proposalStatus, "", "", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var proposals dtos.Proposals
+	for _, respProp := range response.Proposals {
+		content, err := extractContent(cl, *response, respProp.ProposalId)
+		if err != nil {
+			log.Sugar.Error(err)
+			continue
+		}
+		var (
+			prop = dtos.Proposal{
+				ProposalId:      respProp.ProposalId,
+				Content:         *content,
+				VotingStartTime: respProp.VotingStartTime,
+				VotingEndTime:   respProp.VotingEndTime,
+				Status:          respProp.Status.String(),
+			}
+		)
+		proposals.Proposals = append(proposals.Proposals, prop)
+	}
 	return &proposals, nil
 }
 
@@ -55,18 +112,13 @@ func saveAndSendProposals(props *dtos.Proposals, chainDb *ent.Chain) {
 	}
 }
 
-//const filter = "--limit 1"
-
-const filter = "--status voting_period"
-
 const maxFetchErrors = 10 // max fetch errors until fetching will be reported
 
 var fetchErrors = make(map[int]int) // map of chain and number of errors
 
 func FetchProposals() {
 	for _, chain := range database.GetChains() {
-		query := fmt.Sprintf("query governance proposals %v --chain %v", filter, chain.Name)
-		proposals, err := fetchProposals(query)
+		proposals, err := fetchProposals(chain.Name)
 		if err != nil {
 			fetchErrors[chain.ID] += 1
 			if fetchErrors[chain.ID] >= maxFetchErrors {

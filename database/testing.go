@@ -11,5 +11,6 @@ func DropProposals() {
 	client, ctx := connect()
 	client.Proposal.
 		Delete().
+		//Where(proposal.HasChainWith(chain.NameEQ("osmosis"))).
 		ExecX(ctx)
 }
