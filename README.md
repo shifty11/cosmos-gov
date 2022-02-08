@@ -6,8 +6,6 @@ See [documentation](https://entgo.io/docs/getting-started)
 - Edit schemas in ./ent/schemas
 - Run ```go generate ./ent```
 
-[Visualisation](ent/schema-viz.html){:target="_blank"}
-
 ## Environment variables
 - TELEGRAM_TOKEN used to communicate with the telegram api. Get a new one from [BotFather](https://t.me/BotFather)
 - DATABASE_URL connection string for postgreSQL database
