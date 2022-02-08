@@ -43,6 +43,7 @@ func extractContent(cl *client.ChainClient, response types.QueryProposalsRespons
 
 	proto, err := cl.MarshalProto(&response) // this will use the correct type to produce json []byte
 	if err != nil {                          // it will fail if there is a chain specific proposal
+		log.Sugar.Debugf("extractContentByRegEx on for proposal #%v on %v", proposalId, cl.Config.ChainID)
 		return extractContentByRegEx(response.Proposals[0].Content.Value) // extract content by regex in this case
 	}
 
@@ -71,10 +72,12 @@ func fetchProposals(chainId string) (*dtos.Proposals, error) {
 	}
 	var proposalStatus = types.StatusVotingPeriod
 
+	log.Sugar.Debugf("QueryGovernanceProposals on %v", chainId)
 	response, err := cl.QueryGovernanceProposals(proposalStatus, "", "", nil)
 	if err != nil {
 		return nil, err
 	}
+	log.Sugar.Debugf("Got %v proposals", len(response.Proposals))
 
 	var proposals dtos.Proposals
 	for _, respProp := range response.Proposals {
