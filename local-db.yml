@@ -23,7 +23,7 @@ services:
        - pgadmin:/root/.pgadmin
        - ${PWD}/data/db-connection.json:/tmp/db-connection.json
     ports:
-      - "5050:80"
+      - "5051:80"
     restart: unless-stopped
 
 volumes:

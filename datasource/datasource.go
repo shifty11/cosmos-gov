@@ -22,16 +22,16 @@ func extractContentByRegEx(value []byte) (*dtos.ProposalContent, error) {
 	r := regexp.MustCompile("[ -~]+") // search for all printable characters
 	result := r.FindAll(value[1:], -1)
 	if len(result) >= 2 {
-		desc := strings.Replace(string(result[1]), "\\n", "\n", -1)
+		description := strings.Replace(string(result[1]), "\\n", "\n", -1)
 		return &dtos.ProposalContent{
 			Title:       string(result[0])[1:],
-			Description: desc,
+			Description: description,
 		}, nil
 	}
 	return nil, errors.New(fmt.Sprintf("Length of regex result is %v", len(result)))
 }
 
-// This is a bit a hack. The reason for this is because lens doesn't support chain specific proposals
+// This is a bit a hack. The reason for this is that lens doesn't support chain specific proposals
 func extractContent(cl *client.ChainClient, response types.QueryProposalsResponse, proposalId uint64) (*dtos.ProposalContent, error) {
 	// We want just the proposal with proposalId
 	for _, prop := range response.Proposals {
@@ -43,7 +43,7 @@ func extractContent(cl *client.ChainClient, response types.QueryProposalsRespons
 
 	proto, err := cl.MarshalProto(&response) // this will use the correct type to produce json []byte
 	if err != nil {                          // it will fail if there is a chain specific proposal
-		log.Sugar.Debugf("extractContentByRegEx on for proposal #%v on %v", proposalId, cl.Config.ChainID)
+		log.Sugar.Debugf("extractContentByRegEx for proposal #%v on %v", proposalId, cl.Config.ChainID)
 		return extractContentByRegEx(response.Proposals[0].Content.Value) // extract content by regex in this case
 	}
 
@@ -53,9 +53,10 @@ func extractContent(cl *client.ChainClient, response types.QueryProposalsRespons
 		return nil, err
 	}
 	if len(proposals.Proposals) == 1 {
+		description := strings.Replace(proposals.Proposals[0].Content.Description, "\\n", "\n", -1)
 		return &dtos.ProposalContent{ // We just need the content
 			Title:       proposals.Proposals[0].Content.Title,
-			Description: proposals.Proposals[0].Content.Description,
+			Description: description,
 		}, nil
 	}
 	return nil, errors.New(fmt.Sprintf("Length of proposals is %v. This should never happen!", len(proposals.Proposals)))
@@ -75,6 +76,7 @@ func fetchProposals(chainId string) (*dtos.Proposals, error) {
 	log.Sugar.Debugf("QueryGovernanceProposals on %v", chainId)
 	response, err := cl.QueryGovernanceProposals(proposalStatus, "", "", nil)
 	if err != nil {
+		log.Sugar.Debugf("Error while querying proposals on %v: %v", chainId, err)
 		return nil, err
 	}
 	log.Sugar.Debugf("Got %v proposals", len(response.Proposals))
@@ -86,15 +88,13 @@ func fetchProposals(chainId string) (*dtos.Proposals, error) {
 			log.Sugar.Error(err)
 			continue
 		}
-		var (
-			prop = dtos.Proposal{
-				ProposalId:      respProp.ProposalId,
-				Content:         *content,
-				VotingStartTime: respProp.VotingStartTime,
-				VotingEndTime:   respProp.VotingEndTime,
-				Status:          respProp.Status.String(),
-			}
-		)
+		prop := dtos.Proposal{
+			ProposalId:      respProp.ProposalId,
+			Content:         *content,
+			VotingStartTime: respProp.VotingStartTime,
+			VotingEndTime:   respProp.VotingEndTime,
+			Status:          respProp.Status.String(),
+		}
 		proposals.Proposals = append(proposals.Proposals, prop)
 	}
 	return &proposals, nil
