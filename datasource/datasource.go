@@ -35,7 +35,7 @@ func extractContentByRegEx(value []byte) (*dtos.ProposalContent, error) {
 func extractContent(cl *client.ChainClient, response types.QueryProposalsResponse, proposalId uint64) (*dtos.ProposalContent, error) {
 	// We want just the proposal with proposalId
 	for _, prop := range response.Proposals {
-		if prop.ProposalId != proposalId {
+		if prop.ProposalId == proposalId {
 			response.Proposals = []types.Proposal{prop}
 			break
 		}
