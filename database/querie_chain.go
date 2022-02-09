@@ -113,7 +113,7 @@ func GetChains() []*ent.Chain {
 func GetChainStatistics() (*[]dtos.ChainStatistic, error) {
 	client, ctx := connect()
 	var chains []dtos.ChainStatistic
-	err := client.Debug().Chain.Query().
+	err := client.Chain.Query().
 		Order(ent.Asc(chain.FieldName)).
 		GroupBy(chain.FieldName).
 		Aggregate(func(s *sql.Selector) string {
