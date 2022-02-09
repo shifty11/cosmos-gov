@@ -6,6 +6,8 @@ import (
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/log"
 	"os"
+	"strconv"
+	"strings"
 )
 
 var api *tgbotapi.BotAPI = nil
@@ -67,6 +69,26 @@ func sendMenu(update *tgbotapi.Update) {
 	}
 }
 
+func sendUserStatistics(update *tgbotapi.Update) {
+	chatId, err := getChatId(update)
+	if err != nil {
+		log.Sugar.Error(err)
+		return
+	}
+
+	statistics, err := database.GetUserStatistics()
+	if err != nil {
+		log.Sugar.Error(err)
+		return
+	}
+	text := fmt.Sprintf("`"+userStatisticMsg+"`", statistics.CntUsers,
+		statistics.CntUsersThisWeek, statistics.ChangeThisWeekInPercent,
+		statistics.CntUsersSinceYesterday, statistics.ChangeSinceYesterdayInPercent)
+	msg := tgbotapi.NewMessage(chatId, text)
+	msg.ParseMode = "markdown"
+	sendMessageX(msg)
+}
+
 func updateNotification(update *tgbotapi.Update) {
 	if update.CallbackQuery != nil {
 		chatId, err := getChatId(update)
@@ -81,6 +103,13 @@ func updateNotification(update *tgbotapi.Update) {
 			log.Sugar.Error("Error while toggle chain for user %v", chatId)
 		}
 	}
+}
+
+func isInfoCommand(update *tgbotapi.Update) bool {
+	admins := strings.Split(strings.Trim(os.Getenv("ADMIN_IDS"), " "), ",")
+	return update.Message != nil &&
+		update.Message.Text == "/info" &&
+		contains(admins, strconv.Itoa(update.Message.From.ID))
 }
 
 func isNotificationCommand(update *tgbotapi.Update) bool {
@@ -108,6 +137,8 @@ func Listen() {
 			sendMenu(&update)
 		} else if isNotificationCommand(&update) {
 			sendMenu(&update)
+		} else if isInfoCommand(&update) {
+			sendUserStatistics(&update)
 		}
 	}
 }

@@ -26,3 +26,11 @@ type Chain struct {
 	DisplayName string
 	Notify      bool
 }
+
+type UserStatistic struct {
+	CntUsers                      int
+	CntUsersSinceYesterday        int
+	CntUsersThisWeek              int
+	ChangeSinceYesterdayInPercent float64
+	ChangeThisWeekInPercent       float64
+}

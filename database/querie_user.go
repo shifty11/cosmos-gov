@@ -1,9 +1,12 @@
 package database
 
 import (
+	"errors"
+	"github.com/shifty11/cosmos-gov/dtos"
 	"github.com/shifty11/cosmos-gov/ent"
 	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/log"
+	"time"
 )
 
 func getOrCreateUser(chatId int64) *ent.User {
@@ -39,4 +42,40 @@ func DeleteUsers(chatIds map[int]struct{}) {
 	if err != nil {
 		log.Sugar.Errorf("Error while deleting user: %v", err)
 	}
+}
+
+func GetUserStatistics() (*dtos.UserStatistic, error) {
+	client, ctx := connect()
+	cntAll, err := client.User.
+		Query().
+		Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+	cntSinceYesterday, err := client.User.
+		Query().
+		Where(user.CreatedAtGTE(time.Now().AddDate(0, 0, -1))).
+		Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+	cntSinceSevenDays, err := client.User.
+		Query().
+		Where(user.CreatedAtGTE(time.Now().AddDate(0, 0, -7))).
+		Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if cntAll == 0 {
+		return nil, errors.New("no users -> division with 0 not allowed")
+	}
+	changeSinceYesterdayInPercent := float64(cntSinceYesterday) / float64(cntAll) * 100
+	changeThisWeekInPercent := float64(cntSinceSevenDays) / float64(cntAll) * 100
+	return &dtos.UserStatistic{
+		CntUsers:                      cntAll,
+		CntUsersSinceYesterday:        cntSinceYesterday,
+		CntUsersThisWeek:              cntSinceSevenDays,
+		ChangeSinceYesterdayInPercent: changeSinceYesterdayInPercent,
+		ChangeThisWeekInPercent:       changeThisWeekInPercent,
+	}, nil
 }
