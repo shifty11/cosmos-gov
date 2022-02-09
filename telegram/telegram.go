@@ -81,10 +81,26 @@ func sendUserStatistics(update *tgbotapi.Update) {
 		log.Sugar.Error(err)
 		return
 	}
-	text := fmt.Sprintf("`"+userStatisticMsg+"`", statistics.CntUsers,
+	chainStatistics, err := database.GetChainStatistics()
+	if err != nil {
+		log.Sugar.Error(err)
+		return
+	}
+
+	userMsg := fmt.Sprintf("`"+userStatisticMsg+"`", statistics.CntUsers,
 		statistics.CntUsersThisWeek, statistics.ChangeThisWeekInPercent,
 		statistics.CntUsersSinceYesterday, statistics.ChangeSinceYesterdayInPercent)
-	msg := tgbotapi.NewMessage(chatId, text)
+	chainMsg := fmt.Sprintf("`" + chainStatisticHeaderMsg)
+	sumUsers := 0
+	sumChains := 0
+	for _, chain := range *chainStatistics {
+		chainMsg += fmt.Sprintf(chainStatisticRowMsg, strings.Title(chain.Name), chain.Notifications)
+		sumUsers += chain.Notifications
+		sumChains += 1
+	}
+	chainMsg += fmt.Sprintf(chainStatisticFooterMsg+"`", fmt.Sprintf("Total(%v)", sumChains), sumUsers)
+
+	msg := tgbotapi.NewMessage(chatId, chainMsg+"\n\n"+userMsg)
 	msg.ParseMode = "markdown"
 	sendMessageX(msg)
 }

@@ -1,6 +1,7 @@
 package database
 
 import (
+	"entgo.io/ent/dialect/sql"
 	"github.com/shifty11/cosmos-gov/dtos"
 	"github.com/shifty11/cosmos-gov/ent"
 	"github.com/shifty11/cosmos-gov/ent/chain"
@@ -107,4 +108,22 @@ func GetChains() []*ent.Chain {
 		log.Sugar.Panic("Error while querying chains: %v", err)
 	}
 	return chains
+}
+
+func GetChainStatistics() (*[]dtos.ChainStatistic, error) {
+	client, ctx := connect()
+	var chains []dtos.ChainStatistic
+	err := client.Debug().Chain.Query().
+		Order(ent.Asc(chain.FieldName)).
+		GroupBy(chain.FieldName).
+		Aggregate(func(s *sql.Selector) string {
+			t := sql.Table(chain.UsersTable)
+			s.Join(t).On(s.C(chain.FieldID), t.C(user.ChainsPrimaryKey[1]))
+			return sql.As(sql.Count(t.C(user.ChainsPrimaryKey[1])), "notifications")
+		}).
+		Scan(ctx, &chains)
+	if err != nil {
+		return nil, err
+	}
+	return &chains, err
 }

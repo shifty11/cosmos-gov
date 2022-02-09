@@ -34,3 +34,8 @@ type UserStatistic struct {
 	ChangeSinceYesterdayInPercent float64
 	ChangeThisWeekInPercent       float64
 }
+
+type ChainStatistic struct {
+	Name          string
+	Notifications int
+}

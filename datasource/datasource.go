@@ -110,6 +110,7 @@ func saveAndSendProposals(props *dtos.Proposals, chainDb *ent.Chain) {
 			errIds = telegram.SendProposal(text, chatIds)
 		}
 		if len(errIds) != 0 {
+			log.Sugar.Debugf("Delete %v users", len(errIds))
 			database.DeleteUsers(errIds)
 		}
 	}
