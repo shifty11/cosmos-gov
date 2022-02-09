@@ -53,13 +53,13 @@ func sendMessage(message tgbotapi.Chattable) error {
 	return err
 }
 
-func answerCallbackQueryX(update *tgbotapi.Update) {
+func answerCallbackQuery(update *tgbotapi.Update) {
 	if update.CallbackQuery != nil {
 		callback := tgbotapi.NewCallback(update.CallbackQuery.ID, "")
 		api := getApi()
 		_, err := api.AnswerCallbackQuery(callback)
 		if err != nil {
-			log.Sugar.Panic(err)
+			log.Sugar.Error(err)
 		}
 	}
 }

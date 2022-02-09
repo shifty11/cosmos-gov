@@ -64,7 +64,7 @@ func sendMenu(update *tgbotapi.Update) {
 			},
 			Text: menuInfoMsg,
 		}
-		answerCallbackQueryX(update)
+		answerCallbackQuery(update)
 		sendMessageX(msg)
 	}
 }
