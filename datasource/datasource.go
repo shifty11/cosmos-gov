@@ -102,16 +102,11 @@ func fetchProposals(chainId string) (*dtos.Proposals, error) {
 
 func saveAndSendProposals(props *dtos.Proposals, chainDb *ent.Chain) {
 	for _, prop := range props.Proposals {
-		errIds := make(map[int]struct{})
 		propDb := database.CreateProposalIfNotExists(&prop, chainDb)
 		if propDb != nil {
 			chatIds := database.GetUsers(chainDb)
 			text := fmt.Sprintf("<b>%v\n#%v - %v</b>\n%v", chainDb.DisplayName, propDb.ProposalID, propDb.Title, propDb.Description)
-			errIds = telegram.SendProposal(text, chatIds)
-		}
-		if len(errIds) != 0 {
-			log.Sugar.Debugf("Delete %v users", len(errIds))
-			database.DeleteUsers(errIds)
+			telegram.SendProposal(text, chatIds)
 		}
 	}
 }

@@ -1,10 +1,28 @@
 package telegram
 
 import (
-	"errors"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/log"
+	"os"
 )
+
+var api *tgbotapi.BotAPI = nil
+
+func getApi() *tgbotapi.BotAPI {
+	if api == nil {
+		telegramToken := os.Getenv("TELEGRAM_TOKEN")
+		if telegramToken == "" {
+			log.Sugar.Panic("you must provide a telegram token as env variable")
+		}
+		botApi, err := tgbotapi.NewBotAPI(telegramToken)
+		if err != nil {
+			log.Sugar.Panic(err)
+		}
+		api = botApi
+	}
+	return api
+}
 
 type Button struct {
 	Command string
@@ -29,14 +47,25 @@ func createKeyboard(buttons [][]Button) tgbotapi.InlineKeyboardMarkup {
 	return tgbotapi.InlineKeyboardMarkup{InlineKeyboard: keyboard}
 }
 
-func getChatId(update *tgbotapi.Update) (int64, error) {
+func hasChatId(update *tgbotapi.Update) bool {
 	if update.CallbackQuery != nil {
-		return update.CallbackQuery.Message.Chat.ID, nil
+		return true
 	}
 	if update.Message != nil {
-		return update.Message.Chat.ID, nil
+		return true
 	}
-	return 0, errors.New("no chat ID in telegram update present")
+	return false
+}
+
+func getChatIdX(update *tgbotapi.Update) int64 {
+	if update.CallbackQuery != nil {
+		return update.CallbackQuery.Message.Chat.ID
+	}
+	if update.Message != nil {
+		return update.Message.Chat.ID
+	}
+	log.Sugar.Panic("unreachable code reached!!!")
+	return 0
 }
 
 func sendMessageX(message tgbotapi.Chattable) {
@@ -71,4 +100,15 @@ func contains(elems []string, v string) bool {
 		}
 	}
 	return false
+}
+
+func handleError(chatId int, err error) {
+	if err != nil {
+		if err.Error() == "Forbidden: bot was blocked by the user" {
+			log.Sugar.Debugf("Delete user #%v", chatId)
+			database.DeleteUser(int64(chatId))
+		} else {
+			log.Sugar.Errorf("Error while sending message: %v", err)
+		}
+	}
 }

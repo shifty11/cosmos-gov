@@ -29,6 +29,17 @@ func getOrCreateUser(chatId int64) *ent.User {
 	return userDto
 }
 
+func DeleteUser(chatId int64) {
+	client, ctx := connect()
+	_, err := client.User.
+		Delete().
+		Where(user.ChatIDEQ(chatId)).
+		Exec(ctx)
+	if err != nil {
+		log.Sugar.Errorf("Error while deleting user: %v", err)
+	}
+}
+
 func DeleteUsers(chatIds map[int]struct{}) {
 	var chatIds64 []int64
 	for chatId := range chatIds {
@@ -78,4 +89,27 @@ func GetUserStatistics() (*dtos.UserStatistic, error) {
 		ChangeSinceYesterdayInPercent: changeSinceYesterdayInPercent,
 		ChangeThisWeekInPercent:       changeThisWeekInPercent,
 	}, nil
+}
+
+func GetAllUserChatIds() []int {
+	client, ctx := connect()
+	chatIds, err := client.User.
+		Query().
+		Select(user.FieldChatID).
+		Ints(ctx)
+	if err != nil {
+		log.Sugar.Panicf("Error while querying chatIds of all users: %v", err)
+	}
+	return chatIds
+}
+
+func CountUsers() int {
+	client, ctx := connect()
+	cnt, err := client.User.
+		Query().
+		Count(ctx)
+	if err != nil {
+		log.Sugar.Panicf("Error while querying chatIds of all users: %v", err)
+	}
+	return cnt
 }
