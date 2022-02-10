@@ -133,3 +133,9 @@ func sendBroadcastEndInfoMessage(update *tgbotapi.Update, success bool) {
 	msg := tgbotapi.NewMessage(chatId, text)
 	sendMessageX(msg)
 }
+
+func sendCurrentProposals(update *tgbotapi.Update) {
+	chatId := getChatIdX(update)
+	msg := tgbotapi.NewMessage(chatId, "Send current proposals -> not yet implemented")
+	sendMessageX(msg)
+}
