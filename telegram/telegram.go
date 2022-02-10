@@ -125,7 +125,7 @@ func Listen() {
 		if update.Message != nil && update.Message.IsCommand() { // handle commands
 			handleCommand(&update)
 		} else if update.Message != nil && isExpectingMessage(&update) {
-			handleMessage(&update)
+			//handleMessage(&update)
 		} else if update.CallbackQuery != nil {
 			handleCallbackQuery(&update)
 		}
