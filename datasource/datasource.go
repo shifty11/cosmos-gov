@@ -62,7 +62,7 @@ func extractContent(cl *client.ChainClient, response types.QueryProposalsRespons
 	return nil, errors.New(fmt.Sprintf("Length of proposals is %v. This should never happen!", len(proposals.Proposals)))
 }
 
-func fetchProposals(chainId string) (*dtos.Proposals, error) {
+func fetchProposals(chainId string, proposalStatus types.ProposalStatus) (*dtos.Proposals, error) {
 	config, err := cmd.GetConfig()
 	if err != nil {
 		log.Sugar.Panicf("Error while reading config %v", err)
@@ -71,7 +71,6 @@ func fetchProposals(chainId string) (*dtos.Proposals, error) {
 	if cl == nil {
 		log.Sugar.Panicf("Chain client '%v' not found ", chainId)
 	}
-	var proposalStatus = types.StatusVotingPeriod
 
 	log.Sugar.Debugf("QueryGovernanceProposals on %v", chainId)
 	response, err := cl.QueryGovernanceProposals(proposalStatus, "", "", nil)
@@ -104,7 +103,7 @@ func saveAndSendProposals(props *dtos.Proposals, chainDb *ent.Chain) {
 	for _, prop := range props.Proposals {
 		propDb := database.CreateProposalIfNotExists(&prop, chainDb)
 		if propDb != nil {
-			chatIds := database.GetUsers(chainDb)
+			chatIds := database.GetChatIds(chainDb)
 			text := fmt.Sprintf("<b>%v\n#%v - %v</b>\n%v", chainDb.DisplayName, propDb.ProposalID, propDb.Title, propDb.Description)
 			telegram.SendProposal(text, chatIds)
 		}
@@ -117,7 +116,7 @@ var fetchErrors = make(map[int]int) // map of chain and number of errors
 
 func FetchProposals() {
 	for _, chain := range database.GetChains() {
-		proposals, err := fetchProposals(chain.Name)
+		proposals, err := fetchProposals(chain.Name, types.StatusVotingPeriod)
 		if err != nil {
 			fetchErrors[chain.ID] += 1
 			if fetchErrors[chain.ID] >= maxFetchErrors {

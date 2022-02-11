@@ -4,6 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 	"time"
 )
 
@@ -16,7 +17,8 @@ type User struct {
 func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.Time("created_at").
-			Default(time.Now),
+			Default(time.Now).
+			Immutable(),
 		field.Time("updated_at").
 			Default(time.Now).
 			UpdateDefault(time.Now),
@@ -29,5 +31,12 @@ func (User) Fields() []ent.Field {
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("chains", Chain.Type),
+	}
+}
+
+func (User) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("chat_id").
+			Unique(),
 	}
 }

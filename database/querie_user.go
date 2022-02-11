@@ -55,6 +55,18 @@ func DeleteUsers(chatIds map[int]struct{}) {
 	}
 }
 
+func GetChatIds(chainDb *ent.Chain) []int {
+	_, ctx := connect()
+	chatIds, err := chainDb.
+		QueryUsers().
+		Select(user.FieldChatID).
+		Ints(ctx)
+	if err != nil {
+		log.Sugar.Panicf("Error while querying chatIds for chain %v: %v", chainDb.Name, err)
+	}
+	return chatIds
+}
+
 func GetUserStatistics() (*dtos.UserStatistic, error) {
 	client, ctx := connect()
 	cntAll, err := client.User.

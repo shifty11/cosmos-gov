@@ -30,20 +30,6 @@ func (cu *ChainUpdate) Where(ps ...predicate.Chain) *ChainUpdate {
 	return cu
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (cu *ChainUpdate) SetCreatedAt(t time.Time) *ChainUpdate {
-	cu.mutation.SetCreatedAt(t)
-	return cu
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (cu *ChainUpdate) SetNillableCreatedAt(t *time.Time) *ChainUpdate {
-	if t != nil {
-		cu.SetCreatedAt(*t)
-	}
-	return cu
-}
-
 // SetUpdatedAt sets the "updated_at" field.
 func (cu *ChainUpdate) SetUpdatedAt(t time.Time) *ChainUpdate {
 	cu.mutation.SetUpdatedAt(t)
@@ -220,13 +206,6 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := cu.mutation.CreatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: chain.FieldCreatedAt,
-		})
-	}
 	if value, ok := cu.mutation.UpdatedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -373,20 +352,6 @@ type ChainUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *ChainMutation
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (cuo *ChainUpdateOne) SetCreatedAt(t time.Time) *ChainUpdateOne {
-	cuo.mutation.SetCreatedAt(t)
-	return cuo
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (cuo *ChainUpdateOne) SetNillableCreatedAt(t *time.Time) *ChainUpdateOne {
-	if t != nil {
-		cuo.SetCreatedAt(*t)
-	}
-	return cuo
 }
 
 // SetUpdatedAt sets the "updated_at" field.
@@ -588,13 +553,6 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := cuo.mutation.CreatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: chain.FieldCreatedAt,
-		})
 	}
 	if value, ok := cuo.mutation.UpdatedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{

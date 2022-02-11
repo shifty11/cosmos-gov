@@ -29,20 +29,6 @@ func (pu *ProposalUpdate) Where(ps ...predicate.Proposal) *ProposalUpdate {
 	return pu
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (pu *ProposalUpdate) SetCreatedAt(t time.Time) *ProposalUpdate {
-	pu.mutation.SetCreatedAt(t)
-	return pu
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (pu *ProposalUpdate) SetNillableCreatedAt(t *time.Time) *ProposalUpdate {
-	if t != nil {
-		pu.SetCreatedAt(*t)
-	}
-	return pu
-}
-
 // SetUpdatedAt sets the "updated_at" field.
 func (pu *ProposalUpdate) SetUpdatedAt(t time.Time) *ProposalUpdate {
 	pu.mutation.SetUpdatedAt(t)
@@ -219,13 +205,6 @@ func (pu *ProposalUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := pu.mutation.CreatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: proposal.FieldCreatedAt,
-		})
-	}
 	if value, ok := pu.mutation.UpdatedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -334,20 +313,6 @@ type ProposalUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *ProposalMutation
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (puo *ProposalUpdateOne) SetCreatedAt(t time.Time) *ProposalUpdateOne {
-	puo.mutation.SetCreatedAt(t)
-	return puo
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (puo *ProposalUpdateOne) SetNillableCreatedAt(t *time.Time) *ProposalUpdateOne {
-	if t != nil {
-		puo.SetCreatedAt(*t)
-	}
-	return puo
 }
 
 // SetUpdatedAt sets the "updated_at" field.
@@ -549,13 +514,6 @@ func (puo *ProposalUpdateOne) sqlSave(ctx context.Context) (_node *Proposal, err
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := puo.mutation.CreatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: proposal.FieldCreatedAt,
-		})
 	}
 	if value, ok := puo.mutation.UpdatedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{

@@ -21,6 +21,13 @@ var (
 		Name:       "chains",
 		Columns:    ChainsColumns,
 		PrimaryKey: []*schema.Column{ChainsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "chain_name",
+				Unique:  true,
+				Columns: []*schema.Column{ChainsColumns[3]},
+			},
+		},
 	}
 	// ProposalsColumns holds the columns for the "proposals" table.
 	ProposalsColumns = []*schema.Column{
@@ -32,7 +39,7 @@ var (
 		{Name: "description", Type: field.TypeString},
 		{Name: "voting_start_time", Type: field.TypeTime},
 		{Name: "voting_end_time", Type: field.TypeTime},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"PROPOSAL_STATUS_REJECTED", "PROPOSAL_STATUS_FAILED", "PROPOSAL_STATUS_UNSPECIFIED", "PROPOSAL_STATUS_DEPOSIT_PERIOD", "PROPOSAL_STATUS_VOTING_PERIOD", "PROPOSAL_STATUS_PASSED"}},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"PROPOSAL_STATUS_VOTING_PERIOD", "PROPOSAL_STATUS_PASSED", "PROPOSAL_STATUS_REJECTED", "PROPOSAL_STATUS_FAILED", "PROPOSAL_STATUS_UNSPECIFIED", "PROPOSAL_STATUS_DEPOSIT_PERIOD"}},
 		{Name: "chain_proposals", Type: field.TypeInt, Nullable: true},
 	}
 	// ProposalsTable holds the schema information for the "proposals" table.
@@ -48,6 +55,13 @@ var (
 				OnDelete:   schema.SetNull,
 			},
 		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "proposal_proposal_id_chain_proposals",
+				Unique:  true,
+				Columns: []*schema.Column{ProposalsColumns[3], ProposalsColumns[9]},
+			},
+		},
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
@@ -61,6 +75,13 @@ var (
 		Name:       "users",
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "user_chat_id",
+				Unique:  true,
+				Columns: []*schema.Column{UsersColumns[3]},
+			},
+		},
 	}
 	// UserChainsColumns holds the columns for the "user_chains" table.
 	UserChainsColumns = []*schema.Column{

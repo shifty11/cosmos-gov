@@ -4,6 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 	"github.com/cosmos/cosmos-sdk/x/gov/types"
 	"time"
 )
@@ -21,7 +22,8 @@ func (Proposal) Fields() []ent.Field {
 	}
 	return []ent.Field{
 		field.Time("created_at").
-			Default(time.Now),
+			Default(time.Now).
+			Immutable(),
 		field.Time("updated_at").
 			Default(time.Now).
 			UpdateDefault(time.Now),
@@ -40,6 +42,14 @@ func (Proposal) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("chain", Chain.Type).
 			Ref("proposals").
+			Unique(),
+	}
+}
+
+func (Proposal) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("proposal_id").
+			Edges("chain").
 			Unique(),
 	}
 }
