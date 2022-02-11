@@ -153,9 +153,7 @@ func FetchProposals() {
 		proposals, err := fetchProposals(chain.Name, types.StatusVotingPeriod, nil)
 		handleFetchError(chain, err)
 		if err == nil {
-			//saveAndSendProposals(proposals, chain)
-			//TODO: remove
-			log.Sugar.Infof("dryrun: saveAndSendProposals(proposals, chain): %v proposals", len(proposals.Proposals))
+			saveAndSendProposals(proposals, chain)
 		}
 		checkForStatusUpdates(chain)
 	}
