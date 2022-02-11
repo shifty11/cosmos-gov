@@ -3,8 +3,17 @@ package telegram
 const NbrOfButtonsPerRow = 3
 
 const menuInfoMsg = "Select the projects that you want to follow. You will receive notifications about new governance proposals once they enter the voting period."
-const startBroadcastInfoMsg = "Send the broadcast that you want to send to all participants"
-const confirmBroadcastMsg = "Are you sure you want to send this message to %v users?\nyes/no"
+const startBroadcastInfoMsg = `Send the broadcast that you want to send to all participants
+
+**Format**
+<b>bold</b>
+<a href='https://telegram.org'>Telegram</a>
+<i>italic</i>
+<code>code</code>
+<s>strike</s>
+<u>underline</u>
+`
+const confirmBroadcastMsg = "Are you sure you want to send this message to %v users?\nyes/**no**/abort"
 const abortBroadcastMsg = "Abort broadcasting message."
 const successBroadcastMsg = "Successfully sent message to %v users."
 

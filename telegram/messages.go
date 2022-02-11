@@ -21,10 +21,12 @@ var MessageStates = [...]State{StateStartBroadcast, StateConfirmBroadcast}
 var state = make(map[int64]State)
 var stateData = make(map[int64]StateData)
 
+type BroadcastStateData struct {
+	Message string
+}
+
 type StateData struct {
-	DataString string
-	DataInt    int
-	DataInt64  int64
+	BroadcastStateData *BroadcastStateData
 }
 
 func sendMenu(update *tgbotapi.Update) {
@@ -94,31 +96,33 @@ func sendUserStatistics(update *tgbotapi.Update) {
 	sendMessageX(msg)
 }
 
-func sendBroadcastStart(update *tgbotapi.Update) bool {
+func sendBroadcastStart(update *tgbotapi.Update) {
 	chatId := getChatIdX(update)
 	msg := tgbotapi.NewMessage(chatId, startBroadcastInfoMsg)
-	err := sendMessage(msg)
-	if err != nil {
-		log.Sugar.Error(err)
-	}
-	return err == nil
-}
-
-func sendConfirmBroadcastMessage(update *tgbotapi.Update, fromChatId int64, messageId int) {
-	chatId := getChatIdX(update)
-	cntUsers := database.CountUsers()
-	forwardMsg := tgbotapi.NewForward(chatId, fromChatId, messageId)
-	sendMessageX(forwardMsg)
-	msg := tgbotapi.NewMessage(chatId, fmt.Sprintf(confirmBroadcastMsg, cntUsers))
+	msg.DisableWebPagePreview = true
 	sendMessageX(msg)
 }
 
-func sendBroadcastMessage(update *tgbotapi.Update, fromChatId int64, messageId int) {
+func sendConfirmBroadcastMessage(update *tgbotapi.Update, text string) {
+	chatId := getChatIdX(update)
+	cntUsers := database.CountUsers()
+	broadcastMsg := tgbotapi.NewMessage(chatId, text)
+	broadcastMsg.DisableWebPagePreview = true
+	broadcastMsg.ParseMode = "html"
+	sendMessageX(broadcastMsg)
+	msg := tgbotapi.NewMessage(chatId, fmt.Sprintf(confirmBroadcastMsg, cntUsers))
+	msg.ParseMode = "markdown"
+	sendMessageX(msg)
+}
+
+func sendBroadcastMessage(text string) {
 	chatIds := database.GetAllUserChatIds()
 	log.Sugar.Debugf("Broadcast message to %v users", len(chatIds))
 	for _, chatId := range chatIds {
-		forwardMsg := tgbotapi.NewForward(int64(chatId), fromChatId, messageId)
-		err := sendMessage(forwardMsg)
+		broadcastMsg := tgbotapi.NewMessage(int64(chatId), text)
+		broadcastMsg.DisableWebPagePreview = true
+		broadcastMsg.ParseMode = "html"
+		err := sendMessage(broadcastMsg)
 		handleError(chatId, err)
 	}
 }

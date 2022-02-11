@@ -51,7 +51,7 @@ func getStateData(update *tgbotapi.Update) StateData {
 	if _, exists := stateData[chatId]; exists {
 		return stateData[chatId]
 	}
-	return StateData{DataString: ""}
+	return StateData{}
 }
 
 func handleCommand(update *tgbotapi.Update) {
@@ -69,11 +69,8 @@ func handleCommand(update *tgbotapi.Update) {
 				sendUserStatistics(update)
 				setState(update, StateNil, nil)
 			case "broadcast":
-				if sendBroadcastStart(update) {
-					setState(update, StateStartBroadcast, nil)
-				} else {
-					setState(update, StateNil, nil)
-				}
+				sendBroadcastStart(update)
+				setState(update, StateStartBroadcast, nil)
 			}
 		}
 	}
@@ -82,25 +79,27 @@ func handleCommand(update *tgbotapi.Update) {
 func handleMessage(update *tgbotapi.Update) {
 	switch getState(update) {
 	case StateStartBroadcast:
-		data := StateData{
-			DataInt:   update.Message.MessageID,
-			DataInt64: update.Message.Chat.ID,
-		}
-		sendConfirmBroadcastMessage(update, data.DataInt64, data.DataInt)
+		data := StateData{BroadcastStateData: &BroadcastStateData{Message: update.Message.Text}}
+		sendConfirmBroadcastMessage(update, data.BroadcastStateData.Message)
 		setState(update, StateConfirmBroadcast, &data)
 	case StateConfirmBroadcast:
 		yesOptions := []string{"yes", "y"}
+		abortOptions := []string{"abort", "a"}
 		if contains(yesOptions, strings.ToLower(update.Message.Text)) {
 			data := getStateData(update)
-			if data.DataInt == 0 || data.DataInt64 == 0 {
+			if data.BroadcastStateData == nil || data.BroadcastStateData.Message == "" {
 				log.Sugar.Fatal("No message to broadcast. This should never happen!")
 			}
-			sendBroadcastMessage(update, data.DataInt64, data.DataInt)
+			sendBroadcastMessage(data.BroadcastStateData.Message)
 			sendBroadcastEndInfoMessage(update, true)
-		} else {
+			setState(update, StateNil, nil)
+		} else if contains(abortOptions, strings.ToLower(update.Message.Text)) {
 			sendBroadcastEndInfoMessage(update, false)
+			setState(update, StateNil, nil)
+		} else {
+			sendBroadcastStart(update)
+			setState(update, StateStartBroadcast, nil)
 		}
-		setState(update, StateNil, nil)
 	}
 }
 
@@ -128,7 +127,7 @@ func Listen() {
 		if update.Message != nil && update.Message.IsCommand() { // handle commands
 			handleCommand(&update)
 		} else if update.Message != nil && isExpectingMessage(&update) {
-			//handleMessage(&update)
+			handleMessage(&update)
 		} else if update.CallbackQuery != nil {
 			handleCallbackQuery(&update)
 		}
