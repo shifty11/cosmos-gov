@@ -3,6 +3,7 @@ package datasource
 import (
 	"errors"
 	"fmt"
+	querytypes "github.com/cosmos/cosmos-sdk/types/query"
 	"github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/liamylian/jsontime"
 	"github.com/shifty11/cosmos-gov/database"
@@ -62,7 +63,7 @@ func extractContent(cl *client.ChainClient, response types.QueryProposalsRespons
 	return nil, errors.New(fmt.Sprintf("Length of proposals is %v. This should never happen!", len(proposals.Proposals)))
 }
 
-func fetchProposals(chainId string, proposalStatus types.ProposalStatus) (*dtos.Proposals, error) {
+func fetchProposals(chainId string, proposalStatus types.ProposalStatus, pageReq *querytypes.PageRequest) (*dtos.Proposals, error) {
 	config, err := cmd.GetConfig()
 	if err != nil {
 		log.Sugar.Panicf("Error while reading config %v", err)
@@ -72,8 +73,8 @@ func fetchProposals(chainId string, proposalStatus types.ProposalStatus) (*dtos.
 		log.Sugar.Panicf("Chain client '%v' not found ", chainId)
 	}
 
-	log.Sugar.Debugf("QueryGovernanceProposals on %v", chainId)
-	response, err := cl.QueryGovernanceProposals(proposalStatus, "", "", nil)
+	log.Sugar.Debugf("QueryGovernanceProposals on %v --status %v", chainId, strings.ToLower(strings.Replace(proposalStatus.String(), "PROPOSAL_STATUS_", "", 1)))
+	response, err := cl.QueryGovernanceProposals(proposalStatus, "", "", pageReq)
 	if err != nil {
 		log.Sugar.Debugf("Error while querying proposals on %v: %v", chainId, err)
 		return nil, err
@@ -114,17 +115,46 @@ const maxFetchErrors = 10 // max fetch errors until fetching will be reported
 
 var fetchErrors = make(map[int]int) // map of chain and number of errors
 
+func handleFetchError(chain *ent.Chain, err error) {
+	if err != nil {
+		fetchErrors[chain.ID] += 1
+		if fetchErrors[chain.ID] >= maxFetchErrors {
+			log.Sugar.Errorf("Chain '%v' has %v errors", chain.DisplayName, fetchErrors[chain.ID])
+		}
+	} else {
+		fetchErrors[chain.ID] = 0
+	}
+}
+
+func checkForStatusUpdates(chain *ent.Chain) {
+	pageRequest := querytypes.PageRequest{
+		Key:        nil,
+		Offset:     0,
+		Limit:      3,
+		CountTotal: false,
+		Reverse:    true,
+	}
+	votingProposals := database.GetProposalsInVotingPeriod(chain.Name)
+	proposals, err := fetchProposals(chain.Name, types.StatusNil, &pageRequest)
+	handleFetchError(chain, err)
+	if err == nil {
+		for _, prop := range proposals.Proposals {
+			for _, vProp := range votingProposals {
+				if prop.ProposalId == vProp.ProposalID && prop.Status != vProp.Status.String() {
+					database.CreateOrUpdateProposal(&prop, chain)
+				}
+			}
+		}
+	}
+}
+
 func FetchProposals() {
 	for _, chain := range database.GetChains() {
-		proposals, err := fetchProposals(chain.Name, types.StatusVotingPeriod)
-		if err != nil {
-			fetchErrors[chain.ID] += 1
-			if fetchErrors[chain.ID] >= maxFetchErrors {
-				log.Sugar.Errorf("Chain '%v' has %v errors", chain.DisplayName, fetchErrors[chain.ID])
-			}
-		} else {
-			fetchErrors[chain.ID] = 0
+		proposals, err := fetchProposals(chain.Name, types.StatusVotingPeriod, nil)
+		handleFetchError(chain, err)
+		if err == nil {
 			saveAndSendProposals(proposals, chain)
 		}
+		checkForStatusUpdates(chain)
 	}
 }

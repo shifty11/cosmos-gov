@@ -9,7 +9,7 @@ import (
 func InitChains() {
 	for _, chain := range database.GetChains() {
 		if !database.HasFirstOrSecondProposal(chain.Name) {
-			proposals, err := fetchProposals(chain.Name, types.StatusNil)
+			proposals, err := fetchProposals(chain.Name, types.StatusNil, nil)
 			if err != nil {
 				log.Sugar.Errorf("Chain '%v' has %v errors", chain.DisplayName, err)
 			} else {

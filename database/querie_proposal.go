@@ -10,6 +10,8 @@ import (
 	"github.com/shifty11/cosmos-gov/log"
 )
 
+// CreateProposalIfNotExists creates a proposal if it does not exist. If it exists it doesn't do anything.
+// returns new proposal or nil if it already exists.
 func CreateProposalIfNotExists(prop *dtos.Proposal, chainDb *ent.Chain) *ent.Proposal {
 	client, ctx := connect()
 	exist, err := chainDb.QueryProposals().
@@ -105,4 +107,18 @@ func HasFirstOrSecondProposal(chainName string) bool {
 		log.Sugar.Panicf("Error while querying first/second proposal for chain %v: %v", chainName, err)
 	}
 	return cnt > 0
+}
+
+func GetProposalsInVotingPeriod(chainName string) []*ent.Proposal {
+	client, ctx := connect()
+	props, err := client.Proposal.
+		Query().
+		Where(proposal.And(
+			proposal.HasChainWith(chain.NameEQ(chainName)),
+			proposal.StatusNEQ(proposal.StatusPROPOSAL_STATUS_VOTING_PERIOD),
+		)).All(ctx)
+	if err != nil {
+		log.Sugar.Panicf("Error while querying first/second proposal for chain %v: %v", chainName, err)
+	}
+	return props
 }
