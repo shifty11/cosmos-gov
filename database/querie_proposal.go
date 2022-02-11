@@ -1,12 +1,14 @@
 package database
 
 import (
+	"entgo.io/ent/dialect/sql"
 	"errors"
 	"github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/shifty11/cosmos-gov/dtos"
 	"github.com/shifty11/cosmos-gov/ent"
 	"github.com/shifty11/cosmos-gov/ent/chain"
 	"github.com/shifty11/cosmos-gov/ent/proposal"
+	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/log"
 )
 
@@ -116,9 +118,59 @@ func GetProposalsInVotingPeriod(chainName string) []*ent.Proposal {
 		Where(proposal.And(
 			proposal.HasChainWith(chain.NameEQ(chainName)),
 			proposal.StatusNEQ(proposal.StatusPROPOSAL_STATUS_VOTING_PERIOD),
-		)).All(ctx)
+		)).
+		All(ctx)
 	if err != nil {
 		log.Sugar.Panicf("Error while querying first/second proposal for chain %v: %v", chainName, err)
 	}
 	return props
 }
+
+func GetProposalsInVotingPeriodForUser(chatId int64) []dtos.ProposalOverview {
+	client, ctx := connect()
+	var props []dtos.ProposalOverview
+	err := client.Debug().Chain.
+		Query().
+		Where(chain.And(
+			chain.HasUsersWith(user.ChatIDEQ(chatId)),
+			chain.HasProposalsWith(proposal.StatusEQ(proposal.StatusPROPOSAL_STATUS_VOTING_PERIOD)),
+		)).
+		Order(ent.Asc(chain.FieldName)).
+		GroupBy(chain.FieldName).
+		Aggregate(ent.Count()).
+		Aggregate(func(s *sql.Selector) string {
+			t := sql.Table(chain.ProposalsTable)
+			s.Join(t).On(s.C(chain.FieldID), t.C(proposal.ChainColumn))
+			//return sql.As(proposal.FieldID, "proposals")
+			return sql.As(sql.Count(t.C(proposal.FieldID)), "proposals")
+		}, ent.Count()).
+		Scan(ctx, &props)
+	if err != nil {
+		log.Sugar.Panicf("Error while querying proposals for user #%v: %v", chatId, err)
+	}
+	return props
+}
+
+//func GetProposalsInVotingPeriodForUser(chatId int64) []dtos.ProposalOverview {
+//	client, ctx := connect()
+//	var props []dtos.ProposalOverview
+//	err := client.Debug().Proposal.
+//		Query().
+//		Where(proposal.And(
+//			proposal.HasChainWith(chain.HasUsersWith(user.ChatIDEQ(chatId))),
+//			proposal.StatusEQ(proposal.StatusPROPOSAL_STATUS_VOTING_PERIOD),
+//		)).
+//		//Order(ent.Asc(chain.FieldName)).
+//		GroupBy(proposal.ChainColumn).
+//		//Aggregate(func(s *sql.Selector) string {
+//		//	t := sql.Table(chain.ProposalsTable)
+//		//	s.Join(t).On(s.C(chain.FieldID), t.C(proposal.ChainColumn))
+//		//	//return sql.As(proposal.FieldID, "proposals")
+//		//	return sql.As(sql.Count(t.C(proposal.FieldID)), "proposals")
+//		//}, ent.Count()).
+//		Scan(ctx, &props)
+//	if err != nil {
+//		log.Sugar.Panicf("Error while querying proposals for user #%v: %v", chatId, err)
+//	}
+//	return props
+//}

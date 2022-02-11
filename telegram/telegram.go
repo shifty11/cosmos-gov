@@ -59,9 +59,6 @@ func handleCommand(update *tgbotapi.Update) {
 	case "start", "notifications":
 		sendMenu(update)
 		setState(update, StateNil, nil)
-	case "proposals":
-		sendCurrentProposals(update)
-		setState(update, StateNil, nil)
 	default:
 		if isAdmin(update.Message.From.ID) { // Check for admin commands
 			switch update.Message.Command() {
@@ -71,6 +68,9 @@ func handleCommand(update *tgbotapi.Update) {
 			case "broadcast":
 				sendBroadcastStart(update)
 				setState(update, StateStartBroadcast, nil)
+			case "proposals":
+				sendCurrentProposals(update)
+				setState(update, StateNil, nil)
 			}
 		}
 	}

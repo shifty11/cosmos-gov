@@ -140,6 +140,12 @@ func sendBroadcastEndInfoMessage(update *tgbotapi.Update, success bool) {
 
 func sendCurrentProposals(update *tgbotapi.Update) {
 	chatId := getChatIdX(update)
-	msg := tgbotapi.NewMessage(chatId, "Send current proposals -> not yet implemented")
+	text := ""
+	proposals := database.GetProposalsInVotingPeriodForUser(chatId)
+	for _, prop := range proposals {
+		text += fmt.Sprintf("%11.11s: %3.d\n", prop.Name, prop.Count)
+	}
+	msg := tgbotapi.NewMessage(chatId, "`"+text+"`")
+	msg.ParseMode = "markdown"
 	sendMessageX(msg)
 }

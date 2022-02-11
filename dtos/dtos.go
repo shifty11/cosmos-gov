@@ -39,3 +39,10 @@ type ChainStatistic struct {
 	Name          string
 	Notifications int
 }
+
+type ProposalOverview struct {
+	Id        int
+	Name      string
+	Count     int
+	Proposals int
+}
