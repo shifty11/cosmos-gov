@@ -108,29 +108,89 @@ func handleCallbackQuery(update *tgbotapi.Update) {
 	sendMenu(update)
 }
 
-func Listen() {
-	log.Sugar.Info("Start listening for commands")
-	api := getApi()
-
-	updateConfig := tgbotapi.NewUpdate(0)
-
-	updates, err := api.GetUpdatesChan(updateConfig)
-	if err != nil {
-		log.Sugar.Panic(err)
-	}
-
-	for update := range updates {
-		if !hasChatId(&update) { // no chat id means there is something strange or the update is not for us
-			continue
-		}
-
-		if update.Message != nil && update.Message.IsCommand() { // handle commands
+// Handles updates for only 1 user in a serial way
+func handleUpdates(channel chan tgbotapi.Update) {
+	for update := range channel {
+		chatId := getChatIdX(&update)
+		if update.Message != nil && update.Message.IsCommand() {
 			handleCommand(&update)
 		} else if update.Message != nil && isExpectingMessage(&update) {
 			handleMessage(&update)
 		} else if update.CallbackQuery != nil {
 			handleCallbackQuery(&update)
 		}
+		updateCountChannel <- UpdateCount{ChatId: chatId, Updates: -1}
+	}
+}
+
+type UpdateCount struct {
+	ChatId  int64
+	Updates int
+}
+
+// updateChannels contains one update channel for every user.
+// This means the updates can be processed parallel for multiple users but serial for every single user
+var updateChannels map[int64]chan tgbotapi.Update
+
+// updateCountChannel is used to communicate to `manageUpdateChannels` from `handleUpdates`
+var updateCountChannel chan UpdateCount
+
+func hasChannel(channelId int64) bool {
+	for key := range updateChannels {
+		if key == channelId {
+			return true
+		}
+	}
+	return false
+}
+
+func sendToChannelAsync(chatId int64, update tgbotapi.Update) {
+	updateCountChannel <- UpdateCount{ChatId: chatId, Updates: 1}
+	updateChannels[chatId] <- update
+}
+
+func sendToChannel(update *tgbotapi.Update) {
+	chatId := getChatIdX(update)
+	if !hasChannel(chatId) {
+		updateChannels[chatId] = make(chan tgbotapi.Update)
+		go handleUpdates(updateChannels[chatId])
+	}
+	go sendToChannelAsync(chatId, *update)
+}
+
+// Keeps track of all the user channels and closes them if there are no more updates
+func manageUpdateChannels() {
+	updateCountChannel = make(chan UpdateCount)
+	var count = make(map[int64]int)
+	for msg := range updateCountChannel {
+		count[msg.ChatId] += msg.Updates
+		if count[msg.ChatId] == 0 {
+			close(updateChannels[msg.ChatId])
+			delete(updateChannels, msg.ChatId)
+			delete(count, msg.ChatId)
+		}
+	}
+}
+
+func Listen() {
+	log.Sugar.Info("Start listening for messages")
+	api := getApi()
+
+	updateConfig := tgbotapi.NewUpdate(0)
+	updates, err := api.GetUpdatesChan(updateConfig)
+	if err != nil {
+		log.Sugar.Panic(err)
+	}
+
+	updateChannels = make(map[int64]chan tgbotapi.Update)
+	go manageUpdateChannels()
+
+	for update := range updates {
+		if !hasChatId(&update) { // no chat id means there is something strange or the update is not for us
+			continue
+		}
+
+		sendToChannel(&update)
 	}
 }
 
