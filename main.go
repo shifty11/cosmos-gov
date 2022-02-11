@@ -20,6 +20,8 @@ func initDatabase() {
 	database.MigrateDatabase()
 	chains := datasource.ReadLensConfig(lensConfig)
 	database.CreateChains(chains)
+	datasource.InitChains()
+	//database.DropProposals()
 }
 
 func startProposalFetching() {
