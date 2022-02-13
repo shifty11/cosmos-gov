@@ -17,9 +17,12 @@ func initDatabase() {
 		log.Sugar.Panicf("LENS_CONFIG is not set. Please provide the path to the lens config.yaml.")
 	}
 
+	log.Sugar.Info("Migrate database")
 	database.MigrateDatabase()
 	chains := datasource.ReadLensConfig(lensConfig)
+	log.Sugar.Info("Create chains")
 	database.CreateChains(chains)
+	log.Sugar.Info("Init chains")
 	datasource.InitChains()
 	//database.DropProposals()
 }
