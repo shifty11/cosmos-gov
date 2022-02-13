@@ -32,4 +32,8 @@ const userStatisticMsg = `
      1 week ┆ %7d %+7.2f%%
       1 day ┆ %7d %+7.2f%%`
 
-const showProposalMessage = "This are all ongoing proposals for your subscriptions.\n\n"
+const showProposalMsg = "This are all ongoing proposals for your subscriptions.\n\n"
+const helpMsg = `<b>Commands List</b>
+/subscriptions - Manage your subscriptions
+/proposals - Show proposals in voting period
+/help - Show bot commands`

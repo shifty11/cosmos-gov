@@ -140,7 +140,7 @@ func sendBroadcastEndInfoMessage(update *tgbotapi.Update, success bool) {
 
 func sendCurrentProposals(update *tgbotapi.Update) {
 	chatId := getChatIdX(update)
-	text := showProposalMessage
+	text := showProposalMsg
 	chains := database.GetProposalsInVotingPeriodForUser(chatId)
 	for _, chain := range chains {
 		for _, prop := range chain.Edges.Proposals {
@@ -148,6 +148,13 @@ func sendCurrentProposals(update *tgbotapi.Update) {
 		}
 	}
 	msg := tgbotapi.NewMessage(chatId, text)
+	msg.ParseMode = "html"
+	sendMessageX(msg)
+}
+
+func sendHelp(update *tgbotapi.Update) {
+	chatId := getChatIdX(update)
+	msg := tgbotapi.NewMessage(chatId, helpMsg)
 	msg.ParseMode = "html"
 	sendMessageX(msg)
 }
