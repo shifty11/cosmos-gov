@@ -126,15 +126,16 @@ func handleFetchError(chain *ent.Chain, err error) {
 	}
 }
 
+// checks if proposal that are in voting period need to be updated
 func checkForStatusUpdates(chain *ent.Chain) {
 	votingProposals := database.GetProposalsInVotingPeriod(chain.Name)
-	if len(votingProposals) == 0 {
+	if len(votingProposals) == 0 { // do nothing if there is no votingProposal
 		return
 	}
 	pageRequest := querytypes.PageRequest{
 		Key:        nil,
 		Offset:     0,
-		Limit:      uint64(len(votingProposals)) + 30,
+		Limit:      uint64(len(votingProposals)) + 3,
 		CountTotal: false,
 		Reverse:    true,
 	}
