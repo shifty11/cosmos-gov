@@ -131,7 +131,6 @@ func GetProposalsInVotingPeriodForUser(chatId int64) []*ent.Chain {
 		Query().
 		Where(chain.And(
 			chain.HasUsersWith(user.ChatIDEQ(chatId)),
-			chain.HasProposalsWith(proposal.StatusEQ(proposal.StatusPROPOSAL_STATUS_VOTING_PERIOD)),
 		)).
 		Order(ent.Asc(chain.FieldName)).
 		WithProposals(func(q *ent.ProposalQuery) {
