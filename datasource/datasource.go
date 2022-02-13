@@ -153,6 +153,7 @@ func checkForStatusUpdates(chain *ent.Chain) {
 }
 
 func FetchProposals() {
+	log.Sugar.Info("Fetch proposals")
 	for _, chain := range database.GetChains() {
 		proposals, err := fetchProposals(chain.Name, types.StatusVotingPeriod, nil)
 		handleFetchError(chain, err)

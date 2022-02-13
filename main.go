@@ -30,6 +30,7 @@ func startProposalFetching() {
 	if err != nil {
 		log.Sugar.Errorf("while executing 'datasource.FetchProposals()' via cron: %v", err)
 	}
+	log.Sugar.Info("Start proposal fetching")
 	c.Start()
 	//go datasource.FetchProposals()
 }
@@ -44,8 +45,17 @@ func main() {
 
 	defer database.Close()
 
-	initDatabase()
-	startProposalFetching()
-	startTelegramServer()
+	args := os.Args[1:]
+	if len(args) > 0 && args[0] == "fetching" {
+		initDatabase()
+		startProposalFetching()
+	} else if len(args) > 0 && args[0] == "telegram" {
+		startTelegramServer()
+	} else {
+		initDatabase()
+		startProposalFetching()
+		startTelegramServer()
+	}
+
 	time.Sleep(time.Duration(1<<63 - 1))
 }
