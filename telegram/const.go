@@ -31,3 +31,5 @@ const userStatisticMsg = `
    All time ┆ %7d
      1 week ┆ %7d %+7.2f%%
       1 day ┆ %7d %+7.2f%%`
+
+const showProposalMessage = "This are all ongoing proposals for your subscriptions.\n\n"

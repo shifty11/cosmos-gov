@@ -1,7 +1,6 @@
 package database
 
 import (
-	"entgo.io/ent/dialect/sql"
 	"errors"
 	"github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/shifty11/cosmos-gov/dtos"
@@ -126,51 +125,21 @@ func GetProposalsInVotingPeriod(chainName string) []*ent.Proposal {
 	return props
 }
 
-func GetProposalsInVotingPeriodForUser(chatId int64) []dtos.ProposalOverview {
+func GetProposalsInVotingPeriodForUser(chatId int64) []*ent.Chain {
 	client, ctx := connect()
-	var props []dtos.ProposalOverview
-	err := client.Debug().Chain.
+	props, err := client.Chain.
 		Query().
 		Where(chain.And(
 			chain.HasUsersWith(user.ChatIDEQ(chatId)),
 			chain.HasProposalsWith(proposal.StatusEQ(proposal.StatusPROPOSAL_STATUS_VOTING_PERIOD)),
 		)).
 		Order(ent.Asc(chain.FieldName)).
-		GroupBy(chain.FieldName).
-		Aggregate(ent.Count()).
-		Aggregate(func(s *sql.Selector) string {
-			t := sql.Table(chain.ProposalsTable)
-			s.Join(t).On(s.C(chain.FieldID), t.C(proposal.ChainColumn))
-			//return sql.As(proposal.FieldID, "proposals")
-			return sql.As(sql.Count(t.C(proposal.FieldID)), "proposals")
-		}, ent.Count()).
-		Scan(ctx, &props)
+		WithProposals(func(q *ent.ProposalQuery) {
+			q.Where(proposal.StatusEQ(proposal.StatusPROPOSAL_STATUS_VOTING_PERIOD))
+		}).
+		All(ctx)
 	if err != nil {
 		log.Sugar.Panicf("Error while querying proposals for user #%v: %v", chatId, err)
 	}
 	return props
 }
-
-//func GetProposalsInVotingPeriodForUser(chatId int64) []dtos.ProposalOverview {
-//	client, ctx := connect()
-//	var props []dtos.ProposalOverview
-//	err := client.Debug().Proposal.
-//		Query().
-//		Where(proposal.And(
-//			proposal.HasChainWith(chain.HasUsersWith(user.ChatIDEQ(chatId))),
-//			proposal.StatusEQ(proposal.StatusPROPOSAL_STATUS_VOTING_PERIOD),
-//		)).
-//		//Order(ent.Asc(chain.FieldName)).
-//		GroupBy(proposal.ChainColumn).
-//		//Aggregate(func(s *sql.Selector) string {
-//		//	t := sql.Table(chain.ProposalsTable)
-//		//	s.Join(t).On(s.C(chain.FieldID), t.C(proposal.ChainColumn))
-//		//	//return sql.As(proposal.FieldID, "proposals")
-//		//	return sql.As(sql.Count(t.C(proposal.FieldID)), "proposals")
-//		//}, ent.Count()).
-//		Scan(ctx, &props)
-//	if err != nil {
-//		log.Sugar.Panicf("Error while querying proposals for user #%v: %v", chatId, err)
-//	}
-//	return props
-//}

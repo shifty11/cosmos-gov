@@ -104,11 +104,11 @@ func contains(elems []string, v string) bool {
 
 func handleError(chatId int, err error) {
 	if err != nil {
-		if err.Error() == "Forbidden: bot was blocked by the user" {
+		if err.Error() == "Forbidden: bot was blocked by the user" || err.Error() == "Forbidden: bot was kicked from the supergroup chat" {
 			log.Sugar.Debugf("Delete user #%v", chatId)
 			database.DeleteUser(int64(chatId))
 		} else {
-			log.Sugar.Errorf("Error while sending message: %v", err)
+			log.Sugar.Errorf("Error while sending message to chat #%v: %v", chatId, err)
 		}
 	}
 }

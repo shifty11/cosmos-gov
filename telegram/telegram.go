@@ -56,7 +56,7 @@ func getStateData(update *tgbotapi.Update) StateData {
 
 func handleCommand(update *tgbotapi.Update) {
 	switch update.Message.Command() { // Check for non admin commands
-	case "start", "notifications":
+	case "start", "notifications", "subscriptions":
 		sendMenu(update)
 		setState(update, StateNil, nil)
 	default:
