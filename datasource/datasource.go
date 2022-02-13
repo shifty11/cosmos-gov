@@ -127,14 +127,17 @@ func handleFetchError(chain *ent.Chain, err error) {
 }
 
 func checkForStatusUpdates(chain *ent.Chain) {
+	votingProposals := database.GetProposalsInVotingPeriod(chain.Name)
+	if len(votingProposals) == 0 {
+		return
+	}
 	pageRequest := querytypes.PageRequest{
 		Key:        nil,
 		Offset:     0,
-		Limit:      3,
+		Limit:      uint64(len(votingProposals)) + 30,
 		CountTotal: false,
 		Reverse:    true,
 	}
-	votingProposals := database.GetProposalsInVotingPeriod(chain.Name)
 	proposals, err := fetchProposals(chain.Name, types.StatusNil, &pageRequest)
 	handleFetchError(chain, err)
 	if err == nil {

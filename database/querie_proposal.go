@@ -116,7 +116,7 @@ func GetProposalsInVotingPeriod(chainName string) []*ent.Proposal {
 		Query().
 		Where(proposal.And(
 			proposal.HasChainWith(chain.NameEQ(chainName)),
-			proposal.StatusNEQ(proposal.StatusPROPOSAL_STATUS_VOTING_PERIOD),
+			proposal.StatusEQ(proposal.StatusPROPOSAL_STATUS_VOTING_PERIOD),
 		)).
 		All(ctx)
 	if err != nil {
