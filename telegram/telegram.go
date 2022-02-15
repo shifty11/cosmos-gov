@@ -8,9 +8,12 @@ import (
 	"strings"
 )
 
-func isAdmin(fromId int) bool {
+func isAdmin(update *tgbotapi.Update) bool {
+	if update.Message == nil {
+		return false
+	}
 	admins := strings.Split(strings.Trim(os.Getenv("ADMIN_IDS"), " "), ",")
-	return contains(admins, strconv.Itoa(fromId))
+	return contains(admins, strconv.Itoa(update.Message.From.ID))
 }
 
 func isExpectingMessage(update *tgbotapi.Update) bool {
@@ -69,7 +72,7 @@ func handleCommand(update *tgbotapi.Update) {
 		sendSupport(update)
 		setState(update, StateNil, nil)
 	default:
-		if isAdmin(update.Message.From.ID) { // Check for admin commands
+		if isAdmin(update) { // Check for admin commands
 			switch update.Message.Command() {
 			case "stats":
 				sendUserStatistics(update)

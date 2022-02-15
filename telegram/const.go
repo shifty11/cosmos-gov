@@ -41,6 +41,10 @@ const helpMsg = `<b>Commands List</b>
 /support - Show how you can support this bot
 /help - Show bot commands`
 
+const adminHelpMsg = `<b>Admin Commands</b>
+/stats - Show statistics
+/broadcast - Broadcast message to everyone`
+
 const supportMsg = `We would like to continue developing this bot and other products that improve the Cosmos ecosystem.
 
 You can support us by staking a part to our validator service <b>DeCrypto</b> on <a href='https://ping.pub/kava/staking/kavavaloper16wmsum8eaf6sqmj97k9ayvh3c28u00nuuyt9xt'>Kava</a> and <a href='https://ping.pub/dig/staking/digvaloper1fhp54fwlfmpwwgrnfwk3v47v53yjtp8fw6nelw'>Dig</a>.

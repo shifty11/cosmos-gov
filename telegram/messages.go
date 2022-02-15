@@ -163,7 +163,11 @@ func sendCurrentProposals(update *tgbotapi.Update) {
 func sendHelp(update *tgbotapi.Update) {
 	chatId := getChatIdX(update)
 	log.Sugar.Debugf("Send help to user #%v", chatId)
-	msg := tgbotapi.NewMessage(chatId, helpMsg)
+	text := helpMsg
+	if isAdmin(update) {
+		text += "\n\n" + adminHelpMsg
+	}
+	msg := tgbotapi.NewMessage(chatId, text)
 	msg.ParseMode = "html"
 	sendMessageX(msg)
 }
