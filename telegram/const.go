@@ -38,4 +38,11 @@ const noProposalsMsg = "There are currently no proposals in voting period."
 const helpMsg = `<b>Commands List</b>
 /subscriptions - Manage your subscriptions
 /proposals - Show proposals in voting period
+/support - Show how you can support this bot
 /help - Show bot commands`
+
+const supportMsg = `We would like to continue developing this bot and other products that improve the Cosmos ecosystem.
+
+You can support us by staking a part to our validator service <b>DeCrypto</b> on <a href='https://ping.pub/kava/staking/kavavaloper16wmsum8eaf6sqmj97k9ayvh3c28u00nuuyt9xt'>Kava</a> and <a href='https://ping.pub/dig/staking/digvaloper1fhp54fwlfmpwwgrnfwk3v47v53yjtp8fw6nelw'>Dig</a>.
+
+You have a good idea, feedback or want to contribute in other ways? Shoot a message to @rapha_decrypto`

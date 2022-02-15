@@ -65,6 +65,9 @@ func handleCommand(update *tgbotapi.Update) {
 	case "help":
 		sendHelp(update)
 		setState(update, StateNil, nil)
+	case "support":
+		sendSupport(update)
+		setState(update, StateNil, nil)
 	default:
 		if isAdmin(update.Message.From.ID) { // Check for admin commands
 			switch update.Message.Command() {

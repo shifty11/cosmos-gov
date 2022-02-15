@@ -167,3 +167,12 @@ func sendHelp(update *tgbotapi.Update) {
 	msg.ParseMode = "html"
 	sendMessageX(msg)
 }
+
+func sendSupport(update *tgbotapi.Update) {
+	chatId := getChatIdX(update)
+	log.Sugar.Debugf("Send support message to user #%v", chatId)
+	msg := tgbotapi.NewMessage(chatId, supportMsg)
+	msg.DisableWebPagePreview = true
+	msg.ParseMode = "html"
+	sendMessageX(msg)
+}
