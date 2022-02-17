@@ -4,6 +4,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/log"
+	"math"
 	"os"
 )
 
@@ -64,7 +65,18 @@ func getChatIdX(update *tgbotapi.Update) int64 {
 	if update.Message != nil {
 		return update.Message.Chat.ID
 	}
-	log.Sugar.Panic("unreachable code reached!!!")
+	log.Sugar.Panic("getChatIdX: unreachable code reached!!!")
+	return 0
+}
+
+func getUserIdX(update *tgbotapi.Update) int {
+	if update.CallbackQuery != nil {
+		return update.CallbackQuery.From.ID
+	}
+	if update.Message != nil {
+		return update.Message.From.ID
+	}
+	log.Sugar.Panic("getUserIdX: unreachable code reached!!!")
 	return 0
 }
 
@@ -111,4 +123,27 @@ func handleError(chatId int, err error) {
 			log.Sugar.Errorf("Error while sending message to chat #%v: %v", chatId, err)
 		}
 	}
+}
+
+// ChatId is negative for groups
+func isUpdateFromGroup(update *tgbotapi.Update) bool {
+	chatId := getChatIdX(update)
+	return math.Signbit(float64(chatId))
+}
+
+func isUpdateFromCreatorOrAdministrator(update *tgbotapi.Update) bool {
+	api := getApi()
+	chatId := getChatIdX(update)
+	userId := getUserIdX(update)
+	memberConfig := tgbotapi.ChatConfigWithUser{
+		ChatID:             chatId,
+		SuperGroupUsername: "",
+		UserID:             userId,
+	}
+	member, err := api.GetChatMember(memberConfig)
+	if err != nil {
+		log.Sugar.Errorf("Error while getting member (ChatID: %v; UserID: %v): %v", chatId, userId, err)
+		return false
+	}
+	return member.Status == "creator" || member.Status == "administrator"
 }

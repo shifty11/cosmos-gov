@@ -117,16 +117,32 @@ func handleCallbackQuery(update *tgbotapi.Update) {
 	sendSubscriptions(update)
 }
 
+// groups -> just admins and creators can interact with the bot
+// private -> everything is allowed
+func isInteractionAllowed(update *tgbotapi.Update) bool {
+	if isUpdateFromGroup(update) {
+		return isUpdateFromCreatorOrAdministrator(update)
+	}
+	return true
+}
+
 // Handles updates for only 1 user in a serial way
 func handleUpdates(channel chan tgbotapi.Update) {
 	for update := range channel {
 		chatId := getChatIdX(&update)
-		if update.Message != nil && update.Message.IsCommand() {
-			handleCommand(&update)
-		} else if update.Message != nil && isExpectingMessage(&update) {
-			handleMessage(&update)
-		} else if update.CallbackQuery != nil {
-			handleCallbackQuery(&update)
+		if isInteractionAllowed(&update) {
+			if update.Message != nil && update.Message.IsCommand() {
+				handleCommand(&update)
+			} else if update.Message != nil && isExpectingMessage(&update) {
+				handleMessage(&update)
+			} else if update.CallbackQuery != nil {
+				handleCallbackQuery(&update)
+			}
+		} else {
+			log.Sugar.Debugf("Interaction with bot for user #%v is not allowed", chatId)
+			if update.CallbackQuery != nil {
+				answerCallbackQuery(&update)
+			}
 		}
 		updateCountChannel <- UpdateCount{ChatId: chatId, Updates: -1}
 	}
