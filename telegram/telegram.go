@@ -60,7 +60,7 @@ func getStateData(update *tgbotapi.Update) StateData {
 func handleCommand(update *tgbotapi.Update) {
 	switch update.Message.Command() { // Check for non admin commands
 	case "start", "notifications", "subscriptions":
-		sendMenu(update)
+		sendSubscriptions(update)
 		setState(update, StateNil, nil)
 	case "proposals":
 		sendCurrentProposals(update)
@@ -114,7 +114,7 @@ func handleMessage(update *tgbotapi.Update) {
 
 func handleCallbackQuery(update *tgbotapi.Update) {
 	performUpdateNotification(update)
-	sendMenu(update)
+	sendSubscriptions(update)
 }
 
 // Handles updates for only 1 user in a serial way

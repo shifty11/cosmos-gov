@@ -29,7 +29,7 @@ type StateData struct {
 	BroadcastStateData *BroadcastStateData
 }
 
-func sendMenu(update *tgbotapi.Update) {
+func sendSubscriptions(update *tgbotapi.Update) {
 	chatId := getChatIdX(update)
 	chains := database.GetChainsForUser(chatId)
 
@@ -49,7 +49,8 @@ func sendMenu(update *tgbotapi.Update) {
 	replyMarkup := createKeyboard(buttons)
 
 	if update.CallbackQuery == nil {
-		msg := tgbotapi.NewMessage(chatId, menuInfoMsg)
+		text := subscriptionsMsg
+		msg := tgbotapi.NewMessage(chatId, text)
 		msg.ReplyMarkup = replyMarkup
 		sendMessageX(msg)
 	} else {
@@ -58,7 +59,7 @@ func sendMenu(update *tgbotapi.Update) {
 				MessageID:   update.CallbackQuery.Message.MessageID,
 				ReplyMarkup: &replyMarkup,
 			},
-			Text: menuInfoMsg,
+			Text: subscriptionsMsg,
 		}
 		answerCallbackQuery(update)
 		sendMessageX(msg)
