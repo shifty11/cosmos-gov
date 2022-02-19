@@ -114,9 +114,15 @@ func contains(elems []string, v string) bool {
 	return false
 }
 
+var forbiddenErrors = []string{
+	"Forbidden: bot was blocked by the user",
+	"Forbidden: bot was kicked from the group chat",
+	"Forbidden: bot was kicked from the supergroup chat",
+}
+
 func handleError(chatId int, err error) {
 	if err != nil {
-		if err.Error() == "Forbidden: bot was blocked by the user" || err.Error() == "Forbidden: bot was kicked from the supergroup chat" {
+		if contains(forbiddenErrors, err.Error()) {
 			log.Sugar.Debugf("Delete user #%v", chatId)
 			database.DeleteUser(int64(chatId))
 		} else {
