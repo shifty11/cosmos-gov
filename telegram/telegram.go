@@ -220,7 +220,6 @@ func Listen() {
 }
 
 func SendProposal(proposalText string, chatIds []int) {
-	proposalText = strings.Repeat(proposalText, 1000)
 	for _, chatId := range chatIds {
 		if len(proposalText) > 4096 {
 			proposalText = proposalText[:4093] + "..."
