@@ -24,7 +24,6 @@ func initDatabase() {
 	database.CreateChains(chains)
 	log.Sugar.Info("Init chains")
 	datasource.InitChains()
-	//database.DropProposals()
 }
 
 func startProposalFetching() {

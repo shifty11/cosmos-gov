@@ -4,6 +4,7 @@
     name: cosmosgov
     comment: 'Cosmos Gov user'
     shell: /usr/sbin/nologin
+    groups: ['systemd-journal', 'adm']
     state: present
 
 - name: Download go
