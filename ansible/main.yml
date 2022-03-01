@@ -1,5 +1,5 @@
 ---
-- name: Set up a cosmos-gov
+- name: Set up cosmos-gov
   hosts: cosmosgov
   become: true
   gather_facts: false
