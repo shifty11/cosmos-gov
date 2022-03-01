@@ -69,6 +69,7 @@ func fetchProposals(chainId string, proposalStatus types.ProposalStatus, pageReq
 		log.Sugar.Panicf("Error while reading config %v", err)
 	}
 	cl := config.GetClient(chainId)
+	log.Sugar.Debugf("Chains: %v", config.Chains)
 	if cl == nil {
 		log.Sugar.Panicf("Chain client '%v' not found ", chainId)
 	}
