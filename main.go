@@ -34,7 +34,7 @@ func startProposalFetching() {
 	}
 	log.Sugar.Info("Start proposal fetching")
 	c.Start()
-	go datasource.FetchProposals()
+	//go datasource.FetchProposals()
 }
 
 func startTelegramServer() {
