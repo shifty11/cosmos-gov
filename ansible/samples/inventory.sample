@@ -1,0 +1,22 @@
+[cosmosgov]
+64.227.69.1
+
+[cosmosgov:vars]
+# Promtail
+log_name=cosmosgov-log
+log_monitor=http://159.223.5.75:3100
+
+# Cosmos Gov
+cosmosgov_telegram_bot_token=BOT_TOKEN
+cosmosgov_telegram_bot_admins=123,234
+cosmosgov_lens_config_path=/home/ubuntu/.lens/config.yaml
+cosmosgov_sentry_dns=SENTRY_DNS
+cosmosgov_database_url=DB_URL
+
+# Git
+github_access_token=ACCESS_TOKEN
+
+[all:vars]
+ansible_user=ubuntu
+ansible_port=22
+ansible_ssh_private_key_file="~/.ssh/id_rsa"

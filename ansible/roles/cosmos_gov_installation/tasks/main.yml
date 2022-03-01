@@ -1,0 +1,74 @@
+---
+- name: Create cosmosgov user
+  user:
+    name: cosmosgov
+    comment: 'Cosmos Gov user'
+    shell: /usr/sbin/nologin
+    state: present
+
+- name: Download go
+  get_url:
+    url: 'https://golang.org/dl/go{{ go_version }}.linux-amd64.tar.gz'
+    dest: '/tmp/go{{ go_version }}.linux-amd64.tar.gz'
+    mode: '0700'
+
+- name: Unarchive go
+  unarchive:
+    src: '/tmp/go{{ go_version }}.linux-amd64.tar.gz'
+    remote_src: yes
+    dest: '/usr/local/'
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Creates cosmosgov directory
+  file:
+    path: '/etc/cosmosgov'
+    state: directory
+    owner: cosmosgov
+    group: cosmosgov
+    recurse: true
+    mode: 0755
+  changed_when: false
+
+- name: Clone cosmosgov github repository
+  git:
+    repo: https://{{ github_access_token }}@github.com/shifty11/cosmos-gov.git
+    dest: /etc/cosmosgov/cosmos-gov
+    clone: yes
+    update: yes
+    force: yes
+  become: yes
+  become_user: cosmosgov
+
+- name: Copy cosmosgov-data service file
+  template:
+    src: 'cosmosgov-data.service.j2'
+    dest: '/etc/systemd/system/cosmosgov-data.service'
+    owner: root
+    group: root
+    mode: 600
+
+- name: Copy cosmosgov-telegram service file
+  template:
+    src: 'cosmosgov-telegram.service.j2'
+    dest: '/etc/systemd/system/cosmosgov-telegram.service'
+    owner: root
+    group: root
+    mode: 600
+
+- name: Start cosmosgov-data service
+  systemd:
+    name: cosmosgov-data
+    state: restarted
+    daemon_reload: true
+    enabled: true
+  changed_when: false
+
+- name: Start cosmosgov-telegram service
+  systemd:
+    name: cosmosgov-telegram
+    state: restarted
+    daemon_reload: true
+    enabled: true
+  changed_when: false

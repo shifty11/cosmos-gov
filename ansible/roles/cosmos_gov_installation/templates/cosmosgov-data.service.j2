@@ -1,0 +1,27 @@
+[Unit]
+Description=Cosmos Gov data fetching
+ConditionPathExists=/etc/cosmosgov/cosmos-gov/
+After=network.target
+
+[Service]
+Type=simple
+User=cosmosgov
+Group=cosmosgov
+
+WorkingDirectory=/etc/cosmosgov/cosmos-gov/
+ExecStart=/usr/local/go/bin/go run . fetching
+Restart=on-failure
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=cosmosgovdataservice
+
+Environment="TELEGRAM_TOKEN={{ cosmosgov_telegram_bot_token }}"
+Environment="DATABASE_URL={{ cosmosgov_database_url }}"
+Environment="SENTRY_DSN={{ cosmosgov_sentry_dns }}"
+Environment="LENS_CONFIG={{ cosmosgov_lens_config_path }}"
+Environment="ADMIN_IDS={{ cosmosgov_telegram_bot_admins }}"
+Environment="DEBUG=true"
+
+[Install]
+WantedBy=multi-user.target

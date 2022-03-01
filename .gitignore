@@ -19,3 +19,7 @@
 log.txt
 .env
 data/
+
+# some ansible config files
+ansible/inventory
+ansible/group_vars/cosmos_gov.yml

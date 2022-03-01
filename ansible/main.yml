@@ -1,0 +1,14 @@
+---
+- name: Set up a cosmos-gov
+  hosts: cosmosgov
+  become: true
+  gather_facts: false
+  pre_tasks:
+    - name: update and upgrade
+      apt:
+        upgrade: dist
+        update_cache: true
+  roles:
+    - prepare
+    - cosmos_gov_installation
+
