@@ -52,6 +52,6 @@ const adminHelpMsg = `<b>Admin Commands</b>
 
 const supportMsg = `We would like to continue developing this bot and other products that improve the Cosmos ecosystem.
 
-You can support us by staking to our validator service <b>DeCrypto</b> on <a href='https://ping.pub/kava/staking/kavavaloper16wmsum8eaf6sqmj97k9ayvh3c28u00nuuyt9xt'>Kava</a>, <a href='https://ping.pub/dig/staking/digvaloper1fhp54fwlfmpwwgrnfwk3v47v53yjtp8fw6nelw'>Dig</a> and <a href='https://ping.pub/chihuahua/staking/chihuahuavaloper1tst6rcz4kvckfc4gs8p457gc3pxq7fsn537fhf'>Chihuahua</a>.
+You can support us by staking to our validator service <b>DeCrypto</b> on <a href='https://ping.pub/dig/staking/digvaloper1fhp54fwlfmpwwgrnfwk3v47v53yjtp8fw6nelw'>Dig</a>.
 
 You have a good idea, feedback or want to contribute in other ways? Shoot a message to @rapha_decrypto`
