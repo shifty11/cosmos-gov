@@ -147,11 +147,11 @@ func isUpdateFromCreatorOrAdministrator(update *tgbotapi.Update) bool {
 		UserID:             userId,
 	}
 	member, err := api.GetChatMember(memberConfig)
-	if contains(forbiddenErrors, err.Error()) {
-		log.Sugar.Debugf("Error while getting member (ChatID: %v; UserID: %v): %v", chatId, userId, err)
-		return false
-	}
 	if err != nil {
+		if contains(forbiddenErrors, err.Error()) {
+			log.Sugar.Debugf("Error while getting member (ChatID: %v; UserID: %v): %v", chatId, userId, err)
+			return false
+		}
 		log.Sugar.Errorf("Error while getting member (ChatID: %v; UserID: %v): %v", chatId, userId, err)
 		return false
 	}
