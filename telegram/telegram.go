@@ -2,6 +2,7 @@ package telegram
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/shifty11/cosmos-gov/common"
 	"github.com/shifty11/cosmos-gov/log"
 	"os"
 	"strconv"
@@ -13,7 +14,7 @@ func isAdmin(update *tgbotapi.Update) bool {
 		return false
 	}
 	admins := strings.Split(strings.Trim(os.Getenv("ADMIN_IDS"), " "), ",")
-	return contains(admins, strconv.Itoa(update.Message.From.ID))
+	return common.Contains(admins, strconv.Itoa(update.Message.From.ID))
 }
 
 func isExpectingMessage(update *tgbotapi.Update) bool {
@@ -94,7 +95,7 @@ func handleMessage(update *tgbotapi.Update) {
 	case StateConfirmBroadcast:
 		yesOptions := []string{"yes", "y"}
 		abortOptions := []string{"abort", "a"}
-		if contains(yesOptions, strings.ToLower(update.Message.Text)) {
+		if common.Contains(yesOptions, strings.ToLower(update.Message.Text)) {
 			data := getStateData(update)
 			if data.BroadcastStateData == nil || data.BroadcastStateData.Message == "" {
 				log.Sugar.Fatal("No message to broadcast. This should never happen!")
@@ -102,7 +103,7 @@ func handleMessage(update *tgbotapi.Update) {
 			sendBroadcastMessage(data.BroadcastStateData.Message)
 			sendBroadcastEndInfoMessage(update, true)
 			setState(update, StateNil, nil)
-		} else if contains(abortOptions, strings.ToLower(update.Message.Text)) {
+		} else if common.Contains(abortOptions, strings.ToLower(update.Message.Text)) {
 			sendBroadcastEndInfoMessage(update, false)
 			setState(update, StateNil, nil)
 		} else {

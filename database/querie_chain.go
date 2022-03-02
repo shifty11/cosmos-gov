@@ -79,24 +79,24 @@ func GetChainsForUser(chatId int64) []dtos.Chain {
 	return chains
 }
 
-func CreateChains(chains []string) {
+func CreateChain(chainName string) *ent.Chain {
 	client, ctx := connect()
-	for _, chainName := range chains {
-		_, err := client.Chain.
-			Query().
-			Where(chain.NameEQ(chainName)).
-			Only(ctx)
+	c, err := client.Chain.
+		Query().
+		Where(chain.NameEQ(chainName)).
+		Only(ctx)
+	if err != nil {
+		log.Sugar.Infof("Create new chain: %v", chainName)
+		c, err = client.Chain.
+			Create().
+			SetName(chainName).
+			SetDisplayName(strings.Title(chainName)).
+			Save(ctx)
 		if err != nil {
-			_, err = client.Chain.
-				Create().
-				SetName(chainName).
-				SetDisplayName(strings.Title(chainName)).
-				Save(ctx)
-			if err != nil {
-				log.Sugar.Panic("Error while creating chains: %v", err)
-			}
+			log.Sugar.Panic("Error while creating chains: %v", err)
 		}
 	}
+	return c
 }
 
 func GetChains() []*ent.Chain {

@@ -68,7 +68,7 @@ func extractContent(cl *client.ChainClient, response types.QueryProposalsRespons
 }
 
 func fetchProposals(chainId string, proposalStatus types.ProposalStatus, pageReq *querytypes.PageRequest) (*dtos.Proposals, error) {
-	config, err := cmd.GetConfig()
+	config, err := cmd.GetConfig(false)
 	if err != nil {
 		log.Sugar.Panicf("Error while reading config %v", err)
 	}
@@ -124,24 +124,13 @@ func handleFetchError(chain *ent.Chain, err error) {
 	if err != nil {
 		fetchErrors[chain.ID] += 1
 		if fetchErrors[chain.ID] >= maxFetchErrorsUntilAttemptToFix {
-			updateLensConfig(chain.Name)
+			addOrUpdateChainInLensConfig(chain.Name)
 		}
 		if fetchErrors[chain.ID] >= maxFetchErrorsUntilReport {
 			log.Sugar.Errorf("Chain '%v' has %v errors", chain.DisplayName, fetchErrors[chain.ID])
 		}
 	} else {
 		fetchErrors[chain.ID] = 0
-	}
-}
-
-func updateLensConfig(chainName string) {
-	query := fmt.Sprintf("chains add %v", chainName)
-	rootCmd := cmd.NewRootCmd()
-	rootCmd.SetArgs(strings.Fields(query))
-	log.Sugar.Debugf("Try to fix config of chain %v: 'lens %v'", chainName, query)
-	err := rootCmd.Execute()
-	if err != nil {
-		log.Sugar.Errorf("Error while executing query '%v': %v", query, err)
 	}
 }
 

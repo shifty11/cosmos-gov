@@ -37,6 +37,7 @@ func Close() {
 }
 
 func MigrateDatabase() {
+	log.Sugar.Info("Migrate database")
 	client, ctx := connect()
 	err := client.Schema.Create(
 		ctx,

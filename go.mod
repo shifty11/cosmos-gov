@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	entgo.io/ent v0.10.0
+	github.com/PumpkinSeed/cage v0.1.0
 	github.com/TheZeroSlave/zapsentry v1.9.0
 	github.com/cosmos/cosmos-sdk v0.44.5
 	github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible
@@ -13,7 +14,6 @@ require (
 	github.com/robfig/cron/v3 v3.0.0
 	github.com/strangelove-ventures/lens v0.2.1
 	go.uber.org/zap v1.20.0
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )
 
 require (
@@ -132,10 +132,11 @@ require (
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/ini.v1 v1.66.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
+	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
 
 replace google.golang.org/grpc => google.golang.org/grpc v1.33.2
 
 replace github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
 
-replace github.com/strangelove-ventures/lens => github.com/shifty11/lens v1.1.0
+replace github.com/strangelove-ventures/lens => github.com/shifty11/lens v1.2.0

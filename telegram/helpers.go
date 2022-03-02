@@ -2,6 +2,7 @@ package telegram
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/shifty11/cosmos-gov/common"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/log"
 	"math"
@@ -105,15 +106,6 @@ func answerCallbackQuery(update *tgbotapi.Update) {
 	}
 }
 
-func contains(elems []string, v string) bool {
-	for _, s := range elems {
-		if v == s {
-			return true
-		}
-	}
-	return false
-}
-
 var forbiddenErrors = []string{
 	"Forbidden: bot was blocked by the user",
 	"Forbidden: bot was kicked from the group chat",
@@ -122,7 +114,7 @@ var forbiddenErrors = []string{
 
 func handleError(chatId int, err error) {
 	if err != nil {
-		if contains(forbiddenErrors, err.Error()) {
+		if common.Contains(forbiddenErrors, err.Error()) {
 			log.Sugar.Debugf("Delete user #%v", chatId)
 			database.DeleteUser(int64(chatId))
 		} else {
@@ -148,7 +140,7 @@ func isUpdateFromCreatorOrAdministrator(update *tgbotapi.Update) bool {
 	}
 	member, err := api.GetChatMember(memberConfig)
 	if err != nil {
-		if contains(forbiddenErrors, err.Error()) {
+		if common.Contains(forbiddenErrors, err.Error()) {
 			log.Sugar.Debugf("Error while getting member (ChatID: %v; UserID: %v): %v", chatId, userId, err)
 			return false
 		}
