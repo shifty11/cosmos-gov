@@ -219,7 +219,7 @@ func Listen() {
 	}
 }
 
-func SendProposal(proposalText string, chatIds []int) {
+func SendProposal(proposalId uint64, chainName string, proposalText string, chatIds []int) {
 	for _, chatId := range chatIds {
 		if len(proposalText) > 4096 {
 			proposalText = proposalText[:4093] + "..."
@@ -227,7 +227,7 @@ func SendProposal(proposalText string, chatIds []int) {
 		msg := tgbotapi.NewMessage(int64(chatId), proposalText)
 		msg.ParseMode = "html"
 		msg.DisableWebPagePreview = true
-		log.Sugar.Debugf("Send proposal to chat #%v", chatId)
+		log.Sugar.Debugf("Send proposal #%v on %v to chat #%v", proposalId, chainName, chatId)
 		err := sendMessage(msg)
 		handleError(chatId, err)
 	}

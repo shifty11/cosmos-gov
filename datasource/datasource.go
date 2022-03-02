@@ -6,6 +6,7 @@ import (
 	querytypes "github.com/cosmos/cosmos-sdk/types/query"
 	"github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/liamylian/jsontime"
+	"github.com/microcosm-cc/bluemonday"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/dtos"
 	"github.com/shifty11/cosmos-gov/ent"
@@ -18,12 +19,14 @@ import (
 )
 
 var json = jsontime.ConfigWithCustomTimeFormat
+var stripPolicy = bluemonday.StrictPolicy()
 
 func extractContentByRegEx(value []byte) (*dtos.ProposalContent, error) {
 	r := regexp.MustCompile("[ -~]+") // search for all printable characters
 	result := r.FindAll(value[1:], -1)
 	if len(result) >= 2 {
 		description := strings.Replace(string(result[1]), "\\n", "\n", -1)
+		description = stripPolicy.Sanitize(description)
 		return &dtos.ProposalContent{
 			Title:       string(result[0])[1:],
 			Description: description,
@@ -55,6 +58,7 @@ func extractContent(cl *client.ChainClient, response types.QueryProposalsRespons
 	}
 	if len(proposals.Proposals) == 1 {
 		description := strings.Replace(proposals.Proposals[0].Content.Description, "\\n", "\n", -1)
+		description = stripPolicy.Sanitize(description)
 		return &dtos.ProposalContent{ // We just need the content
 			Title:       proposals.Proposals[0].Content.Title,
 			Description: description,
@@ -106,7 +110,7 @@ func saveAndSendProposals(props *dtos.Proposals, chainDb *ent.Chain) {
 		if propDb != nil {
 			chatIds := database.GetChatIds(chainDb)
 			text := fmt.Sprintf("<b>%v\n#%v - %v</b>\n%v", chainDb.DisplayName, propDb.ProposalID, propDb.Title, propDb.Description)
-			telegram.SendProposal(text, chatIds)
+			telegram.SendProposal(propDb.ProposalID, chainDb.DisplayName, text, chatIds)
 		}
 	}
 }
