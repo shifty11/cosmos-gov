@@ -111,18 +111,33 @@ func saveAndSendProposals(props *dtos.Proposals, chainDb *ent.Chain) {
 	}
 }
 
-const maxFetchErrors = 10 // max fetch errors until fetching will be reported
+const maxFetchErrorsUntilAttemptToFix = 10 // max fetch errors until attempt to fix it will start
+const maxFetchErrorsUntilReport = 20       // max fetch errors until fetching will be reported
 
 var fetchErrors = make(map[int]int) // map of chain and number of errors
 
 func handleFetchError(chain *ent.Chain, err error) {
 	if err != nil {
 		fetchErrors[chain.ID] += 1
-		if fetchErrors[chain.ID] >= maxFetchErrors {
+		if fetchErrors[chain.ID] >= maxFetchErrorsUntilAttemptToFix {
+			updateLensConfig(chain.Name)
+		}
+		if fetchErrors[chain.ID] >= maxFetchErrorsUntilReport {
 			log.Sugar.Errorf("Chain '%v' has %v errors", chain.DisplayName, fetchErrors[chain.ID])
 		}
 	} else {
 		fetchErrors[chain.ID] = 0
+	}
+}
+
+func updateLensConfig(chainName string) {
+	query := fmt.Sprintf("chains add %v", chainName)
+	rootCmd := cmd.NewRootCmd()
+	rootCmd.SetArgs(strings.Fields(query))
+	log.Sugar.Debugf("Try to fix config of chain %v: 'lens %v'", chainName, query)
+	err := rootCmd.Execute()
+	if err != nil {
+		log.Sugar.Errorf("Error while executing query '%v': %v", query, err)
 	}
 }
 
@@ -159,7 +174,7 @@ func FetchProposals() {
 		handleFetchError(chain, err)
 		if err == nil {
 			saveAndSendProposals(proposals, chain)
+			checkForStatusUpdates(chain)
 		}
-		checkForStatusUpdates(chain)
 	}
 }
