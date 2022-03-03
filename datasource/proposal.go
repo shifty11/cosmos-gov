@@ -107,7 +107,7 @@ func fetchProposals(chainId string, proposalStatus types.ProposalStatus, pageReq
 func saveAndSendProposals(props *dtos.Proposals, chainDb *ent.Chain) {
 	for _, prop := range props.Proposals {
 		propDb := database.CreateProposalIfNotExists(&prop, chainDb)
-		if propDb != nil {
+		if propDb != nil && chainDb.IsEnabled {
 			chatIds := database.GetChatIds(chainDb)
 			text := fmt.Sprintf("<b>%v\n#%v - %v</b>\n%v", chainDb.DisplayName, propDb.ProposalID, propDb.Title, propDb.Description)
 			telegram.SendProposal(propDb.ProposalID, chainDb.DisplayName, text, chatIds)

@@ -64,6 +64,7 @@ func GetChainsForUser(chatId int64) []dtos.Chain {
 	}
 	allChains, err := client.Chain.
 		Query().
+		Where(chain.IsEnabledEQ(true)).
 		Order(ent.Asc(chain.FieldDisplayName)).
 		All(ctx)
 	var chains []dtos.Chain
@@ -91,6 +92,7 @@ func CreateChain(chainName string) *ent.Chain {
 			Create().
 			SetName(chainName).
 			SetDisplayName(strings.Title(chainName)).
+			SetIsEnabled(false).
 			Save(ctx)
 		if err != nil {
 			log.Sugar.Panic("Error while creating chain: %v", err)

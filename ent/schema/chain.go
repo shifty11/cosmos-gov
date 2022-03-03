@@ -26,6 +26,8 @@ func (Chain) Fields() []ent.Field {
 			Unique(),
 		field.String("display_name").
 			Unique(),
+		field.Bool("is_enabled").
+			Default(true),
 	}
 }
 

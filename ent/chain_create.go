@@ -62,6 +62,20 @@ func (cc *ChainCreate) SetDisplayName(s string) *ChainCreate {
 	return cc
 }
 
+// SetIsEnabled sets the "is_enabled" field.
+func (cc *ChainCreate) SetIsEnabled(b bool) *ChainCreate {
+	cc.mutation.SetIsEnabled(b)
+	return cc
+}
+
+// SetNillableIsEnabled sets the "is_enabled" field if the given value is not nil.
+func (cc *ChainCreate) SetNillableIsEnabled(b *bool) *ChainCreate {
+	if b != nil {
+		cc.SetIsEnabled(*b)
+	}
+	return cc
+}
+
 // AddUserIDs adds the "users" edge to the User entity by IDs.
 func (cc *ChainCreate) AddUserIDs(ids ...int) *ChainCreate {
 	cc.mutation.AddUserIDs(ids...)
@@ -171,6 +185,10 @@ func (cc *ChainCreate) defaults() {
 		v := chain.DefaultUpdatedAt()
 		cc.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := cc.mutation.IsEnabled(); !ok {
+		v := chain.DefaultIsEnabled
+		cc.mutation.SetIsEnabled(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -186,6 +204,9 @@ func (cc *ChainCreate) check() error {
 	}
 	if _, ok := cc.mutation.DisplayName(); !ok {
 		return &ValidationError{Name: "display_name", err: errors.New(`ent: missing required field "Chain.display_name"`)}
+	}
+	if _, ok := cc.mutation.IsEnabled(); !ok {
+		return &ValidationError{Name: "is_enabled", err: errors.New(`ent: missing required field "Chain.is_enabled"`)}
 	}
 	return nil
 }
@@ -245,6 +266,14 @@ func (cc *ChainCreate) createSpec() (*Chain, *sqlgraph.CreateSpec) {
 			Column: chain.FieldDisplayName,
 		})
 		_node.DisplayName = value
+	}
+	if value, ok := cc.mutation.IsEnabled(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: chain.FieldIsEnabled,
+		})
+		_node.IsEnabled = value
 	}
 	if nodes := cc.mutation.UsersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

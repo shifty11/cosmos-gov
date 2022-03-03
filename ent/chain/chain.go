@@ -19,6 +19,8 @@ const (
 	FieldName = "name"
 	// FieldDisplayName holds the string denoting the display_name field in the database.
 	FieldDisplayName = "display_name"
+	// FieldIsEnabled holds the string denoting the is_enabled field in the database.
+	FieldIsEnabled = "is_enabled"
 	// EdgeUsers holds the string denoting the users edge name in mutations.
 	EdgeUsers = "users"
 	// EdgeProposals holds the string denoting the proposals edge name in mutations.
@@ -46,6 +48,7 @@ var Columns = []string{
 	FieldUpdatedAt,
 	FieldName,
 	FieldDisplayName,
+	FieldIsEnabled,
 }
 
 var (
@@ -71,4 +74,6 @@ var (
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
+	// DefaultIsEnabled holds the default value on creation for the "is_enabled" field.
+	DefaultIsEnabled bool
 )

@@ -121,6 +121,13 @@ func DisplayName(v string) predicate.Chain {
 	})
 }
 
+// IsEnabled applies equality check predicate on the "is_enabled" field. It's identical to IsEnabledEQ.
+func IsEnabled(v bool) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldIsEnabled), v))
+	})
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {
@@ -492,6 +499,20 @@ func DisplayNameEqualFold(v string) predicate.Chain {
 func DisplayNameContainsFold(v string) predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldDisplayName), v))
+	})
+}
+
+// IsEnabledEQ applies the EQ predicate on the "is_enabled" field.
+func IsEnabledEQ(v bool) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldIsEnabled), v))
+	})
+}
+
+// IsEnabledNEQ applies the NEQ predicate on the "is_enabled" field.
+func IsEnabledNEQ(v bool) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldIsEnabled), v))
 	})
 }
 

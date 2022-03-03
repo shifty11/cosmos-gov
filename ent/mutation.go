@@ -43,6 +43,7 @@ type ChainMutation struct {
 	updated_at       *time.Time
 	name             *string
 	display_name     *string
+	is_enabled       *bool
 	clearedFields    map[string]struct{}
 	users            map[int]struct{}
 	removedusers     map[int]struct{}
@@ -297,6 +298,42 @@ func (m *ChainMutation) ResetDisplayName() {
 	m.display_name = nil
 }
 
+// SetIsEnabled sets the "is_enabled" field.
+func (m *ChainMutation) SetIsEnabled(b bool) {
+	m.is_enabled = &b
+}
+
+// IsEnabled returns the value of the "is_enabled" field in the mutation.
+func (m *ChainMutation) IsEnabled() (r bool, exists bool) {
+	v := m.is_enabled
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsEnabled returns the old "is_enabled" field's value of the Chain entity.
+// If the Chain object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ChainMutation) OldIsEnabled(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsEnabled is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsEnabled requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsEnabled: %w", err)
+	}
+	return oldValue.IsEnabled, nil
+}
+
+// ResetIsEnabled resets all changes to the "is_enabled" field.
+func (m *ChainMutation) ResetIsEnabled() {
+	m.is_enabled = nil
+}
+
 // AddUserIDs adds the "users" edge to the User entity by ids.
 func (m *ChainMutation) AddUserIDs(ids ...int) {
 	if m.users == nil {
@@ -424,7 +461,7 @@ func (m *ChainMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ChainMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 5)
 	if m.created_at != nil {
 		fields = append(fields, chain.FieldCreatedAt)
 	}
@@ -436,6 +473,9 @@ func (m *ChainMutation) Fields() []string {
 	}
 	if m.display_name != nil {
 		fields = append(fields, chain.FieldDisplayName)
+	}
+	if m.is_enabled != nil {
+		fields = append(fields, chain.FieldIsEnabled)
 	}
 	return fields
 }
@@ -453,6 +493,8 @@ func (m *ChainMutation) Field(name string) (ent.Value, bool) {
 		return m.Name()
 	case chain.FieldDisplayName:
 		return m.DisplayName()
+	case chain.FieldIsEnabled:
+		return m.IsEnabled()
 	}
 	return nil, false
 }
@@ -470,6 +512,8 @@ func (m *ChainMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldName(ctx)
 	case chain.FieldDisplayName:
 		return m.OldDisplayName(ctx)
+	case chain.FieldIsEnabled:
+		return m.OldIsEnabled(ctx)
 	}
 	return nil, fmt.Errorf("unknown Chain field %s", name)
 }
@@ -506,6 +550,13 @@ func (m *ChainMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDisplayName(v)
+		return nil
+	case chain.FieldIsEnabled:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsEnabled(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Chain field %s", name)
@@ -567,6 +618,9 @@ func (m *ChainMutation) ResetField(name string) error {
 		return nil
 	case chain.FieldDisplayName:
 		m.ResetDisplayName()
+		return nil
+	case chain.FieldIsEnabled:
+		m.ResetIsEnabled()
 		return nil
 	}
 	return fmt.Errorf("unknown Chain field %s", name)

@@ -28,6 +28,10 @@ func init() {
 	chain.DefaultUpdatedAt = chainDescUpdatedAt.Default.(func() time.Time)
 	// chain.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	chain.UpdateDefaultUpdatedAt = chainDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// chainDescIsEnabled is the schema descriptor for is_enabled field.
+	chainDescIsEnabled := chainFields[4].Descriptor()
+	// chain.DefaultIsEnabled holds the default value on creation for the is_enabled field.
+	chain.DefaultIsEnabled = chainDescIsEnabled.Default.(bool)
 	lenschaininfoFields := schema.LensChainInfo{}.Fields()
 	_ = lenschaininfoFields
 	// lenschaininfoDescCreatedAt is the schema descriptor for created_at field.
