@@ -12,11 +12,16 @@ import (
 )
 
 func isBotAdmin(update *tgbotapi.Update) bool {
-	if update.Message == nil {
+	var fromId int
+	if update.Message != nil {
+		fromId = update.Message.From.ID
+	} else if update.CallbackQuery != nil {
+		fromId = update.CallbackQuery.From.ID
+	} else {
 		return false
 	}
 	admins := strings.Split(strings.Trim(os.Getenv("ADMIN_IDS"), " "), ",")
-	return common.Contains(admins, strconv.Itoa(update.Message.From.ID))
+	return common.Contains(admins, strconv.Itoa(fromId))
 }
 
 func sendUserStatistics(update *tgbotapi.Update) {
@@ -90,6 +95,50 @@ func sendBroadcastEndInfoMessage(update *tgbotapi.Update, success bool) {
 	}
 	msg := tgbotapi.NewMessage(chatId, text)
 	sendMessageX(msg)
+}
+
+func sendChains(update *tgbotapi.Update) {
+	chatId := getChatIdX(update)
+	chains := database.GetChains()
+
+	var buttons [][]Button
+	var buttonRow []Button
+	for ix, c := range chains {
+		symbol := "❌ "
+		if c.IsEnabled {
+			symbol = "✅ "
+		}
+		callbackData := CallbackData{Command: CallbackCommandENABLE_CHAINS, Data: c.Name}
+		buttonRow = append(buttonRow, NewButton(symbol+c.DisplayName, callbackData))
+		if (ix+1)%NbrOfButtonsPerRow == 0 || ix == len(chains)-1 {
+			buttons = append(buttons, buttonRow)
+			buttonRow = []Button{}
+		}
+	}
+	replyMarkup := createKeyboard(buttons)
+
+	if update.CallbackQuery == nil {
+		text := newChainsMsg
+		msg := tgbotapi.NewMessage(chatId, text)
+		msg.ReplyMarkup = replyMarkup
+		err := sendMessage(msg)
+		if err != nil {
+			log.Sugar.Errorf("Error while sendChains for user #%v: %v", chatId, err)
+		}
+	} else {
+		msg := tgbotapi.EditMessageTextConfig{
+			BaseEdit: tgbotapi.BaseEdit{ChatID: chatId,
+				MessageID:   update.CallbackQuery.Message.MessageID,
+				ReplyMarkup: &replyMarkup,
+			},
+			Text: newChainsMsg,
+		}
+		answerCallbackQuery(update)
+		err := sendMessage(msg)
+		if err != nil {
+			log.Sugar.Errorf("Error while sendChains for user #%v: %v", chatId, err)
+		}
+	}
 }
 
 func SendMessageToBotAdmins(message string) {

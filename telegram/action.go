@@ -6,12 +6,21 @@ import (
 	"github.com/shifty11/cosmos-gov/log"
 )
 
-func performUpdateNotification(update *tgbotapi.Update) {
+// Toggles the subscription for a chain
+func performUpdateSubscription(update *tgbotapi.Update, chainName string) {
 	chatId := getChatIdX(update)
-	chain := update.CallbackQuery.Data
-	log.Sugar.Debugf("Toggle chain %v for user #%v", chain, chatId)
-	err := database.AddOrRemoveChainForUser(chatId, chain)
+	log.Sugar.Debugf("Toggle subscription %v for user #%v", chainName, chatId)
+	err := database.AddOrRemoveChainForUser(chatId, chainName)
 	if err != nil {
-		log.Sugar.Error("Error while toggle chain for user %v", chatId)
+		log.Sugar.Error("Error while toggle subscription %v for user %v", chainName, chatId)
+	}
+}
+
+// Enables or disables a chain for all user. Can only be performed by botadmins.
+func performToggleChain(chainName string) {
+	log.Sugar.Debugf("Enable/disable chain %v", chainName)
+	err := database.EnableOrDisableChain(chainName)
+	if err != nil {
+		log.Sugar.Error("Error while toggle chain %v", chainName)
 	}
 }

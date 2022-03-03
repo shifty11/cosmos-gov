@@ -71,6 +71,9 @@ func handleCommand(update *tgbotapi.Update) {
 			case "broadcast":
 				sendBroadcastStart(update)
 				setState(update, StateStartBroadcast, nil)
+			case "chains":
+				sendChains(update)
+				setState(update, StateNil, nil)
 			}
 		}
 	}
@@ -104,8 +107,20 @@ func handleMessage(update *tgbotapi.Update) {
 }
 
 func handleCallbackQuery(update *tgbotapi.Update) {
-	performUpdateNotification(update)
-	sendSubscriptions(update)
+	callbackData := ToCallbackData(update.CallbackQuery.Data)
+	switch callbackData.Command {
+	case CallbackCommandCHANGE_SUBSCRIPTION:
+		performUpdateSubscription(update, callbackData.Data)
+		sendSubscriptions(update)
+	default:
+		if isBotAdmin(update) { // Check for admin callbacks
+			switch callbackData.Command {
+			case CallbackCommandENABLE_CHAINS:
+				performToggleChain(callbackData.Data)
+				sendChains(update)
+			}
+		}
+	}
 }
 
 // groups -> just admins and creators can interact with the bot

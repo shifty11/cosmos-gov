@@ -105,6 +105,7 @@ func GetChains() []*ent.Chain {
 	client, ctx := connect()
 	chains, err := client.Chain.
 		Query().
+		Order(ent.Asc(chain.FieldDisplayName)).
 		All(ctx)
 	if err != nil {
 		log.Sugar.Panic("Error while querying chains: %v", err)
@@ -128,4 +129,20 @@ func GetChainStatistics() (*[]dtos.ChainStatistic, error) {
 		return nil, err
 	}
 	return &chains, err
+}
+
+func EnableOrDisableChain(chainName string) error {
+	_, ctx := connect()
+	chainDto, err := getChainByName(chainName)
+	if err != nil {
+		return err
+	}
+	_, err = chainDto.
+		Update().
+		SetIsEnabled(!chainDto.IsEnabled).
+		Save(ctx)
+	if err != nil {
+		return err
+	}
+	return nil
 }

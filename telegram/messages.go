@@ -39,7 +39,8 @@ func sendSubscriptions(update *tgbotapi.Update) {
 		if c.Notify {
 			symbol = "✅ "
 		}
-		buttonRow = append(buttonRow, NewButton(c.Name, symbol+c.DisplayName))
+		callbackData := CallbackData{Command: CallbackCommandCHANGE_SUBSCRIPTION, Data: c.Name}
+		buttonRow = append(buttonRow, NewButton(symbol+c.DisplayName, callbackData))
 		if (ix+1)%NbrOfButtonsPerRow == 0 || ix == len(chains)-1 {
 			buttons = append(buttons, buttonRow)
 			buttonRow = []Button{}
@@ -51,7 +52,10 @@ func sendSubscriptions(update *tgbotapi.Update) {
 		text := subscriptionsMsg
 		msg := tgbotapi.NewMessage(chatId, text)
 		msg.ReplyMarkup = replyMarkup
-		sendMessageX(msg)
+		err := sendMessage(msg)
+		if err != nil {
+			log.Sugar.Errorf("Error while sendSubscriptions for user #%v: %v", chatId, err)
+		}
 	} else {
 		msg := tgbotapi.EditMessageTextConfig{
 			BaseEdit: tgbotapi.BaseEdit{ChatID: chatId,
@@ -61,7 +65,10 @@ func sendSubscriptions(update *tgbotapi.Update) {
 			Text: subscriptionsMsg,
 		}
 		answerCallbackQuery(update)
-		sendMessageX(msg)
+		err := sendMessage(msg)
+		if err != nil {
+			log.Sugar.Errorf("Error while sendSubscriptions for user #%v: %v", chatId, err)
+		}
 	}
 }
 

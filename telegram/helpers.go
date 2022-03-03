@@ -1,12 +1,14 @@
 package telegram
 
 import (
+	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/shifty11/cosmos-gov/common"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/log"
 	"math"
 	"os"
+	"strings"
 )
 
 var api *tgbotapi.BotAPI = nil
@@ -26,13 +28,40 @@ func getApi() *tgbotapi.BotAPI {
 	return api
 }
 
-type Button struct {
-	Command string
-	Text    string
+type CallbackCommand string
+
+const (
+	CallbackCommandCHANGE_SUBSCRIPTION CallbackCommand = "CHANGE_SUBSCRIPTION"
+	CallbackCommandENABLE_CHAINS       CallbackCommand = "ENABLE_CHAINS "
+)
+
+type CallbackData struct {
+	Command CallbackCommand
+	Data    string
 }
 
-func NewButton(command string, text string) Button {
-	return Button{Command: command, Text: text}
+func (cd CallbackData) String() string {
+	return fmt.Sprintf("%v:%v", cd.Command, cd.Data)
+}
+
+func ToCallbackData(str string) CallbackData {
+	split := strings.Split(str, ":")
+	if len(split) == 1 {
+		return CallbackData{Command: CallbackCommand(split[0])}
+	} else if len(split) == 2 {
+		return CallbackData{Command: CallbackCommand(split[0]), Data: split[1]}
+	}
+	log.Sugar.Errorf("Can not convert string to CallbackData: '%v'", str)
+	return CallbackData{}
+}
+
+type Button struct {
+	Text         string
+	CallbackData CallbackData
+}
+
+func NewButton(text string, callbackData CallbackData) Button {
+	return Button{Text: text, CallbackData: callbackData}
 }
 
 func createKeyboard(buttons [][]Button) tgbotapi.InlineKeyboardMarkup {
@@ -40,7 +69,7 @@ func createKeyboard(buttons [][]Button) tgbotapi.InlineKeyboardMarkup {
 	for _, row := range buttons {
 		var keyboardRow []tgbotapi.InlineKeyboardButton
 		for _, button := range row {
-			data := button.Command
+			data := button.CallbackData.String()
 			btn := tgbotapi.InlineKeyboardButton{Text: button.Text, CallbackData: &data}
 			keyboardRow = append(keyboardRow, btn)
 		}

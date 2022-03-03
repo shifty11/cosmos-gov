@@ -48,6 +48,7 @@ const helpMsg = `<b>Commands List</b>
 
 const adminHelpMsg = `<b>Admin Commands</b>
 /stats - Show statistics
+/chains - Manage chains
 /broadcast - Broadcast message to everyone`
 
 const supportMsg = `We would like to continue developing this bot and other products that improve the Cosmos ecosystem.
@@ -55,3 +56,5 @@ const supportMsg = `We would like to continue developing this bot and other prod
 You can support us by staking to our validator service <b>DeCrypto</b> on <a href='https://ping.pub/dig/staking/digvaloper1fhp54fwlfmpwwgrnfwk3v47v53yjtp8fw6nelw'>Dig</a>.
 
 You have a good idea, feedback or want to contribute in other ways? Shoot a message to @rapha_decrypto`
+
+const newChainsMsg = `Select the chains that should be enabled for everyone`
