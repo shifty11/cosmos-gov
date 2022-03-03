@@ -109,22 +109,30 @@ func handleMessage(update *tgbotapi.Update) {
 func handleCallbackQuery(update *tgbotapi.Update) {
 	callbackData := ToCallbackData(update.CallbackQuery.Data)
 	switch callbackData.Command {
-	case CallbackCmdChangeSubscription:
-		performUpdateSubscription(update, callbackData.Data)
+	case CallbackCmdShowSubscription:
+		if callbackData.Data != "" {
+			performUpdateSubscription(update, callbackData.Data)
+		}
 		sendSubscriptions(update)
+	case CallbackCmdShowProposals:
+		sendCurrentProposals(update)
+	case CallbackCmdShowHelp:
+		sendHelp(update)
+	case CallbackCmdShowSupport:
+		sendSupport(update)
 	default:
 		if isBotAdmin(update) { // Check for admin callbacks
 			switch callbackData.Command {
 			case CallbackCmdEnableChains:
-				performToggleChain(callbackData.Data)
+				if callbackData.Data != "" {
+					performToggleChain(callbackData.Data)
+				}
 				sendChains(update)
 			default:
-				answerCallbackQuery(update)
 				sendError(update)
 				setState(update, StateNil, nil)
 			}
 		} else {
-			answerCallbackQuery(update)
 			sendError(update)
 			setState(update, StateNil, nil)
 		}

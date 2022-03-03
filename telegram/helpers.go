@@ -31,8 +31,11 @@ func getApi() *tgbotapi.BotAPI {
 type CallbackCommand string
 
 const (
-	CallbackCmdChangeSubscription CallbackCommand = "CHANGE_SUBSCRIPTION"
-	CallbackCmdEnableChains       CallbackCommand = "ENABLE_CHAINS "
+	CallbackCmdShowSubscription CallbackCommand = "SHOW_SUBSCRIPTION"
+	CallbackCmdShowProposals    CallbackCommand = "SHOW_PROPOSALS"
+	CallbackCmdShowHelp         CallbackCommand = "SHOW_HELP"
+	CallbackCmdShowSupport      CallbackCommand = "SHOW_SUPPORT"
+	CallbackCmdEnableChains     CallbackCommand = "ENABLE_CHAINS"
 )
 
 type CallbackData struct {
@@ -177,4 +180,32 @@ func isUpdateFromCreatorOrAdministrator(update *tgbotapi.Update) bool {
 		return false
 	}
 	return member.Status == "creator" || member.Status == "administrator"
+}
+
+type MenuButtonConfig struct {
+	ShowSubscriptions bool
+	ShowProposals     bool
+	ShowHelp          bool
+	ShowSupport       bool
+}
+
+func createMenuButtonConfig() MenuButtonConfig {
+	return MenuButtonConfig{ShowSubscriptions: true, ShowProposals: true, ShowHelp: true, ShowSupport: true}
+}
+
+func getMenuButtonRow(config MenuButtonConfig) []Button {
+	var buttonRow []Button
+	if config.ShowSubscriptions {
+		buttonRow = append(buttonRow, NewButton("🔔 Subscriptions", CallbackData{Command: CallbackCmdShowSubscription}))
+	}
+	if config.ShowProposals {
+		buttonRow = append(buttonRow, NewButton("🗳 Proposals", CallbackData{Command: CallbackCmdShowProposals}))
+	}
+	if config.ShowHelp {
+		buttonRow = append(buttonRow, NewButton("🆘 Help", CallbackData{Command: CallbackCmdShowHelp}))
+	}
+	if config.ShowSupport {
+		buttonRow = append(buttonRow, NewButton("💰 Support", CallbackData{Command: CallbackCmdShowSupport}))
+	}
+	return buttonRow
 }
