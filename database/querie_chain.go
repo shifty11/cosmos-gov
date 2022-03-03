@@ -114,8 +114,8 @@ func GetChainStatistics() (*[]dtos.ChainStatistic, error) {
 	client, ctx := connect()
 	var chains []dtos.ChainStatistic
 	err := client.Chain.Query().
-		Order(ent.Asc(chain.FieldName)).
-		GroupBy(chain.FieldName).
+		Order(ent.Asc(chain.FieldDisplayName)).
+		GroupBy(chain.FieldDisplayName).
 		Aggregate(func(s *sql.Selector) string {
 			t := sql.Table(chain.UsersTable)
 			s.Join(t).On(s.C(chain.FieldID), t.C(user.ChainsPrimaryKey[1]))

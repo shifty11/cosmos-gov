@@ -36,7 +36,7 @@ type UserStatistic struct {
 }
 
 type ChainStatistic struct {
-	Name          string
+	DisplayName   string `json:"display_name"`
 	Notifications int
 }
 
