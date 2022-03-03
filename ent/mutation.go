@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/shifty11/cosmos-gov/ent/chain"
+	"github.com/shifty11/cosmos-gov/ent/lenschaininfo"
 	"github.com/shifty11/cosmos-gov/ent/predicate"
 	"github.com/shifty11/cosmos-gov/ent/proposal"
 	"github.com/shifty11/cosmos-gov/ent/user"
@@ -26,9 +27,10 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeChain    = "Chain"
-	TypeProposal = "Proposal"
-	TypeUser     = "User"
+	TypeChain         = "Chain"
+	TypeLensChainInfo = "LensChainInfo"
+	TypeProposal      = "Proposal"
+	TypeUser          = "User"
 )
 
 // ChainMutation represents an operation that mutates the Chain nodes in the graph.
@@ -678,6 +680,515 @@ func (m *ChainMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown Chain edge %s", name)
+}
+
+// LensChainInfoMutation represents an operation that mutates the LensChainInfo nodes in the graph.
+type LensChainInfoMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	created_at    *time.Time
+	updated_at    *time.Time
+	name          *string
+	cnt_errors    *int
+	addcnt_errors *int
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*LensChainInfo, error)
+	predicates    []predicate.LensChainInfo
+}
+
+var _ ent.Mutation = (*LensChainInfoMutation)(nil)
+
+// lenschaininfoOption allows management of the mutation configuration using functional options.
+type lenschaininfoOption func(*LensChainInfoMutation)
+
+// newLensChainInfoMutation creates new mutation for the LensChainInfo entity.
+func newLensChainInfoMutation(c config, op Op, opts ...lenschaininfoOption) *LensChainInfoMutation {
+	m := &LensChainInfoMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeLensChainInfo,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withLensChainInfoID sets the ID field of the mutation.
+func withLensChainInfoID(id int) lenschaininfoOption {
+	return func(m *LensChainInfoMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *LensChainInfo
+		)
+		m.oldValue = func(ctx context.Context) (*LensChainInfo, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().LensChainInfo.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withLensChainInfo sets the old LensChainInfo of the mutation.
+func withLensChainInfo(node *LensChainInfo) lenschaininfoOption {
+	return func(m *LensChainInfoMutation) {
+		m.oldValue = func(context.Context) (*LensChainInfo, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m LensChainInfoMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m LensChainInfoMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *LensChainInfoMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *LensChainInfoMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().LensChainInfo.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *LensChainInfoMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *LensChainInfoMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the LensChainInfo entity.
+// If the LensChainInfo object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LensChainInfoMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *LensChainInfoMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *LensChainInfoMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *LensChainInfoMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the LensChainInfo entity.
+// If the LensChainInfo object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LensChainInfoMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *LensChainInfoMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetName sets the "name" field.
+func (m *LensChainInfoMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *LensChainInfoMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the LensChainInfo entity.
+// If the LensChainInfo object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LensChainInfoMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *LensChainInfoMutation) ResetName() {
+	m.name = nil
+}
+
+// SetCntErrors sets the "cnt_errors" field.
+func (m *LensChainInfoMutation) SetCntErrors(i int) {
+	m.cnt_errors = &i
+	m.addcnt_errors = nil
+}
+
+// CntErrors returns the value of the "cnt_errors" field in the mutation.
+func (m *LensChainInfoMutation) CntErrors() (r int, exists bool) {
+	v := m.cnt_errors
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCntErrors returns the old "cnt_errors" field's value of the LensChainInfo entity.
+// If the LensChainInfo object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LensChainInfoMutation) OldCntErrors(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCntErrors is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCntErrors requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCntErrors: %w", err)
+	}
+	return oldValue.CntErrors, nil
+}
+
+// AddCntErrors adds i to the "cnt_errors" field.
+func (m *LensChainInfoMutation) AddCntErrors(i int) {
+	if m.addcnt_errors != nil {
+		*m.addcnt_errors += i
+	} else {
+		m.addcnt_errors = &i
+	}
+}
+
+// AddedCntErrors returns the value that was added to the "cnt_errors" field in this mutation.
+func (m *LensChainInfoMutation) AddedCntErrors() (r int, exists bool) {
+	v := m.addcnt_errors
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetCntErrors resets all changes to the "cnt_errors" field.
+func (m *LensChainInfoMutation) ResetCntErrors() {
+	m.cnt_errors = nil
+	m.addcnt_errors = nil
+}
+
+// Where appends a list predicates to the LensChainInfoMutation builder.
+func (m *LensChainInfoMutation) Where(ps ...predicate.LensChainInfo) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// Op returns the operation name.
+func (m *LensChainInfoMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (LensChainInfo).
+func (m *LensChainInfoMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *LensChainInfoMutation) Fields() []string {
+	fields := make([]string, 0, 4)
+	if m.created_at != nil {
+		fields = append(fields, lenschaininfo.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, lenschaininfo.FieldUpdatedAt)
+	}
+	if m.name != nil {
+		fields = append(fields, lenschaininfo.FieldName)
+	}
+	if m.cnt_errors != nil {
+		fields = append(fields, lenschaininfo.FieldCntErrors)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *LensChainInfoMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case lenschaininfo.FieldCreatedAt:
+		return m.CreatedAt()
+	case lenschaininfo.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case lenschaininfo.FieldName:
+		return m.Name()
+	case lenschaininfo.FieldCntErrors:
+		return m.CntErrors()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *LensChainInfoMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case lenschaininfo.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case lenschaininfo.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case lenschaininfo.FieldName:
+		return m.OldName(ctx)
+	case lenschaininfo.FieldCntErrors:
+		return m.OldCntErrors(ctx)
+	}
+	return nil, fmt.Errorf("unknown LensChainInfo field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *LensChainInfoMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case lenschaininfo.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case lenschaininfo.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case lenschaininfo.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case lenschaininfo.FieldCntErrors:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCntErrors(v)
+		return nil
+	}
+	return fmt.Errorf("unknown LensChainInfo field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *LensChainInfoMutation) AddedFields() []string {
+	var fields []string
+	if m.addcnt_errors != nil {
+		fields = append(fields, lenschaininfo.FieldCntErrors)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *LensChainInfoMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case lenschaininfo.FieldCntErrors:
+		return m.AddedCntErrors()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *LensChainInfoMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case lenschaininfo.FieldCntErrors:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCntErrors(v)
+		return nil
+	}
+	return fmt.Errorf("unknown LensChainInfo numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *LensChainInfoMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *LensChainInfoMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *LensChainInfoMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown LensChainInfo nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *LensChainInfoMutation) ResetField(name string) error {
+	switch name {
+	case lenschaininfo.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case lenschaininfo.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case lenschaininfo.FieldName:
+		m.ResetName()
+		return nil
+	case lenschaininfo.FieldCntErrors:
+		m.ResetCntErrors()
+		return nil
+	}
+	return fmt.Errorf("unknown LensChainInfo field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *LensChainInfoMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *LensChainInfoMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *LensChainInfoMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *LensChainInfoMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *LensChainInfoMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *LensChainInfoMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *LensChainInfoMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown LensChainInfo unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *LensChainInfoMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown LensChainInfo edge %s", name)
 }
 
 // ProposalMutation represents an operation that mutates the Proposal nodes in the graph.

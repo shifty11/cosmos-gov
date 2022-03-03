@@ -19,6 +19,7 @@
 log.txt
 .env
 data/
+/database/testing.go
 
 # some ansible config files
 ansible/inventory

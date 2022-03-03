@@ -7,7 +7,9 @@ import (
 	"github.com/shifty11/cosmos-gov/common"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/log"
+	"github.com/shifty11/cosmos-gov/telegram"
 	"github.com/strangelove-ventures/lens/cmd"
+	"sort"
 	"strings"
 )
 
@@ -40,8 +42,46 @@ func getChainsFromRegistry() ([]string, error) {
 	return filteredChains, err
 }
 
+func orderChainsByErrorCnt(chains []string) []string {
+	chainInfo := database.GetLensChainInfos()
+	var chainsWithErrors = make(map[int][]string)
+	chainsWithErrors[0] = []string{}
+	for _, chainName := range chains {
+		var found = false
+		for _, lcInfo := range chainInfo {
+			if chainName == lcInfo.Name {
+				if chainsWithErrors[lcInfo.CntErrors] != nil {
+					chainsWithErrors[lcInfo.CntErrors] = append(chainsWithErrors[lcInfo.CntErrors], lcInfo.Name)
+				} else {
+					chainsWithErrors[lcInfo.CntErrors] = []string{lcInfo.Name}
+				}
+				found = true
+			}
+		}
+		if !found {
+			chainsWithErrors[0] = append(chainsWithErrors[0], chainName)
+		}
+	}
+
+	keys := make([]int, len(chainsWithErrors))
+	i := 0
+	for k := range chainsWithErrors {
+		keys[i] = k
+		i++
+	}
+
+	var orderedChains []string
+	sort.Ints(keys)
+	for _, k := range keys {
+		for _, chain := range chainsWithErrors[k] {
+			orderedChains = append(orderedChains, chain)
+		}
+	}
+	return orderedChains
+}
+
 func getNewChains() []string {
-	newChains, err := getChainsFromRegistry()
+	chainsInRegistry, err := getChainsFromRegistry()
 	if err != nil {
 		return nil
 	}
@@ -52,13 +92,13 @@ func getNewChains() []string {
 		chainNames = append(chainNames, chain.Name)
 	}
 
-	var filteredChains []string
-	for _, chain := range newChains {
+	var newChains []string
+	for _, chain := range chainsInRegistry {
 		if !common.Contains(chainNames, chain) {
-			filteredChains = append(filteredChains, chain)
+			newChains = append(newChains, chain)
 		}
 	}
-	return filteredChains
+	return orderChainsByErrorCnt(newChains)
 }
 
 func isChainInConfig(chainName string) bool {
@@ -78,23 +118,34 @@ func isChainInConfig(chainName string) bool {
 func AddNewChains() {
 	log.Sugar.Info("Add new chains")
 	chains := getNewChains()
-	for _, chain := range chains {
-		addOrUpdateChainInLensConfig(chain)
-		if isChainInConfig(chain) {
-			proposals, err := fetchProposals(chain, types.StatusNil, nil)
+	message := ""
+	for _, chainName := range chains {
+		addOrUpdateChainInLensConfig(chainName)
+		if isChainInConfig(chainName) {
+			proposals, err := fetchProposals(chainName, types.StatusNil, nil)
 			if err != nil {
-				log.Sugar.Debugf("Chain '%v' has %v errors", chain, err)
-				removeChainFromLensConfig(chain)
+				log.Sugar.Debugf("Chain '%v' has %v errors", chainName, err)
+				removeChainFromLensConfig(chainName)
+				database.AddErrorToLensChainInfo(chainName)
 			} else {
 				if len(proposals.Proposals) >= 1 {
-					chainEnt := database.CreateChain(chain)
+					chainEnt := database.CreateChain(chainName)
 					for _, prop := range proposals.Proposals {
 						database.CreateOrUpdateProposal(&prop, chainEnt)
 					}
+					database.DeleteLensChainInfo(chainName)
+					message += fmt.Sprintf("Added chain '%v' including %v proposals\n", chainName, len(proposals.Proposals))
 				} else {
-					removeChainFromLensConfig(chain)
+					removeChainFromLensConfig(chainName)
+					database.AddErrorToLensChainInfo(chainName)
 				}
 			}
+		} else {
+			database.AddErrorToLensChainInfo(chainName)
 		}
+	}
+	if message != "" {
+		intro := "<b>New chain update info</b>\n"
+		telegram.SendMessageToAdmins(intro + message)
 	}
 }

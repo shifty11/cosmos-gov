@@ -10,6 +10,7 @@ import (
 	"github.com/shifty11/cosmos-gov/ent/migrate"
 
 	"github.com/shifty11/cosmos-gov/ent/chain"
+	"github.com/shifty11/cosmos-gov/ent/lenschaininfo"
 	"github.com/shifty11/cosmos-gov/ent/proposal"
 	"github.com/shifty11/cosmos-gov/ent/user"
 
@@ -25,6 +26,8 @@ type Client struct {
 	Schema *migrate.Schema
 	// Chain is the client for interacting with the Chain builders.
 	Chain *ChainClient
+	// LensChainInfo is the client for interacting with the LensChainInfo builders.
+	LensChainInfo *LensChainInfoClient
 	// Proposal is the client for interacting with the Proposal builders.
 	Proposal *ProposalClient
 	// User is the client for interacting with the User builders.
@@ -43,6 +46,7 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Chain = NewChainClient(c.config)
+	c.LensChainInfo = NewLensChainInfoClient(c.config)
 	c.Proposal = NewProposalClient(c.config)
 	c.User = NewUserClient(c.config)
 }
@@ -76,11 +80,12 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:      ctx,
-		config:   cfg,
-		Chain:    NewChainClient(cfg),
-		Proposal: NewProposalClient(cfg),
-		User:     NewUserClient(cfg),
+		ctx:           ctx,
+		config:        cfg,
+		Chain:         NewChainClient(cfg),
+		LensChainInfo: NewLensChainInfoClient(cfg),
+		Proposal:      NewProposalClient(cfg),
+		User:          NewUserClient(cfg),
 	}, nil
 }
 
@@ -98,11 +103,12 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:      ctx,
-		config:   cfg,
-		Chain:    NewChainClient(cfg),
-		Proposal: NewProposalClient(cfg),
-		User:     NewUserClient(cfg),
+		ctx:           ctx,
+		config:        cfg,
+		Chain:         NewChainClient(cfg),
+		LensChainInfo: NewLensChainInfoClient(cfg),
+		Proposal:      NewProposalClient(cfg),
+		User:          NewUserClient(cfg),
 	}, nil
 }
 
@@ -133,6 +139,7 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	c.Chain.Use(hooks...)
+	c.LensChainInfo.Use(hooks...)
 	c.Proposal.Use(hooks...)
 	c.User.Use(hooks...)
 }
@@ -257,6 +264,96 @@ func (c *ChainClient) QueryProposals(ch *Chain) *ProposalQuery {
 // Hooks returns the client hooks.
 func (c *ChainClient) Hooks() []Hook {
 	return c.hooks.Chain
+}
+
+// LensChainInfoClient is a client for the LensChainInfo schema.
+type LensChainInfoClient struct {
+	config
+}
+
+// NewLensChainInfoClient returns a client for the LensChainInfo from the given config.
+func NewLensChainInfoClient(c config) *LensChainInfoClient {
+	return &LensChainInfoClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `lenschaininfo.Hooks(f(g(h())))`.
+func (c *LensChainInfoClient) Use(hooks ...Hook) {
+	c.hooks.LensChainInfo = append(c.hooks.LensChainInfo, hooks...)
+}
+
+// Create returns a create builder for LensChainInfo.
+func (c *LensChainInfoClient) Create() *LensChainInfoCreate {
+	mutation := newLensChainInfoMutation(c.config, OpCreate)
+	return &LensChainInfoCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of LensChainInfo entities.
+func (c *LensChainInfoClient) CreateBulk(builders ...*LensChainInfoCreate) *LensChainInfoCreateBulk {
+	return &LensChainInfoCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for LensChainInfo.
+func (c *LensChainInfoClient) Update() *LensChainInfoUpdate {
+	mutation := newLensChainInfoMutation(c.config, OpUpdate)
+	return &LensChainInfoUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *LensChainInfoClient) UpdateOne(lci *LensChainInfo) *LensChainInfoUpdateOne {
+	mutation := newLensChainInfoMutation(c.config, OpUpdateOne, withLensChainInfo(lci))
+	return &LensChainInfoUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *LensChainInfoClient) UpdateOneID(id int) *LensChainInfoUpdateOne {
+	mutation := newLensChainInfoMutation(c.config, OpUpdateOne, withLensChainInfoID(id))
+	return &LensChainInfoUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for LensChainInfo.
+func (c *LensChainInfoClient) Delete() *LensChainInfoDelete {
+	mutation := newLensChainInfoMutation(c.config, OpDelete)
+	return &LensChainInfoDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *LensChainInfoClient) DeleteOne(lci *LensChainInfo) *LensChainInfoDeleteOne {
+	return c.DeleteOneID(lci.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *LensChainInfoClient) DeleteOneID(id int) *LensChainInfoDeleteOne {
+	builder := c.Delete().Where(lenschaininfo.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &LensChainInfoDeleteOne{builder}
+}
+
+// Query returns a query builder for LensChainInfo.
+func (c *LensChainInfoClient) Query() *LensChainInfoQuery {
+	return &LensChainInfoQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a LensChainInfo entity by its id.
+func (c *LensChainInfoClient) Get(ctx context.Context, id int) (*LensChainInfo, error) {
+	return c.Query().Where(lenschaininfo.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *LensChainInfoClient) GetX(ctx context.Context, id int) *LensChainInfo {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *LensChainInfoClient) Hooks() []Hook {
+	return c.hooks.LensChainInfo
 }
 
 // ProposalClient is a client for the Proposal schema.

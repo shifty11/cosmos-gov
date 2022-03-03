@@ -233,3 +233,18 @@ func SendProposal(proposalId uint64, chainName string, proposalText string, chat
 		handleError(chatId, err)
 	}
 }
+
+func SendMessageToAdmins(message string) {
+	admins := strings.Split(strings.Trim(os.Getenv("ADMIN_IDS"), " "), ",")
+	for _, chatIdStr := range admins {
+		chatId, err := strconv.Atoi(chatIdStr)
+		if err != nil {
+			log.Sugar.Error(err)
+		}
+		msg := tgbotapi.NewMessage(int64(chatId), message)
+		msg.ParseMode = "html"
+		msg.DisableWebPagePreview = true
+		err = sendMessage(msg)
+		handleError(chatId, err)
+	}
+}

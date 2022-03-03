@@ -93,7 +93,7 @@ func CreateChain(chainName string) *ent.Chain {
 			SetDisplayName(strings.Title(chainName)).
 			Save(ctx)
 		if err != nil {
-			log.Sugar.Panic("Error while creating chains: %v", err)
+			log.Sugar.Panic("Error while creating chain: %v", err)
 		}
 	}
 	return c

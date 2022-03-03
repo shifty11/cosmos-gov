@@ -29,6 +29,27 @@ var (
 			},
 		},
 	}
+	// LensChainInfosColumns holds the columns for the "lens_chain_infos" table.
+	LensChainInfosColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "name", Type: field.TypeString, Unique: true},
+		{Name: "cnt_errors", Type: field.TypeInt},
+	}
+	// LensChainInfosTable holds the schema information for the "lens_chain_infos" table.
+	LensChainInfosTable = &schema.Table{
+		Name:       "lens_chain_infos",
+		Columns:    LensChainInfosColumns,
+		PrimaryKey: []*schema.Column{LensChainInfosColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "lenschaininfo_name",
+				Unique:  true,
+				Columns: []*schema.Column{LensChainInfosColumns[3]},
+			},
+		},
+	}
 	// ProposalsColumns holds the columns for the "proposals" table.
 	ProposalsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -39,7 +60,7 @@ var (
 		{Name: "description", Type: field.TypeString},
 		{Name: "voting_start_time", Type: field.TypeTime},
 		{Name: "voting_end_time", Type: field.TypeTime},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"PROPOSAL_STATUS_VOTING_PERIOD", "PROPOSAL_STATUS_PASSED", "PROPOSAL_STATUS_REJECTED", "PROPOSAL_STATUS_FAILED", "PROPOSAL_STATUS_UNSPECIFIED", "PROPOSAL_STATUS_DEPOSIT_PERIOD"}},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"PROPOSAL_STATUS_FAILED", "PROPOSAL_STATUS_UNSPECIFIED", "PROPOSAL_STATUS_DEPOSIT_PERIOD", "PROPOSAL_STATUS_VOTING_PERIOD", "PROPOSAL_STATUS_PASSED", "PROPOSAL_STATUS_REJECTED"}},
 		{Name: "chain_proposals", Type: field.TypeInt, Nullable: true},
 	}
 	// ProposalsTable holds the schema information for the "proposals" table.
@@ -111,6 +132,7 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		ChainsTable,
+		LensChainInfosTable,
 		ProposalsTable,
 		UsersTable,
 		UserChainsTable,

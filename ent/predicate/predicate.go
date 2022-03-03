@@ -9,6 +9,9 @@ import (
 // Chain is the predicate function for chain builders.
 type Chain func(*sql.Selector)
 
+// LensChainInfo is the predicate function for lenschaininfo builders.
+type LensChainInfo func(*sql.Selector)
+
 // Proposal is the predicate function for proposal builders.
 type Proposal func(*sql.Selector)
 
