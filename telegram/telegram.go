@@ -4,18 +4,8 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/shifty11/cosmos-gov/common"
 	"github.com/shifty11/cosmos-gov/log"
-	"os"
-	"strconv"
 	"strings"
 )
-
-func isAdmin(update *tgbotapi.Update) bool {
-	if update.Message == nil {
-		return false
-	}
-	admins := strings.Split(strings.Trim(os.Getenv("ADMIN_IDS"), " "), ",")
-	return common.Contains(admins, strconv.Itoa(update.Message.From.ID))
-}
 
 func isExpectingMessage(update *tgbotapi.Update) bool {
 	currentState := getState(update)
@@ -73,7 +63,7 @@ func handleCommand(update *tgbotapi.Update) {
 		sendSupport(update)
 		setState(update, StateNil, nil)
 	default:
-		if isAdmin(update) { // Check for admin commands
+		if isBotAdmin(update) { // Check for admin commands
 			switch update.Message.Command() {
 			case "stats":
 				sendUserStatistics(update)
@@ -230,21 +220,6 @@ func SendProposal(proposalId uint64, chainName string, proposalText string, chat
 		msg.DisableWebPagePreview = true
 		log.Sugar.Debugf("Send proposal #%v on %v to chat #%v", proposalId, chainName, chatId)
 		err := sendMessage(msg)
-		handleError(chatId, err)
-	}
-}
-
-func SendMessageToAdmins(message string) {
-	admins := strings.Split(strings.Trim(os.Getenv("ADMIN_IDS"), " "), ",")
-	for _, chatIdStr := range admins {
-		chatId, err := strconv.Atoi(chatIdStr)
-		if err != nil {
-			log.Sugar.Error(err)
-		}
-		msg := tgbotapi.NewMessage(int64(chatId), message)
-		msg.ParseMode = "html"
-		msg.DisableWebPagePreview = true
-		err = sendMessage(msg)
 		handleError(chatId, err)
 	}
 }

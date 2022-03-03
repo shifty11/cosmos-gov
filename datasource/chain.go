@@ -146,6 +146,6 @@ func AddNewChains() {
 	}
 	if message != "" {
 		intro := "<b>New chain update info</b>\n"
-		telegram.SendMessageToAdmins(intro + message)
+		telegram.SendMessageToBotAdmins(intro + message)
 	}
 }
