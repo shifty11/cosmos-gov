@@ -5,7 +5,6 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/log"
-	"strings"
 )
 
 type State int
@@ -31,6 +30,7 @@ type StateData struct {
 
 func sendSubscriptions(update *tgbotapi.Update) {
 	chatId := getChatIdX(update)
+	log.Sugar.Debugf("Send subscriptions to user #%v", chatId)
 	chains := database.GetChainsForUser(chatId)
 
 	var buttons [][]Button
@@ -40,107 +40,43 @@ func sendSubscriptions(update *tgbotapi.Update) {
 		if c.Notify {
 			symbol = "✅ "
 		}
-		buttonRow = append(buttonRow, NewButton(c.Name, symbol+c.DisplayName))
+		callbackData := CallbackData{Command: CallbackCmdShowSubscriptions, Data: c.Name}
+		buttonRow = append(buttonRow, NewButton(symbol+c.DisplayName, callbackData))
 		if (ix+1)%NbrOfButtonsPerRow == 0 || ix == len(chains)-1 {
 			buttons = append(buttons, buttonRow)
 			buttonRow = []Button{}
 		}
 	}
+	config := createMenuButtonConfig()
+	config.ShowSubscriptions = false
+	buttons = append(buttons, getMenuButtonRow(config))
+	if isBotAdmin(update) {
+		botAdminConfig := createBotAdminMenuButtonConfig()
+		buttons = append(buttons, getBotAdminMenuButtonRow(botAdminConfig))
+	}
 	replyMarkup := createKeyboard(buttons)
 
 	if update.CallbackQuery == nil {
-		text := subscriptionsMsg
-		msg := tgbotapi.NewMessage(chatId, text)
+		msg := tgbotapi.NewMessage(chatId, subscriptionsMsg)
 		msg.ReplyMarkup = replyMarkup
-		sendMessageX(msg)
-	} else {
-		msg := tgbotapi.EditMessageTextConfig{
-			BaseEdit: tgbotapi.BaseEdit{ChatID: chatId,
-				MessageID:   update.CallbackQuery.Message.MessageID,
-				ReplyMarkup: &replyMarkup,
-			},
-			Text: subscriptionsMsg,
+		err := sendMessage(msg)
+		if err != nil {
+			log.Sugar.Errorf("Error while sendSubscriptions for user #%v: %v", chatId, err)
 		}
+	} else {
+		msg := tgbotapi.NewEditMessageText(chatId, update.CallbackQuery.Message.MessageID, subscriptionsMsg)
+		msg.ReplyMarkup = &replyMarkup
 		answerCallbackQuery(update)
-		sendMessageX(msg)
+		err := sendMessage(msg)
+		if err != nil {
+			log.Sugar.Errorf("Error while sendSubscriptions for user #%v: %v", chatId, err)
+		}
 	}
-}
-
-func sendUserStatistics(update *tgbotapi.Update) {
-	chatId := getChatIdX(update)
-	statistics, err := database.GetUserStatistics()
-	if err != nil {
-		log.Sugar.Error(err)
-		return
-	}
-	chainStatistics, err := database.GetChainStatistics()
-	if err != nil {
-		log.Sugar.Error(err)
-		return
-	}
-
-	userMsg := fmt.Sprintf("`"+userStatisticMsg+"`", statistics.CntUsers,
-		statistics.CntUsersThisWeek, statistics.ChangeThisWeekInPercent,
-		statistics.CntUsersSinceYesterday, statistics.ChangeSinceYesterdayInPercent)
-	chainMsg := fmt.Sprintf("`" + chainStatisticHeaderMsg)
-	sumUsers := 0
-	sumChains := 0
-	for _, chain := range *chainStatistics {
-		chainMsg += fmt.Sprintf(chainStatisticRowMsg, strings.Title(chain.Name), chain.Notifications)
-		sumUsers += chain.Notifications
-		sumChains += 1
-	}
-	chainMsg += fmt.Sprintf(chainStatisticFooterMsg+"`", fmt.Sprintf("Total(%v)", sumChains), sumUsers)
-
-	msg := tgbotapi.NewMessage(chatId, chainMsg+"\n\n"+userMsg)
-	msg.ParseMode = "markdown"
-	sendMessageX(msg)
-}
-
-func sendBroadcastStart(update *tgbotapi.Update) {
-	chatId := getChatIdX(update)
-	msg := tgbotapi.NewMessage(chatId, startBroadcastInfoMsg)
-	msg.DisableWebPagePreview = true
-	sendMessageX(msg)
-}
-
-func sendConfirmBroadcastMessage(update *tgbotapi.Update, text string) {
-	chatId := getChatIdX(update)
-	cntUsers := database.CountUsers()
-	broadcastMsg := tgbotapi.NewMessage(chatId, text)
-	broadcastMsg.DisableWebPagePreview = true
-	broadcastMsg.ParseMode = "html"
-	sendMessageX(broadcastMsg)
-	msg := tgbotapi.NewMessage(chatId, fmt.Sprintf(confirmBroadcastMsg, cntUsers))
-	msg.ParseMode = "markdown"
-	sendMessageX(msg)
-}
-
-func sendBroadcastMessage(text string) {
-	chatIds := database.GetAllUserChatIds()
-	log.Sugar.Debugf("Broadcast message to %v users", len(chatIds))
-	for _, chatId := range chatIds {
-		broadcastMsg := tgbotapi.NewMessage(int64(chatId), text)
-		broadcastMsg.DisableWebPagePreview = true
-		broadcastMsg.ParseMode = "html"
-		err := sendMessage(broadcastMsg)
-		handleError(chatId, err)
-	}
-}
-
-func sendBroadcastEndInfoMessage(update *tgbotapi.Update, success bool) {
-	chatId := getChatIdX(update)
-	text := abortBroadcastMsg
-	if success {
-		cntUsers := database.CountUsers()
-		text = fmt.Sprintf(successBroadcastMsg, cntUsers)
-	}
-	msg := tgbotapi.NewMessage(chatId, text)
-	sendMessageX(msg)
 }
 
 func sendCurrentProposals(update *tgbotapi.Update) {
 	chatId := getChatIdX(update)
+	log.Sugar.Debugf("Send current proposals to user #%v", chatId)
 	text := proposalsMsg
 	chains := database.GetProposalsInVotingPeriodForUser(chatId)
 	if len(chains) == 0 {
@@ -155,29 +91,118 @@ func sendCurrentProposals(update *tgbotapi.Update) {
 			text = noProposalsMsg
 		}
 	}
-	log.Sugar.Debugf("Send current proposals to user #%v", chatId)
-	msg := tgbotapi.NewMessage(chatId, text)
-	msg.ParseMode = "html"
-	sendMessageX(msg)
+
+	config := createMenuButtonConfig()
+	config.ShowProposals = false
+	buttons := [][]Button{getMenuButtonRow(config)}
+	if isBotAdmin(update) {
+		botAdminConfig := createBotAdminMenuButtonConfig()
+		buttons = append(buttons, getBotAdminMenuButtonRow(botAdminConfig))
+	}
+	replyMarkup := createKeyboard(buttons)
+
+	if update.CallbackQuery == nil {
+		msg := tgbotapi.NewMessage(chatId, text)
+		msg.ReplyMarkup = replyMarkup
+		msg.ParseMode = "html"
+		err := sendMessage(msg)
+		if err != nil {
+			log.Sugar.Errorf("Error while sendCurrentProposals for user #%v: %v", chatId, err)
+		}
+	} else {
+		msg := tgbotapi.NewEditMessageText(chatId, update.CallbackQuery.Message.MessageID, text)
+		msg.ReplyMarkup = &replyMarkup
+		msg.ParseMode = "html"
+		answerCallbackQuery(update)
+		err := sendMessage(msg)
+		if err != nil {
+			log.Sugar.Errorf("Error while sendCurrentProposals for user #%v: %v", chatId, err)
+		}
+	}
 }
 
 func sendHelp(update *tgbotapi.Update) {
 	chatId := getChatIdX(update)
 	log.Sugar.Debugf("Send help to user #%v", chatId)
 	text := helpMsg
-	if isAdmin(update) {
+	if isBotAdmin(update) {
 		text += "\n\n" + adminHelpMsg
 	}
-	msg := tgbotapi.NewMessage(chatId, text)
-	msg.ParseMode = "html"
-	sendMessageX(msg)
+
+	config := createMenuButtonConfig()
+	config.ShowHelp = false
+	buttons := [][]Button{getMenuButtonRow(config)}
+	if isBotAdmin(update) {
+		botAdminConfig := createBotAdminMenuButtonConfig()
+		buttons = append(buttons, getBotAdminMenuButtonRow(botAdminConfig))
+	}
+	replyMarkup := createKeyboard(buttons)
+
+	if update.CallbackQuery == nil {
+		msg := tgbotapi.NewMessage(chatId, text)
+		msg.ReplyMarkup = replyMarkup
+		msg.ParseMode = "html"
+		err := sendMessage(msg)
+		if err != nil {
+			log.Sugar.Errorf("Error while sendHelp for user #%v: %v", chatId, err)
+		}
+	} else {
+		msg := tgbotapi.NewEditMessageText(chatId, update.CallbackQuery.Message.MessageID, text)
+		msg.ReplyMarkup = &replyMarkup
+		msg.ParseMode = "html"
+		answerCallbackQuery(update)
+		err := sendMessage(msg)
+		if err != nil {
+			log.Sugar.Errorf("Error while sendHelp for user #%v: %v", chatId, err)
+		}
+	}
 }
 
 func sendSupport(update *tgbotapi.Update) {
 	chatId := getChatIdX(update)
 	log.Sugar.Debugf("Send support message to user #%v", chatId)
-	msg := tgbotapi.NewMessage(chatId, supportMsg)
-	msg.DisableWebPagePreview = true
-	msg.ParseMode = "html"
-	sendMessageX(msg)
+
+	config := createMenuButtonConfig()
+	config.ShowSupport = false
+	buttons := [][]Button{getMenuButtonRow(config)}
+	if isBotAdmin(update) {
+		botAdminConfig := createBotAdminMenuButtonConfig()
+		buttons = append(buttons, getBotAdminMenuButtonRow(botAdminConfig))
+	}
+	replyMarkup := createKeyboard(buttons)
+
+	if update.CallbackQuery == nil {
+		msg := tgbotapi.NewMessage(chatId, supportMsg)
+		msg.ReplyMarkup = replyMarkup
+		msg.ParseMode = "html"
+		msg.DisableWebPagePreview = true
+		err := sendMessage(msg)
+		if err != nil {
+			log.Sugar.Errorf("Error while sendSupport for user #%v: %v", chatId, err)
+		}
+	} else {
+		msg := tgbotapi.NewEditMessageText(chatId, update.CallbackQuery.Message.MessageID, supportMsg)
+		msg.ReplyMarkup = &replyMarkup
+		msg.ParseMode = "html"
+		msg.DisableWebPagePreview = true
+		answerCallbackQuery(update)
+		err := sendMessage(msg)
+		if err != nil {
+			log.Sugar.Errorf("Error while sendSupport for user #%v: %v", chatId, err)
+		}
+	}
+}
+
+func sendError(update *tgbotapi.Update) {
+	chatId := getChatIdX(update)
+	log.Sugar.Debugf("Send error msg to user #%v", chatId)
+	text := errMsg
+	msg := tgbotapi.NewMessage(chatId, text)
+	if update.CallbackQuery != nil {
+		answerCallbackQuery(update)
+	}
+	err := sendMessage(msg)
+	if err != nil {
+		log.Sugar.Errorf("Error while sendError for user #%v: %v", chatId, err)
+	}
 }

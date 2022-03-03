@@ -48,6 +48,20 @@ func (cu *ChainUpdate) SetDisplayName(s string) *ChainUpdate {
 	return cu
 }
 
+// SetIsEnabled sets the "is_enabled" field.
+func (cu *ChainUpdate) SetIsEnabled(b bool) *ChainUpdate {
+	cu.mutation.SetIsEnabled(b)
+	return cu
+}
+
+// SetNillableIsEnabled sets the "is_enabled" field if the given value is not nil.
+func (cu *ChainUpdate) SetNillableIsEnabled(b *bool) *ChainUpdate {
+	if b != nil {
+		cu.SetIsEnabled(*b)
+	}
+	return cu
+}
+
 // AddUserIDs adds the "users" edge to the User entity by IDs.
 func (cu *ChainUpdate) AddUserIDs(ids ...int) *ChainUpdate {
 	cu.mutation.AddUserIDs(ids...)
@@ -227,6 +241,13 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: chain.FieldDisplayName,
 		})
 	}
+	if value, ok := cu.mutation.IsEnabled(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: chain.FieldIsEnabled,
+		})
+	}
 	if cu.mutation.UsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
@@ -369,6 +390,20 @@ func (cuo *ChainUpdateOne) SetName(s string) *ChainUpdateOne {
 // SetDisplayName sets the "display_name" field.
 func (cuo *ChainUpdateOne) SetDisplayName(s string) *ChainUpdateOne {
 	cuo.mutation.SetDisplayName(s)
+	return cuo
+}
+
+// SetIsEnabled sets the "is_enabled" field.
+func (cuo *ChainUpdateOne) SetIsEnabled(b bool) *ChainUpdateOne {
+	cuo.mutation.SetIsEnabled(b)
+	return cuo
+}
+
+// SetNillableIsEnabled sets the "is_enabled" field if the given value is not nil.
+func (cuo *ChainUpdateOne) SetNillableIsEnabled(b *bool) *ChainUpdateOne {
+	if b != nil {
+		cuo.SetIsEnabled(*b)
+	}
 	return cuo
 }
 
@@ -573,6 +608,13 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 			Type:   field.TypeString,
 			Value:  value,
 			Column: chain.FieldDisplayName,
+		})
+	}
+	if value, ok := cuo.mutation.IsEnabled(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: chain.FieldIsEnabled,
 		})
 	}
 	if cuo.mutation.UsersCleared() {

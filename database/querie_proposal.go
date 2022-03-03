@@ -94,22 +94,6 @@ func CreateOrUpdateProposal(prop *dtos.Proposal, chainDb *ent.Chain) *ent.Propos
 	return newProp
 }
 
-// HasFirstOrSecondProposal Some chains don't have a first proposal for some reason (like terra or crypto.com)
-// That's why we check for first or second
-func HasFirstOrSecondProposal(chainName string) bool {
-	client, ctx := connect()
-	cnt, err := client.Proposal.
-		Query().
-		Where(proposal.And(
-			proposal.HasChainWith(chain.NameEQ(chainName)),
-			proposal.ProposalIDIn(1, 2),
-		)).Count(ctx)
-	if err != nil {
-		log.Sugar.Panicf("Error while querying first/second proposal for chain %v: %v", chainName, err)
-	}
-	return cnt > 0
-}
-
 func GetProposalsInVotingPeriod(chainName string) []*ent.Proposal {
 	client, ctx := connect()
 	props, err := client.Proposal.

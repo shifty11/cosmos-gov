@@ -2,19 +2,10 @@ package telegram
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/shifty11/cosmos-gov/common"
 	"github.com/shifty11/cosmos-gov/log"
-	"os"
-	"strconv"
 	"strings"
 )
-
-func isAdmin(update *tgbotapi.Update) bool {
-	if update.Message == nil {
-		return false
-	}
-	admins := strings.Split(strings.Trim(os.Getenv("ADMIN_IDS"), " "), ",")
-	return contains(admins, strconv.Itoa(update.Message.From.ID))
-}
 
 func isExpectingMessage(update *tgbotapi.Update) bool {
 	currentState := getState(update)
@@ -58,28 +49,31 @@ func getStateData(update *tgbotapi.Update) StateData {
 }
 
 func handleCommand(update *tgbotapi.Update) {
-	switch update.Message.Command() { // Check for non admin commands
-	case "start", "notifications", "subscriptions":
+	switch MessageCommand(update.Message.Command()) { // Check for non admin commands
+	case MessageCmdStart, MessageCmdSubscriptions:
 		sendSubscriptions(update)
 		setState(update, StateNil, nil)
-	case "proposals":
+	case MessageCmdProposals:
 		sendCurrentProposals(update)
 		setState(update, StateNil, nil)
-	case "help":
+	case MessageCmdHelp:
 		sendHelp(update)
 		setState(update, StateNil, nil)
-	case "support":
+	case MessageCmdSupport:
 		sendSupport(update)
 		setState(update, StateNil, nil)
 	default:
-		if isAdmin(update) { // Check for admin commands
-			switch update.Message.Command() {
-			case "stats":
+		if isBotAdmin(update) { // Check for admin commands
+			switch MessageCommand(update.Message.Command()) {
+			case MessageCmdStats:
 				sendUserStatistics(update)
 				setState(update, StateNil, nil)
-			case "broadcast":
+			case MessageCmdBroadcast:
 				sendBroadcastStart(update)
 				setState(update, StateStartBroadcast, nil)
+			case MessageCmdChains:
+				sendChains(update)
+				setState(update, StateNil, nil)
 			}
 		}
 	}
@@ -94,7 +88,7 @@ func handleMessage(update *tgbotapi.Update) {
 	case StateConfirmBroadcast:
 		yesOptions := []string{"yes", "y"}
 		abortOptions := []string{"abort", "a"}
-		if contains(yesOptions, strings.ToLower(update.Message.Text)) {
+		if common.Contains(yesOptions, strings.ToLower(update.Message.Text)) {
 			data := getStateData(update)
 			if data.BroadcastStateData == nil || data.BroadcastStateData.Message == "" {
 				log.Sugar.Fatal("No message to broadcast. This should never happen!")
@@ -102,7 +96,7 @@ func handleMessage(update *tgbotapi.Update) {
 			sendBroadcastMessage(data.BroadcastStateData.Message)
 			sendBroadcastEndInfoMessage(update, true)
 			setState(update, StateNil, nil)
-		} else if contains(abortOptions, strings.ToLower(update.Message.Text)) {
+		} else if common.Contains(abortOptions, strings.ToLower(update.Message.Text)) {
 			sendBroadcastEndInfoMessage(update, false)
 			setState(update, StateNil, nil)
 		} else {
@@ -113,8 +107,36 @@ func handleMessage(update *tgbotapi.Update) {
 }
 
 func handleCallbackQuery(update *tgbotapi.Update) {
-	performUpdateNotification(update)
-	sendSubscriptions(update)
+	callbackData := ToCallbackData(update.CallbackQuery.Data)
+	switch callbackData.Command {
+	case CallbackCmdShowSubscriptions:
+		performUpdateSubscription(update, callbackData.Data)
+		sendSubscriptions(update)
+	case CallbackCmdShowProposals:
+		sendCurrentProposals(update)
+	case CallbackCmdShowHelp:
+		sendHelp(update)
+	case CallbackCmdShowSupport:
+		sendSupport(update)
+	default:
+		if isBotAdmin(update) { // Check for admin callbacks
+			switch callbackData.Command {
+			case CallbackCmdStats:
+				sendUserStatistics(update)
+			case CallbackCmdEnableChains:
+				performToggleChain(callbackData.Data)
+				sendChains(update)
+			default:
+				sendError(update)
+				sendHelp(update)
+				setState(update, StateNil, nil)
+			}
+		} else {
+			sendError(update)
+			sendHelp(update)
+			setState(update, StateNil, nil)
+		}
+	}
 }
 
 // groups -> just admins and creators can interact with the bot

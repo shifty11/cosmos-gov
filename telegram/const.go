@@ -2,11 +2,7 @@ package telegram
 
 const NbrOfButtonsPerRow = 3
 
-const subscriptionsMsg = `Select the projects that you want to follow. You will receive notifications about new governance proposals once they enter the voting period.
-
-If you click on /proposals you can see all active proposals for your subscriptions.
-
-If you like this bot you can support us by delegating to one of our validators -> see /support`
+const subscriptionsMsg = `Select the projects that you want to follow. You will receive notifications about new governance proposals once they enter the voting period.`
 
 const startBroadcastInfoMsg = `Send the broadcast that you want to send to all participants
 
@@ -23,12 +19,12 @@ const abortBroadcastMsg = "Abort broadcasting message."
 const successBroadcastMsg = "Successfully sent message to %v users."
 
 const chainStatisticHeaderMsg = `
-      Chain ┆ Subscriptions
- -----------┼---------------`
+      Chain ┆ Props ┆ Subs 
+ -----------┼-------┼--------`
 const chainStatisticRowMsg = `
-%11.11s ┆ %6d`
+%11.11s ┆ %5d ┆ %5d`
 const chainStatisticFooterMsg = `
- -----------┼---------------
+ -----------┼-------┼--------
   %s ┆ %6d`
 const userStatisticMsg = `
        Time ┆   Users (change)
@@ -48,10 +44,15 @@ const helpMsg = `<b>Commands List</b>
 
 const adminHelpMsg = `<b>Admin Commands</b>
 /stats - Show statistics
+/chains - Manage chains
 /broadcast - Broadcast message to everyone`
 
 const supportMsg = `We would like to continue developing this bot and other products that improve the Cosmos ecosystem.
 
-You can support us by staking to our validator service <b>DeCrypto</b> on <a href='https://ping.pub/dig/staking/digvaloper1fhp54fwlfmpwwgrnfwk3v47v53yjtp8fw6nelw'>Dig</a>.
+You can support us by staking to my validator service <b>DeCrypto</b> on <a href='https://ping.pub/dig/staking/digvaloper1fhp54fwlfmpwwgrnfwk3v47v53yjtp8fw6nelw'>Dig</a>.
 
 You have a good idea, feedback or want to contribute in other ways? Shoot a message to @rapha_decrypto`
+
+const newChainsMsg = `Select the chains that should be enabled for everyone`
+
+const errMsg = `There was an unknown error`

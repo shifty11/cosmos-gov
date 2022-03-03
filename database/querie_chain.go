@@ -5,6 +5,7 @@ import (
 	"github.com/shifty11/cosmos-gov/dtos"
 	"github.com/shifty11/cosmos-gov/ent"
 	"github.com/shifty11/cosmos-gov/ent/chain"
+	"github.com/shifty11/cosmos-gov/ent/proposal"
 	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/log"
 	"strings"
@@ -64,6 +65,7 @@ func GetChainsForUser(chatId int64) []dtos.Chain {
 	}
 	allChains, err := client.Chain.
 		Query().
+		Where(chain.IsEnabledEQ(true)).
 		Order(ent.Asc(chain.FieldDisplayName)).
 		All(ctx)
 	var chains []dtos.Chain
@@ -79,30 +81,32 @@ func GetChainsForUser(chatId int64) []dtos.Chain {
 	return chains
 }
 
-func CreateChains(chains []string) {
+func CreateChain(chainName string) *ent.Chain {
 	client, ctx := connect()
-	for _, chainName := range chains {
-		_, err := client.Chain.
-			Query().
-			Where(chain.NameEQ(chainName)).
-			Only(ctx)
+	c, err := client.Chain.
+		Query().
+		Where(chain.NameEQ(chainName)).
+		Only(ctx)
+	if err != nil {
+		log.Sugar.Infof("Create new chain: %v", chainName)
+		c, err = client.Chain.
+			Create().
+			SetName(chainName).
+			SetDisplayName(strings.Title(chainName)).
+			SetIsEnabled(false).
+			Save(ctx)
 		if err != nil {
-			_, err = client.Chain.
-				Create().
-				SetName(chainName).
-				SetDisplayName(strings.Title(chainName)).
-				Save(ctx)
-			if err != nil {
-				log.Sugar.Panic("Error while creating chains: %v", err)
-			}
+			log.Sugar.Panic("Error while creating chain: %v", err)
 		}
 	}
+	return c
 }
 
 func GetChains() []*ent.Chain {
 	client, ctx := connect()
 	chains, err := client.Chain.
 		Query().
+		Order(ent.Asc(chain.FieldDisplayName)).
 		All(ctx)
 	if err != nil {
 		log.Sugar.Panic("Error while querying chains: %v", err)
@@ -112,18 +116,72 @@ func GetChains() []*ent.Chain {
 
 func GetChainStatistics() (*[]dtos.ChainStatistic, error) {
 	client, ctx := connect()
-	var chains []dtos.ChainStatistic
-	err := client.Chain.Query().
-		Order(ent.Asc(chain.FieldName)).
-		GroupBy(chain.FieldName).
-		Aggregate(func(s *sql.Selector) string {
-			t := sql.Table(chain.UsersTable)
-			s.Join(t).On(s.C(chain.FieldID), t.C(user.ChainsPrimaryKey[1]))
-			return sql.As(sql.Count(t.C(user.ChainsPrimaryKey[1])), "notifications")
-		}).
-		Scan(ctx, &chains)
+	var chainsWithNotifications []dtos.ChainStatistic
+	err := client.Debug().Chain.Query().
+		Order(ent.Asc(chain.FieldDisplayName)).
+		GroupBy(chain.FieldDisplayName).
+		Aggregate(
+			func(s *sql.Selector) string {
+				t := sql.Table(chain.UsersTable)
+				s.Join(t).On(s.C(chain.FieldID), t.C(user.ChainsPrimaryKey[1]))
+				return sql.As(sql.Count(t.C(user.ChainsPrimaryKey[1])), "notifications")
+			},
+		).
+		Scan(ctx, &chainsWithNotifications)
 	if err != nil {
 		return nil, err
 	}
-	return &chains, err
+	var chainsWithProposals []dtos.ChainStatistic
+	err = client.Debug().Chain.Query().
+		Order(ent.Asc(chain.FieldDisplayName)).
+		GroupBy(chain.FieldDisplayName).
+		Aggregate(
+			func(s *sql.Selector) string {
+				t := sql.Table(chain.ProposalsTable)
+				s.Join(t).On(s.C(chain.FieldID), t.C(proposal.ChainColumn))
+				return sql.As(sql.Count(t.C(proposal.FieldID)), "proposals")
+			},
+		).
+		Scan(ctx, &chainsWithProposals)
+	if err != nil {
+		return nil, err
+	}
+	var stats []dtos.ChainStatistic
+	for _, cp := range chainsWithProposals {
+		found := false
+		for _, cn := range chainsWithNotifications {
+			if cp.DisplayName == cn.DisplayName {
+				stats = append(stats, dtos.ChainStatistic{
+					DisplayName:   cp.DisplayName,
+					Proposals:     cp.Proposals,
+					Notifications: cn.Notifications,
+				})
+				found = true
+			}
+		}
+		if !found {
+			stats = append(stats, dtos.ChainStatistic{
+				DisplayName:   cp.DisplayName,
+				Proposals:     cp.Proposals,
+				Notifications: 0,
+			})
+		}
+	}
+	return &stats, err
+}
+
+func EnableOrDisableChain(chainName string) error {
+	_, ctx := connect()
+	chainDto, err := getChainByName(chainName)
+	if err != nil {
+		return err
+	}
+	_, err = chainDto.
+		Update().
+		SetIsEnabled(!chainDto.IsEnabled).
+		Save(ctx)
+	if err != nil {
+		return err
+	}
+	return nil
 }

@@ -12,29 +12,29 @@ import (
 )
 
 func initDatabase() {
-	lensConfig := os.Getenv("LENS_CONFIG")
-	if lensConfig == "" {
-		log.Sugar.Panicf("LENS_CONFIG is not set. Please provide the path to the lens config.yaml.")
-	}
-
-	log.Sugar.Info("Migrate database")
 	database.MigrateDatabase()
-	chains := datasource.ReadLensConfig(lensConfig)
-	log.Sugar.Info("Create chains")
-	database.CreateChains(chains)
-	log.Sugar.Info("Init chains")
-	datasource.InitChains()
+	datasource.AddNewChains()
 }
 
 func startProposalFetching() {
+	go func() {
+		datasource.FetchProposals()
+		c := cron.New()
+		_, err := c.AddFunc("@every 5m", func() { datasource.FetchProposals() })
+		if err != nil {
+			log.Sugar.Errorf("while executing 'datasource.FetchProposals()' via cron: %v", err)
+		}
+		c.Start()
+	}()
+}
+
+func startNewChainFetching() {
 	c := cron.New()
-	_, err := c.AddFunc("@every 5m", func() { datasource.FetchProposals() })
+	_, err := c.AddFunc("0 10 * * *", func() { datasource.AddNewChains() }) // execute every Monday at 10.00
 	if err != nil {
-		log.Sugar.Errorf("while executing 'datasource.FetchProposals()' via cron: %v", err)
+		log.Sugar.Errorf("while executing 'datasource.AddNewChains()' via cron: %v", err)
 	}
-	log.Sugar.Info("Start proposal fetching")
 	c.Start()
-	//go datasource.FetchProposals()
 }
 
 func startTelegramServer() {
@@ -51,11 +51,13 @@ func main() {
 	if len(args) > 0 && args[0] == "fetching" {
 		initDatabase()
 		startProposalFetching()
+		startNewChainFetching()
 	} else if len(args) > 0 && args[0] == "telegram" {
 		startTelegramServer()
 	} else {
 		initDatabase()
 		startProposalFetching()
+		startNewChainFetching()
 		startTelegramServer()
 	}
 

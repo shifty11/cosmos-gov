@@ -15,13 +15,13 @@ func addSentryToLogger(log *zap.Logger) *zap.Logger {
 	}
 
 	cfg := zapsentry.Configuration{
-		Level: zapcore.ErrorLevel, //when to send message to sentry
+		Level: zapcore.ErrorLevel, // when to send message to sentry
 		Tags: map[string]string{
 			"component": "system",
 		},
 	}
 	core, err := zapsentry.NewCore(cfg, zapsentry.NewSentryClientFromDSN(sentryDsn))
-	//in case of err it will return noop core. so we can safely attach it
+	// in case of err it will return noop core. so we can safely attach it
 	if err != nil {
 		log.Warn("failed to init zap", zap.Error(err))
 	}

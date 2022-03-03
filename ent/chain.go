@@ -24,6 +24,8 @@ type Chain struct {
 	Name string `json:"name,omitempty"`
 	// DisplayName holds the value of the "display_name" field.
 	DisplayName string `json:"display_name,omitempty"`
+	// IsEnabled holds the value of the "is_enabled" field.
+	IsEnabled bool `json:"is_enabled,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ChainQuery when eager-loading is set.
 	Edges ChainEdges `json:"edges"`
@@ -63,6 +65,8 @@ func (*Chain) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case chain.FieldIsEnabled:
+			values[i] = new(sql.NullBool)
 		case chain.FieldID:
 			values[i] = new(sql.NullInt64)
 		case chain.FieldName, chain.FieldDisplayName:
@@ -114,6 +118,12 @@ func (c *Chain) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				c.DisplayName = value.String
 			}
+		case chain.FieldIsEnabled:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field is_enabled", values[i])
+			} else if value.Valid {
+				c.IsEnabled = value.Bool
+			}
 		}
 	}
 	return nil
@@ -160,6 +170,8 @@ func (c *Chain) String() string {
 	builder.WriteString(c.Name)
 	builder.WriteString(", display_name=")
 	builder.WriteString(c.DisplayName)
+	builder.WriteString(", is_enabled=")
+	builder.WriteString(fmt.Sprintf("%v", c.IsEnabled))
 	builder.WriteByte(')')
 	return builder.String()
 }
