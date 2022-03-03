@@ -5,6 +5,7 @@ import (
 	"github.com/shifty11/cosmos-gov/dtos"
 	"github.com/shifty11/cosmos-gov/ent"
 	"github.com/shifty11/cosmos-gov/ent/chain"
+	"github.com/shifty11/cosmos-gov/ent/proposal"
 	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/log"
 	"strings"
@@ -115,20 +116,58 @@ func GetChains() []*ent.Chain {
 
 func GetChainStatistics() (*[]dtos.ChainStatistic, error) {
 	client, ctx := connect()
-	var chains []dtos.ChainStatistic
-	err := client.Chain.Query().
+	var chainsWithNotifications []dtos.ChainStatistic
+	err := client.Debug().Chain.Query().
 		Order(ent.Asc(chain.FieldDisplayName)).
 		GroupBy(chain.FieldDisplayName).
-		Aggregate(func(s *sql.Selector) string {
-			t := sql.Table(chain.UsersTable)
-			s.Join(t).On(s.C(chain.FieldID), t.C(user.ChainsPrimaryKey[1]))
-			return sql.As(sql.Count(t.C(user.ChainsPrimaryKey[1])), "notifications")
-		}).
-		Scan(ctx, &chains)
+		Aggregate(
+			func(s *sql.Selector) string {
+				t := sql.Table(chain.UsersTable)
+				s.Join(t).On(s.C(chain.FieldID), t.C(user.ChainsPrimaryKey[1]))
+				return sql.As(sql.Count(t.C(user.ChainsPrimaryKey[1])), "notifications")
+			},
+		).
+		Scan(ctx, &chainsWithNotifications)
 	if err != nil {
 		return nil, err
 	}
-	return &chains, err
+	var chainsWithProposals []dtos.ChainStatistic
+	err = client.Debug().Chain.Query().
+		Order(ent.Asc(chain.FieldDisplayName)).
+		GroupBy(chain.FieldDisplayName).
+		Aggregate(
+			func(s *sql.Selector) string {
+				t := sql.Table(chain.ProposalsTable)
+				s.Join(t).On(s.C(chain.FieldID), t.C(proposal.ChainColumn))
+				return sql.As(sql.Count(t.C(proposal.FieldID)), "proposals")
+			},
+		).
+		Scan(ctx, &chainsWithProposals)
+	if err != nil {
+		return nil, err
+	}
+	var stats []dtos.ChainStatistic
+	for _, cp := range chainsWithProposals {
+		found := false
+		for _, cn := range chainsWithNotifications {
+			if cp.DisplayName == cn.DisplayName {
+				stats = append(stats, dtos.ChainStatistic{
+					DisplayName:   cp.DisplayName,
+					Proposals:     cp.Proposals,
+					Notifications: cn.Notifications,
+				})
+				found = true
+			}
+		}
+		if !found {
+			stats = append(stats, dtos.ChainStatistic{
+				DisplayName:   cp.DisplayName,
+				Proposals:     cp.Proposals,
+				Notifications: 0,
+			})
+		}
+	}
+	return &stats, err
 }
 
 func EnableOrDisableChain(chainName string) error {

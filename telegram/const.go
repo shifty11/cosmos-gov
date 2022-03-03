@@ -19,12 +19,12 @@ const abortBroadcastMsg = "Abort broadcasting message."
 const successBroadcastMsg = "Successfully sent message to %v users."
 
 const chainStatisticHeaderMsg = `
-      Chain ┆ Subscriptions
- -----------┼---------------`
+      Chain ┆ Props ┆ Subs 
+ -----------┼-------┼--------`
 const chainStatisticRowMsg = `
-%11.11s ┆ %6d`
+%11.11s ┆ %5d ┆ %5d`
 const chainStatisticFooterMsg = `
- -----------┼---------------
+ -----------┼-------┼--------
   %s ┆ %6d`
 const userStatisticMsg = `
        Time ┆   Users (change)
