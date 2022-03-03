@@ -13,7 +13,6 @@ import (
 
 func initDatabase() {
 	database.MigrateDatabase()
-	datasource.AddNewChains()
 }
 
 func startProposalFetching() {

@@ -117,7 +117,7 @@ func GetChains() []*ent.Chain {
 func GetChainStatistics() (*[]dtos.ChainStatistic, error) {
 	client, ctx := connect()
 	var chainsWithNotifications []dtos.ChainStatistic
-	err := client.Debug().Chain.Query().
+	err := client.Chain.Query().
 		Order(ent.Asc(chain.FieldDisplayName)).
 		GroupBy(chain.FieldDisplayName).
 		Aggregate(
@@ -132,7 +132,7 @@ func GetChainStatistics() (*[]dtos.ChainStatistic, error) {
 		return nil, err
 	}
 	var chainsWithProposals []dtos.ChainStatistic
-	err = client.Debug().Chain.Query().
+	err = client.Chain.Query().
 		Order(ent.Asc(chain.FieldDisplayName)).
 		GroupBy(chain.FieldDisplayName).
 		Aggregate(

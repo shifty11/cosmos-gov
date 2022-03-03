@@ -40,21 +40,6 @@ func DeleteUser(chatId int64) {
 	}
 }
 
-func DeleteUsers(chatIds map[int]struct{}) {
-	var chatIds64 []int64
-	for chatId := range chatIds {
-		chatIds64 = append(chatIds64, int64(chatId))
-	}
-	client, ctx := connect()
-	_, err := client.User.
-		Delete().
-		Where(user.ChatIDIn(chatIds64...)).
-		Exec(ctx)
-	if err != nil {
-		log.Sugar.Errorf("Error while deleting user: %v", err)
-	}
-}
-
 func GetChatIds(chainDb *ent.Chain) []int {
 	_, ctx := connect()
 	chatIds, err := chainDb.
