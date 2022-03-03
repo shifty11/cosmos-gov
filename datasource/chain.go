@@ -22,7 +22,7 @@ func getChainsFromRegistry() ([]string, error) {
 	err := rootCmd.Execute()
 	cage.Stop(c)
 	if err != nil {
-		log.Sugar.Errorf("Error while querying '%v': %v", query, err)
+		log.Sugar.Debugf("Error while querying '%v': %v", query, err)
 		return nil, err
 	}
 

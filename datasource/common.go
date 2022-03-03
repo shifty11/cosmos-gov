@@ -14,7 +14,7 @@ func addOrUpdateChainInLensConfig(chainName string) {
 	log.Sugar.Debugf("Add/update chain %v in lens config: 'lens %v'", chainName, query)
 	err := rootCmd.Execute()
 	if err != nil {
-		log.Sugar.Errorf("Error while executing query '%v': %v", query, err)
+		log.Sugar.Debugf("Error while executing query '%v': %v", query, err)
 	}
 }
 
