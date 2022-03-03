@@ -50,9 +50,9 @@ const (
 	CallbackCmdShowHelp          CallbackCommand = "SHOW_HELP"
 	CallbackCmdShowSupport       CallbackCommand = "SHOW_SUPPORT"
 
-	CallbackCmdStats        CallbackCommand = "STATS"         // admin command
-	CallbackCmdEnableChains CallbackCommand = "ENABLE_CHAINS" // admin command
-	CallbackCmdBroadcast    CallbackCommand = "BROADCAST"     // admin command
+	CallbackCmdStats CallbackCommand = "STATS" // admin command
+	//CallbackCmdEnableChains CallbackCommand = "ENABLE_CHAINS" // admin command
+	//CallbackCmdBroadcast    CallbackCommand = "BROADCAST"     // admin command
 )
 
 type CallbackData struct {

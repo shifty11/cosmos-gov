@@ -123,12 +123,6 @@ func handleCallbackQuery(update *tgbotapi.Update) {
 			switch callbackData.Command {
 			case CallbackCmdStats:
 				sendUserStatistics(update)
-			case CallbackCmdBroadcast:
-				sendBroadcastStart(update)
-				setState(update, StateStartBroadcast, nil)
-			case CallbackCmdEnableChains:
-				performToggleChain(callbackData.Data)
-				sendChains(update)
 			default:
 				sendError(update)
 				sendHelp(update)
