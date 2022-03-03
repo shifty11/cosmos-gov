@@ -25,7 +25,7 @@ const chainStatisticRowMsg = `
 %11.11s ┆ %5d ┆ %5d`
 const chainStatisticFooterMsg = `
  -----------┼-------┼--------
-  %s ┆ %6d`
+  %s ┆ %5d ┆ %5d`
 const userStatisticMsg = `
        Time ┆   Users (change)
  -----------┼------------------

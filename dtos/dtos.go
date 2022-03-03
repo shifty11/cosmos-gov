@@ -38,7 +38,7 @@ type UserStatistic struct {
 type ChainStatistic struct {
 	DisplayName   string `json:"display_name"`
 	Proposals     int
-	Notifications int
+	Subscriptions int
 }
 
 type ProposalOverview struct {

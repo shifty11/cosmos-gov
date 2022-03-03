@@ -41,14 +41,16 @@ func sendUserStatistics(update *tgbotapi.Update) {
 		statistics.CntUsersThisWeek, statistics.ChangeThisWeekInPercent,
 		statistics.CntUsersSinceYesterday, statistics.ChangeSinceYesterdayInPercent)
 	chainMsg := fmt.Sprintf("`" + chainStatisticHeaderMsg)
-	sumUsers := 0
+	sumSubscriptions := 0
+	sumProposals := 0
 	sumChains := 0
 	for _, chain := range *chainStatistics {
-		chainMsg += fmt.Sprintf(chainStatisticRowMsg, strings.Title(chain.DisplayName), chain.Proposals, chain.Notifications)
-		sumUsers += chain.Notifications
+		chainMsg += fmt.Sprintf(chainStatisticRowMsg, strings.Title(chain.DisplayName), chain.Proposals, chain.Subscriptions)
+		sumSubscriptions += chain.Subscriptions
+		sumProposals += chain.Proposals
 		sumChains += 1
 	}
-	chainMsg += fmt.Sprintf(chainStatisticFooterMsg+"`", fmt.Sprintf("Total(%v)", sumChains), sumUsers)
+	chainMsg += fmt.Sprintf(chainStatisticFooterMsg+"`", fmt.Sprintf("Total(%v)", sumChains), sumProposals, sumSubscriptions)
 
 	text := chainMsg + "\n\n" + userMsg
 
@@ -142,7 +144,6 @@ func sendChains(update *tgbotapi.Update) {
 	}
 
 	config := createMenuButtonConfig()
-	config.ShowSubscriptions = false
 	buttons = append(buttons, getMenuButtonRow(config))
 	if isBotAdmin(update) {
 		botAdminConfig := createBotAdminMenuButtonConfig()

@@ -124,7 +124,7 @@ func GetChainStatistics() (*[]dtos.ChainStatistic, error) {
 			func(s *sql.Selector) string {
 				t := sql.Table(chain.UsersTable)
 				s.Join(t).On(s.C(chain.FieldID), t.C(user.ChainsPrimaryKey[1]))
-				return sql.As(sql.Count(t.C(user.ChainsPrimaryKey[1])), "notifications")
+				return sql.As(sql.Count(t.C(user.ChainsPrimaryKey[1])), "subscriptions")
 			},
 		).
 		Scan(ctx, &chainsWithNotifications)
@@ -154,7 +154,7 @@ func GetChainStatistics() (*[]dtos.ChainStatistic, error) {
 				stats = append(stats, dtos.ChainStatistic{
 					DisplayName:   cp.DisplayName,
 					Proposals:     cp.Proposals,
-					Notifications: cn.Notifications,
+					Subscriptions: cn.Subscriptions,
 				})
 				found = true
 			}
@@ -163,7 +163,7 @@ func GetChainStatistics() (*[]dtos.ChainStatistic, error) {
 			stats = append(stats, dtos.ChainStatistic{
 				DisplayName:   cp.DisplayName,
 				Proposals:     cp.Proposals,
-				Notifications: 0,
+				Subscriptions: 0,
 			})
 		}
 	}
