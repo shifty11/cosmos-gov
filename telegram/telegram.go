@@ -49,29 +49,29 @@ func getStateData(update *tgbotapi.Update) StateData {
 }
 
 func handleCommand(update *tgbotapi.Update) {
-	switch update.Message.Command() { // Check for non admin commands
-	case "start", "notifications", "subscriptions":
+	switch MessageCommand(update.Message.Command()) { // Check for non admin commands
+	case MessageCmdStart, MessageCmdSubscriptions:
 		sendSubscriptions(update)
 		setState(update, StateNil, nil)
-	case "proposals":
+	case MessageCmdProposals:
 		sendCurrentProposals(update)
 		setState(update, StateNil, nil)
-	case "help":
+	case MessageCmdHelp:
 		sendHelp(update)
 		setState(update, StateNil, nil)
-	case "support":
+	case MessageCmdSupport:
 		sendSupport(update)
 		setState(update, StateNil, nil)
 	default:
 		if isBotAdmin(update) { // Check for admin commands
-			switch update.Message.Command() {
-			case "stats":
+			switch MessageCommand(update.Message.Command()) {
+			case MessageCmdStats:
 				sendUserStatistics(update)
 				setState(update, StateNil, nil)
-			case "broadcast":
+			case MessageCmdBroadcast:
 				sendBroadcastStart(update)
 				setState(update, StateStartBroadcast, nil)
-			case "chains":
+			case MessageCmdChains:
 				sendChains(update)
 				setState(update, StateNil, nil)
 			}
@@ -109,10 +109,8 @@ func handleMessage(update *tgbotapi.Update) {
 func handleCallbackQuery(update *tgbotapi.Update) {
 	callbackData := ToCallbackData(update.CallbackQuery.Data)
 	switch callbackData.Command {
-	case CallbackCmdShowSubscription:
-		if callbackData.Data != "" {
-			performUpdateSubscription(update, callbackData.Data)
-		}
+	case CallbackCmdShowSubscriptions:
+		performUpdateSubscription(update, callbackData.Data)
 		sendSubscriptions(update)
 	case CallbackCmdShowProposals:
 		sendCurrentProposals(update)
@@ -123,17 +121,22 @@ func handleCallbackQuery(update *tgbotapi.Update) {
 	default:
 		if isBotAdmin(update) { // Check for admin callbacks
 			switch callbackData.Command {
+			case CallbackCmdStats:
+				sendUserStatistics(update)
+			case CallbackCmdBroadcast:
+				sendBroadcastStart(update)
+				setState(update, StateStartBroadcast, nil)
 			case CallbackCmdEnableChains:
-				if callbackData.Data != "" {
-					performToggleChain(callbackData.Data)
-				}
+				performToggleChain(callbackData.Data)
 				sendChains(update)
 			default:
 				sendError(update)
+				sendHelp(update)
 				setState(update, StateNil, nil)
 			}
 		} else {
 			sendError(update)
+			sendHelp(update)
 			setState(update, StateNil, nil)
 		}
 	}

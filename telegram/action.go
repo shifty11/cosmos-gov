@@ -8,6 +8,9 @@ import (
 
 // Toggles the subscription for a chain
 func performUpdateSubscription(update *tgbotapi.Update, chainName string) {
+	if chainName == "" {
+		return
+	}
 	chatId := getChatIdX(update)
 	log.Sugar.Debugf("Toggle subscription %v for user #%v", chainName, chatId)
 	err := database.AddOrRemoveChainForUser(chatId, chainName)
@@ -18,6 +21,9 @@ func performUpdateSubscription(update *tgbotapi.Update, chainName string) {
 
 // Enables or disables a chain for all user. Can only be performed by botadmins.
 func performToggleChain(chainName string) {
+	if chainName == "" {
+		return
+	}
 	log.Sugar.Debugf("Enable/disable chain %v", chainName)
 	err := database.EnableOrDisableChain(chainName)
 	if err != nil {

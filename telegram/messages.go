@@ -40,7 +40,7 @@ func sendSubscriptions(update *tgbotapi.Update) {
 		if c.Notify {
 			symbol = "✅ "
 		}
-		callbackData := CallbackData{Command: CallbackCmdShowSubscription, Data: c.Name}
+		callbackData := CallbackData{Command: CallbackCmdShowSubscriptions, Data: c.Name}
 		buttonRow = append(buttonRow, NewButton(symbol+c.DisplayName, callbackData))
 		if (ix+1)%NbrOfButtonsPerRow == 0 || ix == len(chains)-1 {
 			buttons = append(buttons, buttonRow)
@@ -50,12 +50,14 @@ func sendSubscriptions(update *tgbotapi.Update) {
 	config := createMenuButtonConfig()
 	config.ShowSubscriptions = false
 	buttons = append(buttons, getMenuButtonRow(config))
-
+	if isBotAdmin(update) {
+		botAdminConfig := createBotAdminMenuButtonConfig()
+		buttons = append(buttons, getBotAdminMenuButtonRow(botAdminConfig))
+	}
 	replyMarkup := createKeyboard(buttons)
 
 	if update.CallbackQuery == nil {
-		text := subscriptionsMsg
-		msg := tgbotapi.NewMessage(chatId, text)
+		msg := tgbotapi.NewMessage(chatId, subscriptionsMsg)
 		msg.ReplyMarkup = replyMarkup
 		err := sendMessage(msg)
 		if err != nil {
@@ -93,6 +95,10 @@ func sendCurrentProposals(update *tgbotapi.Update) {
 	config := createMenuButtonConfig()
 	config.ShowProposals = false
 	buttons := [][]Button{getMenuButtonRow(config)}
+	if isBotAdmin(update) {
+		botAdminConfig := createBotAdminMenuButtonConfig()
+		buttons = append(buttons, getBotAdminMenuButtonRow(botAdminConfig))
+	}
 	replyMarkup := createKeyboard(buttons)
 
 	if update.CallbackQuery == nil {
@@ -126,6 +132,10 @@ func sendHelp(update *tgbotapi.Update) {
 	config := createMenuButtonConfig()
 	config.ShowHelp = false
 	buttons := [][]Button{getMenuButtonRow(config)}
+	if isBotAdmin(update) {
+		botAdminConfig := createBotAdminMenuButtonConfig()
+		buttons = append(buttons, getBotAdminMenuButtonRow(botAdminConfig))
+	}
 	replyMarkup := createKeyboard(buttons)
 
 	if update.CallbackQuery == nil {
@@ -155,6 +165,10 @@ func sendSupport(update *tgbotapi.Update) {
 	config := createMenuButtonConfig()
 	config.ShowSupport = false
 	buttons := [][]Button{getMenuButtonRow(config)}
+	if isBotAdmin(update) {
+		botAdminConfig := createBotAdminMenuButtonConfig()
+		buttons = append(buttons, getBotAdminMenuButtonRow(botAdminConfig))
+	}
 	replyMarkup := createKeyboard(buttons)
 
 	if update.CallbackQuery == nil {

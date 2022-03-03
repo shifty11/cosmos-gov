@@ -50,9 +50,34 @@ func sendUserStatistics(update *tgbotapi.Update) {
 	}
 	chainMsg += fmt.Sprintf(chainStatisticFooterMsg+"`", fmt.Sprintf("Total(%v)", sumChains), sumUsers)
 
-	msg := tgbotapi.NewMessage(chatId, chainMsg+"\n\n"+userMsg)
-	msg.ParseMode = "markdown"
-	sendMessageX(msg)
+	text := chainMsg + "\n\n" + userMsg
+
+	config := createMenuButtonConfig()
+	buttons := [][]Button{getMenuButtonRow(config)}
+	if isBotAdmin(update) {
+		botAdminConfig := createBotAdminMenuButtonConfig()
+		buttons = append(buttons, getBotAdminMenuButtonRow(botAdminConfig))
+	}
+	replyMarkup := createKeyboard(buttons)
+
+	if update.CallbackQuery == nil {
+		msg := tgbotapi.NewMessage(chatId, text)
+		msg.ReplyMarkup = replyMarkup
+		msg.ParseMode = "markdown"
+		err := sendMessage(msg)
+		if err != nil {
+			log.Sugar.Errorf("Error while sendSubscriptions for user #%v: %v", chatId, err)
+		}
+	} else {
+		msg := tgbotapi.NewEditMessageText(chatId, update.CallbackQuery.Message.MessageID, text)
+		msg.ReplyMarkup = &replyMarkup
+		msg.ParseMode = "markdown"
+		answerCallbackQuery(update)
+		err := sendMessage(msg)
+		if err != nil {
+			log.Sugar.Debugf("Error while sendSubscriptions for user #%v: %v", chatId, err)
+		}
+	}
 }
 
 func sendBroadcastStart(update *tgbotapi.Update) {

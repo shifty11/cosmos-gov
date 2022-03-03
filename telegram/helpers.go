@@ -28,14 +28,31 @@ func getApi() *tgbotapi.BotAPI {
 	return api
 }
 
+type MessageCommand string
+
+const (
+	MessageCmdStart         MessageCommand = "start"
+	MessageCmdSubscriptions MessageCommand = "subscriptions"
+	MessageCmdProposals     MessageCommand = "proposals"
+	MessageCmdHelp          MessageCommand = "help"
+	MessageCmdSupport       MessageCommand = "support"
+
+	MessageCmdStats     MessageCommand = "stats"     // admin command
+	MessageCmdChains    MessageCommand = "chains"    // admin command
+	MessageCmdBroadcast MessageCommand = "broadcast" // admin command
+)
+
 type CallbackCommand string
 
 const (
-	CallbackCmdShowSubscription CallbackCommand = "SHOW_SUBSCRIPTION"
-	CallbackCmdShowProposals    CallbackCommand = "SHOW_PROPOSALS"
-	CallbackCmdShowHelp         CallbackCommand = "SHOW_HELP"
-	CallbackCmdShowSupport      CallbackCommand = "SHOW_SUPPORT"
-	CallbackCmdEnableChains     CallbackCommand = "ENABLE_CHAINS"
+	CallbackCmdShowSubscriptions CallbackCommand = "SHOW_SUBSCRIPTION"
+	CallbackCmdShowProposals     CallbackCommand = "SHOW_PROPOSALS"
+	CallbackCmdShowHelp          CallbackCommand = "SHOW_HELP"
+	CallbackCmdShowSupport       CallbackCommand = "SHOW_SUPPORT"
+
+	CallbackCmdStats        CallbackCommand = "STATS"         // admin command
+	CallbackCmdEnableChains CallbackCommand = "ENABLE_CHAINS" // admin command
+	CallbackCmdBroadcast    CallbackCommand = "BROADCAST"     // admin command
 )
 
 type CallbackData struct {
@@ -196,7 +213,7 @@ func createMenuButtonConfig() MenuButtonConfig {
 func getMenuButtonRow(config MenuButtonConfig) []Button {
 	var buttonRow []Button
 	if config.ShowSubscriptions {
-		buttonRow = append(buttonRow, NewButton("🔔 Subscriptions", CallbackData{Command: CallbackCmdShowSubscription}))
+		buttonRow = append(buttonRow, NewButton("🔔 Subscriptions", CallbackData{Command: CallbackCmdShowSubscriptions}))
 	}
 	if config.ShowProposals {
 		buttonRow = append(buttonRow, NewButton("🗳 Proposals", CallbackData{Command: CallbackCmdShowProposals}))
@@ -207,5 +224,29 @@ func getMenuButtonRow(config MenuButtonConfig) []Button {
 	if config.ShowSupport {
 		buttonRow = append(buttonRow, NewButton("💰 Support", CallbackData{Command: CallbackCmdShowSupport}))
 	}
+	return buttonRow
+}
+
+type BotAdminMenuButtonConfig struct {
+	ShowStats     bool
+	ShowChains    bool
+	ShowBroadcast bool
+}
+
+func createBotAdminMenuButtonConfig() BotAdminMenuButtonConfig {
+	return BotAdminMenuButtonConfig{ShowStats: true, ShowChains: true, ShowBroadcast: true}
+}
+
+func getBotAdminMenuButtonRow(config BotAdminMenuButtonConfig) []Button {
+	var buttonRow []Button
+	if config.ShowStats {
+		buttonRow = append(buttonRow, NewButton("📈 Stats", CallbackData{Command: CallbackCmdStats}))
+	}
+	//if config.ShowChains {
+	//	buttonRow = append(buttonRow, NewButton("🔗 Chains", CallbackData{Command: CallbackCmdEnableChains}))
+	//}
+	//if config.ShowBroadcast {
+	//	buttonRow = append(buttonRow, NewButton("🔊 Broadcast", CallbackData{Command: CallbackCmdBroadcast}))
+	//}
 	return buttonRow
 }
