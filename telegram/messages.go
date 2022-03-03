@@ -39,7 +39,7 @@ func sendSubscriptions(update *tgbotapi.Update) {
 		if c.Notify {
 			symbol = "✅ "
 		}
-		callbackData := CallbackData{Command: CallbackCommandCHANGE_SUBSCRIPTION, Data: c.Name}
+		callbackData := CallbackData{Command: CallbackCmdChangeSubscription, Data: c.Name}
 		buttonRow = append(buttonRow, NewButton(symbol+c.DisplayName, callbackData))
 		if (ix+1)%NbrOfButtonsPerRow == 0 || ix == len(chains)-1 {
 			buttons = append(buttons, buttonRow)
@@ -112,5 +112,13 @@ func sendSupport(update *tgbotapi.Update) {
 	msg := tgbotapi.NewMessage(chatId, supportMsg)
 	msg.DisableWebPagePreview = true
 	msg.ParseMode = "html"
+	sendMessageX(msg)
+}
+
+func sendError(update *tgbotapi.Update) {
+	chatId := getChatIdX(update)
+	log.Sugar.Debugf("Send error msg to user #%v", chatId)
+	text := errMsg
+	msg := tgbotapi.NewMessage(chatId, text)
 	sendMessageX(msg)
 }

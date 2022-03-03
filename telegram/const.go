@@ -58,3 +58,5 @@ You can support us by staking to our validator service <b>DeCrypto</b> on <a hre
 You have a good idea, feedback or want to contribute in other ways? Shoot a message to @rapha_decrypto`
 
 const newChainsMsg = `Select the chains that should be enabled for everyone`
+
+const errMsg = `There was an unknown error`

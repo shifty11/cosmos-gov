@@ -31,8 +31,8 @@ func getApi() *tgbotapi.BotAPI {
 type CallbackCommand string
 
 const (
-	CallbackCommandCHANGE_SUBSCRIPTION CallbackCommand = "CHANGE_SUBSCRIPTION"
-	CallbackCommandENABLE_CHAINS       CallbackCommand = "ENABLE_CHAINS "
+	CallbackCmdChangeSubscription CallbackCommand = "CHANGE_SUBSCRIPTION"
+	CallbackCmdEnableChains       CallbackCommand = "ENABLE_CHAINS "
 )
 
 type CallbackData struct {
