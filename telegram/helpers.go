@@ -50,8 +50,8 @@ const (
 	CallbackCmdShowHelp          CallbackCommand = "SHOW_HELP"
 	CallbackCmdShowSupport       CallbackCommand = "SHOW_SUPPORT"
 
-	CallbackCmdStats CallbackCommand = "STATS" // admin command
-	//CallbackCmdEnableChains CallbackCommand = "ENABLE_CHAINS" // admin command
+	CallbackCmdStats        CallbackCommand = "STATS"         // admin command
+	CallbackCmdEnableChains CallbackCommand = "ENABLE_CHAINS" // admin command
 	//CallbackCmdBroadcast    CallbackCommand = "BROADCAST"     // admin command
 )
 
@@ -228,13 +228,13 @@ func getMenuButtonRow(config MenuButtonConfig) []Button {
 }
 
 type BotAdminMenuButtonConfig struct {
-	ShowStats     bool
-	ShowChains    bool
-	ShowBroadcast bool
+	ShowStats  bool
+	ShowChains bool
+	//ShowBroadcast bool
 }
 
 func createBotAdminMenuButtonConfig() BotAdminMenuButtonConfig {
-	return BotAdminMenuButtonConfig{ShowStats: true, ShowChains: true, ShowBroadcast: true}
+	return BotAdminMenuButtonConfig{ShowStats: true, ShowChains: true}
 }
 
 func getBotAdminMenuButtonRow(config BotAdminMenuButtonConfig) []Button {
@@ -242,9 +242,9 @@ func getBotAdminMenuButtonRow(config BotAdminMenuButtonConfig) []Button {
 	if config.ShowStats {
 		buttonRow = append(buttonRow, NewButton("📈 Stats", CallbackData{Command: CallbackCmdStats}))
 	}
-	//if config.ShowChains {
-	//	buttonRow = append(buttonRow, NewButton("🔗 Chains", CallbackData{Command: CallbackCmdEnableChains}))
-	//}
+	if config.ShowChains {
+		buttonRow = append(buttonRow, NewButton("🔗 Chains", CallbackData{Command: CallbackCmdEnableChains}))
+	}
 	//if config.ShowBroadcast {
 	//	buttonRow = append(buttonRow, NewButton("🔊 Broadcast", CallbackData{Command: CallbackCmdBroadcast}))
 	//}

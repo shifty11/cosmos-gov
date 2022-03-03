@@ -140,28 +140,31 @@ func sendChains(update *tgbotapi.Update) {
 			buttonRow = []Button{}
 		}
 	}
+
+	config := createMenuButtonConfig()
+	config.ShowSubscriptions = false
+	buttons = append(buttons, getMenuButtonRow(config))
+	if isBotAdmin(update) {
+		botAdminConfig := createBotAdminMenuButtonConfig()
+		botAdminConfig.ShowChains = false
+		buttons = append(buttons, getBotAdminMenuButtonRow(botAdminConfig))
+	}
 	replyMarkup := createKeyboard(buttons)
 
 	if update.CallbackQuery == nil {
-		text := newChainsMsg
-		msg := tgbotapi.NewMessage(chatId, text)
+		msg := tgbotapi.NewMessage(chatId, newChainsMsg)
 		msg.ReplyMarkup = replyMarkup
 		err := sendMessage(msg)
 		if err != nil {
 			log.Sugar.Errorf("Error while sendChains for user #%v: %v", chatId, err)
 		}
 	} else {
-		msg := tgbotapi.EditMessageTextConfig{
-			BaseEdit: tgbotapi.BaseEdit{ChatID: chatId,
-				MessageID:   update.CallbackQuery.Message.MessageID,
-				ReplyMarkup: &replyMarkup,
-			},
-			Text: newChainsMsg,
-		}
+		msg := tgbotapi.NewEditMessageText(chatId, update.CallbackQuery.Message.MessageID, newChainsMsg)
+		msg.ReplyMarkup = &replyMarkup
 		answerCallbackQuery(update)
 		err := sendMessage(msg)
 		if err != nil {
-			log.Sugar.Errorf("Error while sendChains for user #%v: %v", chatId, err)
+			log.Sugar.Debugf("Error while sendChains for user #%v: %v", chatId, err)
 		}
 	}
 }
