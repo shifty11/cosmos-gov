@@ -30,7 +30,7 @@ func startProposalFetching() {
 
 func startNewChainFetching() {
 	c := cron.New()
-	_, err := c.AddFunc("0 10 * * 1", func() { datasource.AddNewChains() }) // execute every Monday at 10.00
+	_, err := c.AddFunc("0 10 * * *", func() { datasource.AddNewChains() }) // execute every Monday at 10.00
 	if err != nil {
 		log.Sugar.Errorf("while executing 'datasource.AddNewChains()' via cron: %v", err)
 	}
