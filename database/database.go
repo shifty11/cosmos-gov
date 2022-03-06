@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"github.com/shifty11/cosmos-gov/ent/chain"
 	"github.com/shifty11/cosmos-gov/ent/migrate"
 	"os"
 
@@ -47,4 +48,5 @@ func MigrateDatabase() {
 	if err != nil {
 		log.Sugar.Panic("Failed creating schema resources: %v", err)
 	}
+	client.Chain.Update().Where(chain.DisplayName("Fetchhub")).SetDisplayName("Fetch.ai").SaveX(ctx)
 }
