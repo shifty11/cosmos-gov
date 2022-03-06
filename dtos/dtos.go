@@ -39,6 +39,7 @@ type ChainStatistic struct {
 	DisplayName   string `json:"display_name"`
 	Proposals     int
 	Subscriptions int
+	IsEnabled     bool `json:"is_enabled"`
 }
 
 type ProposalOverview struct {

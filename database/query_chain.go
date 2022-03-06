@@ -118,8 +118,8 @@ func GetChainStatistics() (*[]dtos.ChainStatistic, error) {
 	client, ctx := connect()
 	var chainsWithNotifications []dtos.ChainStatistic
 	err := client.Chain.Query().
-		Order(ent.Asc(chain.FieldDisplayName)).
-		GroupBy(chain.FieldDisplayName).
+		Order(ent.Desc(chain.FieldIsEnabled), ent.Asc(chain.FieldDisplayName)).
+		GroupBy(chain.FieldIsEnabled, chain.FieldDisplayName).
 		Aggregate(
 			func(s *sql.Selector) string {
 				t := sql.Table(chain.UsersTable)
@@ -133,8 +133,8 @@ func GetChainStatistics() (*[]dtos.ChainStatistic, error) {
 	}
 	var chainsWithProposals []dtos.ChainStatistic
 	err = client.Chain.Query().
-		Order(ent.Asc(chain.FieldDisplayName)).
-		GroupBy(chain.FieldDisplayName).
+		Order(ent.Desc(chain.FieldIsEnabled), ent.Asc(chain.FieldDisplayName)).
+		GroupBy(chain.FieldIsEnabled, chain.FieldDisplayName).
 		Aggregate(
 			func(s *sql.Selector) string {
 				t := sql.Table(chain.ProposalsTable)
