@@ -45,7 +45,7 @@ func sendUserStatistics(update *tgbotapi.Update) {
 	sumProposals := 0
 	sumChains := 0
 	for _, chain := range *chainStatistics {
-		chainMsg += fmt.Sprintf(chainStatisticRowMsg, strings.Title(chain.DisplayName), chain.Proposals, chain.Subscriptions)
+		chainMsg += fmt.Sprintf(chainStatisticRowMsg, chain.DisplayName, chain.Proposals, chain.Subscriptions)
 		sumSubscriptions += chain.Subscriptions
 		sumProposals += chain.Proposals
 		sumChains += 1
