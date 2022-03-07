@@ -68,7 +68,7 @@ func sendUserStatistics(update *tgbotapi.Update) {
 		msg.ParseMode = "markdown"
 		err := sendMessage(msg)
 		if err != nil {
-			log.Sugar.Errorf("Error while sendSubscriptions for user #%v: %v", chatId, err)
+			log.Sugar.Errorf("Error while sendUserStatistics for user #%v: %v", chatId, err)
 		}
 	} else {
 		msg := tgbotapi.NewEditMessageText(chatId, update.CallbackQuery.Message.MessageID, text)
@@ -77,7 +77,7 @@ func sendUserStatistics(update *tgbotapi.Update) {
 		answerCallbackQuery(update)
 		err := sendMessage(msg)
 		if err != nil {
-			log.Sugar.Debugf("Error while sendSubscriptions for user #%v: %v", chatId, err)
+			log.Sugar.Debugf("Error while sendUserStatistics for user #%v: %v", chatId, err)
 		}
 	}
 }
