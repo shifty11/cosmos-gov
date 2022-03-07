@@ -47,9 +47,9 @@ const adminHelpMsg = `<b>Admin Commands</b>
 /chains - Manage chains
 /broadcast - Broadcast message to everyone`
 
-const supportMsg = `We would like to continue developing this bot and other products that improve the Cosmos ecosystem.
+const supportMsg = `I would like to continue developing this bot and other products that improve the Cosmos ecosystem.
 
-You can support us by staking to my validator service <b>DeCrypto</b> on <a href='https://ping.pub/dig/staking/digvaloper1fhp54fwlfmpwwgrnfwk3v47v53yjtp8fw6nelw'>Dig</a>.
+You can support me by staking to my validator <b>DeCrypto</b> on <a href='https://ping.pub/dig/staking/digvaloper1fhp54fwlfmpwwgrnfwk3v47v53yjtp8fw6nelw'>Dig</a> and <a href='https://www.mintscan.io/lum/validators/lumvaloper18rd4dk828pfgw680hr93rxjfmj8zvr5xc03hd3'>Lum</a>.
 
 You have a good idea, feedback or want to contribute in other ways? Shoot a message to @rapha_decrypto`
 
