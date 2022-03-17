@@ -19,7 +19,7 @@ func performUpdateSubscription(update *tgbotapi.Update, chainName string) {
 	}
 }
 
-// Enables or disables a chain for all user. Can only be performed by botadmins.
+// Enables or disables a chain for all users. Can only be performed by botadmins.
 func performToggleChain(chainName string) {
 	if chainName == "" {
 		return
