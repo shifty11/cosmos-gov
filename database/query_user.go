@@ -9,18 +9,22 @@ import (
 	"time"
 )
 
-func getOrCreateUser(chatId int64) *ent.User {
+func getOrCreateUser(chatId int64, userType user.Type) *ent.User {
 	client, ctx := connect()
 	var userDto *ent.User
 	var err error
 	userDto, err = client.User.
 		Query().
-		Where(user.ChatIDEQ(chatId)).
+		Where(
+			user.And(
+				user.ChatIDEQ(chatId), user.TypeEQ(userType),
+			)).
 		Only(ctx)
 	if err != nil {
 		userDto, err = client.User.
 			Create().
 			SetChatID(chatId).
+			SetType(userType).
 			Save(ctx)
 		if err != nil {
 			log.Sugar.Panic("Error while creating user: %v", err)
@@ -29,21 +33,54 @@ func getOrCreateUser(chatId int64) *ent.User {
 	return userDto
 }
 
-func DeleteUser(chatId int64) {
+func DeleteUser(chatId int64, userType user.Type) {
 	client, ctx := connect()
 	_, err := client.User.
 		Delete().
-		Where(user.ChatIDEQ(chatId)).
+		Where(
+			user.And(
+				user.ChatIDEQ(chatId),
+				user.TypeEQ(userType),
+			)).
 		Exec(ctx)
 	if err != nil {
 		log.Sugar.Errorf("Error while deleting user: %v", err)
 	}
 }
 
-func GetChatIds(chainDb *ent.Chain) []int {
+func DeleteUsers(chatIds []int64, userType user.Type) {
+	client, ctx := connect()
+	_, err := client.User.
+		Delete().
+		Where(
+			user.And(
+				user.ChatIDIn(chatIds...),
+				user.TypeEQ(userType),
+			)).
+		Exec(ctx)
+	if err != nil {
+		log.Sugar.Errorf("Error while deleting users: %v", err)
+	}
+}
+
+func GetTelegramChatIds(chainDb *ent.Chain) []int {
 	_, ctx := connect()
 	chatIds, err := chainDb.
 		QueryUsers().
+		Where(user.TypeEQ(user.TypeTelegram)).
+		Select(user.FieldChatID).
+		Ints(ctx)
+	if err != nil {
+		log.Sugar.Panicf("Error while querying chatIds for chain %v: %v", chainDb.Name, err)
+	}
+	return chatIds
+}
+
+func GetDiscordChatIds(chainDb *ent.Chain) []int {
+	_, ctx := connect()
+	chatIds, err := chainDb.
+		QueryUsers().
+		Where(user.TypeEQ(user.TypeDiscord)).
 		Select(user.FieldChatID).
 		Ints(ctx)
 	if err != nil {

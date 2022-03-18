@@ -55,6 +55,20 @@ func (uc *UserCreate) SetChatID(i int64) *UserCreate {
 	return uc
 }
 
+// SetType sets the "type" field.
+func (uc *UserCreate) SetType(u user.Type) *UserCreate {
+	uc.mutation.SetType(u)
+	return uc
+}
+
+// SetNillableType sets the "type" field if the given value is not nil.
+func (uc *UserCreate) SetNillableType(u *user.Type) *UserCreate {
+	if u != nil {
+		uc.SetType(*u)
+	}
+	return uc
+}
+
 // AddChainIDs adds the "chains" edge to the Chain entity by IDs.
 func (uc *UserCreate) AddChainIDs(ids ...int) *UserCreate {
 	uc.mutation.AddChainIDs(ids...)
@@ -149,6 +163,10 @@ func (uc *UserCreate) defaults() {
 		v := user.DefaultUpdatedAt()
 		uc.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := uc.mutation.GetType(); !ok {
+		v := user.DefaultType
+		uc.mutation.SetType(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -161,6 +179,14 @@ func (uc *UserCreate) check() error {
 	}
 	if _, ok := uc.mutation.ChatID(); !ok {
 		return &ValidationError{Name: "chat_id", err: errors.New(`ent: missing required field "User.chat_id"`)}
+	}
+	if _, ok := uc.mutation.GetType(); !ok {
+		return &ValidationError{Name: "type", err: errors.New(`ent: missing required field "User.type"`)}
+	}
+	if v, ok := uc.mutation.GetType(); ok {
+		if err := user.TypeValidator(v); err != nil {
+			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "User.type": %w`, err)}
+		}
 	}
 	return nil
 }
@@ -212,6 +238,14 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Column: user.FieldChatID,
 		})
 		_node.ChatID = value
+	}
+	if value, ok := uc.mutation.GetType(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: user.FieldType,
+		})
+		_node.Type = value
 	}
 	if nodes := uc.mutation.ChainsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

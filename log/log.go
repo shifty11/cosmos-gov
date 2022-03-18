@@ -31,7 +31,7 @@ func addSentryToLogger(log *zap.Logger) *zap.Logger {
 var Sugar *zap.SugaredLogger
 var logger *zap.Logger
 
-func InitLogger() {
+func init() {
 	if logger == nil {
 		logger, err := zap.NewProduction()
 		if os.Getenv("DEBUG") == "true" {

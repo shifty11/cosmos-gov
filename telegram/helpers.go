@@ -5,6 +5,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/shifty11/cosmos-gov/common"
 	"github.com/shifty11/cosmos-gov/database"
+	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/log"
 	"math"
 	"os"
@@ -165,7 +166,7 @@ func handleError(chatId int, err error) {
 	if err != nil {
 		if common.Contains(forbiddenErrors, err.Error()) {
 			log.Sugar.Debugf("Delete user #%v", chatId)
-			database.DeleteUser(int64(chatId))
+			database.DeleteUser(int64(chatId), user.TypeTelegram)
 		} else {
 			log.Sugar.Errorf("Error while sending message to chat #%v: %v", chatId, err)
 		}

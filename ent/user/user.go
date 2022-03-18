@@ -3,6 +3,7 @@
 package user
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -17,6 +18,8 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldChatID holds the string denoting the chat_id field in the database.
 	FieldChatID = "chat_id"
+	// FieldType holds the string denoting the type field in the database.
+	FieldType = "type"
 	// EdgeChains holds the string denoting the chains edge name in mutations.
 	EdgeChains = "chains"
 	// Table holds the table name of the user in the database.
@@ -34,6 +37,7 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldChatID,
+	FieldType,
 }
 
 var (
@@ -60,3 +64,29 @@ var (
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
 )
+
+// Type defines the type for the "type" enum field.
+type Type string
+
+// TypeTelegram is the default value of the Type enum.
+const DefaultType = TypeTelegram
+
+// Type values.
+const (
+	TypeTelegram Type = "telegram"
+	TypeDiscord  Type = "discord"
+)
+
+func (_type Type) String() string {
+	return string(_type)
+}
+
+// TypeValidator is a validator for the "type" field enum values. It is called by the builders before save.
+func TypeValidator(_type Type) error {
+	switch _type {
+	case TypeTelegram, TypeDiscord:
+		return nil
+	default:
+		return fmt.Errorf("user: invalid enum value for type field: %q", _type)
+	}
+}

@@ -5,6 +5,7 @@ import (
 	"github.com/robfig/cron/v3"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/datasource"
+	"github.com/shifty11/cosmos-gov/discord"
 	"github.com/shifty11/cosmos-gov/log"
 	"github.com/shifty11/cosmos-gov/telegram"
 	"os"
@@ -13,6 +14,7 @@ import (
 
 func initDatabase() {
 	database.MigrateDatabase()
+	database.DropProposals()
 }
 
 func startProposalFetching() {
@@ -40,8 +42,11 @@ func startTelegramServer() {
 	go telegram.Listen()
 }
 
+func startDiscordServer() {
+	go discord.Start()
+}
+
 func main() {
-	log.InitLogger()
 	defer log.SyncLogger() // flushes buffer, if any
 
 	defer database.Close()
@@ -53,6 +58,8 @@ func main() {
 		startNewChainFetching()
 	} else if len(args) > 0 && args[0] == "telegram" {
 		startTelegramServer()
+	} else if len(args) > 0 && args[0] == "discord" {
+		startDiscordServer()
 	} else {
 		initDatabase()
 		startProposalFetching()

@@ -90,7 +90,8 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "chat_id", Type: field.TypeInt64, Unique: true},
+		{Name: "chat_id", Type: field.TypeInt64},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"telegram", "discord"}, Default: "telegram"},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
@@ -99,9 +100,9 @@ var (
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
 		Indexes: []*schema.Index{
 			{
-				Name:    "user_chat_id",
+				Name:    "user_chat_id_type",
 				Unique:  true,
-				Columns: []*schema.Column{UsersColumns[3]},
+				Columns: []*schema.Column{UsersColumns[3], UsersColumns[4]},
 			},
 		},
 	}

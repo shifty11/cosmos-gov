@@ -4,6 +4,7 @@ import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/shifty11/cosmos-gov/database"
+	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/log"
 )
 
@@ -31,7 +32,7 @@ type StateData struct {
 func sendSubscriptions(update *tgbotapi.Update) {
 	chatId := getChatIdX(update)
 	log.Sugar.Debugf("Send subscriptions to user #%v", chatId)
-	chains := database.GetChainsForUser(chatId)
+	chains := database.GetChainsForUser(chatId, user.TypeTelegram)
 
 	var buttons [][]Button
 	var buttonRow []Button

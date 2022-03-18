@@ -22,8 +22,10 @@ func (User) Fields() []ent.Field {
 		field.Time("updated_at").
 			Default(time.Now).
 			UpdateDefault(time.Now),
-		field.Int64("chat_id").
-			Unique(),
+		field.Int64("chat_id"),
+		field.Enum("type").
+			Values("telegram", "discord").
+			Default("telegram"),
 	}
 }
 
@@ -36,7 +38,7 @@ func (User) Edges() []ent.Edge {
 
 func (User) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("chat_id").
+		index.Fields("chat_id", "type").
 			Unique(),
 	}
 }

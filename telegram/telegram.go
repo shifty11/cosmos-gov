@@ -3,6 +3,8 @@ package telegram
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/shifty11/cosmos-gov/common"
+	"github.com/shifty11/cosmos-gov/database"
+	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/log"
 	"strings"
 )
@@ -110,7 +112,7 @@ func handleCallbackQuery(update *tgbotapi.Update) {
 	callbackData := ToCallbackData(update.CallbackQuery.Data)
 	switch callbackData.Command {
 	case CallbackCmdShowSubscriptions:
-		performUpdateSubscription(update, callbackData.Data)
+		database.PerformUpdateSubscription(getChatIdX(update), user.TypeTelegram, callbackData.Data)
 		sendSubscriptions(update)
 	case CallbackCmdShowProposals:
 		sendCurrentProposals(update)
@@ -220,7 +222,7 @@ func manageUpdateChannels() {
 }
 
 func Listen() {
-	log.Sugar.Info("Start listening for messages")
+	log.Sugar.Info("Start telegram bot")
 	api := getApi()
 
 	updateConfig := tgbotapi.NewUpdate(0)
@@ -238,19 +240,5 @@ func Listen() {
 		}
 
 		sendToChannel(&update)
-	}
-}
-
-func SendProposal(proposalId uint64, chainName string, proposalText string, chatIds []int) {
-	for _, chatId := range chatIds {
-		if len(proposalText) > 4096 {
-			proposalText = proposalText[:4093] + "..."
-		}
-		msg := tgbotapi.NewMessage(int64(chatId), proposalText)
-		msg.ParseMode = "html"
-		msg.DisableWebPagePreview = true
-		log.Sugar.Debugf("Send proposal #%v on %v to chat #%v", proposalId, chainName, chatId)
-		err := sendMessage(msg)
-		handleError(chatId, err)
 	}
 }
