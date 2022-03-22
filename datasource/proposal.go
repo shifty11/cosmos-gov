@@ -151,7 +151,7 @@ func checkForStatusUpdates(chain *ent.Chain) {
 	pageRequest := querytypes.PageRequest{
 		Key:        nil,
 		Offset:     0,
-		Limit:      uint64(len(votingProposals)) + 3,
+		Limit:      uint64(len(votingProposals)) + 10,
 		CountTotal: false,
 		Reverse:    true,
 	}

@@ -61,14 +61,6 @@ func (uc *UserCreate) SetType(u user.Type) *UserCreate {
 	return uc
 }
 
-// SetNillableType sets the "type" field if the given value is not nil.
-func (uc *UserCreate) SetNillableType(u *user.Type) *UserCreate {
-	if u != nil {
-		uc.SetType(*u)
-	}
-	return uc
-}
-
 // AddChainIDs adds the "chains" edge to the Chain entity by IDs.
 func (uc *UserCreate) AddChainIDs(ids ...int) *UserCreate {
 	uc.mutation.AddChainIDs(ids...)
@@ -162,10 +154,6 @@ func (uc *UserCreate) defaults() {
 	if _, ok := uc.mutation.UpdatedAt(); !ok {
 		v := user.DefaultUpdatedAt()
 		uc.mutation.SetUpdatedAt(v)
-	}
-	if _, ok := uc.mutation.GetType(); !ok {
-		v := user.DefaultType
-		uc.mutation.SetType(v)
 	}
 }
 

@@ -24,8 +24,7 @@ func (User) Fields() []ent.Field {
 			UpdateDefault(time.Now),
 		field.Int64("chat_id"),
 		field.Enum("type").
-			Values("telegram", "discord").
-			Default("telegram"),
+			Values("telegram", "discord"),
 	}
 }
 

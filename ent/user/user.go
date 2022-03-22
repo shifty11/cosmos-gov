@@ -68,9 +68,6 @@ var (
 // Type defines the type for the "type" enum field.
 type Type string
 
-// TypeTelegram is the default value of the Type enum.
-const DefaultType = TypeTelegram
-
 // Type values.
 const (
 	TypeTelegram Type = "telegram"

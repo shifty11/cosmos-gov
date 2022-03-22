@@ -54,14 +54,6 @@ func (uu *UserUpdate) SetType(u user.Type) *UserUpdate {
 	return uu
 }
 
-// SetNillableType sets the "type" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableType(u *user.Type) *UserUpdate {
-	if u != nil {
-		uu.SetType(*u)
-	}
-	return uu
-}
-
 // AddChainIDs adds the "chains" edge to the Chain entity by IDs.
 func (uu *UserUpdate) AddChainIDs(ids ...int) *UserUpdate {
 	uu.mutation.AddChainIDs(ids...)
@@ -323,14 +315,6 @@ func (uuo *UserUpdateOne) AddChatID(i int64) *UserUpdateOne {
 // SetType sets the "type" field.
 func (uuo *UserUpdateOne) SetType(u user.Type) *UserUpdateOne {
 	uuo.mutation.SetType(u)
-	return uuo
-}
-
-// SetNillableType sets the "type" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableType(u *user.Type) *UserUpdateOne {
-	if u != nil {
-		uuo.SetType(*u)
-	}
 	return uuo
 }
 
