@@ -47,9 +47,9 @@ func SendProposals(entProp *ent.Proposal, entChain *ent.Chain) []int64 {
 
 	description := strings.Replace(entProp.Description, "*", "", -1)
 
-	text := fmt.Sprintf("🎉  **%v - Proposal %v\n\n%v**\n\n*%v*", entChain.DisplayName, entProp.ProposalID, entProp.Title, description)
+	text := fmt.Sprintf("🎉  **%v - Proposal %v\n\n%v**\n\n%v", entChain.DisplayName, entProp.ProposalID, entProp.Title, description)
 	if len(text) > 2000 {
-		text = text[:1995] + "* ..."
+		text = text[:1997] + "..."
 	}
 
 	var errIds []int64

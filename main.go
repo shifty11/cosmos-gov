@@ -39,7 +39,7 @@ func startNewChainFetching() {
 }
 
 func startTelegramServer() {
-	go telegram.Listen()
+	go telegram.Start()
 }
 
 func startDiscordServer() {
@@ -65,6 +65,7 @@ func main() {
 		startProposalFetching()
 		startNewChainFetching()
 		startTelegramServer()
+		startDiscordServer()
 	}
 
 	time.Sleep(time.Duration(1<<63 - 1))

@@ -1,16 +1,15 @@
 package discord
 
 import (
+	"fmt"
 	"github.com/bwmarrin/discordgo"
+	"github.com/shifty11/cosmos-gov/common"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/dtos"
 	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/log"
+	"strings"
 )
-
-//const cmdSubscriptions = "subscriptions"
-const cmdSubscriptions = "subs"
-const subscriptionsMsg = `Select the projects that you want to follow. You will receive notifications about new governance proposals once they enter the voting period.`
 
 const NbrOfButtonsPerRow = 5
 
@@ -26,7 +25,7 @@ func createKeyboard(chains *[]dtos.Chain) []discordgo.MessageComponent {
 			Label:    symbol + " " + c.DisplayName,
 			Style:    discordgo.SecondaryButton,
 			Disabled: false,
-			CustomID: cmdSubscriptions + ":" + c.Name,
+			CustomID: common.SubscriptionCmd + ":" + c.Name,
 		}
 		buttons = append(buttons, button)
 		if (ix+1)%NbrOfButtonsPerRow == 0 || ix == len(*chains)-1 {
@@ -70,19 +69,27 @@ func getSpecificChunk(chunks *[][]dtos.Chain, name string) *[]dtos.Chain {
 var (
 	cmds = []*discordgo.ApplicationCommand{
 		{
-			Name:        cmdSubscriptions,
-			Description: "Edit your Subscriptions",
+			Name:        common.SubscriptionCmd,
+			Description: "Manage your Subscriptions",
 		},
+		{
+			Name:        common.ProposalsCmd,
+			Description: "Show ongoing proposals",
+		},
+		//{
+		//	Name:        common.SupportCmd,
+		//	Description: "Show ongoing proposals",
+		//},
 	}
 	cmdHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
-		cmdSubscriptions: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			userId := getChannelId(i)
+		common.SubscriptionCmd: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			channelId := getChannelId(i)
 
-			chains := chunks(database.GetChainsForUser(userId, user.TypeDiscord), 25)
+			chains := chunks(database.GetChainsForUser(channelId, user.TypeDiscord), 25)
 			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content:    subscriptionsMsg,
+					Content:    common.SubscriptionsMsg,
 					Components: createKeyboard(&chains[0]),
 				},
 			})
@@ -101,12 +108,42 @@ var (
 				}
 			}
 		},
+		common.ProposalsCmd: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			channelId := getChannelId(i)
+
+			text := common.GetOngoingProposalsText(channelId, user.TypeDiscord)
+			text = strings.Replace(text, "*", "**", -1)
+
+			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Content: text,
+				},
+			})
+			if err != nil {
+				log.Sugar.Errorf("Error while sending subscriptions: %v", err)
+			}
+		},
+		common.SupportCmd: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			text := fmt.Sprintf(common.SupportMsg, "[Rapha](https://discordapp.com/users/228978159440232453/)")
+			text = strings.Replace(text, "*", "**", -1)
+
+			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Content: text,
+				},
+			})
+			if err != nil {
+				log.Sugar.Errorf("Error while sending subscriptions: %v", err)
+			}
+		},
 	}
 )
 
 var (
 	actionHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate, action string){
-		cmdSubscriptions: func(s *discordgo.Session, i *discordgo.InteractionCreate, action string) {
+		common.SubscriptionCmd: func(s *discordgo.Session, i *discordgo.InteractionCreate, action string) {
 			userId := getChannelId(i)
 
 			database.PerformUpdateSubscription(userId, user.TypeDiscord, action)

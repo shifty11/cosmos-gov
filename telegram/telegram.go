@@ -221,7 +221,7 @@ func manageUpdateChannels() {
 	}
 }
 
-func Listen() {
+func Start() {
 	log.Sugar.Info("Start telegram bot")
 	api := getApi()
 
