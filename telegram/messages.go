@@ -166,7 +166,7 @@ func sendSupport(update *tgbotapi.Update) {
 	}
 	replyMarkup := createKeyboard(buttons)
 
-	text := fmt.Sprintf(common.SupportMsg, "@rapha_decrypto")
+	text := fmt.Sprintf(common.SupportMsg, "@rapha\\_decrypto")
 	if update.CallbackQuery == nil {
 		msg := tgbotapi.NewMessage(chatId, text)
 		msg.ReplyMarkup = replyMarkup
