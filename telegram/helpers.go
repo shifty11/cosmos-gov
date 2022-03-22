@@ -222,9 +222,9 @@ func getMenuButtonRow(config MenuButtonConfig) []Button {
 	//if config.ShowHelp {
 	//	buttonRow = append(buttonRow, NewButton("🆘 Help", CallbackData{Command: CallbackCmdShowHelp}))
 	//}
-	if config.ShowSupport {
-		buttonRow = append(buttonRow, NewButton("💰 Support", CallbackData{Command: CallbackCmdShowSupport}))
-	}
+	//if config.ShowSupport {
+	//	buttonRow = append(buttonRow, NewButton("💰 Support", CallbackData{Command: CallbackCmdShowSupport}))
+	//}
 	return buttonRow
 }
 

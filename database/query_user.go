@@ -34,6 +34,7 @@ func getOrCreateUser(chatId int64, userType user.Type) *ent.User {
 }
 
 func DeleteUser(chatId int64, userType user.Type) {
+	log.Sugar.Debugf("Delete %v %v", userType, chatId)
 	client, ctx := connect()
 	_, err := client.User.
 		Delete().
@@ -49,6 +50,7 @@ func DeleteUser(chatId int64, userType user.Type) {
 }
 
 func DeleteUsers(chatIds []int64, userType user.Type) {
+	log.Sugar.Debugf("Delete %v %v's", len(chatIds), userType)
 	client, ctx := connect()
 	_, err := client.User.
 		Delete().
