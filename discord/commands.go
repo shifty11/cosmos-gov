@@ -111,8 +111,7 @@ var (
 		common.ProposalsCmd: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			channelId := getChannelId(i)
 
-			text := common.GetOngoingProposalsText(channelId, user.TypeDiscord)
-			text = strings.Replace(text, "*", "**", -1)
+			text := common.GetOngoingProposalsText(channelId, user.TypeDiscord, common.MsgFormatMarkdown)
 
 			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
