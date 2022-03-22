@@ -3,7 +3,9 @@ package telegram
 import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/shifty11/cosmos-gov/common"
 	"github.com/shifty11/cosmos-gov/database"
+	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/log"
 )
 
@@ -31,7 +33,7 @@ type StateData struct {
 func sendSubscriptions(update *tgbotapi.Update) {
 	chatId := getChatIdX(update)
 	log.Sugar.Debugf("Send subscriptions to user #%v", chatId)
-	chains := database.GetChainsForUser(chatId)
+	chains := database.GetChainsForUser(chatId, user.TypeTelegram)
 
 	var buttons [][]Button
 	var buttonRow []Button
@@ -57,15 +59,19 @@ func sendSubscriptions(update *tgbotapi.Update) {
 	replyMarkup := createKeyboard(buttons)
 
 	if update.CallbackQuery == nil {
-		msg := tgbotapi.NewMessage(chatId, subscriptionsMsg)
+		msg := tgbotapi.NewMessage(chatId, common.SubscriptionsMsg)
 		msg.ReplyMarkup = replyMarkup
+		msg.ParseMode = "markdown"
+		msg.DisableWebPagePreview = true
 		err := sendMessage(msg)
 		if err != nil {
 			log.Sugar.Errorf("Error while sendSubscriptions for user #%v: %v", chatId, err)
 		}
 	} else {
-		msg := tgbotapi.NewEditMessageText(chatId, update.CallbackQuery.Message.MessageID, subscriptionsMsg)
+		msg := tgbotapi.NewEditMessageText(chatId, update.CallbackQuery.Message.MessageID, common.SubscriptionsMsg)
 		msg.ReplyMarkup = &replyMarkup
+		msg.ParseMode = "markdown"
+		msg.DisableWebPagePreview = true
 		answerCallbackQuery(update)
 		err := sendMessage(msg)
 		if err != nil {
@@ -77,20 +83,8 @@ func sendSubscriptions(update *tgbotapi.Update) {
 func sendCurrentProposals(update *tgbotapi.Update) {
 	chatId := getChatIdX(update)
 	log.Sugar.Debugf("Send current proposals to user #%v", chatId)
-	text := proposalsMsg
-	chains := database.GetProposalsInVotingPeriodForUser(chatId)
-	if len(chains) == 0 {
-		text = noSubscriptionsMsg
-	} else {
-		for _, chain := range chains {
-			for _, prop := range chain.Edges.Proposals {
-				text += fmt.Sprintf("<b>%v #%d</b> %v\n\n", chain.DisplayName, prop.ProposalID, prop.Title)
-			}
-		}
-		if len(text) == len(proposalsMsg) {
-			text = noProposalsMsg
-		}
-	}
+
+	text := common.GetOngoingProposalsText(chatId, user.TypeTelegram)
 
 	config := createMenuButtonConfig()
 	config.ShowProposals = false
@@ -104,7 +98,7 @@ func sendCurrentProposals(update *tgbotapi.Update) {
 	if update.CallbackQuery == nil {
 		msg := tgbotapi.NewMessage(chatId, text)
 		msg.ReplyMarkup = replyMarkup
-		msg.ParseMode = "html"
+		msg.ParseMode = "markdown"
 		err := sendMessage(msg)
 		if err != nil {
 			log.Sugar.Errorf("Error while sendCurrentProposals for user #%v: %v", chatId, err)
@@ -112,7 +106,7 @@ func sendCurrentProposals(update *tgbotapi.Update) {
 	} else {
 		msg := tgbotapi.NewEditMessageText(chatId, update.CallbackQuery.Message.MessageID, text)
 		msg.ReplyMarkup = &replyMarkup
-		msg.ParseMode = "html"
+		msg.ParseMode = "markdown"
 		answerCallbackQuery(update)
 		err := sendMessage(msg)
 		if err != nil {
@@ -171,19 +165,20 @@ func sendSupport(update *tgbotapi.Update) {
 	}
 	replyMarkup := createKeyboard(buttons)
 
+	text := fmt.Sprintf(common.SupportMsg, "@rapha_decrypto")
 	if update.CallbackQuery == nil {
-		msg := tgbotapi.NewMessage(chatId, supportMsg)
+		msg := tgbotapi.NewMessage(chatId, text)
 		msg.ReplyMarkup = replyMarkup
-		msg.ParseMode = "html"
+		msg.ParseMode = "markdown"
 		msg.DisableWebPagePreview = true
 		err := sendMessage(msg)
 		if err != nil {
 			log.Sugar.Errorf("Error while sendSupport for user #%v: %v", chatId, err)
 		}
 	} else {
-		msg := tgbotapi.NewEditMessageText(chatId, update.CallbackQuery.Message.MessageID, supportMsg)
+		msg := tgbotapi.NewEditMessageText(chatId, update.CallbackQuery.Message.MessageID, text)
 		msg.ReplyMarkup = &replyMarkup
-		msg.ParseMode = "html"
+		msg.ParseMode = "markdown"
 		msg.DisableWebPagePreview = true
 		answerCallbackQuery(update)
 		err := sendMessage(msg)

@@ -2049,6 +2049,7 @@ type UserMutation struct {
 	updated_at    *time.Time
 	chat_id       *int64
 	addchat_id    *int64
+	_type         *user.Type
 	clearedFields map[string]struct{}
 	chains        map[int]struct{}
 	removedchains map[int]struct{}
@@ -2284,6 +2285,42 @@ func (m *UserMutation) ResetChatID() {
 	m.addchat_id = nil
 }
 
+// SetType sets the "type" field.
+func (m *UserMutation) SetType(u user.Type) {
+	m._type = &u
+}
+
+// GetType returns the value of the "type" field in the mutation.
+func (m *UserMutation) GetType() (r user.Type, exists bool) {
+	v := m._type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldType returns the old "type" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldType(ctx context.Context) (v user.Type, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldType: %w", err)
+	}
+	return oldValue.Type, nil
+}
+
+// ResetType resets all changes to the "type" field.
+func (m *UserMutation) ResetType() {
+	m._type = nil
+}
+
 // AddChainIDs adds the "chains" edge to the Chain entity by ids.
 func (m *UserMutation) AddChainIDs(ids ...int) {
 	if m.chains == nil {
@@ -2357,7 +2394,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 4)
 	if m.created_at != nil {
 		fields = append(fields, user.FieldCreatedAt)
 	}
@@ -2366,6 +2403,9 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m.chat_id != nil {
 		fields = append(fields, user.FieldChatID)
+	}
+	if m._type != nil {
+		fields = append(fields, user.FieldType)
 	}
 	return fields
 }
@@ -2381,6 +2421,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedAt()
 	case user.FieldChatID:
 		return m.ChatID()
+	case user.FieldType:
+		return m.GetType()
 	}
 	return nil, false
 }
@@ -2396,6 +2438,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldUpdatedAt(ctx)
 	case user.FieldChatID:
 		return m.OldChatID(ctx)
+	case user.FieldType:
+		return m.OldType(ctx)
 	}
 	return nil, fmt.Errorf("unknown User field %s", name)
 }
@@ -2425,6 +2469,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetChatID(v)
+		return nil
+	case user.FieldType:
+		v, ok := value.(user.Type)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetType(v)
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
@@ -2498,6 +2549,9 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldChatID:
 		m.ResetChatID()
+		return nil
+	case user.FieldType:
+		m.ResetType()
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)

@@ -8,8 +8,10 @@ import (
 	"github.com/liamylian/jsontime"
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/shifty11/cosmos-gov/database"
+	"github.com/shifty11/cosmos-gov/discord"
 	"github.com/shifty11/cosmos-gov/dtos"
 	"github.com/shifty11/cosmos-gov/ent"
+	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/log"
 	"github.com/shifty11/cosmos-gov/telegram"
 	"github.com/strangelove-ventures/lens/client"
@@ -104,13 +106,19 @@ func fetchProposals(chainId string, proposalStatus types.ProposalStatus, pageReq
 	return &proposals, nil
 }
 
-func saveAndSendProposals(props *dtos.Proposals, chainDb *ent.Chain) {
+func saveAndSendProposals(props *dtos.Proposals, entChain *ent.Chain) {
 	for _, prop := range props.Proposals {
-		propDb := database.CreateProposalIfNotExists(&prop, chainDb)
-		if propDb != nil && chainDb.IsEnabled {
-			chatIds := database.GetChatIds(chainDb)
-			text := fmt.Sprintf("<b>%v\n#%v - %v</b>\n%v", chainDb.DisplayName, propDb.ProposalID, propDb.Title, propDb.Description)
-			telegram.SendProposal(propDb.ProposalID, chainDb.DisplayName, text, chatIds)
+		entProp := database.CreateProposalIfNotExists(&prop, entChain)
+		if entProp != nil && entChain.IsEnabled {
+			errIds := telegram.SendProposals(entProp, entChain)
+			if len(errIds) > 0 {
+				database.DeleteUsers(errIds, user.TypeTelegram)
+			}
+
+			errIds = discord.SendProposals(entProp, entChain)
+			if len(errIds) > 0 {
+				database.DeleteUsers(errIds, user.TypeDiscord)
+			}
 		}
 	}
 }

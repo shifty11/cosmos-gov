@@ -22,6 +22,8 @@ type User struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// ChatID holds the value of the "chat_id" field.
 	ChatID int64 `json:"chat_id,omitempty"`
+	// Type holds the value of the "type" field.
+	Type user.Type `json:"type,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges UserEdges `json:"edges"`
@@ -52,6 +54,8 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case user.FieldID, user.FieldChatID:
 			values[i] = new(sql.NullInt64)
+		case user.FieldType:
+			values[i] = new(sql.NullString)
 		case user.FieldCreatedAt, user.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		default:
@@ -93,6 +97,12 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				u.ChatID = value.Int64
 			}
+		case user.FieldType:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field type", values[i])
+			} else if value.Valid {
+				u.Type = user.Type(value.String)
+			}
 		}
 	}
 	return nil
@@ -132,6 +142,8 @@ func (u *User) String() string {
 	builder.WriteString(u.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", chat_id=")
 	builder.WriteString(fmt.Sprintf("%v", u.ChatID))
+	builder.WriteString(", type=")
+	builder.WriteString(fmt.Sprintf("%v", u.Type))
 	builder.WriteByte(')')
 	return builder.String()
 }

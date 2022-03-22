@@ -109,12 +109,15 @@ func GetProposalsInVotingPeriod(chainName string) []*ent.Proposal {
 	return props
 }
 
-func GetProposalsInVotingPeriodForUser(chatId int64) []*ent.Chain {
+func GetProposalsInVotingPeriodForUser(chatId int64, userType user.Type) []*ent.Chain {
 	client, ctx := connect()
 	props, err := client.Chain.
 		Query().
 		Where(chain.And(
-			chain.HasUsersWith(user.ChatIDEQ(chatId)),
+			chain.HasUsersWith(user.And(
+				user.ChatIDEQ(chatId),
+				user.TypeEQ(userType),
+			)),
 		)).
 		Order(ent.Asc(chain.FieldName)).
 		WithProposals(func(q *ent.ProposalQuery) {

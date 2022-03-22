@@ -1,5 +1,5 @@
 [Unit]
-Description=Cosmos Gov data fetching
+Description=Cosmos Gov Discord Bot
 ConditionPathExists=/etc/cosmosgov/cosmos-gov/
 After=network.target
 
@@ -9,18 +9,16 @@ User=cosmosgov
 Group=cosmosgov
 
 WorkingDirectory=/etc/cosmosgov/cosmos-gov/
-ExecStart=/usr/local/go/bin/go run . fetching
+ExecStart=/usr/local/go/bin/go run . discord
 Restart=on-failure
 RestartSec=10
 StandardOutput=syslog
 StandardError=syslog
-SyslogIdentifier=cosmosgovdataservice
+SyslogIdentifier=cosmosgovdiscordservice
 
-Environment="TELEGRAM_TOKEN={{ cosmosgov_telegram_bot_token }}"
 Environment="DISCORD_TOKEN={{ cosmosgov_discord_bot_token }}"
 Environment="DATABASE_URL={{ cosmosgov_database_url }}"
 Environment="SENTRY_DSN={{ cosmosgov_sentry_dns }}"
-Environment="ADMIN_IDS={{ cosmosgov_telegram_bot_admins }}"
 Environment="DEBUG=true"
 
 [Install]

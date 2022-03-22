@@ -48,6 +48,20 @@ func (uu *UserUpdate) AddChatID(i int64) *UserUpdate {
 	return uu
 }
 
+// SetType sets the "type" field.
+func (uu *UserUpdate) SetType(u user.Type) *UserUpdate {
+	uu.mutation.SetType(u)
+	return uu
+}
+
+// SetNillableType sets the "type" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableType(u *user.Type) *UserUpdate {
+	if u != nil {
+		uu.SetType(*u)
+	}
+	return uu
+}
+
 // AddChainIDs adds the "chains" edge to the Chain entity by IDs.
 func (uu *UserUpdate) AddChainIDs(ids ...int) *UserUpdate {
 	uu.mutation.AddChainIDs(ids...)
@@ -97,12 +111,18 @@ func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 	)
 	uu.defaults()
 	if len(uu.hooks) == 0 {
+		if err = uu.check(); err != nil {
+			return 0, err
+		}
 		affected, err = uu.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*UserMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = uu.check(); err != nil {
+				return 0, err
 			}
 			uu.mutation = mutation
 			affected, err = uu.sqlSave(ctx)
@@ -152,6 +172,16 @@ func (uu *UserUpdate) defaults() {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (uu *UserUpdate) check() error {
+	if v, ok := uu.mutation.GetType(); ok {
+		if err := user.TypeValidator(v); err != nil {
+			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "User.type": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -189,6 +219,13 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeInt64,
 			Value:  value,
 			Column: user.FieldChatID,
+		})
+	}
+	if value, ok := uu.mutation.GetType(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: user.FieldType,
 		})
 	}
 	if uu.mutation.ChainsCleared() {
@@ -283,6 +320,20 @@ func (uuo *UserUpdateOne) AddChatID(i int64) *UserUpdateOne {
 	return uuo
 }
 
+// SetType sets the "type" field.
+func (uuo *UserUpdateOne) SetType(u user.Type) *UserUpdateOne {
+	uuo.mutation.SetType(u)
+	return uuo
+}
+
+// SetNillableType sets the "type" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableType(u *user.Type) *UserUpdateOne {
+	if u != nil {
+		uuo.SetType(*u)
+	}
+	return uuo
+}
+
 // AddChainIDs adds the "chains" edge to the Chain entity by IDs.
 func (uuo *UserUpdateOne) AddChainIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.AddChainIDs(ids...)
@@ -339,12 +390,18 @@ func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 	)
 	uuo.defaults()
 	if len(uuo.hooks) == 0 {
+		if err = uuo.check(); err != nil {
+			return nil, err
+		}
 		node, err = uuo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*UserMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = uuo.check(); err != nil {
+				return nil, err
 			}
 			uuo.mutation = mutation
 			node, err = uuo.sqlSave(ctx)
@@ -392,6 +449,16 @@ func (uuo *UserUpdateOne) defaults() {
 		v := user.UpdateDefaultUpdatedAt()
 		uuo.mutation.SetUpdatedAt(v)
 	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (uuo *UserUpdateOne) check() error {
+	if v, ok := uuo.mutation.GetType(); ok {
+		if err := user.TypeValidator(v); err != nil {
+			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "User.type": %w`, err)}
+		}
+	}
+	return nil
 }
 
 func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
@@ -448,6 +515,13 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Type:   field.TypeInt64,
 			Value:  value,
 			Column: user.FieldChatID,
+		})
+	}
+	if value, ok := uuo.mutation.GetType(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: user.FieldType,
 		})
 	}
 	if uuo.mutation.ChainsCleared() {
