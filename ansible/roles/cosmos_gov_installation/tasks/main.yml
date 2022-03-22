@@ -58,6 +58,14 @@
     group: root
     mode: 600
 
+- name: Copy cosmosgov-discord service file
+  template:
+    src: 'cosmosgov-discord.service.j2'
+    dest: '/etc/systemd/system/cosmosgov-discord.service'
+    owner: root
+    group: root
+    mode: 600
+
 - name: Start cosmosgov-data service
   systemd:
     name: cosmosgov-data
@@ -69,6 +77,14 @@
 - name: Start cosmosgov-telegram service
   systemd:
     name: cosmosgov-telegram
+    state: restarted
+    daemon_reload: true
+    enabled: true
+  changed_when: false
+
+- name: Start cosmosgov-discord service
+  systemd:
+    name: cosmosgov-discord
     state: restarted
     daemon_reload: true
     enabled: true
