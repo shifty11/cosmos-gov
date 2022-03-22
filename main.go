@@ -14,7 +14,6 @@ import (
 
 func initDatabase() {
 	database.MigrateDatabase()
-	database.DropProposals()
 }
 
 func startProposalFetching() {
