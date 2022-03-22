@@ -125,10 +125,11 @@ func GetUserStatistics() (*dtos.UserStatistic, error) {
 	}, nil
 }
 
-func GetAllUserChatIds() []int {
+func GetAllUserChatIds(userType user.Type) []int {
 	client, ctx := connect()
 	chatIds, err := client.User.
 		Query().
+		Where(user.TypeEQ(userType)).
 		Select(user.FieldChatID).
 		Ints(ctx)
 	if err != nil {

@@ -5,6 +5,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/shifty11/cosmos-gov/common"
 	"github.com/shifty11/cosmos-gov/database"
+	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/log"
 	"os"
 	"strconv"
@@ -102,7 +103,7 @@ func sendConfirmBroadcastMessage(update *tgbotapi.Update, text string) {
 }
 
 func sendBroadcastMessage(text string) {
-	chatIds := database.GetAllUserChatIds()
+	chatIds := database.GetAllUserChatIds(user.TypeTelegram)
 	log.Sugar.Debugf("Broadcast message to %v users", len(chatIds))
 	for _, chatId := range chatIds {
 		broadcastMsg := tgbotapi.NewMessage(int64(chatId), text)
