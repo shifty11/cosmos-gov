@@ -91,24 +91,31 @@ func GetDiscordChatIds(chainDb *ent.Chain) []int {
 	return chatIds
 }
 
-func GetUserStatistics() (*dtos.UserStatistic, error) {
+func GetUserStatistics(userType user.Type) (*dtos.UserStatistic, error) {
 	client, ctx := connect()
 	cntAll, err := client.User.
 		Query().
+		Where(user.TypeEQ(userType)).
 		Count(ctx)
 	if err != nil {
 		return nil, err
 	}
 	cntSinceYesterday, err := client.User.
 		Query().
-		Where(user.CreatedAtGTE(time.Now().AddDate(0, 0, -1))).
+		Where(user.And(
+			user.CreatedAtGTE(time.Now().AddDate(0, 0, -1)),
+			user.TypeEQ(userType),
+		)).
 		Count(ctx)
 	if err != nil {
 		return nil, err
 	}
 	cntSinceSevenDays, err := client.User.
 		Query().
-		Where(user.CreatedAtGTE(time.Now().AddDate(0, 0, -7))).
+		Where(user.And(
+			user.CreatedAtGTE(time.Now().AddDate(0, 0, -7)),
+			user.TypeEQ(userType),
+		)).
 		Count(ctx)
 	if err != nil {
 		return nil, err

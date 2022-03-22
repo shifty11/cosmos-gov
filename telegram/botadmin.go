@@ -27,24 +27,28 @@ func isBotAdmin(update *tgbotapi.Update) bool {
 
 func sendUserStatistics(update *tgbotapi.Update) {
 	chatId := getChatIdX(update)
-	statistics, err := database.GetUserStatistics()
-	if err != nil {
-		log.Sugar.Error(err)
-		return
-	}
 	chainStatistics, err := database.GetChainStatistics()
 	if err != nil {
 		log.Sugar.Error(err)
 		return
 	}
 
-	userMsg := fmt.Sprintf("`"+userStatisticMsg+"`", statistics.CntUsers,
-		statistics.CntUsersThisWeek, statistics.ChangeThisWeekInPercent,
-		statistics.CntUsersSinceYesterday, statistics.ChangeSinceYesterdayInPercent)
-	chainMsg := fmt.Sprintf("`" + chainStatisticHeaderMsg)
+	telegramStats, err := database.GetUserStatistics(user.TypeTelegram)
+	if err != nil {
+		log.Sugar.Error(err)
+		return
+	}
+
+	discordStats, err := database.GetUserStatistics(user.TypeDiscord)
+	if err != nil {
+		log.Sugar.Error(err)
+		return
+	}
+
 	sumSubscriptions := 0
 	sumProposals := 0
 	sumChains := 0
+	chainMsg := fmt.Sprintf("`" + chainStatisticHeaderMsg)
 	for _, chain := range *chainStatistics {
 		chainMsg += fmt.Sprintf(chainStatisticRowMsg, chain.DisplayName, chain.Proposals, chain.Subscriptions)
 		sumSubscriptions += chain.Subscriptions
@@ -53,7 +57,15 @@ func sendUserStatistics(update *tgbotapi.Update) {
 	}
 	chainMsg += fmt.Sprintf(chainStatisticFooterMsg+"`", fmt.Sprintf("Total(%v)", sumChains), sumProposals, sumSubscriptions)
 
-	text := chainMsg + "\n\n" + userMsg
+	telegramMsg := fmt.Sprintf("`"+userStatisticMsg+"`", user.TypeTelegram, telegramStats.CntUsers,
+		telegramStats.CntUsersThisWeek, telegramStats.ChangeThisWeekInPercent,
+		telegramStats.CntUsersSinceYesterday, telegramStats.ChangeSinceYesterdayInPercent)
+
+	discordMsg := fmt.Sprintf("`"+userStatisticMsg+"`", user.TypeDiscord, discordStats.CntUsers,
+		discordStats.CntUsersThisWeek, discordStats.ChangeThisWeekInPercent,
+		discordStats.CntUsersSinceYesterday, discordStats.ChangeSinceYesterdayInPercent)
+
+	text := chainMsg + "\n\n" + telegramMsg + "\n\n" + discordMsg
 
 	config := createMenuButtonConfig()
 	buttons := [][]Button{getMenuButtonRow(config)}

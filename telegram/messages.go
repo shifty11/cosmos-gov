@@ -84,7 +84,8 @@ func sendCurrentProposals(update *tgbotapi.Update) {
 	chatId := getChatIdX(update)
 	log.Sugar.Debugf("Send current proposals to user #%v", chatId)
 
-	text := common.GetOngoingProposalsText(chatId, user.TypeTelegram)
+	format := common.MsgFormatHtml
+	text := common.GetOngoingProposalsText(chatId, user.TypeTelegram, format)
 
 	config := createMenuButtonConfig()
 	config.ShowProposals = false
@@ -98,7 +99,7 @@ func sendCurrentProposals(update *tgbotapi.Update) {
 	if update.CallbackQuery == nil {
 		msg := tgbotapi.NewMessage(chatId, text)
 		msg.ReplyMarkup = replyMarkup
-		msg.ParseMode = "markdown"
+		msg.ParseMode = format.String()
 		err := sendMessage(msg)
 		if err != nil {
 			log.Sugar.Errorf("Error while sendCurrentProposals for user #%v: %v", chatId, err)
@@ -106,7 +107,7 @@ func sendCurrentProposals(update *tgbotapi.Update) {
 	} else {
 		msg := tgbotapi.NewEditMessageText(chatId, update.CallbackQuery.Message.MessageID, text)
 		msg.ReplyMarkup = &replyMarkup
-		msg.ParseMode = "markdown"
+		msg.ParseMode = format.String()
 		answerCallbackQuery(update)
 		err := sendMessage(msg)
 		if err != nil {
