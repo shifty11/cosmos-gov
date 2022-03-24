@@ -35,7 +35,7 @@ func closeSession(session *discordgo.Session) {
 
 func shouldDeleteUser(err error) bool {
 	if restErr, ok := err.(*discordgo.RESTError); ok {
-		return restErr.Response.StatusCode == 403
+		return restErr.Response.StatusCode == 403 || restErr.Response.StatusCode == 404
 	} else {
 		return false
 	}
