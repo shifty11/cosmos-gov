@@ -160,6 +160,7 @@ var forbiddenErrors = []string{
 	"Forbidden: bot was blocked by the user",
 	"Forbidden: bot was kicked from the group chat",
 	"Forbidden: bot was kicked from the supergroup chat",
+	"Forbidden: bot is not a member of the supergroup chat",
 }
 
 func handleError(chatId int, err error) {
