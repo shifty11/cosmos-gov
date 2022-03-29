@@ -17,7 +17,6 @@ func startSession() *discordgo.Session {
 	if err != nil {
 		log.Sugar.Fatalf("Invalid bot parameters: %v", err)
 	}
-	log.Sugar.Info("Start discord bot")
 
 	err = session.Open()
 	if err != nil {
