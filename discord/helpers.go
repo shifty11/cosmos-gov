@@ -27,3 +27,31 @@ func getAction(dataStr string) Action {
 	}
 	return Action{Name: data[0], Data: ""}
 }
+
+func canInteractWithBot(s *discordgo.Session, i *discordgo.InteractionCreate) bool {
+	channel, err := s.Channel(i.ChannelID)
+	if err != nil {
+		log.Sugar.Errorf("Error while getting channel: %v", err)
+		return false
+	}
+	if channel.Type == discordgo.ChannelTypeDM {
+		return true
+	}
+
+	p, err := s.UserChannelPermissions(i.Interaction.Member.User.ID, i.ChannelID)
+	if err != nil {
+		log.Sugar.Errorf("Error while getting permissions: %v", err)
+		return false
+	}
+
+	return p&discordgo.PermissionManageMessages == discordgo.PermissionManageMessages
+}
+
+func sendEmptyResponse(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseDeferredMessageUpdate,
+	})
+	if err != nil {
+		log.Sugar.Errorf("Error while sending empty response: %v", err)
+	}
+}

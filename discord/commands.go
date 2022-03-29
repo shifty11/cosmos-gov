@@ -83,6 +83,11 @@ var (
 	}
 	cmdHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
 		common.SubscriptionCmd: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			if !canInteractWithBot(s, i) {
+				sendEmptyResponse(s, i)
+				return
+			}
+
 			channelId := getChannelId(i)
 
 			chains := chunks(database.GetChainsForUser(channelId, user.TypeDiscord), 25)
@@ -109,6 +114,11 @@ var (
 			}
 		},
 		common.ProposalsCmd: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			if !canInteractWithBot(s, i) {
+				sendEmptyResponse(s, i)
+				return
+			}
+
 			channelId := getChannelId(i)
 
 			text := common.GetOngoingProposalsText(channelId, user.TypeDiscord, common.MsgFormatMarkdown)
@@ -124,6 +134,11 @@ var (
 			}
 		},
 		common.SupportCmd: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			if !canInteractWithBot(s, i) {
+				sendEmptyResponse(s, i)
+				return
+			}
+
 			text := fmt.Sprintf(common.SupportMsg, "[Rapha](https://discordapp.com/users/228978159440232453/)")
 			text = strings.Replace(text, "*", "**", -1)
 
@@ -143,6 +158,11 @@ var (
 var (
 	actionHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate, action string){
 		common.SubscriptionCmd: func(s *discordgo.Session, i *discordgo.InteractionCreate, action string) {
+			if !canInteractWithBot(s, i) {
+				sendEmptyResponse(s, i)
+				return
+			}
+
 			userId := getChannelId(i)
 
 			database.PerformUpdateSubscription(userId, user.TypeDiscord, action)
@@ -157,7 +177,7 @@ var (
 				},
 			})
 			if err != nil {
-				log.Sugar.Errorf("Error while sending subscriptions: %v", err)
+				log.Sugar.Errorf("Error while changing subscriptions: %v", err)
 			}
 		},
 	}
