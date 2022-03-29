@@ -18,6 +18,7 @@ func initDiscord() {
 		log.Sugar.Fatalf("Invalid bot parameters: %v", err)
 	}
 	s.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		//TODO: make this multithreaded (see Telegram bot)
 		switch i.Type {
 		case discordgo.InteractionApplicationCommand:
 			if h, ok := cmdHandlers[i.ApplicationCommandData().Name]; ok {
