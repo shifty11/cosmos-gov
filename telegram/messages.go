@@ -32,7 +32,11 @@ type StateData struct {
 
 func sendSubscriptions(update *tgbotapi.Update) {
 	chatId := getChatIdX(update)
-	log.Sugar.Debugf("Send subscriptions to user #%v", chatId)
+	if update.Message != nil && update.Message.Chat != nil && update.Message.Chat.Type == "group" {
+		log.Sugar.Debugf("Send subscriptions to group '%v' #%v", update.Message.Chat.Title, chatId)
+	} else {
+		log.Sugar.Debugf("Send subscriptions to user #%v", chatId)
+	}
 	chains := database.GetChainsForUser(chatId, user.TypeTelegram)
 
 	var buttons [][]Button
