@@ -7,7 +7,6 @@ import (
 	"github.com/shifty11/cosmos-gov/ent"
 	"github.com/shifty11/cosmos-gov/log"
 	"os"
-	"regexp"
 	"strconv"
 	"strings"
 )
@@ -48,14 +47,7 @@ func SendProposals(entProp *ent.Proposal, entChain *ent.Chain) []int64 {
 
 	// Remove bold text inside of description
 	description := strings.Replace(entProp.Description, "*", "", -1)
-
-	// Use <> around urls so that no embeds are created
-	r, _ := regexp.Compile("https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9@:%_\\+.~#?&//=]*)")
-	description = r.ReplaceAllStringFunc(description,
-		func(part string) string {
-			return "<" + part + ">"
-		},
-	)
+	description = sanitizeUrls(description)
 
 	text := fmt.Sprintf("🎉  **%v - Proposal %v\n\n%v**\n\n%v", entChain.DisplayName, entProp.ProposalID, entProp.Title, description)
 	if len(text) > 2000 {

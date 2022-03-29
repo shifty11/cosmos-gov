@@ -94,7 +94,7 @@ var (
 			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content:    common.SubscriptionsMsg,
+					Content:    sanitizeUrls(common.SubscriptionsMsg),
 					Components: createKeyboard(&chains[0]),
 				},
 			})

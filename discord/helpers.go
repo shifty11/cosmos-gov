@@ -3,6 +3,7 @@ package discord
 import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/shifty11/cosmos-gov/log"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -54,4 +55,14 @@ func sendEmptyResponse(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	if err != nil {
 		log.Sugar.Errorf("Error while sending empty response: %v", err)
 	}
+}
+
+func sanitizeUrls(text string) string {
+	// Use <> around urls so that no embeds are created
+	r, _ := regexp.Compile("https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9@:%_\\+.~#?&//=]*)")
+	return r.ReplaceAllStringFunc(text,
+		func(part string) string {
+			return "<" + part + ">"
+		},
+	)
 }

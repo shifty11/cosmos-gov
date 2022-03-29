@@ -4,9 +4,9 @@ const SubscriptionCmd = "subscriptions"
 const SubscriptionsMsg = `🔔 *Subscriptions*
 
 Select the projects that you want to follow. You will receive notifications about new governance proposals once they enter the voting period.
-`
 
-//Powered by [DeCrypto](https://decrypto.online)
+Powered by [DeCrypto](https://decrypto.online)
+`
 
 const ProposalsCmd = "proposals"
 const ProposalsMsg = `🗳 *Proposals*
