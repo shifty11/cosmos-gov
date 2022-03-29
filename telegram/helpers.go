@@ -161,6 +161,7 @@ var forbiddenErrors = []string{
 	"Forbidden: bot was kicked from the group chat",
 	"Forbidden: bot was kicked from the supergroup chat",
 	"Forbidden: bot is not a member of the supergroup chat",
+	"Forbidden: user is deactivated",
 	"Bad Request: chat not found",
 }
 
