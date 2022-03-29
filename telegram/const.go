@@ -12,7 +12,7 @@ const startBroadcastInfoMsg = `Send the broadcast that you want to send to all p
 <s>strike</s>
 <u>underline</u>
 `
-const confirmBroadcastMsg = "Are you sure you want to send this message to %v users?\nyes/**no**/abort"
+const confirmBroadcastMsg = "Are you sure you want to send this message to %v Telegram users?\nyes/**no**/abort"
 const abortBroadcastMsg = "Abort broadcasting message."
 const successBroadcastMsg = "Successfully sent message to %v users."
 

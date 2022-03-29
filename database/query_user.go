@@ -147,10 +147,11 @@ func GetAllUserChatIds(userType user.Type) []int {
 	return chatIds
 }
 
-func CountUsers() int {
+func CountUsers(userType user.Type) int {
 	client, ctx := connect()
 	cnt, err := client.User.
 		Query().
+		Where(user.TypeEQ(userType)).
 		Count(ctx)
 	if err != nil {
 		log.Sugar.Panicf("Error while querying chatIds of all users: %v", err)

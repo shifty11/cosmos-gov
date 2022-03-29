@@ -104,7 +104,7 @@ func sendBroadcastStart(update *tgbotapi.Update) {
 
 func sendConfirmBroadcastMessage(update *tgbotapi.Update, text string) {
 	chatId := getChatIdX(update)
-	cntUsers := database.CountUsers()
+	cntUsers := database.CountUsers(user.TypeTelegram)
 	broadcastMsg := tgbotapi.NewMessage(chatId, text)
 	broadcastMsg.DisableWebPagePreview = true
 	broadcastMsg.ParseMode = "html"
@@ -130,7 +130,7 @@ func sendBroadcastEndInfoMessage(update *tgbotapi.Update, success bool) {
 	chatId := getChatIdX(update)
 	text := abortBroadcastMsg
 	if success {
-		cntUsers := database.CountUsers()
+		cntUsers := database.CountUsers(user.TypeTelegram)
 		text = fmt.Sprintf(successBroadcastMsg, cntUsers)
 	}
 	msg := tgbotapi.NewMessage(chatId, text)
