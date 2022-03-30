@@ -142,26 +142,43 @@ func handleFetchError(chain *ent.Chain, err error) {
 	}
 }
 
-// checks if proposal that are in voting period need to be updated
-func checkForStatusUpdates(chain *ent.Chain) {
-	votingProposals := database.GetProposalsInVotingPeriod(chain.Name)
-	if len(votingProposals) == 0 { // do nothing if there is no votingProposal
-		return
-	}
+func updateProposal(entProp *ent.Proposal, status types.ProposalStatus) bool {
 	pageRequest := querytypes.PageRequest{
 		Key:        nil,
 		Offset:     0,
-		Limit:      uint64(len(votingProposals)) + 10,
+		Limit:      10,
 		CountTotal: false,
 		Reverse:    true,
 	}
-	proposals, err := fetchProposals(chain.Name, types.StatusNil, &pageRequest)
-	handleFetchError(chain, err)
-	if err == nil {
-		for _, prop := range proposals.Proposals {
-			for _, vProp := range votingProposals {
-				if prop.ProposalId == vProp.ProposalID && prop.Status != vProp.Status.String() {
-					database.CreateOrUpdateProposal(&prop, chain)
+	proposals, err := fetchProposals(entProp.Edges.Chain.Name, status, &pageRequest)
+	handleFetchError(entProp.Edges.Chain, err)
+	if err != nil {
+		return false
+	}
+	for _, prop := range proposals.Proposals {
+		if prop.ProposalId == entProp.ProposalID {
+			database.CreateOrUpdateProposal(&prop, entProp.Edges.Chain)
+			return false
+		}
+	}
+	return true
+}
+
+// CheckForUpdates checks if proposal that are in voting period need to be updated
+func CheckForUpdates() {
+	votingProposals := database.GetFinishedProposalsInVotingPeriod()
+	if len(votingProposals) == 0 { // do nothing if there is no finished votingProposal
+		return
+	}
+
+	for _, entProp := range votingProposals {
+		continueUpdating := updateProposal(entProp, types.StatusPassed)
+		if continueUpdating {
+			continueUpdating = updateProposal(entProp, types.StatusRejected)
+			if continueUpdating {
+				continueUpdating = updateProposal(entProp, types.StatusFailed)
+				if continueUpdating {
+					log.Sugar.Errorf("Status of proposal #%v on chain %v could not be updated", entProp.ProposalID, entProp.Edges.Chain.DisplayName)
 				}
 			}
 		}
@@ -175,7 +192,6 @@ func FetchProposals() {
 		handleFetchError(chain, err)
 		if err == nil {
 			saveAndSendProposals(proposals, chain)
-			checkForStatusUpdates(chain)
 		}
 	}
 }

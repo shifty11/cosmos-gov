@@ -9,6 +9,7 @@ import (
 	"github.com/shifty11/cosmos-gov/ent/proposal"
 	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/log"
+	"time"
 )
 
 // CreateProposalIfNotExists creates a proposal if it does not exist. If it exists it doesn't do anything.
@@ -94,17 +95,18 @@ func CreateOrUpdateProposal(prop *dtos.Proposal, chainDb *ent.Chain) *ent.Propos
 	return newProp
 }
 
-func GetProposalsInVotingPeriod(chainName string) []*ent.Proposal {
+func GetFinishedProposalsInVotingPeriod() []*ent.Proposal {
 	client, ctx := connect()
 	props, err := client.Proposal.
 		Query().
 		Where(proposal.And(
-			proposal.HasChainWith(chain.NameEQ(chainName)),
 			proposal.StatusEQ(proposal.StatusPROPOSAL_STATUS_VOTING_PERIOD),
+			proposal.VotingEndTimeLT(time.Now()),
 		)).
+		WithChain().
 		All(ctx)
 	if err != nil {
-		log.Sugar.Panicf("Error while querying first/second proposal for chain %v: %v", chainName, err)
+		log.Sugar.Panicf("Error while querying finished proposals in voting period: %v", err)
 	}
 	return props
 }

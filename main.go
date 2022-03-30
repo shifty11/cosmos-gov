@@ -18,7 +18,7 @@ func initDatabase() {
 
 func startProposalFetching() {
 	go func() {
-		datasource.FetchProposals()
+		datasource.FetchProposals() // start immediately and then every 5 minutes
 		c := cron.New()
 		_, err := c.AddFunc("@every 5m", func() { datasource.FetchProposals() })
 		if err != nil {
@@ -30,11 +30,23 @@ func startProposalFetching() {
 
 func startNewChainFetching() {
 	c := cron.New()
-	_, err := c.AddFunc("0 10 * * *", func() { datasource.AddNewChains() }) // execute every Monday at 10.00
+	_, err := c.AddFunc("0 10 * * *", func() { datasource.AddNewChains() }) // execute every day at 10.00
 	if err != nil {
 		log.Sugar.Errorf("while executing 'datasource.AddNewChains()' via cron: %v", err)
 	}
 	c.Start()
+}
+
+func startProposalUpdating() {
+	go func() {
+		datasource.CheckForUpdates() // start immediately and then every hour
+		c := cron.New()
+		_, err := c.AddFunc("@every 1h", func() { datasource.CheckForUpdates() }) // execute every hour
+		if err != nil {
+			log.Sugar.Errorf("while executing 'datasource.CheckForUpdates()' via cron: %v", err)
+		}
+		c.Start()
+	}()
 }
 
 func startTelegramServer() {
@@ -55,6 +67,7 @@ func main() {
 		initDatabase()
 		startProposalFetching()
 		startNewChainFetching()
+		startProposalUpdating()
 	} else if len(args) > 0 && args[0] == "telegram" {
 		startTelegramServer()
 	} else if len(args) > 0 && args[0] == "discord" {
@@ -63,6 +76,7 @@ func main() {
 		initDatabase()
 		startProposalFetching()
 		startNewChainFetching()
+		startProposalUpdating()
 		startTelegramServer()
 		startDiscordServer()
 	}
