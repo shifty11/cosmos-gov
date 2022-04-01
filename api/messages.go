@@ -20,13 +20,19 @@ func (m MsgFormat) String() string {
 }
 
 func GetOngoingProposalsText(chatId int64, userType user.Type, format MsgFormat) string {
-	text := common.ProposalsMsg
+	header := common.ProposalsTitleHtmlMsg
+	if format == MsgFormatMarkdown {
+		header = common.ProposalsTitleMarkdownMsg
+	}
 	chains := database.GetProposalsInVotingPeriodForUser(chatId, userType)
 	if len(chains) == 0 {
-		text = common.NoSubscriptionsMsg
+		return header + common.NoSubscriptionsMsg
 	} else {
+		var hasProposals = false
+		var text = common.ProposalsMsg
 		for _, chain := range chains {
 			for _, prop := range chain.Edges.Proposals {
+				hasProposals = true
 				if format == MsgFormatMarkdown {
 					title := strings.Replace(prop.Title, "_", "\\_", -1)
 					title = strings.Replace(title, "*", "\\*", -1)
@@ -36,9 +42,9 @@ func GetOngoingProposalsText(chatId int64, userType user.Type, format MsgFormat)
 				}
 			}
 		}
-		if len(text) == len(common.ProposalsMsg) {
-			text = common.NoProposalsMsg
+		if !hasProposals {
+			return header + common.NoProposalsMsg
 		}
+		return header + text
 	}
-	return text
 }
