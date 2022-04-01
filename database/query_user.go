@@ -2,7 +2,7 @@ package database
 
 import (
 	"errors"
-	"github.com/shifty11/cosmos-gov/dtos"
+	"github.com/shifty11/cosmos-gov/common"
 	"github.com/shifty11/cosmos-gov/ent"
 	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/log"
@@ -91,7 +91,7 @@ func GetDiscordChatIds(chainDb *ent.Chain) []int {
 	return chatIds
 }
 
-func GetUserStatistics(userType user.Type) (*dtos.UserStatistic, error) {
+func GetUserStatistics(userType user.Type) (*common.UserStatistic, error) {
 	client, ctx := connect()
 	cntAll, err := client.User.
 		Query().
@@ -125,7 +125,7 @@ func GetUserStatistics(userType user.Type) (*dtos.UserStatistic, error) {
 	}
 	changeSinceYesterdayInPercent := float64(cntSinceYesterday) / float64(cntAll) * 100
 	changeThisWeekInPercent := float64(cntSinceSevenDays) / float64(cntAll) * 100
-	return &dtos.UserStatistic{
+	return &common.UserStatistic{
 		CntUsers:                      cntAll,
 		CntUsersSinceYesterday:        cntSinceYesterday,
 		CntUsersThisWeek:              cntSinceSevenDays,

@@ -2,7 +2,7 @@ package database
 
 import (
 	"entgo.io/ent/dialect/sql"
-	"github.com/shifty11/cosmos-gov/dtos"
+	"github.com/shifty11/cosmos-gov/common"
 	"github.com/shifty11/cosmos-gov/ent"
 	"github.com/shifty11/cosmos-gov/ent/chain"
 	"github.com/shifty11/cosmos-gov/ent/proposal"
@@ -53,7 +53,7 @@ func AddOrRemoveChainForUser(chatId int64, userType user.Type, chainName string)
 	return nil
 }
 
-func GetChainsForUser(chatId int64, userType user.Type) []dtos.Chain {
+func GetChainsForUser(chatId int64, userType user.Type) []common.Chain {
 	client, ctx := connect()
 	var userDto = getOrCreateUser(chatId, userType)
 	chainsOfUser, err := client.Chain.
@@ -68,9 +68,9 @@ func GetChainsForUser(chatId int64, userType user.Type) []dtos.Chain {
 		Where(chain.IsEnabledEQ(true)).
 		Order(ent.Asc(chain.FieldDisplayName)).
 		All(ctx)
-	var chains []dtos.Chain
+	var chains []common.Chain
 	for _, c := range allChains {
-		var chainEntry = dtos.Chain{Name: c.Name, DisplayName: c.DisplayName, Notify: false}
+		var chainEntry = common.Chain{Name: c.Name, DisplayName: c.DisplayName, Notify: false}
 		for _, nc := range chainsOfUser { // check if user gets notified for this chain (c)
 			if nc.ID == c.ID {
 				chainEntry.Notify = true
@@ -114,9 +114,9 @@ func GetChains() []*ent.Chain {
 	return chains
 }
 
-func GetChainStatistics() (*[]dtos.ChainStatistic, error) {
+func GetChainStatistics() (*[]common.ChainStatistic, error) {
 	client, ctx := connect()
-	var chainsWithNotifications []dtos.ChainStatistic
+	var chainsWithNotifications []common.ChainStatistic
 	err := client.Chain.Query().
 		Order(ent.Desc(chain.FieldIsEnabled), ent.Asc(chain.FieldDisplayName)).
 		GroupBy(chain.FieldIsEnabled, chain.FieldDisplayName).
@@ -131,7 +131,7 @@ func GetChainStatistics() (*[]dtos.ChainStatistic, error) {
 	if err != nil {
 		return nil, err
 	}
-	var chainsWithProposals []dtos.ChainStatistic
+	var chainsWithProposals []common.ChainStatistic
 	err = client.Chain.Query().
 		Order(ent.Desc(chain.FieldIsEnabled), ent.Asc(chain.FieldDisplayName)).
 		GroupBy(chain.FieldIsEnabled, chain.FieldDisplayName).
@@ -146,12 +146,12 @@ func GetChainStatistics() (*[]dtos.ChainStatistic, error) {
 	if err != nil {
 		return nil, err
 	}
-	var stats []dtos.ChainStatistic
+	var stats []common.ChainStatistic
 	for _, cp := range chainsWithProposals {
 		found := false
 		for _, cn := range chainsWithNotifications {
 			if cp.DisplayName == cn.DisplayName {
-				stats = append(stats, dtos.ChainStatistic{
+				stats = append(stats, common.ChainStatistic{
 					DisplayName:   cp.DisplayName,
 					Proposals:     cp.Proposals,
 					Subscriptions: cn.Subscriptions,
@@ -160,7 +160,7 @@ func GetChainStatistics() (*[]dtos.ChainStatistic, error) {
 			}
 		}
 		if !found {
-			stats = append(stats, dtos.ChainStatistic{
+			stats = append(stats, common.ChainStatistic{
 				DisplayName:   cp.DisplayName,
 				Proposals:     cp.Proposals,
 				Subscriptions: 0,

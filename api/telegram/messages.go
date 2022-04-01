@@ -3,6 +3,7 @@ package telegram
 import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/shifty11/cosmos-gov/api"
 	"github.com/shifty11/cosmos-gov/common"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/ent/user"
@@ -88,8 +89,8 @@ func sendCurrentProposals(update *tgbotapi.Update) {
 	chatId := getChatIdX(update)
 	log.Sugar.Debugf("Send current proposals to user #%v", chatId)
 
-	format := common.MsgFormatHtml
-	text := common.GetOngoingProposalsText(chatId, user.TypeTelegram, format)
+	format := api.MsgFormatHtml
+	text := api.GetOngoingProposalsText(chatId, user.TypeTelegram, format)
 
 	config := createMenuButtonConfig()
 	config.ShowProposals = false

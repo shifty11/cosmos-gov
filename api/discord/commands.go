@@ -3,9 +3,9 @@ package discord
 import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
+	"github.com/shifty11/cosmos-gov/api"
 	"github.com/shifty11/cosmos-gov/common"
 	"github.com/shifty11/cosmos-gov/database"
-	"github.com/shifty11/cosmos-gov/dtos"
 	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/log"
 	"strings"
@@ -13,7 +13,7 @@ import (
 
 const NbrOfButtonsPerRow = 5
 
-func createKeyboard(chains *[]dtos.Chain) []discordgo.MessageComponent {
+func createKeyboard(chains *[]common.Chain) []discordgo.MessageComponent {
 	var buttons []discordgo.MessageComponent
 	var buttonRows []discordgo.MessageComponent
 	for ix, c := range *chains {
@@ -37,11 +37,11 @@ func createKeyboard(chains *[]dtos.Chain) []discordgo.MessageComponent {
 	return buttonRows
 }
 
-func chunks(xs []dtos.Chain, chunkSize int) [][]dtos.Chain {
+func chunks(xs []common.Chain, chunkSize int) [][]common.Chain {
 	if len(xs) == 0 {
 		return nil
 	}
-	divided := make([][]dtos.Chain, (len(xs)+chunkSize-1)/chunkSize)
+	divided := make([][]common.Chain, (len(xs)+chunkSize-1)/chunkSize)
 	prev := 0
 	i := 0
 	till := len(xs) - chunkSize
@@ -55,7 +55,7 @@ func chunks(xs []dtos.Chain, chunkSize int) [][]dtos.Chain {
 	return divided
 }
 
-func getSpecificChunk(chunks *[][]dtos.Chain, name string) *[]dtos.Chain {
+func getSpecificChunk(chunks *[][]common.Chain, name string) *[]common.Chain {
 	for _, c1 := range *chunks {
 		for _, c2 := range c1 {
 			if c2.Name == name {
@@ -121,7 +121,7 @@ var (
 
 			channelId := getChannelId(i)
 
-			text := common.GetOngoingProposalsText(channelId, user.TypeDiscord, common.MsgFormatMarkdown)
+			text := api.GetOngoingProposalsText(channelId, user.TypeDiscord, api.MsgFormatMarkdown)
 
 			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,

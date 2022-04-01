@@ -3,7 +3,7 @@ package database
 import (
 	"errors"
 	"github.com/cosmos/cosmos-sdk/x/gov/types"
-	"github.com/shifty11/cosmos-gov/dtos"
+	"github.com/shifty11/cosmos-gov/common"
 	"github.com/shifty11/cosmos-gov/ent"
 	"github.com/shifty11/cosmos-gov/ent/chain"
 	"github.com/shifty11/cosmos-gov/ent/proposal"
@@ -14,7 +14,7 @@ import (
 
 // CreateProposalIfNotExists creates a proposal if it does not exist. If it exists it doesn't do anything.
 // returns new proposal or nil if it already exists.
-func CreateProposalIfNotExists(prop *dtos.Proposal, chainDb *ent.Chain) *ent.Proposal {
+func CreateProposalIfNotExists(prop *common.Proposal, chainDb *ent.Chain) *ent.Proposal {
 	client, ctx := connect()
 	exist, err := chainDb.QueryProposals().
 		Where(proposal.And(proposal.ProposalIDEQ(prop.ProposalId))).
@@ -46,7 +46,7 @@ func CreateProposalIfNotExists(prop *dtos.Proposal, chainDb *ent.Chain) *ent.Pro
 	return nil
 }
 
-func CreateOrUpdateProposal(prop *dtos.Proposal, chainDb *ent.Chain) *ent.Proposal {
+func CreateOrUpdateProposal(prop *common.Proposal, chainDb *ent.Chain) *ent.Proposal {
 	status, err := types.ProposalStatusFromString(prop.Status)
 	if err != nil {
 		log.Sugar.Panicf("Error while reading proposal status of proposal #%v: %v", prop.ProposalId, err)

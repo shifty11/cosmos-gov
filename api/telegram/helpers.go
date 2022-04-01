@@ -12,10 +12,10 @@ import (
 	"strings"
 )
 
-var api *tgbotapi.BotAPI = nil
+var _api *tgbotapi.BotAPI = nil
 
 func getApi() *tgbotapi.BotAPI {
-	if api == nil {
+	if _api == nil {
 		telegramToken := os.Getenv("TELEGRAM_TOKEN")
 		if telegramToken == "" {
 			log.Sugar.Panic("you must provide a telegram token as env variable")
@@ -24,9 +24,9 @@ func getApi() *tgbotapi.BotAPI {
 		if err != nil {
 			log.Sugar.Panic(err)
 		}
-		api = botApi
+		_api = botApi
 	}
-	return api
+	return _api
 }
 
 type MessageCommand string

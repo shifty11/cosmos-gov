@@ -3,11 +3,11 @@ package main
 import (
 	_ "github.com/lib/pq"
 	"github.com/robfig/cron/v3"
+	"github.com/shifty11/cosmos-gov/api/discord"
+	"github.com/shifty11/cosmos-gov/api/telegram"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/datasource"
-	"github.com/shifty11/cosmos-gov/discord"
 	"github.com/shifty11/cosmos-gov/log"
-	"github.com/shifty11/cosmos-gov/telegram"
 	"os"
 	"time"
 )

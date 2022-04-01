@@ -1,7 +1,8 @@
-package common
+package api
 
 import (
 	"fmt"
+	"github.com/shifty11/cosmos-gov/common"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/ent/user"
 	"strings"
@@ -19,10 +20,10 @@ func (m MsgFormat) String() string {
 }
 
 func GetOngoingProposalsText(chatId int64, userType user.Type, format MsgFormat) string {
-	text := ProposalsMsg
+	text := common.ProposalsMsg
 	chains := database.GetProposalsInVotingPeriodForUser(chatId, userType)
 	if len(chains) == 0 {
-		text = NoSubscriptionsMsg
+		text = common.NoSubscriptionsMsg
 	} else {
 		for _, chain := range chains {
 			for _, prop := range chain.Edges.Proposals {
@@ -35,8 +36,8 @@ func GetOngoingProposalsText(chatId int64, userType user.Type, format MsgFormat)
 				}
 			}
 		}
-		if len(text) == len(ProposalsMsg) {
-			text = NoProposalsMsg
+		if len(text) == len(common.ProposalsMsg) {
+			text = common.NoProposalsMsg
 		}
 	}
 	return text
