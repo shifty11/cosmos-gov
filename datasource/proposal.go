@@ -145,8 +145,8 @@ func handleFetchError(chain *ent.Chain, err error) {
 func updateProposal(entProp *ent.Proposal, status types.ProposalStatus) bool {
 	pageRequest := querytypes.PageRequest{
 		Key:        nil,
-		Offset:     entProp.ProposalID - 5,
-		Limit:      10,
+		Offset:     0,
+		Limit:      100,
 		CountTotal: false,
 		Reverse:    true,
 	}
