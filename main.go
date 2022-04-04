@@ -3,8 +3,8 @@ package main
 import (
 	_ "github.com/lib/pq"
 	"github.com/robfig/cron/v3"
-	grpc "github.com/shifty11/cosmos-gov/api/cosmos-gov-grpc"
 	"github.com/shifty11/cosmos-gov/api/discord"
+	grpc "github.com/shifty11/cosmos-gov/api/grpc"
 	"github.com/shifty11/cosmos-gov/api/telegram"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/datasource"
@@ -79,8 +79,6 @@ func main() {
 		startDiscordServer()
 	} else if len(args) > 0 && args[0] == "grpc" {
 		startGrpcServer()
-	} else if len(args) > 0 && args[0] == "test-client" {
-		go grpc.StartClient()
 	} else {
 		initDatabase()
 		startProposalFetching()
