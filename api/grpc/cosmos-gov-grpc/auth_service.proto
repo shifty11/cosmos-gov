@@ -1,0 +1,22 @@
+syntax = "proto3";
+package cosmosgov_grpc;
+
+option go_package = "protobuf/auth_service";
+
+service AuthService {
+  rpc TokenLogin (TokenLoginRequest) returns (TokenLoginResponse) {}
+}
+
+message TokenLoginRequest {
+  string token = 1;
+  int64 chatId = 2;
+  enum Type {
+    TELEGRAM = 0;
+    DISCORD = 1;
+  }
+  Type TYPE = 3;
+}
+
+message TokenLoginResponse {
+  string access_token = 1;
+}
