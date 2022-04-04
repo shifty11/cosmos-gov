@@ -1,0 +1,3 @@
+[submodule "api/grpc/cosmos-gov-grpc"]
+	path = api/grpc/cosmos-gov-grpc
+	url = git@github.com:shifty11/cosmos-gov-grpc.git
