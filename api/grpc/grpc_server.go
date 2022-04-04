@@ -1,7 +1,7 @@
 package grpc
 
 import (
-	pb "github.com/shifty11/cosmos-gov/api/grpc/cosmos-gov-grpc/go/protobuf/auth_service"
+	pb "github.com/shifty11/cosmos-gov/api/grpc/protobuf/go/protobuf/auth_service"
 	"github.com/shifty11/cosmos-gov/log"
 	"google.golang.org/grpc"
 	"net"
