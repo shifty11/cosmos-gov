@@ -9,12 +9,15 @@ require (
 	github.com/bwmarrin/discordgo v0.24.0
 	github.com/cosmos/cosmos-sdk v0.44.5
 	github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/liamylian/jsontime v1.0.1
 	github.com/lib/pq v1.10.4
 	github.com/microcosm-cc/bluemonday v1.0.18
 	github.com/robfig/cron/v3 v3.0.0
 	github.com/strangelove-ventures/lens v0.2.1
 	go.uber.org/zap v1.20.0
+	google.golang.org/grpc v1.43.0
+	google.golang.org/protobuf v1.27.1
 )
 
 require (
@@ -73,7 +76,6 @@ require (
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/hashicorp/hcl/v2 v2.10.0 // indirect
 	github.com/hdevalence/ed25519consensus v0.0.0-20210204194344-59a8610d2b87 // indirect
-	github.com/hedwigz/entviz v0.0.0-20211119095041-601c47ba417e // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/jmhodges/levigo v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
@@ -130,8 +132,6 @@ require (
 	golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/genproto v0.0.0-20211208223120-3a66f561d7aa // indirect
-	google.golang.org/grpc v1.43.0 // indirect
-	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/ini.v1 v1.66.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
