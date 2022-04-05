@@ -1,6 +1,6 @@
 module github.com/shifty11/cosmos-gov
 
-go 1.17
+go 1.18
 
 require (
 	entgo.io/ent v0.10.0
@@ -16,6 +16,7 @@ require (
 	github.com/robfig/cron/v3 v3.0.0
 	github.com/strangelove-ventures/lens v0.2.1
 	go.uber.org/zap v1.20.0
+	golang.org/x/exp v0.0.0-20220328175248-053ad81199eb
 	google.golang.org/grpc v1.43.0
 	google.golang.org/protobuf v1.27.1
 )
@@ -125,7 +126,7 @@ require (
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.7.0 // indirect
 	golang.org/x/crypto v0.0.0-20211215153901-e495a2d5b3d3 // indirect
-	golang.org/x/mod v0.5.1 // indirect
+	golang.org/x/mod v0.6.0-dev.0.20211013180041-c96bc1413d57 // indirect
 	golang.org/x/net v0.0.0-20211209124913-491a49abca63 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/sys v0.0.0-20211210111614-af8b64212486 // indirect
