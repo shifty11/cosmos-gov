@@ -24,6 +24,8 @@ type User struct {
 	ChatID int64 `json:"chat_id,omitempty"`
 	// Type holds the value of the "type" field.
 	Type user.Type `json:"type,omitempty"`
+	// LogingToken holds the value of the "loging_token" field.
+	LogingToken string `json:"loging_token,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges UserEdges `json:"edges"`
@@ -54,7 +56,7 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case user.FieldID, user.FieldChatID:
 			values[i] = new(sql.NullInt64)
-		case user.FieldType:
+		case user.FieldType, user.FieldLogingToken:
 			values[i] = new(sql.NullString)
 		case user.FieldCreatedAt, user.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -103,6 +105,12 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				u.Type = user.Type(value.String)
 			}
+		case user.FieldLogingToken:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field loging_token", values[i])
+			} else if value.Valid {
+				u.LogingToken = value.String
+			}
 		}
 	}
 	return nil
@@ -144,6 +152,8 @@ func (u *User) String() string {
 	builder.WriteString(fmt.Sprintf("%v", u.ChatID))
 	builder.WriteString(", type=")
 	builder.WriteString(fmt.Sprintf("%v", u.Type))
+	builder.WriteString(", loging_token=")
+	builder.WriteString(u.LogingToken)
 	builder.WriteByte(')')
 	return builder.String()
 }

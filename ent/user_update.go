@@ -54,6 +54,20 @@ func (uu *UserUpdate) SetType(u user.Type) *UserUpdate {
 	return uu
 }
 
+// SetLogingToken sets the "loging_token" field.
+func (uu *UserUpdate) SetLogingToken(s string) *UserUpdate {
+	uu.mutation.SetLogingToken(s)
+	return uu
+}
+
+// SetNillableLogingToken sets the "loging_token" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableLogingToken(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetLogingToken(*s)
+	}
+	return uu
+}
+
 // AddChainIDs adds the "chains" edge to the Chain entity by IDs.
 func (uu *UserUpdate) AddChainIDs(ids ...int) *UserUpdate {
 	uu.mutation.AddChainIDs(ids...)
@@ -220,6 +234,13 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: user.FieldType,
 		})
 	}
+	if value, ok := uu.mutation.LogingToken(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldLogingToken,
+		})
+	}
 	if uu.mutation.ChainsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
@@ -315,6 +336,20 @@ func (uuo *UserUpdateOne) AddChatID(i int64) *UserUpdateOne {
 // SetType sets the "type" field.
 func (uuo *UserUpdateOne) SetType(u user.Type) *UserUpdateOne {
 	uuo.mutation.SetType(u)
+	return uuo
+}
+
+// SetLogingToken sets the "loging_token" field.
+func (uuo *UserUpdateOne) SetLogingToken(s string) *UserUpdateOne {
+	uuo.mutation.SetLogingToken(s)
+	return uuo
+}
+
+// SetNillableLogingToken sets the "loging_token" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableLogingToken(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetLogingToken(*s)
+	}
 	return uuo
 }
 
@@ -506,6 +541,13 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Type:   field.TypeEnum,
 			Value:  value,
 			Column: user.FieldType,
+		})
+	}
+	if value, ok := uuo.mutation.LogingToken(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldLogingToken,
 		})
 	}
 	if uuo.mutation.ChainsCleared() {

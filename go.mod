@@ -15,6 +15,7 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.18
 	github.com/robfig/cron/v3 v3.0.0
 	github.com/strangelove-ventures/lens v0.2.1
+	github.com/zach-klippenstein/goregen v0.0.0-20160303162051-795b5e3961ea
 	go.uber.org/zap v1.20.0
 	golang.org/x/exp v0.0.0-20220328175248-053ad81199eb
 	google.golang.org/grpc v1.43.0
@@ -63,6 +64,7 @@ require (
 	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/google/go-github v17.0.0+incompatible // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
+	github.com/google/gxui v0.0.0-20151028112939-f85e0a97b3a4 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect

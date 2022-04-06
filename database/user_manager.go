@@ -3,6 +3,7 @@ package database
 import (
 	"github.com/shifty11/cosmos-gov/ent"
 	"github.com/shifty11/cosmos-gov/ent/user"
+	regen "github.com/zach-klippenstein/goregen"
 )
 
 type UserManager struct {
@@ -24,15 +25,19 @@ func (server *UserManager) GetUser(chatId int64, userType user.Type, token strin
 	return entUser, err
 }
 
-func (server *UserManager) InvalidateToken(chatId int64, userType user.Type, token string) error {
+func (server *UserManager) GenerateNewLoginToken(chatId int64, userType user.Type) error {
+	token, err := regen.Generate("[A-Za-z0-9]{32}")
+	if err != nil {
+		return err
+	}
 	client, ctx := connect()
-	_, err := client.User.
+	_, err = client.User.
 		Update().
 		Where(user.And(
 			user.ChatIDEQ(chatId),
 			user.TypeEQ(userType),
 		)).
-		//SetToken().
+		SetLogingToken(token).
 		Save(ctx)
 	return err
 }

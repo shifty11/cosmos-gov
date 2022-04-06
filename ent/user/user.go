@@ -20,6 +20,8 @@ const (
 	FieldChatID = "chat_id"
 	// FieldType holds the string denoting the type field in the database.
 	FieldType = "type"
+	// FieldLogingToken holds the string denoting the loging_token field in the database.
+	FieldLogingToken = "loging_token"
 	// EdgeChains holds the string denoting the chains edge name in mutations.
 	EdgeChains = "chains"
 	// Table holds the table name of the user in the database.
@@ -38,6 +40,7 @@ var Columns = []string{
 	FieldUpdatedAt,
 	FieldChatID,
 	FieldType,
+	FieldLogingToken,
 }
 
 var (
@@ -63,6 +66,8 @@ var (
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
+	// DefaultLogingToken holds the default value on creation for the "loging_token" field.
+	DefaultLogingToken string
 )
 
 // Type defines the type for the "type" enum field.

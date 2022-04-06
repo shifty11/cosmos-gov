@@ -25,6 +25,8 @@ func (User) Fields() []ent.Field {
 		field.Int64("chat_id"),
 		field.Enum("type").
 			Values("telegram", "discord"),
+		field.String("loging_token").
+			Default(""),
 	}
 }
 

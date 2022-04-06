@@ -114,6 +114,13 @@ func ChatID(v int64) predicate.User {
 	})
 }
 
+// LogingToken applies equality check predicate on the "loging_token" field. It's identical to LogingTokenEQ.
+func LogingToken(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldLogingToken), v))
+	})
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
@@ -387,6 +394,117 @@ func TypeNotIn(vs ...Type) predicate.User {
 			return
 		}
 		s.Where(sql.NotIn(s.C(FieldType), v...))
+	})
+}
+
+// LogingTokenEQ applies the EQ predicate on the "loging_token" field.
+func LogingTokenEQ(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldLogingToken), v))
+	})
+}
+
+// LogingTokenNEQ applies the NEQ predicate on the "loging_token" field.
+func LogingTokenNEQ(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldLogingToken), v))
+	})
+}
+
+// LogingTokenIn applies the In predicate on the "loging_token" field.
+func LogingTokenIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldLogingToken), v...))
+	})
+}
+
+// LogingTokenNotIn applies the NotIn predicate on the "loging_token" field.
+func LogingTokenNotIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldLogingToken), v...))
+	})
+}
+
+// LogingTokenGT applies the GT predicate on the "loging_token" field.
+func LogingTokenGT(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldLogingToken), v))
+	})
+}
+
+// LogingTokenGTE applies the GTE predicate on the "loging_token" field.
+func LogingTokenGTE(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldLogingToken), v))
+	})
+}
+
+// LogingTokenLT applies the LT predicate on the "loging_token" field.
+func LogingTokenLT(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldLogingToken), v))
+	})
+}
+
+// LogingTokenLTE applies the LTE predicate on the "loging_token" field.
+func LogingTokenLTE(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldLogingToken), v))
+	})
+}
+
+// LogingTokenContains applies the Contains predicate on the "loging_token" field.
+func LogingTokenContains(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldLogingToken), v))
+	})
+}
+
+// LogingTokenHasPrefix applies the HasPrefix predicate on the "loging_token" field.
+func LogingTokenHasPrefix(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldLogingToken), v))
+	})
+}
+
+// LogingTokenHasSuffix applies the HasSuffix predicate on the "loging_token" field.
+func LogingTokenHasSuffix(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldLogingToken), v))
+	})
+}
+
+// LogingTokenEqualFold applies the EqualFold predicate on the "loging_token" field.
+func LogingTokenEqualFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldLogingToken), v))
+	})
+}
+
+// LogingTokenContainsFold applies the ContainsFold predicate on the "loging_token" field.
+func LogingTokenContainsFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldLogingToken), v))
 	})
 }
 

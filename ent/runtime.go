@@ -68,4 +68,8 @@ func init() {
 	user.DefaultUpdatedAt = userDescUpdatedAt.Default.(func() time.Time)
 	// user.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	user.UpdateDefaultUpdatedAt = userDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// userDescLogingToken is the schema descriptor for loging_token field.
+	userDescLogingToken := userFields[4].Descriptor()
+	// user.DefaultLogingToken holds the default value on creation for the loging_token field.
+	user.DefaultLogingToken = userDescLogingToken.Default.(string)
 }

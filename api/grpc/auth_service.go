@@ -30,19 +30,19 @@ func (server *AuthServer) TokenLogin(_ context.Context, req *pb.TokenLoginReques
 		return nil, status.Errorf(codes.Internal, "cannot find user: %v", err)
 	}
 
-	err = server.userManager.InvalidateToken(req.ChatId, userType, req.Token)
+	err = server.userManager.GenerateNewLoginToken(req.ChatId, userType)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "cannot invalidate accessToken user: %v", err)
+		return nil, status.Errorf(codes.Internal, "cannot generate new login token: %v", err)
 	}
 
 	accessToken, err := server.jwtManager.GenerateToken(entUser, AccessToken)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "cannot generate accessToken")
+		return nil, status.Errorf(codes.Internal, "cannot generate accessToken: %v", err)
 	}
 
 	refreshToken, err := server.jwtManager.GenerateToken(entUser, RefreshToken)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "cannot generate refreshToken")
+		return nil, status.Errorf(codes.Internal, "cannot generate refreshToken: %v", err)
 	}
 
 	res := &pb.TokenLoginResponse{AccessToken: accessToken, RefreshToken: refreshToken}
@@ -62,7 +62,7 @@ func (server *AuthServer) RefreshAccessToken(_ context.Context, req *pb.RefreshA
 
 	accessToken, err := server.jwtManager.GenerateToken(entUser, AccessToken)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "cannot generate accessToken")
+		return nil, status.Errorf(codes.Internal, "cannot generate accessToken: %v", err)
 	}
 
 	res := &pb.RefreshAccessTokenResponse{AccessToken: accessToken}

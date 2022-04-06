@@ -61,6 +61,20 @@ func (uc *UserCreate) SetType(u user.Type) *UserCreate {
 	return uc
 }
 
+// SetLogingToken sets the "loging_token" field.
+func (uc *UserCreate) SetLogingToken(s string) *UserCreate {
+	uc.mutation.SetLogingToken(s)
+	return uc
+}
+
+// SetNillableLogingToken sets the "loging_token" field if the given value is not nil.
+func (uc *UserCreate) SetNillableLogingToken(s *string) *UserCreate {
+	if s != nil {
+		uc.SetLogingToken(*s)
+	}
+	return uc
+}
+
 // AddChainIDs adds the "chains" edge to the Chain entity by IDs.
 func (uc *UserCreate) AddChainIDs(ids ...int) *UserCreate {
 	uc.mutation.AddChainIDs(ids...)
@@ -155,6 +169,10 @@ func (uc *UserCreate) defaults() {
 		v := user.DefaultUpdatedAt()
 		uc.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := uc.mutation.LogingToken(); !ok {
+		v := user.DefaultLogingToken
+		uc.mutation.SetLogingToken(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -175,6 +193,9 @@ func (uc *UserCreate) check() error {
 		if err := user.TypeValidator(v); err != nil {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "User.type": %w`, err)}
 		}
+	}
+	if _, ok := uc.mutation.LogingToken(); !ok {
+		return &ValidationError{Name: "loging_token", err: errors.New(`ent: missing required field "User.loging_token"`)}
 	}
 	return nil
 }
@@ -234,6 +255,14 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Column: user.FieldType,
 		})
 		_node.Type = value
+	}
+	if value, ok := uc.mutation.LogingToken(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldLogingToken,
+		})
+		_node.LogingToken = value
 	}
 	if nodes := uc.mutation.ChainsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
