@@ -4,48 +4,81 @@ import (
 	"fmt"
 	"github.com/golang-jwt/jwt"
 	"github.com/shifty11/cosmos-gov/ent"
+	"github.com/shifty11/cosmos-gov/ent/user"
+	"github.com/shifty11/cosmos-gov/log"
+	"os"
 	"time"
 )
 
-var jwtKey = []byte("B8D4NdpsxLaYHyeU6E7j")
+type Role string
 
-//type Credentials struct {
-//	Token  string `json:"token"`
-//	ChatId string `json:"chat_id"`
-//}
+const (
+	Unautheticated Role = "Unautheticated"
+	User           Role = "User"
+)
+
+type TokenType string
+
+const (
+	AccessToken  TokenType = "AccessToken"
+	RefreshToken TokenType = "RefreshToken"
+)
+
+func accessibleRoles() map[string][]Role {
+	const path = "/cosmosgov_grpc.AuthService/"
+
+	return map[string][]Role{
+		path + "TokenLogin":         {Unautheticated, User},
+		path + "RefreshAccessToken": {Unautheticated, User},
+	}
+}
 
 type Claims struct {
 	jwt.StandardClaims
-	ChatId int64  `json:"chat_id"`
-	Role   string `json:"role"`
+	ChatId int64     `json:"chat_id"`
+	Type   user.Type `json:"type"`
+	Role   Role      `json:"role,omitempty"`
 }
 
 type JWTManager struct {
-	secretKey     []byte
-	tokenDuration time.Duration
+	jwtSecretKey         []byte
+	accessTokenDuration  time.Duration
+	refreshTokenDuration time.Duration
 }
 
-func NewJWTManager(tokenDuration time.Duration) *JWTManager {
-	return &JWTManager{jwtKey, tokenDuration}
+func NewJWTManager(accessTokenDuration time.Duration, refreshTokenDuration time.Duration) *JWTManager {
+	jwtSecretKey := os.Getenv("JWT_SECRET_KEY")
+	if jwtSecretKey == "" {
+		log.Sugar.Panic("JWT_SECRET_KEY must be set")
+	}
+	return &JWTManager{
+		jwtSecretKey:         []byte(jwtSecretKey),
+		accessTokenDuration:  accessTokenDuration,
+		refreshTokenDuration: refreshTokenDuration,
+	}
 }
 
-func (manager *JWTManager) Generate(entUser *ent.User) (string, error) {
-	expirationTime := time.Now().Add(5 * time.Minute)
+func (manager *JWTManager) GenerateToken(entUser *ent.User, tokenType TokenType) (string, error) {
+	expirationTime := time.Now().Add(manager.accessTokenDuration)
+	if tokenType == RefreshToken {
+		expirationTime = time.Now().Add(manager.refreshTokenDuration)
+	}
 
 	claims := &Claims{
 		ChatId: entUser.ChatID,
+		Type:   entUser.Type,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 		},
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(manager.secretKey)
+	return token.SignedString(manager.jwtSecretKey)
 }
 
-func (manager *JWTManager) Verify(accessToken string) (*Claims, error) {
+func (manager *JWTManager) Verify(tokenString string) (*Claims, error) {
 	token, err := jwt.ParseWithClaims(
-		accessToken,
+		tokenString,
 		&Claims{},
 		func(token *jwt.Token) (interface{}, error) {
 			_, ok := token.Method.(*jwt.SigningMethodHMAC)
@@ -53,7 +86,7 @@ func (manager *JWTManager) Verify(accessToken string) (*Claims, error) {
 				return nil, fmt.Errorf("unexpected token signing method")
 			}
 
-			return manager.secretKey, nil
+			return manager.jwtSecretKey, nil
 		},
 	)
 

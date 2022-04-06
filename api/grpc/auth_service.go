@@ -32,14 +32,39 @@ func (server *AuthServer) TokenLogin(_ context.Context, req *pb.TokenLoginReques
 
 	err = server.userManager.InvalidateToken(req.ChatId, userType, req.Token)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "cannot invalidate token user: %v", err)
+		return nil, status.Errorf(codes.Internal, "cannot invalidate accessToken user: %v", err)
 	}
 
-	token, err := server.jwtManager.Generate(entUser)
+	accessToken, err := server.jwtManager.GenerateToken(entUser, AccessToken)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "cannot generate access token")
+		return nil, status.Errorf(codes.Internal, "cannot generate accessToken")
 	}
 
-	res := &pb.TokenLoginResponse{AccessToken: token}
+	refreshToken, err := server.jwtManager.GenerateToken(entUser, RefreshToken)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "cannot generate refreshToken")
+	}
+
+	res := &pb.TokenLoginResponse{AccessToken: accessToken, RefreshToken: refreshToken}
+	return res, nil
+}
+
+func (server *AuthServer) RefreshAccessToken(_ context.Context, req *pb.RefreshAccessTokenRequest) (*pb.RefreshAccessTokenResponse, error) {
+	claims, err := server.jwtManager.Verify(req.RefreshToken)
+	if err != nil {
+		return nil, status.Errorf(codes.Unauthenticated, "refresh token invalid: %v", err)
+	}
+
+	entUser, err := server.userManager.GetUser(claims.ChatId, claims.Type, "")
+	if err != nil {
+		return nil, status.Errorf(codes.Unauthenticated, "cannot find user: %v", err)
+	}
+
+	accessToken, err := server.jwtManager.GenerateToken(entUser, AccessToken)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "cannot generate accessToken")
+	}
+
+	res := &pb.RefreshAccessTokenResponse{AccessToken: accessToken}
 	return res, nil
 }

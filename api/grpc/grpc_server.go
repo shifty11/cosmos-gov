@@ -9,34 +9,29 @@ import (
 )
 
 const (
-	port = ":50051"
+	port                 = ":50051"
+	accessTokenDuration  = time.Minute * 4
+	refreshTokenDuration = time.Hour * 24
 )
 
-func accessibleRoles() map[string][]string {
-	const cosmosGovPath = "/cosmosgov_grpc.CosmosGov/"
-
-	return map[string][]string{
-		//cosmosGovPath + "TokenLogin": {"admin", "user"},
-	}
-}
-
 func Start() {
+	jwtManager := NewJWTManager(accessTokenDuration, refreshTokenDuration)
+	authServer := NewAuthServer(jwtManager)
+	interceptor := NewAuthInterceptor(jwtManager, accessibleRoles())
+
+	server := grpc.NewServer(
+		grpc.UnaryInterceptor(interceptor.Unary()),
+		grpc.StreamInterceptor(interceptor.Stream()),
+	)
+
+	pb.RegisterAuthServiceServer(server, authServer)
+
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
 		log.Sugar.Fatalf("failed to listen: %v", err)
 	}
 
-	jwtManager := NewJWTManager(5 * time.Minute)
-	authServer := NewAuthServer(jwtManager)
-	interceptor := NewAuthInterceptor(jwtManager, accessibleRoles())
-
-	s := grpc.NewServer(
-		grpc.UnaryInterceptor(interceptor.Unary()),
-		grpc.StreamInterceptor(interceptor.Stream()),
-	)
-
-	pb.RegisterAuthServiceServer(s, authServer)
-	err = s.Serve(lis)
+	err = server.Serve(lis)
 	if err != nil {
 		log.Sugar.Fatalf("failed to serve grpc: %v", err)
 	}

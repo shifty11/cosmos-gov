@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 	"github.com/shifty11/cosmos-gov/log"
+	"golang.org/x/exp/slices"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -11,11 +12,11 @@ import (
 
 type AuthInterceptor struct {
 	jwtManager      *JWTManager
-	accessibleRoles map[string][]string
+	accessibleRoles map[string][]Role
 }
 
-func NewAuthInterceptor(jwtManager *JWTManager, accessibleRoles map[string][]string) *AuthInterceptor {
-	return &AuthInterceptor{jwtManager, accessibleRoles}
+func NewAuthInterceptor(jwtManager *JWTManager, accessibleRoles map[string][]Role) *AuthInterceptor {
+	return &AuthInterceptor{jwtManager: jwtManager, accessibleRoles: accessibleRoles}
 }
 
 func (interceptor *AuthInterceptor) Unary() grpc.UnaryServerInterceptor {
@@ -55,9 +56,8 @@ func (interceptor *AuthInterceptor) Stream() grpc.StreamServerInterceptor {
 }
 
 func (interceptor *AuthInterceptor) authorize(ctx context.Context, method string) error {
-	accessibleRoles, ok := interceptor.accessibleRoles[method]
-	if !ok {
-		// everyone can access
+	roles, ok := interceptor.accessibleRoles[method]
+	if slices.Contains(roles, Unautheticated) {
 		return nil
 	}
 
@@ -77,7 +77,7 @@ func (interceptor *AuthInterceptor) authorize(ctx context.Context, method string
 		return status.Errorf(codes.Unauthenticated, "access token is invalid: %v", err)
 	}
 
-	for _, role := range accessibleRoles {
+	for _, role := range roles {
 		if role == claims.Role {
 			return nil
 		}
