@@ -13,29 +13,30 @@ func NewUserManager() *UserManager {
 	return &UserManager{}
 }
 
-func (server *UserManager) GetUser(chatId int64, userType user.Type, token string) (*ent.User, error) {
+func (manager *UserManager) GetUser(chatId int64, userType user.Type) (*ent.User, error) {
 	client, ctx := connect()
-	if token == "" {
-		return client.User.
-			Query().
-			Where(user.And(
-				user.ChatIDEQ(chatId),
-				user.TypeEQ(userType),
-			)).
-			Only(ctx)
-	} else {
-		return client.User.
-			Query().
-			Where(user.And(
-				user.ChatIDEQ(chatId),
-				user.TypeEQ(userType),
-				//user.LogingTokenEQ(token),	//TODO: add this line
-			)).
-			Only(ctx)
-	}
+	return client.User.
+		Query().
+		Where(user.And(
+			user.ChatIDEQ(chatId),
+			user.TypeEQ(userType),
+		)).
+		Only(ctx)
 }
 
-func (server *UserManager) GenerateNewLoginToken(chatId int64, userType user.Type) error {
+func (manager *UserManager) GetUserByToken(chatId int64, userType user.Type, token string) (*ent.User, error) {
+	client, ctx := connect()
+	return client.User.
+		Query().
+		Where(user.And(
+			user.ChatIDEQ(chatId),
+			user.TypeEQ(userType),
+			//user.LogingTokenEQ(token),	//TODO: add this line
+		)).
+		Only(ctx)
+}
+
+func (manager *UserManager) GenerateNewLoginToken(chatId int64, userType user.Type) error {
 	token, err := regen.Generate("[A-Za-z0-9]{32}")
 	if err != nil {
 		return err

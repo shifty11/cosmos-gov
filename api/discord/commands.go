@@ -13,7 +13,7 @@ import (
 
 const NbrOfButtonsPerRow = 5
 
-func createKeyboard(chains *[]common.Chain) []discordgo.MessageComponent {
+func createKeyboard(chains *[]database.Subscription) []discordgo.MessageComponent {
 	var buttons []discordgo.MessageComponent
 	var buttonRows []discordgo.MessageComponent
 	for ix, c := range *chains {
@@ -37,11 +37,11 @@ func createKeyboard(chains *[]common.Chain) []discordgo.MessageComponent {
 	return buttonRows
 }
 
-func chunks(xs []common.Chain, chunkSize int) [][]common.Chain {
+func chunks(xs []database.Subscription, chunkSize int) [][]database.Subscription {
 	if len(xs) == 0 {
 		return nil
 	}
-	divided := make([][]common.Chain, (len(xs)+chunkSize-1)/chunkSize)
+	divided := make([][]database.Subscription, (len(xs)+chunkSize-1)/chunkSize)
 	prev := 0
 	i := 0
 	till := len(xs) - chunkSize
@@ -55,7 +55,7 @@ func chunks(xs []common.Chain, chunkSize int) [][]common.Chain {
 	return divided
 }
 
-func getSpecificChunk(chunks *[][]common.Chain, name string) *[]common.Chain {
+func getSpecificChunk(chunks *[][]database.Subscription, name string) *[]database.Subscription {
 	for _, c1 := range *chunks {
 		for _, c2 := range c1 {
 			if c2.Name == name {

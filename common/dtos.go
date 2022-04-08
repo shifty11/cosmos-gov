@@ -21,12 +21,6 @@ type Proposals struct {
 	Proposals []Proposal `json:"proposals"`
 }
 
-type Chain struct {
-	Name        string
-	DisplayName string
-	Notify      bool
-}
-
 type UserStatistic struct {
 	CntUsers                      int
 	CntUsersSinceYesterday        int

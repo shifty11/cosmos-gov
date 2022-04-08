@@ -26,7 +26,7 @@ func (server *AuthServer) TokenLogin(_ context.Context, req *pb.TokenLoginReques
 		userType = user.TypeDiscord
 	}
 
-	entUser, err := server.userManager.GetUser(req.ChatId, userType, req.Token)
+	entUser, err := server.userManager.GetUserByToken(req.ChatId, userType, req.Token)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "cannot find user: %v", err)
 	}
@@ -56,7 +56,7 @@ func (server *AuthServer) RefreshAccessToken(_ context.Context, req *pb.RefreshA
 		return nil, status.Errorf(codes.Unauthenticated, "refresh token invalid: %v", err)
 	}
 
-	entUser, err := server.userManager.GetUser(claims.ChatId, claims.Type, "")
+	entUser, err := server.userManager.GetUser(claims.ChatId, claims.Type)
 	if err != nil {
 		return nil, status.Errorf(codes.Unauthenticated, "cannot find user: %v", err)
 	}

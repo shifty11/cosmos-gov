@@ -8,8 +8,11 @@ import (
 	"github.com/shifty11/cosmos-gov/ent/proposal"
 	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/log"
-	"strings"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
+
+var caser = cases.Title(language.English)
 
 func getChainByName(name string) (*ent.Chain, error) {
 	client, ctx := connect()
@@ -53,7 +56,7 @@ func AddOrRemoveChainForUser(chatId int64, userType user.Type, chainName string)
 	return nil
 }
 
-func GetChainsForUser(chatId int64, userType user.Type) []common.Chain {
+func GetChainsForUser(chatId int64, userType user.Type) []Subscription {
 	client, ctx := connect()
 	var userDto = getOrCreateUser(chatId, userType)
 	chainsOfUser, err := client.Chain.
@@ -68,9 +71,9 @@ func GetChainsForUser(chatId int64, userType user.Type) []common.Chain {
 		Where(chain.IsEnabledEQ(true)).
 		Order(ent.Asc(chain.FieldDisplayName)).
 		All(ctx)
-	var chains []common.Chain
+	var chains []Subscription
 	for _, c := range allChains {
-		var chainEntry = common.Chain{Name: c.Name, DisplayName: c.DisplayName, Notify: false}
+		var chainEntry = Subscription{Name: c.Name, DisplayName: c.DisplayName, Notify: false}
 		for _, nc := range chainsOfUser { // check if user gets notified for this chain (c)
 			if nc.ID == c.ID {
 				chainEntry.Notify = true
@@ -92,7 +95,7 @@ func CreateChain(chainName string) *ent.Chain {
 		c, err = client.Chain.
 			Create().
 			SetName(chainName).
-			SetDisplayName(strings.Title(chainName)).
+			SetDisplayName(caser.String(chainName)).
 			SetIsEnabled(false).
 			Save(ctx)
 		if err != nil {
