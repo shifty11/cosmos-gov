@@ -1,12 +1,10 @@
-package grpc
+package auth
 
 import (
 	"fmt"
 	"github.com/golang-jwt/jwt"
 	"github.com/shifty11/cosmos-gov/ent"
 	"github.com/shifty11/cosmos-gov/ent/user"
-	"github.com/shifty11/cosmos-gov/log"
-	"os"
 	"time"
 )
 
@@ -24,12 +22,15 @@ const (
 	RefreshToken TokenType = "RefreshToken"
 )
 
-func accessibleRoles() map[string][]Role {
-	const path = "/cosmosgov_grpc.AuthService/"
+func AccessibleRoles() map[string][]Role {
+	const path = "/cosmosgov_grpc"
+	const authService = path + ".AuthService/"
+	const subsService = path + ".SubscriptionService/"
 
 	return map[string][]Role{
-		path + "TokenLogin":         {Unautheticated, User},
-		path + "RefreshAccessToken": {Unautheticated, User},
+		authService + "TokenLogin":         {Unautheticated, User},
+		authService + "RefreshAccessToken": {Unautheticated, User},
+		subsService + "GetSubscriptions":   {User},
 	}
 }
 
@@ -46,13 +47,9 @@ type JWTManager struct {
 	refreshTokenDuration time.Duration
 }
 
-func NewJWTManager(accessTokenDuration time.Duration, refreshTokenDuration time.Duration) *JWTManager {
-	jwtSecretKey := os.Getenv("JWT_SECRET_KEY")
-	if jwtSecretKey == "" {
-		log.Sugar.Panic("JWT_SECRET_KEY must be set")
-	}
+func NewJWTManager(jwtSecretKey []byte, accessTokenDuration time.Duration, refreshTokenDuration time.Duration) *JWTManager {
 	return &JWTManager{
-		jwtSecretKey:         []byte(jwtSecretKey),
+		jwtSecretKey:         jwtSecretKey,
 		accessTokenDuration:  accessTokenDuration,
 		refreshTokenDuration: refreshTokenDuration,
 	}
@@ -70,6 +67,7 @@ func (manager *JWTManager) GenerateToken(entUser *ent.User, tokenType TokenType)
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 		},
+		Role: User,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

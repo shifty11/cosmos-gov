@@ -1,17 +1,21 @@
-package grpc
+package auth
 
 import (
 	"context"
+	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/log"
 	"golang.org/x/exp/slices"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
+	"strings"
 )
 
+//goland:noinspection GoNameStartsWithPackageName
 type AuthInterceptor struct {
 	jwtManager      *JWTManager
+	userManager     *database.UserManager
 	accessibleRoles map[string][]Role
 }
 
@@ -28,7 +32,7 @@ func (interceptor *AuthInterceptor) Unary() grpc.UnaryServerInterceptor {
 	) (interface{}, error) {
 		log.Sugar.Debug("--> unary interceptor: ", info.FullMethod)
 
-		err := interceptor.authorize(ctx, info.FullMethod)
+		ctx, err := interceptor.authorize(ctx, info.FullMethod)
 		if err != nil {
 			return nil, err
 		}
@@ -46,7 +50,7 @@ func (interceptor *AuthInterceptor) Stream() grpc.StreamServerInterceptor {
 	) error {
 		log.Sugar.Debug("--> stream interceptor: ", info.FullMethod)
 
-		err := interceptor.authorize(stream.Context(), info.FullMethod)
+		_, err := interceptor.authorize(stream.Context(), info.FullMethod)
 		if err != nil {
 			return err
 		}
@@ -55,33 +59,37 @@ func (interceptor *AuthInterceptor) Stream() grpc.StreamServerInterceptor {
 	}
 }
 
-func (interceptor *AuthInterceptor) authorize(ctx context.Context, method string) error {
+func (interceptor *AuthInterceptor) authorize(ctx context.Context, method string) (context.Context, error) {
 	roles, ok := interceptor.accessibleRoles[method]
 	if slices.Contains(roles, Unautheticated) {
-		return nil
+		return nil, nil
 	}
 
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
-		return status.Errorf(codes.Unauthenticated, "metadata is not provided")
+		return nil, status.Errorf(codes.Unauthenticated, "metadata is not provided")
 	}
 
 	values := md["authorization"]
 	if len(values) == 0 {
-		return status.Errorf(codes.Unauthenticated, "authorization token is not provided")
+		return nil, status.Errorf(codes.Unauthenticated, "authorization token is not provided")
 	}
 
-	accessToken := values[0]
+	accessToken := strings.Replace(values[0], "Bearer ", "", 1)
 	claims, err := interceptor.jwtManager.Verify(accessToken)
 	if err != nil {
-		return status.Errorf(codes.Unauthenticated, "access token is invalid: %v", err)
+		return nil, status.Errorf(codes.Unauthenticated, "access token is invalid: %v", err)
 	}
 
 	for _, role := range roles {
 		if role == claims.Role {
-			return nil
+			entUser, err := interceptor.userManager.GetUser(claims.ChatId, claims.Type, "")
+			if err != nil {
+				return nil, status.Error(codes.Internal, "user not found")
+			}
+			return context.WithValue(ctx, "user", entUser), nil
 		}
 	}
 
-	return status.Error(codes.PermissionDenied, "no permission to access this RPC")
+	return nil, status.Error(codes.PermissionDenied, "no permission to access this RPC")
 }

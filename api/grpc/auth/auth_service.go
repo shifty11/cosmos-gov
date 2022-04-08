@@ -1,22 +1,23 @@
-package grpc
+package auth
 
 import (
 	"context"
-	pb "github.com/shifty11/cosmos-gov/api/grpc/protobuf/go/protobuf/auth_service"
+	pb "github.com/shifty11/cosmos-gov/api/grpc/protobuf/go/auth_service"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/ent/user"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
+//goland:noinspection GoNameStartsWithPackageName
 type AuthServer struct {
 	pb.UnimplementedAuthServiceServer
 	userManager *database.UserManager
 	jwtManager  *JWTManager
 }
 
-func NewAuthServer(jwtManager *JWTManager) pb.AuthServiceServer {
-	return &AuthServer{userManager: database.NewUserManager(), jwtManager: jwtManager}
+func NewAuthServer(userManager *database.UserManager, jwtManager *JWTManager) pb.AuthServiceServer {
+	return &AuthServer{userManager: userManager, jwtManager: jwtManager}
 }
 
 func (server *AuthServer) TokenLogin(_ context.Context, req *pb.TokenLoginRequest) (*pb.TokenLoginResponse, error) {

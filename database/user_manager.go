@@ -15,14 +15,24 @@ func NewUserManager() *UserManager {
 
 func (server *UserManager) GetUser(chatId int64, userType user.Type, token string) (*ent.User, error) {
 	client, ctx := connect()
-	entUser, err := client.User.
-		Query().
-		Where(user.And(
-			user.ChatIDEQ(chatId),
-			user.TypeEQ(userType),
-		)).
-		Only(ctx)
-	return entUser, err
+	if token == "" {
+		return client.User.
+			Query().
+			Where(user.And(
+				user.ChatIDEQ(chatId),
+				user.TypeEQ(userType),
+			)).
+			Only(ctx)
+	} else {
+		return client.User.
+			Query().
+			Where(user.And(
+				user.ChatIDEQ(chatId),
+				user.TypeEQ(userType),
+				//user.LogingTokenEQ(token),	//TODO: add this line
+			)).
+			Only(ctx)
+	}
 }
 
 func (server *UserManager) GenerateNewLoginToken(chatId int64, userType user.Type) error {
