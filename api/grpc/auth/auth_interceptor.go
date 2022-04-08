@@ -60,8 +60,8 @@ func (interceptor *AuthInterceptor) Stream() grpc.StreamServerInterceptor {
 }
 
 func (interceptor *AuthInterceptor) authorize(ctx context.Context, method string) (context.Context, error) {
-	roles, ok := interceptor.accessibleRoles[method]
-	if slices.Contains(roles, Unautheticated) {
+	accessibleRoles, ok := interceptor.accessibleRoles[method]
+	if slices.Contains(accessibleRoles, Unautheticated) {
 		return nil, nil
 	}
 
@@ -81,7 +81,7 @@ func (interceptor *AuthInterceptor) authorize(ctx context.Context, method string
 		return nil, status.Errorf(codes.Unauthenticated, "access token is invalid: %v", err)
 	}
 
-	for _, role := range roles {
+	for _, role := range accessibleRoles {
 		if role == claims.Role {
 			entUser, err := interceptor.userManager.GetUser(claims.ChatId, claims.Type, "")
 			if err != nil {
