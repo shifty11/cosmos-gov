@@ -31,6 +31,7 @@ func AccessibleRoles() map[string][]Role {
 		authService + "TokenLogin":         {Unautheticated, User},
 		authService + "RefreshAccessToken": {Unautheticated, User},
 		subsService + "GetSubscriptions":   {User},
+		subsService + "ToggleSubscription": {User},
 	}
 }
 

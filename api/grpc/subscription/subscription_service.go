@@ -52,7 +52,6 @@ func (server *SubscriptionServer) ToggleSubscription(ctx context.Context, req *p
 		log.Sugar.Error("error while toggling subscription: %v", err)
 		return nil, status.Errorf(codes.Internal, "Unknown error occured")
 	}
-	sub := &pb.Subscription{Name: req.Name, IsSubscribed: isSubscribed}
-	var res = &pb.ToggleSubscriptionResponse{Subscription: sub}
+	var res = &pb.ToggleSubscriptionResponse{IsSubscribed: isSubscribed}
 	return res, nil
 }
