@@ -45,14 +45,9 @@ func canInteractWithBot(s *discordgo.Session, i *discordgo.InteractionCreate) bo
 		return false
 	}
 
-	log.Sugar.Debugf("User %v has permissions %v", i.Interaction.Member.User.Username, p)
-
 	permAdmin := int64(discordgo.PermissionAdministrator)
 	permManChan := int64(discordgo.PermissionManageChannels)
 	permManServ := int64(discordgo.PermissionManageServer)
-	log.Sugar.Debugf("User %v PermissionAdministrator: %v", i.Interaction.Member.User.Username, p&permAdmin == permAdmin)
-	log.Sugar.Debugf("User %v PermissionManageChannels: %v", i.Interaction.Member.User.Username, p&permManChan == permManChan)
-	log.Sugar.Debugf("User %v PermissionManageServer: %v", i.Interaction.Member.User.Username, p&permManServ == permManServ)
 	return p&permAdmin == permAdmin || p&permManChan == permManChan || p&permManServ == permManServ
 }
 
