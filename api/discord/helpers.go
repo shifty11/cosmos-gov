@@ -45,9 +45,10 @@ func canInteractWithBot(s *discordgo.Session, i *discordgo.InteractionCreate) bo
 		return false
 	}
 
-	return p&discordgo.PermissionAdministrator == discordgo.PermissionAdministrator ||
-		p&discordgo.PermissionManageChannels == discordgo.PermissionManageChannels ||
-		p&discordgo.PermissionManageServer == discordgo.PermissionManageServer
+	permAdmin := int64(discordgo.PermissionAdministrator)
+	permManChan := int64(discordgo.PermissionManageChannels)
+	permManServ := int64(discordgo.PermissionManageServer)
+	return p&permAdmin == permAdmin || p&permManChan == permManChan || p&permManServ == permManServ
 }
 
 func sendEmptyResponse(s *discordgo.Session, i *discordgo.InteractionCreate) {
