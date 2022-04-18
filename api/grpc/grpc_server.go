@@ -16,7 +16,7 @@ import (
 
 const (
 	port                 = ":50051"
-	accessTokenDuration  = time.Minute * 4
+	accessTokenDuration  = time.Minute * 15
 	refreshTokenDuration = time.Hour * 24
 )
 
