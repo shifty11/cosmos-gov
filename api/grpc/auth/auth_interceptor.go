@@ -61,7 +61,7 @@ func (interceptor *AuthInterceptor) Stream() grpc.StreamServerInterceptor {
 
 func (interceptor *AuthInterceptor) authorize(ctx context.Context, method string) (context.Context, error) {
 	accessibleRoles, ok := interceptor.accessibleRoles[method]
-	if slices.Contains(accessibleRoles, Unautheticated) {
+	if slices.Contains(accessibleRoles, Unauthenticated) {
 		return nil, nil
 	}
 

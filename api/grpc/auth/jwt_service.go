@@ -11,8 +11,8 @@ import (
 type Role string
 
 const (
-	Unautheticated Role = "Unautheticated"
-	User           Role = "User"
+	Unauthenticated Role = "Unauthenticated"
+	User            Role = "User"
 )
 
 type TokenType string
@@ -26,12 +26,15 @@ func AccessibleRoles() map[string][]Role {
 	const path = "/cosmosgov_grpc"
 	const authService = path + ".AuthService/"
 	const subsService = path + ".SubscriptionService/"
+	const votePermissionService = path + ".VotePermissionService/"
 
 	return map[string][]Role{
-		authService + "TokenLogin":         {Unautheticated, User},
-		authService + "RefreshAccessToken": {Unautheticated, User},
-		subsService + "GetSubscriptions":   {User},
-		subsService + "ToggleSubscription": {User},
+		authService + "TokenLogin":                   {Unauthenticated, User},
+		authService + "RefreshAccessToken":           {Unauthenticated, User},
+		subsService + "GetSubscriptions":             {User},
+		subsService + "ToggleSubscription":           {User},
+		votePermissionService + "GetVotePermissions": {User},
+		votePermissionService + "RefreshPermission":  {User},
 	}
 }
 
