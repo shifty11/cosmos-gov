@@ -8,7 +8,7 @@ require (
 	github.com/TheZeroSlave/zapsentry v1.9.0
 	github.com/bwmarrin/discordgo v0.25.0
 	github.com/cosmos/cosmos-sdk v0.44.5
-	github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible
+	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/liamylian/jsontime v1.0.1
 	github.com/lib/pq v1.10.5
@@ -18,6 +18,7 @@ require (
 	github.com/zach-klippenstein/goregen v0.0.0-20160303162051-795b5e3961ea
 	go.uber.org/zap v1.20.0
 	golang.org/x/exp v0.0.0-20220328175248-053ad81199eb
+	golang.org/x/text v0.3.7
 	google.golang.org/grpc v1.43.0
 	google.golang.org/protobuf v1.27.1
 )
@@ -133,7 +134,6 @@ require (
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/sys v0.0.0-20220412211240-33da011f77ad // indirect
 	golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1 // indirect
-	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/genproto v0.0.0-20211208223120-3a66f561d7aa // indirect
 	gopkg.in/ini.v1 v1.66.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

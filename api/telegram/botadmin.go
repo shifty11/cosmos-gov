@@ -2,7 +2,7 @@ package telegram
 
 import (
 	"fmt"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/shifty11/cosmos-gov/common"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/ent/user"
@@ -13,7 +13,7 @@ import (
 )
 
 func isBotAdmin(update *tgbotapi.Update) bool {
-	var fromId int
+	var fromId int64
 	if update.Message != nil {
 		fromId = update.Message.From.ID
 	} else if update.CallbackQuery != nil {
@@ -22,7 +22,7 @@ func isBotAdmin(update *tgbotapi.Update) bool {
 		return false
 	}
 	admins := strings.Split(strings.Trim(os.Getenv("ADMIN_IDS"), " "), ",")
-	return common.Contains(admins, strconv.Itoa(fromId))
+	return common.Contains(admins, strconv.FormatInt(fromId, 10))
 }
 
 func sendUserStatistics(update *tgbotapi.Update) {

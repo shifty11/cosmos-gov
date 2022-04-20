@@ -2,7 +2,7 @@ package telegram
 
 import (
 	"fmt"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/shifty11/cosmos-gov/common"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/ent/user"
@@ -120,7 +120,7 @@ func getChatIdX(update *tgbotapi.Update) int64 {
 	return 0
 }
 
-func getUserIdX(update *tgbotapi.Update) int {
+func getUserIdX(update *tgbotapi.Update) int64 {
 	if update.CallbackQuery != nil {
 		return update.CallbackQuery.From.ID
 	}
@@ -149,7 +149,7 @@ func answerCallbackQuery(update *tgbotapi.Update) {
 	if update.CallbackQuery != nil {
 		callback := tgbotapi.NewCallback(update.CallbackQuery.ID, "")
 		api := getApi()
-		_, err := api.AnswerCallbackQuery(callback)
+		_, err := api.Request(callback)
 		if err != nil {
 			log.Sugar.Error(err)
 		}
@@ -186,10 +186,12 @@ func isUpdateFromCreatorOrAdministrator(update *tgbotapi.Update) bool {
 	api := getApi()
 	chatId := getChatIdX(update)
 	userId := getUserIdX(update)
-	memberConfig := tgbotapi.ChatConfigWithUser{
-		ChatID:             chatId,
-		SuperGroupUsername: "",
-		UserID:             userId,
+	memberConfig := tgbotapi.GetChatMemberConfig{
+		ChatConfigWithUser: tgbotapi.ChatConfigWithUser{
+			ChatID:             chatId,
+			SuperGroupUsername: "",
+			UserID:             userId,
+		},
 	}
 	member, err := api.GetChatMember(memberConfig)
 	if err != nil {
