@@ -12,6 +12,7 @@ import (
 	"github.com/shifty11/cosmos-gov/ent/chain"
 	"github.com/shifty11/cosmos-gov/ent/discordchannel"
 	"github.com/shifty11/cosmos-gov/ent/lenschaininfo"
+	"github.com/shifty11/cosmos-gov/ent/migrationinfo"
 	"github.com/shifty11/cosmos-gov/ent/proposal"
 	"github.com/shifty11/cosmos-gov/ent/telegramchat"
 	"github.com/shifty11/cosmos-gov/ent/user"
@@ -33,6 +34,8 @@ type Client struct {
 	DiscordChannel *DiscordChannelClient
 	// LensChainInfo is the client for interacting with the LensChainInfo builders.
 	LensChainInfo *LensChainInfoClient
+	// MigrationInfo is the client for interacting with the MigrationInfo builders.
+	MigrationInfo *MigrationInfoClient
 	// Proposal is the client for interacting with the Proposal builders.
 	Proposal *ProposalClient
 	// TelegramChat is the client for interacting with the TelegramChat builders.
@@ -57,6 +60,7 @@ func (c *Client) init() {
 	c.Chain = NewChainClient(c.config)
 	c.DiscordChannel = NewDiscordChannelClient(c.config)
 	c.LensChainInfo = NewLensChainInfoClient(c.config)
+	c.MigrationInfo = NewMigrationInfoClient(c.config)
 	c.Proposal = NewProposalClient(c.config)
 	c.TelegramChat = NewTelegramChatClient(c.config)
 	c.User = NewUserClient(c.config)
@@ -97,6 +101,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Chain:          NewChainClient(cfg),
 		DiscordChannel: NewDiscordChannelClient(cfg),
 		LensChainInfo:  NewLensChainInfoClient(cfg),
+		MigrationInfo:  NewMigrationInfoClient(cfg),
 		Proposal:       NewProposalClient(cfg),
 		TelegramChat:   NewTelegramChatClient(cfg),
 		User:           NewUserClient(cfg),
@@ -123,6 +128,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Chain:          NewChainClient(cfg),
 		DiscordChannel: NewDiscordChannelClient(cfg),
 		LensChainInfo:  NewLensChainInfoClient(cfg),
+		MigrationInfo:  NewMigrationInfoClient(cfg),
 		Proposal:       NewProposalClient(cfg),
 		TelegramChat:   NewTelegramChatClient(cfg),
 		User:           NewUserClient(cfg),
@@ -159,6 +165,7 @@ func (c *Client) Use(hooks ...Hook) {
 	c.Chain.Use(hooks...)
 	c.DiscordChannel.Use(hooks...)
 	c.LensChainInfo.Use(hooks...)
+	c.MigrationInfo.Use(hooks...)
 	c.Proposal.Use(hooks...)
 	c.TelegramChat.Use(hooks...)
 	c.User.Use(hooks...)
@@ -497,6 +504,96 @@ func (c *LensChainInfoClient) GetX(ctx context.Context, id int) *LensChainInfo {
 // Hooks returns the client hooks.
 func (c *LensChainInfoClient) Hooks() []Hook {
 	return c.hooks.LensChainInfo
+}
+
+// MigrationInfoClient is a client for the MigrationInfo schema.
+type MigrationInfoClient struct {
+	config
+}
+
+// NewMigrationInfoClient returns a client for the MigrationInfo from the given config.
+func NewMigrationInfoClient(c config) *MigrationInfoClient {
+	return &MigrationInfoClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `migrationinfo.Hooks(f(g(h())))`.
+func (c *MigrationInfoClient) Use(hooks ...Hook) {
+	c.hooks.MigrationInfo = append(c.hooks.MigrationInfo, hooks...)
+}
+
+// Create returns a create builder for MigrationInfo.
+func (c *MigrationInfoClient) Create() *MigrationInfoCreate {
+	mutation := newMigrationInfoMutation(c.config, OpCreate)
+	return &MigrationInfoCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of MigrationInfo entities.
+func (c *MigrationInfoClient) CreateBulk(builders ...*MigrationInfoCreate) *MigrationInfoCreateBulk {
+	return &MigrationInfoCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for MigrationInfo.
+func (c *MigrationInfoClient) Update() *MigrationInfoUpdate {
+	mutation := newMigrationInfoMutation(c.config, OpUpdate)
+	return &MigrationInfoUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *MigrationInfoClient) UpdateOne(mi *MigrationInfo) *MigrationInfoUpdateOne {
+	mutation := newMigrationInfoMutation(c.config, OpUpdateOne, withMigrationInfo(mi))
+	return &MigrationInfoUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *MigrationInfoClient) UpdateOneID(id int) *MigrationInfoUpdateOne {
+	mutation := newMigrationInfoMutation(c.config, OpUpdateOne, withMigrationInfoID(id))
+	return &MigrationInfoUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for MigrationInfo.
+func (c *MigrationInfoClient) Delete() *MigrationInfoDelete {
+	mutation := newMigrationInfoMutation(c.config, OpDelete)
+	return &MigrationInfoDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *MigrationInfoClient) DeleteOne(mi *MigrationInfo) *MigrationInfoDeleteOne {
+	return c.DeleteOneID(mi.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *MigrationInfoClient) DeleteOneID(id int) *MigrationInfoDeleteOne {
+	builder := c.Delete().Where(migrationinfo.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &MigrationInfoDeleteOne{builder}
+}
+
+// Query returns a query builder for MigrationInfo.
+func (c *MigrationInfoClient) Query() *MigrationInfoQuery {
+	return &MigrationInfoQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a MigrationInfo entity by its id.
+func (c *MigrationInfoClient) Get(ctx context.Context, id int) (*MigrationInfo, error) {
+	return c.Query().Where(migrationinfo.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *MigrationInfoClient) GetX(ctx context.Context, id int) *MigrationInfo {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *MigrationInfoClient) Hooks() []Hook {
+	return c.hooks.MigrationInfo
 }
 
 // ProposalClient is a client for the Proposal schema.

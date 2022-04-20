@@ -15,6 +15,9 @@ type DiscordChannel func(*sql.Selector)
 // LensChainInfo is the predicate function for lenschaininfo builders.
 type LensChainInfo func(*sql.Selector)
 
+// MigrationInfo is the predicate function for migrationinfo builders.
+type MigrationInfo func(*sql.Selector)
+
 // Proposal is the predicate function for proposal builders.
 type Proposal func(*sql.Selector)
 

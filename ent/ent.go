@@ -11,6 +11,7 @@ import (
 	"github.com/shifty11/cosmos-gov/ent/chain"
 	"github.com/shifty11/cosmos-gov/ent/discordchannel"
 	"github.com/shifty11/cosmos-gov/ent/lenschaininfo"
+	"github.com/shifty11/cosmos-gov/ent/migrationinfo"
 	"github.com/shifty11/cosmos-gov/ent/proposal"
 	"github.com/shifty11/cosmos-gov/ent/telegramchat"
 	"github.com/shifty11/cosmos-gov/ent/user"
@@ -38,6 +39,7 @@ func columnChecker(table string) func(string) error {
 		chain.Table:          chain.ValidColumn,
 		discordchannel.Table: discordchannel.ValidColumn,
 		lenschaininfo.Table:  lenschaininfo.ValidColumn,
+		migrationinfo.Table:  migrationinfo.ValidColumn,
 		proposal.Table:       proposal.ValidColumn,
 		telegramchat.Table:   telegramchat.ValidColumn,
 		user.Table:           user.ValidColumn,

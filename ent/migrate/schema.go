@@ -105,6 +105,19 @@ var (
 			},
 		},
 	}
+	// MigrationInfosColumns holds the columns for the "migration_infos" table.
+	MigrationInfosColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "is_migrated", Type: field.TypeBool, Default: false},
+	}
+	// MigrationInfosTable holds the schema information for the "migration_infos" table.
+	MigrationInfosTable = &schema.Table{
+		Name:       "migration_infos",
+		Columns:    MigrationInfosColumns,
+		PrimaryKey: []*schema.Column{MigrationInfosColumns[0]},
+	}
 	// ProposalsColumns holds the columns for the "proposals" table.
 	ProposalsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -267,6 +280,7 @@ var (
 		ChainsTable,
 		DiscordChannelsTable,
 		LensChainInfosTable,
+		MigrationInfosTable,
 		ProposalsTable,
 		TelegramChatsTable,
 		UsersTable,

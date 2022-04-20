@@ -8,6 +8,7 @@ import (
 	"github.com/shifty11/cosmos-gov/ent/chain"
 	"github.com/shifty11/cosmos-gov/ent/discordchannel"
 	"github.com/shifty11/cosmos-gov/ent/lenschaininfo"
+	"github.com/shifty11/cosmos-gov/ent/migrationinfo"
 	"github.com/shifty11/cosmos-gov/ent/proposal"
 	"github.com/shifty11/cosmos-gov/ent/schema"
 	"github.com/shifty11/cosmos-gov/ent/telegramchat"
@@ -59,6 +60,22 @@ func init() {
 	lenschaininfo.DefaultUpdatedAt = lenschaininfoDescUpdatedAt.Default.(func() time.Time)
 	// lenschaininfo.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	lenschaininfo.UpdateDefaultUpdatedAt = lenschaininfoDescUpdatedAt.UpdateDefault.(func() time.Time)
+	migrationinfoFields := schema.MigrationInfo{}.Fields()
+	_ = migrationinfoFields
+	// migrationinfoDescCreatedAt is the schema descriptor for created_at field.
+	migrationinfoDescCreatedAt := migrationinfoFields[0].Descriptor()
+	// migrationinfo.DefaultCreatedAt holds the default value on creation for the created_at field.
+	migrationinfo.DefaultCreatedAt = migrationinfoDescCreatedAt.Default.(func() time.Time)
+	// migrationinfoDescUpdatedAt is the schema descriptor for updated_at field.
+	migrationinfoDescUpdatedAt := migrationinfoFields[1].Descriptor()
+	// migrationinfo.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	migrationinfo.DefaultUpdatedAt = migrationinfoDescUpdatedAt.Default.(func() time.Time)
+	// migrationinfo.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	migrationinfo.UpdateDefaultUpdatedAt = migrationinfoDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// migrationinfoDescIsMigrated is the schema descriptor for is_migrated field.
+	migrationinfoDescIsMigrated := migrationinfoFields[2].Descriptor()
+	// migrationinfo.DefaultIsMigrated holds the default value on creation for the is_migrated field.
+	migrationinfo.DefaultIsMigrated = migrationinfoDescIsMigrated.Default.(bool)
 	proposalFields := schema.Proposal{}.Fields()
 	_ = proposalFields
 	// proposalDescCreatedAt is the schema descriptor for created_at field.

@@ -48,6 +48,19 @@ func (f LensChainInfoFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Valu
 	return f(ctx, mv)
 }
 
+// The MigrationInfoFunc type is an adapter to allow the use of ordinary
+// function as MigrationInfo mutator.
+type MigrationInfoFunc func(context.Context, *ent.MigrationInfoMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f MigrationInfoFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.MigrationInfoMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.MigrationInfoMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The ProposalFunc type is an adapter to allow the use of ordinary
 // function as Proposal mutator.
 type ProposalFunc func(context.Context, *ent.ProposalMutation) (ent.Value, error)
