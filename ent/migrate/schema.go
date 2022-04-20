@@ -60,7 +60,7 @@ var (
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "name", Type: field.TypeString},
 		{Name: "is_group", Type: field.TypeBool},
-		{Name: "roles", Type: field.TypeString},
+		{Name: "roles", Type: field.TypeString, Default: ""},
 		{Name: "discord_channel_user", Type: field.TypeInt64, Nullable: true},
 	}
 	// DiscordChannelsTable holds the schema information for the "discord_channels" table.
@@ -187,7 +187,7 @@ var (
 		{Name: "id", Type: field.TypeInt64, Increment: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "name", Type: field.TypeString},
+		{Name: "name", Type: field.TypeString, Default: "<not set>"},
 		{Name: "chat_id", Type: field.TypeInt64},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"telegram", "discord"}},
 		{Name: "loging_token", Type: field.TypeString, Default: ""},

@@ -68,6 +68,14 @@ func (dcc *DiscordChannelCreate) SetRoles(s string) *DiscordChannelCreate {
 	return dcc
 }
 
+// SetNillableRoles sets the "roles" field if the given value is not nil.
+func (dcc *DiscordChannelCreate) SetNillableRoles(s *string) *DiscordChannelCreate {
+	if s != nil {
+		dcc.SetRoles(*s)
+	}
+	return dcc
+}
+
 // SetID sets the "id" field.
 func (dcc *DiscordChannelCreate) SetID(i int64) *DiscordChannelCreate {
 	dcc.mutation.SetID(i)
@@ -186,6 +194,10 @@ func (dcc *DiscordChannelCreate) defaults() {
 	if _, ok := dcc.mutation.UpdatedAt(); !ok {
 		v := discordchannel.DefaultUpdatedAt()
 		dcc.mutation.SetUpdatedAt(v)
+	}
+	if _, ok := dcc.mutation.Roles(); !ok {
+		v := discordchannel.DefaultRoles
+		dcc.mutation.SetRoles(v)
 	}
 }
 

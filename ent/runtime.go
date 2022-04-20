@@ -48,6 +48,10 @@ func init() {
 	discordchannel.DefaultUpdatedAt = discordchannelDescUpdatedAt.Default.(func() time.Time)
 	// discordchannel.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	discordchannel.UpdateDefaultUpdatedAt = discordchannelDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// discordchannelDescRoles is the schema descriptor for roles field.
+	discordchannelDescRoles := discordchannelFields[5].Descriptor()
+	// discordchannel.DefaultRoles holds the default value on creation for the roles field.
+	discordchannel.DefaultRoles = discordchannelDescRoles.Default.(string)
 	lenschaininfoFields := schema.LensChainInfo{}.Fields()
 	_ = lenschaininfoFields
 	// lenschaininfoDescCreatedAt is the schema descriptor for created_at field.
@@ -112,6 +116,10 @@ func init() {
 	user.DefaultUpdatedAt = userDescUpdatedAt.Default.(func() time.Time)
 	// user.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	user.UpdateDefaultUpdatedAt = userDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// userDescName is the schema descriptor for name field.
+	userDescName := userFields[3].Descriptor()
+	// user.DefaultName holds the default value on creation for the name field.
+	user.DefaultName = userDescName.Default.(string)
 	// userDescLogingToken is the schema descriptor for loging_token field.
 	userDescLogingToken := userFields[6].Descriptor()
 	// user.DefaultLogingToken holds the default value on creation for the loging_token field.

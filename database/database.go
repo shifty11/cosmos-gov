@@ -3,6 +3,8 @@ package database
 import (
 	"context"
 	"github.com/shifty11/cosmos-gov/ent/migrate"
+	"github.com/shifty11/cosmos-gov/ent/migrationinfo"
+	"github.com/shifty11/cosmos-gov/ent/user"
 	"os"
 
 	"github.com/shifty11/cosmos-gov/ent"
@@ -45,6 +47,84 @@ func MigrateDatabase() {
 		migrate.WithDropColumn(true),
 	)
 	if err != nil {
-		log.Sugar.Panic("Failed creating schema resources: %v", err)
+		log.Sugar.Panicf("Failed creating schema resources: %v", err)
 	}
+	migrateUsers()
+}
+
+// TODO: remove after migration
+func migrateUsers() {
+	client, ctx := connect()
+	doesExist, err := client.MigrationInfo.
+		Query().
+		Where(migrationinfo.IsMigratedEQ(true)).
+		Exist(ctx)
+	if err != nil {
+		log.Sugar.Panicf("Failed migrating %v", err)
+	}
+	if doesExist {
+		return
+	}
+
+	users, err := client.User.
+		Query().
+		WithChains().
+		All(ctx)
+	if err != nil {
+		log.Sugar.Panicf("Failed migrating %v", err)
+	}
+
+	_, err = client.TelegramChat.
+		Delete().
+		Exec(ctx)
+	if err != nil {
+		log.Sugar.Panicf("Failed migrating %v", err)
+	}
+	_, err = client.DiscordChannel.
+		Delete().
+		Exec(ctx)
+	if err != nil {
+		log.Sugar.Panicf("Failed migrating %v", err)
+	}
+
+	for _, u := range users {
+		chains, err := u.QueryChains().All(ctx)
+		if err != nil {
+			log.Sugar.Panicf("Failed migrating %v", err)
+		}
+		if u.Type == user.TypeTelegram {
+			err = client.TelegramChat.
+				Create().
+				SetID(u.ChatID).
+				SetName("<not set>"). // TODO: set this field properly
+				SetIsGroup(u.ChatID < 0).
+				SetUser(u).
+				AddChains(chains...).
+				Exec(ctx)
+			if err != nil {
+				log.Sugar.Panicf("Failed migrating %v", err)
+			}
+		} else {
+			err = client.DiscordChannel.
+				Create().
+				SetID(u.ChatID).
+				SetName("<not set>"). // TODO: set this field properly
+				SetIsGroup(true).     // TODO: set this field properly
+				SetUser(u).
+				AddChains(chains...).
+				Exec(ctx)
+			if err != nil {
+				log.Sugar.Panicf("Failed migrating %v", err)
+			}
+		}
+	}
+
+	err = client.MigrationInfo.
+		Create().
+		SetIsMigrated(true).
+		Exec(ctx)
+	if err != nil {
+		log.Sugar.Panicf("Failed migrating %v", err)
+	}
+	log.Sugar.Info("User migration successful")
 }

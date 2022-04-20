@@ -48,6 +48,14 @@ func (dcu *DiscordChannelUpdate) SetRoles(s string) *DiscordChannelUpdate {
 	return dcu
 }
 
+// SetNillableRoles sets the "roles" field if the given value is not nil.
+func (dcu *DiscordChannelUpdate) SetNillableRoles(s *string) *DiscordChannelUpdate {
+	if s != nil {
+		dcu.SetRoles(*s)
+	}
+	return dcu
+}
+
 // SetUserID sets the "user" edge to the User entity by ID.
 func (dcu *DiscordChannelUpdate) SetUserID(id int64) *DiscordChannelUpdate {
 	dcu.mutation.SetUserID(id)
@@ -339,6 +347,14 @@ func (dcuo *DiscordChannelUpdateOne) SetName(s string) *DiscordChannelUpdateOne 
 // SetRoles sets the "roles" field.
 func (dcuo *DiscordChannelUpdateOne) SetRoles(s string) *DiscordChannelUpdateOne {
 	dcuo.mutation.SetRoles(s)
+	return dcuo
+}
+
+// SetNillableRoles sets the "roles" field if the given value is not nil.
+func (dcuo *DiscordChannelUpdateOne) SetNillableRoles(s *string) *DiscordChannelUpdateOne {
+	if s != nil {
+		dcuo.SetRoles(*s)
+	}
 	return dcuo
 }
 

@@ -58,6 +58,14 @@ func (uc *UserCreate) SetName(s string) *UserCreate {
 	return uc
 }
 
+// SetNillableName sets the "name" field if the given value is not nil.
+func (uc *UserCreate) SetNillableName(s *string) *UserCreate {
+	if s != nil {
+		uc.SetName(*s)
+	}
+	return uc
+}
+
 // SetChatID sets the "chat_id" field.
 func (uc *UserCreate) SetChatID(i int64) *UserCreate {
 	uc.mutation.SetChatID(i)
@@ -228,6 +236,10 @@ func (uc *UserCreate) defaults() {
 	if _, ok := uc.mutation.UpdatedAt(); !ok {
 		v := user.DefaultUpdatedAt()
 		uc.mutation.SetUpdatedAt(v)
+	}
+	if _, ok := uc.mutation.Name(); !ok {
+		v := user.DefaultName
+		uc.mutation.SetName(v)
 	}
 	if _, ok := uc.mutation.LogingToken(); !ok {
 		v := user.DefaultLogingToken

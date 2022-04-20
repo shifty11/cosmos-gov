@@ -81,4 +81,6 @@ var (
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
+	// DefaultRoles holds the default value on creation for the "roles" field.
+	DefaultRoles string
 )

@@ -24,7 +24,8 @@ func (User) Fields() []ent.Field {
 			UpdateDefault(time.Now),
 		field.Int64("id").
 			Immutable(),
-		field.String("name"),
+		field.String("name").
+			Default("<not set>"), // TODO: remote Default
 		field.Int64("chat_id"). // TODO: has to be removed
 					Immutable(),
 		field.Enum("type").

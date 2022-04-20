@@ -28,7 +28,8 @@ func (DiscordChannel) Fields() []ent.Field {
 		field.String("name"),
 		field.Bool("is_group").
 			Immutable(),
-		field.String("roles"),
+		field.String("roles").
+			Default(""),
 	}
 }
 
