@@ -22,6 +22,19 @@ func (f ChainFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error
 	return f(ctx, mv)
 }
 
+// The DiscordChannelFunc type is an adapter to allow the use of ordinary
+// function as DiscordChannel mutator.
+type DiscordChannelFunc func(context.Context, *ent.DiscordChannelMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f DiscordChannelFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.DiscordChannelMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DiscordChannelMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The LensChainInfoFunc type is an adapter to allow the use of ordinary
 // function as LensChainInfo mutator.
 type LensChainInfoFunc func(context.Context, *ent.LensChainInfoMutation) (ent.Value, error)
@@ -48,6 +61,19 @@ func (f ProposalFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, er
 	return f(ctx, mv)
 }
 
+// The TelegramChatFunc type is an adapter to allow the use of ordinary
+// function as TelegramChat mutator.
+type TelegramChatFunc func(context.Context, *ent.TelegramChatMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f TelegramChatFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.TelegramChatMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TelegramChatMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The UserFunc type is an adapter to allow the use of ordinary
 // function as User mutator.
 type UserFunc func(context.Context, *ent.UserMutation) (ent.Value, error)
@@ -57,6 +83,19 @@ func (f UserFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error)
 	mv, ok := m.(*ent.UserMutation)
 	if !ok {
 		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The WalletFunc type is an adapter to allow the use of ordinary
+// function as Wallet mutator.
+type WalletFunc func(context.Context, *ent.WalletMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f WalletFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.WalletMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.WalletMutation", m)
 	}
 	return f(ctx, mv)
 }

@@ -63,14 +63,14 @@ func (cu *ChainUpdate) SetNillableIsEnabled(b *bool) *ChainUpdate {
 }
 
 // AddUserIDs adds the "users" edge to the User entity by IDs.
-func (cu *ChainUpdate) AddUserIDs(ids ...int) *ChainUpdate {
+func (cu *ChainUpdate) AddUserIDs(ids ...int64) *ChainUpdate {
 	cu.mutation.AddUserIDs(ids...)
 	return cu
 }
 
 // AddUsers adds the "users" edges to the User entity.
 func (cu *ChainUpdate) AddUsers(u ...*User) *ChainUpdate {
-	ids := make([]int, len(u))
+	ids := make([]int64, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -104,14 +104,14 @@ func (cu *ChainUpdate) ClearUsers() *ChainUpdate {
 }
 
 // RemoveUserIDs removes the "users" edge to User entities by IDs.
-func (cu *ChainUpdate) RemoveUserIDs(ids ...int) *ChainUpdate {
+func (cu *ChainUpdate) RemoveUserIDs(ids ...int64) *ChainUpdate {
 	cu.mutation.RemoveUserIDs(ids...)
 	return cu
 }
 
 // RemoveUsers removes "users" edges to User entities.
 func (cu *ChainUpdate) RemoveUsers(u ...*User) *ChainUpdate {
-	ids := make([]int, len(u))
+	ids := make([]int64, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -257,7 +257,7 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeInt64,
 					Column: user.FieldID,
 				},
 			},
@@ -273,7 +273,7 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeInt64,
 					Column: user.FieldID,
 				},
 			},
@@ -292,7 +292,7 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeInt64,
 					Column: user.FieldID,
 				},
 			},
@@ -408,14 +408,14 @@ func (cuo *ChainUpdateOne) SetNillableIsEnabled(b *bool) *ChainUpdateOne {
 }
 
 // AddUserIDs adds the "users" edge to the User entity by IDs.
-func (cuo *ChainUpdateOne) AddUserIDs(ids ...int) *ChainUpdateOne {
+func (cuo *ChainUpdateOne) AddUserIDs(ids ...int64) *ChainUpdateOne {
 	cuo.mutation.AddUserIDs(ids...)
 	return cuo
 }
 
 // AddUsers adds the "users" edges to the User entity.
 func (cuo *ChainUpdateOne) AddUsers(u ...*User) *ChainUpdateOne {
-	ids := make([]int, len(u))
+	ids := make([]int64, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -449,14 +449,14 @@ func (cuo *ChainUpdateOne) ClearUsers() *ChainUpdateOne {
 }
 
 // RemoveUserIDs removes the "users" edge to User entities by IDs.
-func (cuo *ChainUpdateOne) RemoveUserIDs(ids ...int) *ChainUpdateOne {
+func (cuo *ChainUpdateOne) RemoveUserIDs(ids ...int64) *ChainUpdateOne {
 	cuo.mutation.RemoveUserIDs(ids...)
 	return cuo
 }
 
 // RemoveUsers removes "users" edges to User entities.
 func (cuo *ChainUpdateOne) RemoveUsers(u ...*User) *ChainUpdateOne {
-	ids := make([]int, len(u))
+	ids := make([]int64, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -626,7 +626,7 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeInt64,
 					Column: user.FieldID,
 				},
 			},
@@ -642,7 +642,7 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeInt64,
 					Column: user.FieldID,
 				},
 			},
@@ -661,7 +661,7 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeInt64,
 					Column: user.FieldID,
 				},
 			},

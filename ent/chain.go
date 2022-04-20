@@ -28,7 +28,10 @@ type Chain struct {
 	IsEnabled bool `json:"is_enabled,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ChainQuery when eager-loading is set.
-	Edges ChainEdges `json:"edges"`
+	Edges                  ChainEdges `json:"edges"`
+	discord_channel_chains *int64
+	telegram_chat_chains   *int64
+	wallet_chains          *int
 }
 
 // ChainEdges holds the relations/edges for other nodes in the graph.
@@ -73,6 +76,12 @@ func (*Chain) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullString)
 		case chain.FieldCreatedAt, chain.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
+		case chain.ForeignKeys[0]: // discord_channel_chains
+			values[i] = new(sql.NullInt64)
+		case chain.ForeignKeys[1]: // telegram_chat_chains
+			values[i] = new(sql.NullInt64)
+		case chain.ForeignKeys[2]: // wallet_chains
+			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Chain", columns[i])
 		}
@@ -123,6 +132,27 @@ func (c *Chain) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field is_enabled", values[i])
 			} else if value.Valid {
 				c.IsEnabled = value.Bool
+			}
+		case chain.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field discord_channel_chains", value)
+			} else if value.Valid {
+				c.discord_channel_chains = new(int64)
+				*c.discord_channel_chains = int64(value.Int64)
+			}
+		case chain.ForeignKeys[1]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field telegram_chat_chains", value)
+			} else if value.Valid {
+				c.telegram_chat_chains = new(int64)
+				*c.telegram_chat_chains = int64(value.Int64)
+			}
+		case chain.ForeignKeys[2]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field wallet_chains", value)
+			} else if value.Valid {
+				c.wallet_chains = new(int)
+				*c.wallet_chains = int(value.Int64)
 			}
 		}
 	}

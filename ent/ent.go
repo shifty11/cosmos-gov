@@ -9,9 +9,12 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/shifty11/cosmos-gov/ent/chain"
+	"github.com/shifty11/cosmos-gov/ent/discordchannel"
 	"github.com/shifty11/cosmos-gov/ent/lenschaininfo"
 	"github.com/shifty11/cosmos-gov/ent/proposal"
+	"github.com/shifty11/cosmos-gov/ent/telegramchat"
 	"github.com/shifty11/cosmos-gov/ent/user"
+	"github.com/shifty11/cosmos-gov/ent/wallet"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -32,10 +35,13 @@ type OrderFunc func(*sql.Selector)
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
-		chain.Table:         chain.ValidColumn,
-		lenschaininfo.Table: lenschaininfo.ValidColumn,
-		proposal.Table:      proposal.ValidColumn,
-		user.Table:          user.ValidColumn,
+		chain.Table:          chain.ValidColumn,
+		discordchannel.Table: discordchannel.ValidColumn,
+		lenschaininfo.Table:  lenschaininfo.ValidColumn,
+		proposal.Table:       proposal.ValidColumn,
+		telegramchat.Table:   telegramchat.ValidColumn,
+		user.Table:           user.ValidColumn,
+		wallet.Table:         wallet.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {

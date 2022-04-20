@@ -22,9 +22,14 @@ func (User) Fields() []ent.Field {
 		field.Time("updated_at").
 			Default(time.Now).
 			UpdateDefault(time.Now),
-		field.Int64("chat_id"),
+		field.Int64("id").
+			Immutable(),
+		field.String("name"),
+		field.Int64("chat_id"). // TODO: has to be removed
+					Immutable(),
 		field.Enum("type").
-			Values("telegram", "discord"),
+			Values("telegram", "discord").
+			Immutable(),
 		field.String("loging_token").
 			Default(""),
 	}
@@ -33,13 +38,18 @@ func (User) Fields() []ent.Field {
 // Edges of the User.
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("chains", Chain.Type),
+		edge.To("chains", Chain.Type), // TODO: has to be removed
+		edge.From("telegram_chats", TelegramChat.Type).
+			Ref("user"),
+		edge.From("discord_channels", DiscordChannel.Type).
+			Ref("user"),
+		edge.To("wallets", Wallet.Type),
 	}
 }
 
 func (User) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("chat_id", "type").
-			Unique(),
+		index.Fields("chat_id", "type"). // TODO: has to be removed
+							Unique(),
 	}
 }

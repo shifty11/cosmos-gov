@@ -30,6 +30,7 @@ type ChainQuery struct {
 	// eager-loading edges.
 	withUsers     *UserQuery
 	withProposals *ProposalQuery
+	withFKs       bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -386,12 +387,16 @@ func (cq *ChainQuery) prepareQuery(ctx context.Context) error {
 func (cq *ChainQuery) sqlAll(ctx context.Context) ([]*Chain, error) {
 	var (
 		nodes       = []*Chain{}
+		withFKs     = cq.withFKs
 		_spec       = cq.querySpec()
 		loadedTypes = [2]bool{
 			cq.withUsers != nil,
 			cq.withProposals != nil,
 		}
 	)
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, chain.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &Chain{config: cq.config}
 		nodes = append(nodes, node)
@@ -421,8 +426,8 @@ func (cq *ChainQuery) sqlAll(ctx context.Context) ([]*Chain, error) {
 			node.Edges.Users = []*User{}
 		}
 		var (
-			edgeids []int
-			edges   = make(map[int][]*Chain)
+			edgeids []int64
+			edges   = make(map[int64][]*Chain)
 		)
 		_spec := &sqlgraph.EdgeQuerySpec{
 			Edge: &sqlgraph.EdgeSpec{
@@ -446,7 +451,7 @@ func (cq *ChainQuery) sqlAll(ctx context.Context) ([]*Chain, error) {
 					return fmt.Errorf("unexpected id value for edge-in")
 				}
 				outValue := int(eout.Int64)
-				inValue := int(ein.Int64)
+				inValue := ein.Int64
 				node, ok := ids[outValue]
 				if !ok {
 					return fmt.Errorf("unexpected node id in edges: %v", outValue)

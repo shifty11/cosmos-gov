@@ -9,11 +9,20 @@ import (
 // Chain is the predicate function for chain builders.
 type Chain func(*sql.Selector)
 
+// DiscordChannel is the predicate function for discordchannel builders.
+type DiscordChannel func(*sql.Selector)
+
 // LensChainInfo is the predicate function for lenschaininfo builders.
 type LensChainInfo func(*sql.Selector)
 
 // Proposal is the predicate function for proposal builders.
 type Proposal func(*sql.Selector)
 
+// TelegramChat is the predicate function for telegramchat builders.
+type TelegramChat func(*sql.Selector)
+
 // User is the predicate function for user builders.
 type User func(*sql.Selector)
+
+// Wallet is the predicate function for wallet builders.
+type Wallet func(*sql.Selector)

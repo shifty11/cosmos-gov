@@ -16,17 +16,71 @@ var (
 		{Name: "name", Type: field.TypeString, Unique: true},
 		{Name: "display_name", Type: field.TypeString, Unique: true},
 		{Name: "is_enabled", Type: field.TypeBool, Default: true},
+		{Name: "discord_channel_chains", Type: field.TypeInt64, Nullable: true},
+		{Name: "telegram_chat_chains", Type: field.TypeInt64, Nullable: true},
+		{Name: "wallet_chains", Type: field.TypeInt, Nullable: true},
 	}
 	// ChainsTable holds the schema information for the "chains" table.
 	ChainsTable = &schema.Table{
 		Name:       "chains",
 		Columns:    ChainsColumns,
 		PrimaryKey: []*schema.Column{ChainsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "chains_discord_channels_chains",
+				Columns:    []*schema.Column{ChainsColumns[6]},
+				RefColumns: []*schema.Column{DiscordChannelsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "chains_telegram_chats_chains",
+				Columns:    []*schema.Column{ChainsColumns[7]},
+				RefColumns: []*schema.Column{TelegramChatsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "chains_wallets_chains",
+				Columns:    []*schema.Column{ChainsColumns[8]},
+				RefColumns: []*schema.Column{WalletsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 		Indexes: []*schema.Index{
 			{
 				Name:    "chain_name",
 				Unique:  true,
 				Columns: []*schema.Column{ChainsColumns[3]},
+			},
+		},
+	}
+	// DiscordChannelsColumns holds the columns for the "discord_channels" table.
+	DiscordChannelsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "name", Type: field.TypeString},
+		{Name: "is_group", Type: field.TypeBool},
+		{Name: "roles", Type: field.TypeString},
+		{Name: "discord_channel_user", Type: field.TypeInt64, Nullable: true},
+	}
+	// DiscordChannelsTable holds the schema information for the "discord_channels" table.
+	DiscordChannelsTable = &schema.Table{
+		Name:       "discord_channels",
+		Columns:    DiscordChannelsColumns,
+		PrimaryKey: []*schema.Column{DiscordChannelsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "discord_channels_users_user",
+				Columns:    []*schema.Column{DiscordChannelsColumns[6]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "discordchannel_id",
+				Unique:  true,
+				Columns: []*schema.Column{DiscordChannelsColumns[0]},
 			},
 		},
 	}
@@ -61,7 +115,7 @@ var (
 		{Name: "description", Type: field.TypeString},
 		{Name: "voting_start_time", Type: field.TypeTime},
 		{Name: "voting_end_time", Type: field.TypeTime},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"PROPOSAL_STATUS_FAILED", "PROPOSAL_STATUS_UNSPECIFIED", "PROPOSAL_STATUS_DEPOSIT_PERIOD", "PROPOSAL_STATUS_VOTING_PERIOD", "PROPOSAL_STATUS_PASSED", "PROPOSAL_STATUS_REJECTED"}},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"PROPOSAL_STATUS_UNSPECIFIED", "PROPOSAL_STATUS_DEPOSIT_PERIOD", "PROPOSAL_STATUS_VOTING_PERIOD", "PROPOSAL_STATUS_PASSED", "PROPOSAL_STATUS_REJECTED", "PROPOSAL_STATUS_FAILED"}},
 		{Name: "chain_proposals", Type: field.TypeInt, Nullable: true},
 	}
 	// ProposalsTable holds the schema information for the "proposals" table.
@@ -85,11 +139,42 @@ var (
 			},
 		},
 	}
-	// UsersColumns holds the columns for the "users" table.
-	UsersColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+	// TelegramChatsColumns holds the columns for the "telegram_chats" table.
+	TelegramChatsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "name", Type: field.TypeString},
+		{Name: "is_group", Type: field.TypeBool},
+		{Name: "telegram_chat_user", Type: field.TypeInt64, Nullable: true},
+	}
+	// TelegramChatsTable holds the schema information for the "telegram_chats" table.
+	TelegramChatsTable = &schema.Table{
+		Name:       "telegram_chats",
+		Columns:    TelegramChatsColumns,
+		PrimaryKey: []*schema.Column{TelegramChatsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "telegram_chats_users_user",
+				Columns:    []*schema.Column{TelegramChatsColumns[5]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "telegramchat_id",
+				Unique:  true,
+				Columns: []*schema.Column{TelegramChatsColumns[0]},
+			},
+		},
+	}
+	// UsersColumns holds the columns for the "users" table.
+	UsersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "name", Type: field.TypeString},
 		{Name: "chat_id", Type: field.TypeInt64},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"telegram", "discord"}},
 		{Name: "loging_token", Type: field.TypeString, Default: ""},
@@ -103,13 +188,33 @@ var (
 			{
 				Name:    "user_chat_id_type",
 				Unique:  true,
-				Columns: []*schema.Column{UsersColumns[3], UsersColumns[4]},
+				Columns: []*schema.Column{UsersColumns[4], UsersColumns[5]},
+			},
+		},
+	}
+	// WalletsColumns holds the columns for the "wallets" table.
+	WalletsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "address", Type: field.TypeString, Unique: true},
+	}
+	// WalletsTable holds the schema information for the "wallets" table.
+	WalletsTable = &schema.Table{
+		Name:       "wallets",
+		Columns:    WalletsColumns,
+		PrimaryKey: []*schema.Column{WalletsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "wallet_address",
+				Unique:  true,
+				Columns: []*schema.Column{WalletsColumns[3]},
 			},
 		},
 	}
 	// UserChainsColumns holds the columns for the "user_chains" table.
 	UserChainsColumns = []*schema.Column{
-		{Name: "user_id", Type: field.TypeInt},
+		{Name: "user_id", Type: field.TypeInt64},
 		{Name: "chain_id", Type: field.TypeInt},
 	}
 	// UserChainsTable holds the schema information for the "user_chains" table.
@@ -132,18 +237,54 @@ var (
 			},
 		},
 	}
+	// UserWalletsColumns holds the columns for the "user_wallets" table.
+	UserWalletsColumns = []*schema.Column{
+		{Name: "user_id", Type: field.TypeInt64},
+		{Name: "wallet_id", Type: field.TypeInt},
+	}
+	// UserWalletsTable holds the schema information for the "user_wallets" table.
+	UserWalletsTable = &schema.Table{
+		Name:       "user_wallets",
+		Columns:    UserWalletsColumns,
+		PrimaryKey: []*schema.Column{UserWalletsColumns[0], UserWalletsColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "user_wallets_user_id",
+				Columns:    []*schema.Column{UserWalletsColumns[0]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "user_wallets_wallet_id",
+				Columns:    []*schema.Column{UserWalletsColumns[1]},
+				RefColumns: []*schema.Column{WalletsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		ChainsTable,
+		DiscordChannelsTable,
 		LensChainInfosTable,
 		ProposalsTable,
+		TelegramChatsTable,
 		UsersTable,
+		WalletsTable,
 		UserChainsTable,
+		UserWalletsTable,
 	}
 )
 
 func init() {
+	ChainsTable.ForeignKeys[0].RefTable = DiscordChannelsTable
+	ChainsTable.ForeignKeys[1].RefTable = TelegramChatsTable
+	ChainsTable.ForeignKeys[2].RefTable = WalletsTable
+	DiscordChannelsTable.ForeignKeys[0].RefTable = UsersTable
 	ProposalsTable.ForeignKeys[0].RefTable = ChainsTable
+	TelegramChatsTable.ForeignKeys[0].RefTable = UsersTable
 	UserChainsTable.ForeignKeys[0].RefTable = UsersTable
 	UserChainsTable.ForeignKeys[1].RefTable = ChainsTable
+	UserWalletsTable.ForeignKeys[0].RefTable = UsersTable
+	UserWalletsTable.ForeignKeys[1].RefTable = WalletsTable
 }

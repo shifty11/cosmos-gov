@@ -6,10 +6,13 @@ import (
 	"time"
 
 	"github.com/shifty11/cosmos-gov/ent/chain"
+	"github.com/shifty11/cosmos-gov/ent/discordchannel"
 	"github.com/shifty11/cosmos-gov/ent/lenschaininfo"
 	"github.com/shifty11/cosmos-gov/ent/proposal"
 	"github.com/shifty11/cosmos-gov/ent/schema"
+	"github.com/shifty11/cosmos-gov/ent/telegramchat"
 	"github.com/shifty11/cosmos-gov/ent/user"
+	"github.com/shifty11/cosmos-gov/ent/wallet"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -32,6 +35,18 @@ func init() {
 	chainDescIsEnabled := chainFields[4].Descriptor()
 	// chain.DefaultIsEnabled holds the default value on creation for the is_enabled field.
 	chain.DefaultIsEnabled = chainDescIsEnabled.Default.(bool)
+	discordchannelFields := schema.DiscordChannel{}.Fields()
+	_ = discordchannelFields
+	// discordchannelDescCreatedAt is the schema descriptor for created_at field.
+	discordchannelDescCreatedAt := discordchannelFields[0].Descriptor()
+	// discordchannel.DefaultCreatedAt holds the default value on creation for the created_at field.
+	discordchannel.DefaultCreatedAt = discordchannelDescCreatedAt.Default.(func() time.Time)
+	// discordchannelDescUpdatedAt is the schema descriptor for updated_at field.
+	discordchannelDescUpdatedAt := discordchannelFields[1].Descriptor()
+	// discordchannel.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	discordchannel.DefaultUpdatedAt = discordchannelDescUpdatedAt.Default.(func() time.Time)
+	// discordchannel.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	discordchannel.UpdateDefaultUpdatedAt = discordchannelDescUpdatedAt.UpdateDefault.(func() time.Time)
 	lenschaininfoFields := schema.LensChainInfo{}.Fields()
 	_ = lenschaininfoFields
 	// lenschaininfoDescCreatedAt is the schema descriptor for created_at field.
@@ -56,6 +71,18 @@ func init() {
 	proposal.DefaultUpdatedAt = proposalDescUpdatedAt.Default.(func() time.Time)
 	// proposal.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	proposal.UpdateDefaultUpdatedAt = proposalDescUpdatedAt.UpdateDefault.(func() time.Time)
+	telegramchatFields := schema.TelegramChat{}.Fields()
+	_ = telegramchatFields
+	// telegramchatDescCreatedAt is the schema descriptor for created_at field.
+	telegramchatDescCreatedAt := telegramchatFields[0].Descriptor()
+	// telegramchat.DefaultCreatedAt holds the default value on creation for the created_at field.
+	telegramchat.DefaultCreatedAt = telegramchatDescCreatedAt.Default.(func() time.Time)
+	// telegramchatDescUpdatedAt is the schema descriptor for updated_at field.
+	telegramchatDescUpdatedAt := telegramchatFields[1].Descriptor()
+	// telegramchat.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	telegramchat.DefaultUpdatedAt = telegramchatDescUpdatedAt.Default.(func() time.Time)
+	// telegramchat.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	telegramchat.UpdateDefaultUpdatedAt = telegramchatDescUpdatedAt.UpdateDefault.(func() time.Time)
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescCreatedAt is the schema descriptor for created_at field.
@@ -69,7 +96,19 @@ func init() {
 	// user.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	user.UpdateDefaultUpdatedAt = userDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// userDescLogingToken is the schema descriptor for loging_token field.
-	userDescLogingToken := userFields[4].Descriptor()
+	userDescLogingToken := userFields[6].Descriptor()
 	// user.DefaultLogingToken holds the default value on creation for the loging_token field.
 	user.DefaultLogingToken = userDescLogingToken.Default.(string)
+	walletFields := schema.Wallet{}.Fields()
+	_ = walletFields
+	// walletDescCreatedAt is the schema descriptor for created_at field.
+	walletDescCreatedAt := walletFields[0].Descriptor()
+	// wallet.DefaultCreatedAt holds the default value on creation for the created_at field.
+	wallet.DefaultCreatedAt = walletDescCreatedAt.Default.(func() time.Time)
+	// walletDescUpdatedAt is the schema descriptor for updated_at field.
+	walletDescUpdatedAt := walletFields[1].Descriptor()
+	// wallet.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	wallet.DefaultUpdatedAt = walletDescUpdatedAt.Default.(func() time.Time)
+	// wallet.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	wallet.UpdateDefaultUpdatedAt = walletDescUpdatedAt.UpdateDefault.(func() time.Time)
 }

@@ -14,12 +14,18 @@ type Tx struct {
 	config
 	// Chain is the client for interacting with the Chain builders.
 	Chain *ChainClient
+	// DiscordChannel is the client for interacting with the DiscordChannel builders.
+	DiscordChannel *DiscordChannelClient
 	// LensChainInfo is the client for interacting with the LensChainInfo builders.
 	LensChainInfo *LensChainInfoClient
 	// Proposal is the client for interacting with the Proposal builders.
 	Proposal *ProposalClient
+	// TelegramChat is the client for interacting with the TelegramChat builders.
+	TelegramChat *TelegramChatClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
+	// Wallet is the client for interacting with the Wallet builders.
+	Wallet *WalletClient
 
 	// lazily loaded.
 	client     *Client
@@ -156,9 +162,12 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Chain = NewChainClient(tx.config)
+	tx.DiscordChannel = NewDiscordChannelClient(tx.config)
 	tx.LensChainInfo = NewLensChainInfoClient(tx.config)
 	tx.Proposal = NewProposalClient(tx.config)
+	tx.TelegramChat = NewTelegramChatClient(tx.config)
 	tx.User = NewUserClient(tx.config)
+	tx.Wallet = NewWalletClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

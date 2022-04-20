@@ -12,8 +12,11 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/shifty11/cosmos-gov/ent/chain"
+	"github.com/shifty11/cosmos-gov/ent/discordchannel"
 	"github.com/shifty11/cosmos-gov/ent/predicate"
+	"github.com/shifty11/cosmos-gov/ent/telegramchat"
 	"github.com/shifty11/cosmos-gov/ent/user"
+	"github.com/shifty11/cosmos-gov/ent/wallet"
 )
 
 // UserUpdate is the builder for updating User entities.
@@ -35,22 +38,9 @@ func (uu *UserUpdate) SetUpdatedAt(t time.Time) *UserUpdate {
 	return uu
 }
 
-// SetChatID sets the "chat_id" field.
-func (uu *UserUpdate) SetChatID(i int64) *UserUpdate {
-	uu.mutation.ResetChatID()
-	uu.mutation.SetChatID(i)
-	return uu
-}
-
-// AddChatID adds i to the "chat_id" field.
-func (uu *UserUpdate) AddChatID(i int64) *UserUpdate {
-	uu.mutation.AddChatID(i)
-	return uu
-}
-
-// SetType sets the "type" field.
-func (uu *UserUpdate) SetType(u user.Type) *UserUpdate {
-	uu.mutation.SetType(u)
+// SetName sets the "name" field.
+func (uu *UserUpdate) SetName(s string) *UserUpdate {
+	uu.mutation.SetName(s)
 	return uu
 }
 
@@ -83,6 +73,51 @@ func (uu *UserUpdate) AddChains(c ...*Chain) *UserUpdate {
 	return uu.AddChainIDs(ids...)
 }
 
+// AddTelegramChatIDs adds the "telegram_chats" edge to the TelegramChat entity by IDs.
+func (uu *UserUpdate) AddTelegramChatIDs(ids ...int64) *UserUpdate {
+	uu.mutation.AddTelegramChatIDs(ids...)
+	return uu
+}
+
+// AddTelegramChats adds the "telegram_chats" edges to the TelegramChat entity.
+func (uu *UserUpdate) AddTelegramChats(t ...*TelegramChat) *UserUpdate {
+	ids := make([]int64, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return uu.AddTelegramChatIDs(ids...)
+}
+
+// AddDiscordChannelIDs adds the "discord_channels" edge to the DiscordChannel entity by IDs.
+func (uu *UserUpdate) AddDiscordChannelIDs(ids ...int64) *UserUpdate {
+	uu.mutation.AddDiscordChannelIDs(ids...)
+	return uu
+}
+
+// AddDiscordChannels adds the "discord_channels" edges to the DiscordChannel entity.
+func (uu *UserUpdate) AddDiscordChannels(d ...*DiscordChannel) *UserUpdate {
+	ids := make([]int64, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return uu.AddDiscordChannelIDs(ids...)
+}
+
+// AddWalletIDs adds the "wallets" edge to the Wallet entity by IDs.
+func (uu *UserUpdate) AddWalletIDs(ids ...int) *UserUpdate {
+	uu.mutation.AddWalletIDs(ids...)
+	return uu
+}
+
+// AddWallets adds the "wallets" edges to the Wallet entity.
+func (uu *UserUpdate) AddWallets(w ...*Wallet) *UserUpdate {
+	ids := make([]int, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uu.AddWalletIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
@@ -109,6 +144,69 @@ func (uu *UserUpdate) RemoveChains(c ...*Chain) *UserUpdate {
 	return uu.RemoveChainIDs(ids...)
 }
 
+// ClearTelegramChats clears all "telegram_chats" edges to the TelegramChat entity.
+func (uu *UserUpdate) ClearTelegramChats() *UserUpdate {
+	uu.mutation.ClearTelegramChats()
+	return uu
+}
+
+// RemoveTelegramChatIDs removes the "telegram_chats" edge to TelegramChat entities by IDs.
+func (uu *UserUpdate) RemoveTelegramChatIDs(ids ...int64) *UserUpdate {
+	uu.mutation.RemoveTelegramChatIDs(ids...)
+	return uu
+}
+
+// RemoveTelegramChats removes "telegram_chats" edges to TelegramChat entities.
+func (uu *UserUpdate) RemoveTelegramChats(t ...*TelegramChat) *UserUpdate {
+	ids := make([]int64, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return uu.RemoveTelegramChatIDs(ids...)
+}
+
+// ClearDiscordChannels clears all "discord_channels" edges to the DiscordChannel entity.
+func (uu *UserUpdate) ClearDiscordChannels() *UserUpdate {
+	uu.mutation.ClearDiscordChannels()
+	return uu
+}
+
+// RemoveDiscordChannelIDs removes the "discord_channels" edge to DiscordChannel entities by IDs.
+func (uu *UserUpdate) RemoveDiscordChannelIDs(ids ...int64) *UserUpdate {
+	uu.mutation.RemoveDiscordChannelIDs(ids...)
+	return uu
+}
+
+// RemoveDiscordChannels removes "discord_channels" edges to DiscordChannel entities.
+func (uu *UserUpdate) RemoveDiscordChannels(d ...*DiscordChannel) *UserUpdate {
+	ids := make([]int64, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return uu.RemoveDiscordChannelIDs(ids...)
+}
+
+// ClearWallets clears all "wallets" edges to the Wallet entity.
+func (uu *UserUpdate) ClearWallets() *UserUpdate {
+	uu.mutation.ClearWallets()
+	return uu
+}
+
+// RemoveWalletIDs removes the "wallets" edge to Wallet entities by IDs.
+func (uu *UserUpdate) RemoveWalletIDs(ids ...int) *UserUpdate {
+	uu.mutation.RemoveWalletIDs(ids...)
+	return uu
+}
+
+// RemoveWallets removes "wallets" edges to Wallet entities.
+func (uu *UserUpdate) RemoveWallets(w ...*Wallet) *UserUpdate {
+	ids := make([]int, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uu.RemoveWalletIDs(ids...)
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 	var (
@@ -117,18 +215,12 @@ func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 	)
 	uu.defaults()
 	if len(uu.hooks) == 0 {
-		if err = uu.check(); err != nil {
-			return 0, err
-		}
 		affected, err = uu.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*UserMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = uu.check(); err != nil {
-				return 0, err
 			}
 			uu.mutation = mutation
 			affected, err = uu.sqlSave(ctx)
@@ -178,23 +270,13 @@ func (uu *UserUpdate) defaults() {
 	}
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (uu *UserUpdate) check() error {
-	if v, ok := uu.mutation.GetType(); ok {
-		if err := user.TypeValidator(v); err != nil {
-			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "User.type": %w`, err)}
-		}
-	}
-	return nil
-}
-
 func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   user.Table,
 			Columns: user.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeInt64,
 				Column: user.FieldID,
 			},
 		},
@@ -213,25 +295,11 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: user.FieldUpdatedAt,
 		})
 	}
-	if value, ok := uu.mutation.ChatID(); ok {
+	if value, ok := uu.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
+			Type:   field.TypeString,
 			Value:  value,
-			Column: user.FieldChatID,
-		})
-	}
-	if value, ok := uu.mutation.AddedChatID(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
-			Value:  value,
-			Column: user.FieldChatID,
-		})
-	}
-	if value, ok := uu.mutation.GetType(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: user.FieldType,
+			Column: user.FieldName,
 		})
 	}
 	if value, ok := uu.mutation.LogingToken(); ok {
@@ -295,6 +363,168 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if uu.mutation.TelegramChatsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.TelegramChatsTable,
+			Columns: []string{user.TelegramChatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt64,
+					Column: telegramchat.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedTelegramChatsIDs(); len(nodes) > 0 && !uu.mutation.TelegramChatsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.TelegramChatsTable,
+			Columns: []string{user.TelegramChatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt64,
+					Column: telegramchat.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.TelegramChatsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.TelegramChatsTable,
+			Columns: []string{user.TelegramChatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt64,
+					Column: telegramchat.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uu.mutation.DiscordChannelsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.DiscordChannelsTable,
+			Columns: []string{user.DiscordChannelsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt64,
+					Column: discordchannel.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedDiscordChannelsIDs(); len(nodes) > 0 && !uu.mutation.DiscordChannelsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.DiscordChannelsTable,
+			Columns: []string{user.DiscordChannelsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt64,
+					Column: discordchannel.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.DiscordChannelsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.DiscordChannelsTable,
+			Columns: []string{user.DiscordChannelsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt64,
+					Column: discordchannel.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uu.mutation.WalletsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.WalletsTable,
+			Columns: user.WalletsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: wallet.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedWalletsIDs(); len(nodes) > 0 && !uu.mutation.WalletsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.WalletsTable,
+			Columns: user.WalletsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: wallet.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.WalletsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.WalletsTable,
+			Columns: user.WalletsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: wallet.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
@@ -320,22 +550,9 @@ func (uuo *UserUpdateOne) SetUpdatedAt(t time.Time) *UserUpdateOne {
 	return uuo
 }
 
-// SetChatID sets the "chat_id" field.
-func (uuo *UserUpdateOne) SetChatID(i int64) *UserUpdateOne {
-	uuo.mutation.ResetChatID()
-	uuo.mutation.SetChatID(i)
-	return uuo
-}
-
-// AddChatID adds i to the "chat_id" field.
-func (uuo *UserUpdateOne) AddChatID(i int64) *UserUpdateOne {
-	uuo.mutation.AddChatID(i)
-	return uuo
-}
-
-// SetType sets the "type" field.
-func (uuo *UserUpdateOne) SetType(u user.Type) *UserUpdateOne {
-	uuo.mutation.SetType(u)
+// SetName sets the "name" field.
+func (uuo *UserUpdateOne) SetName(s string) *UserUpdateOne {
+	uuo.mutation.SetName(s)
 	return uuo
 }
 
@@ -368,6 +585,51 @@ func (uuo *UserUpdateOne) AddChains(c ...*Chain) *UserUpdateOne {
 	return uuo.AddChainIDs(ids...)
 }
 
+// AddTelegramChatIDs adds the "telegram_chats" edge to the TelegramChat entity by IDs.
+func (uuo *UserUpdateOne) AddTelegramChatIDs(ids ...int64) *UserUpdateOne {
+	uuo.mutation.AddTelegramChatIDs(ids...)
+	return uuo
+}
+
+// AddTelegramChats adds the "telegram_chats" edges to the TelegramChat entity.
+func (uuo *UserUpdateOne) AddTelegramChats(t ...*TelegramChat) *UserUpdateOne {
+	ids := make([]int64, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return uuo.AddTelegramChatIDs(ids...)
+}
+
+// AddDiscordChannelIDs adds the "discord_channels" edge to the DiscordChannel entity by IDs.
+func (uuo *UserUpdateOne) AddDiscordChannelIDs(ids ...int64) *UserUpdateOne {
+	uuo.mutation.AddDiscordChannelIDs(ids...)
+	return uuo
+}
+
+// AddDiscordChannels adds the "discord_channels" edges to the DiscordChannel entity.
+func (uuo *UserUpdateOne) AddDiscordChannels(d ...*DiscordChannel) *UserUpdateOne {
+	ids := make([]int64, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return uuo.AddDiscordChannelIDs(ids...)
+}
+
+// AddWalletIDs adds the "wallets" edge to the Wallet entity by IDs.
+func (uuo *UserUpdateOne) AddWalletIDs(ids ...int) *UserUpdateOne {
+	uuo.mutation.AddWalletIDs(ids...)
+	return uuo
+}
+
+// AddWallets adds the "wallets" edges to the Wallet entity.
+func (uuo *UserUpdateOne) AddWallets(w ...*Wallet) *UserUpdateOne {
+	ids := make([]int, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uuo.AddWalletIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
@@ -394,6 +656,69 @@ func (uuo *UserUpdateOne) RemoveChains(c ...*Chain) *UserUpdateOne {
 	return uuo.RemoveChainIDs(ids...)
 }
 
+// ClearTelegramChats clears all "telegram_chats" edges to the TelegramChat entity.
+func (uuo *UserUpdateOne) ClearTelegramChats() *UserUpdateOne {
+	uuo.mutation.ClearTelegramChats()
+	return uuo
+}
+
+// RemoveTelegramChatIDs removes the "telegram_chats" edge to TelegramChat entities by IDs.
+func (uuo *UserUpdateOne) RemoveTelegramChatIDs(ids ...int64) *UserUpdateOne {
+	uuo.mutation.RemoveTelegramChatIDs(ids...)
+	return uuo
+}
+
+// RemoveTelegramChats removes "telegram_chats" edges to TelegramChat entities.
+func (uuo *UserUpdateOne) RemoveTelegramChats(t ...*TelegramChat) *UserUpdateOne {
+	ids := make([]int64, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return uuo.RemoveTelegramChatIDs(ids...)
+}
+
+// ClearDiscordChannels clears all "discord_channels" edges to the DiscordChannel entity.
+func (uuo *UserUpdateOne) ClearDiscordChannels() *UserUpdateOne {
+	uuo.mutation.ClearDiscordChannels()
+	return uuo
+}
+
+// RemoveDiscordChannelIDs removes the "discord_channels" edge to DiscordChannel entities by IDs.
+func (uuo *UserUpdateOne) RemoveDiscordChannelIDs(ids ...int64) *UserUpdateOne {
+	uuo.mutation.RemoveDiscordChannelIDs(ids...)
+	return uuo
+}
+
+// RemoveDiscordChannels removes "discord_channels" edges to DiscordChannel entities.
+func (uuo *UserUpdateOne) RemoveDiscordChannels(d ...*DiscordChannel) *UserUpdateOne {
+	ids := make([]int64, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return uuo.RemoveDiscordChannelIDs(ids...)
+}
+
+// ClearWallets clears all "wallets" edges to the Wallet entity.
+func (uuo *UserUpdateOne) ClearWallets() *UserUpdateOne {
+	uuo.mutation.ClearWallets()
+	return uuo
+}
+
+// RemoveWalletIDs removes the "wallets" edge to Wallet entities by IDs.
+func (uuo *UserUpdateOne) RemoveWalletIDs(ids ...int) *UserUpdateOne {
+	uuo.mutation.RemoveWalletIDs(ids...)
+	return uuo
+}
+
+// RemoveWallets removes "wallets" edges to Wallet entities.
+func (uuo *UserUpdateOne) RemoveWallets(w ...*Wallet) *UserUpdateOne {
+	ids := make([]int, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uuo.RemoveWalletIDs(ids...)
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (uuo *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne {
@@ -409,18 +734,12 @@ func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 	)
 	uuo.defaults()
 	if len(uuo.hooks) == 0 {
-		if err = uuo.check(); err != nil {
-			return nil, err
-		}
 		node, err = uuo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*UserMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = uuo.check(); err != nil {
-				return nil, err
 			}
 			uuo.mutation = mutation
 			node, err = uuo.sqlSave(ctx)
@@ -470,23 +789,13 @@ func (uuo *UserUpdateOne) defaults() {
 	}
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (uuo *UserUpdateOne) check() error {
-	if v, ok := uuo.mutation.GetType(); ok {
-		if err := user.TypeValidator(v); err != nil {
-			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "User.type": %w`, err)}
-		}
-	}
-	return nil
-}
-
 func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   user.Table,
 			Columns: user.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeInt64,
 				Column: user.FieldID,
 			},
 		},
@@ -522,25 +831,11 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Column: user.FieldUpdatedAt,
 		})
 	}
-	if value, ok := uuo.mutation.ChatID(); ok {
+	if value, ok := uuo.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
+			Type:   field.TypeString,
 			Value:  value,
-			Column: user.FieldChatID,
-		})
-	}
-	if value, ok := uuo.mutation.AddedChatID(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
-			Value:  value,
-			Column: user.FieldChatID,
-		})
-	}
-	if value, ok := uuo.mutation.GetType(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: user.FieldType,
+			Column: user.FieldName,
 		})
 	}
 	if value, ok := uuo.mutation.LogingToken(); ok {
@@ -596,6 +891,168 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: chain.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.TelegramChatsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.TelegramChatsTable,
+			Columns: []string{user.TelegramChatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt64,
+					Column: telegramchat.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedTelegramChatsIDs(); len(nodes) > 0 && !uuo.mutation.TelegramChatsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.TelegramChatsTable,
+			Columns: []string{user.TelegramChatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt64,
+					Column: telegramchat.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.TelegramChatsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.TelegramChatsTable,
+			Columns: []string{user.TelegramChatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt64,
+					Column: telegramchat.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.DiscordChannelsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.DiscordChannelsTable,
+			Columns: []string{user.DiscordChannelsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt64,
+					Column: discordchannel.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedDiscordChannelsIDs(); len(nodes) > 0 && !uuo.mutation.DiscordChannelsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.DiscordChannelsTable,
+			Columns: []string{user.DiscordChannelsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt64,
+					Column: discordchannel.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.DiscordChannelsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.DiscordChannelsTable,
+			Columns: []string{user.DiscordChannelsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt64,
+					Column: discordchannel.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.WalletsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.WalletsTable,
+			Columns: user.WalletsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: wallet.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedWalletsIDs(); len(nodes) > 0 && !uuo.mutation.WalletsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.WalletsTable,
+			Columns: user.WalletsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: wallet.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.WalletsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.WalletsTable,
+			Columns: user.WalletsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: wallet.FieldID,
 				},
 			},
 		}

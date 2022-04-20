@@ -77,14 +77,14 @@ func (cc *ChainCreate) SetNillableIsEnabled(b *bool) *ChainCreate {
 }
 
 // AddUserIDs adds the "users" edge to the User entity by IDs.
-func (cc *ChainCreate) AddUserIDs(ids ...int) *ChainCreate {
+func (cc *ChainCreate) AddUserIDs(ids ...int64) *ChainCreate {
 	cc.mutation.AddUserIDs(ids...)
 	return cc
 }
 
 // AddUsers adds the "users" edges to the User entity.
 func (cc *ChainCreate) AddUsers(u ...*User) *ChainCreate {
-	ids := make([]int, len(u))
+	ids := make([]int64, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -284,7 +284,7 @@ func (cc *ChainCreate) createSpec() (*Chain, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeInt64,
 					Column: user.FieldID,
 				},
 			},

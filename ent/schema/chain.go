@@ -34,8 +34,8 @@ func (Chain) Fields() []ent.Field {
 // Edges of the Chain.
 func (Chain) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("users", User.Type).
-			Ref("chains"),
+		edge.From("users", User.Type). // TODO: has to be removed
+						Ref("chains"),
 		edge.To("proposals", Proposal.Type),
 	}
 }
