@@ -156,7 +156,7 @@ func (cq *ChainQuery) FirstIDX(ctx context.Context) int {
 }
 
 // Only returns a single Chain entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one Chain entity is not found.
+// Returns a *NotSingularError when more than one Chain entity is found.
 // Returns a *NotFoundError when no Chain entities are found.
 func (cq *ChainQuery) Only(ctx context.Context) (*Chain, error) {
 	nodes, err := cq.Limit(2).All(ctx)
@@ -183,7 +183,7 @@ func (cq *ChainQuery) OnlyX(ctx context.Context) *Chain {
 }
 
 // OnlyID is like Only, but returns the only Chain ID in the query.
-// Returns a *NotSingularError when exactly one Chain ID is not found.
+// Returns a *NotSingularError when more than one Chain ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (cq *ChainQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
@@ -294,8 +294,9 @@ func (cq *ChainQuery) Clone() *ChainQuery {
 		withUsers:     cq.withUsers.Clone(),
 		withProposals: cq.withProposals.Clone(),
 		// clone intermediate query.
-		sql:  cq.sql.Clone(),
-		path: cq.path,
+		sql:    cq.sql.Clone(),
+		path:   cq.path,
+		unique: cq.unique,
 	}
 }
 
