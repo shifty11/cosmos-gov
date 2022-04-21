@@ -3,6 +3,7 @@ package vote_permission
 import (
 	"context"
 	pb "github.com/shifty11/cosmos-gov/api/grpc/protobuf/go/vote_permission_service"
+	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"time"
 )
@@ -21,7 +22,7 @@ func NewVotePermissionsServer() pb.VotePermissionServiceServer {
 	return &VotePermissionServer{}
 }
 
-func (server *VotePermissionServer) GetVotePermissions(ctx context.Context, _ *pb.GetVotePermissionsRequest) (*pb.GetVotePermissionsResponse, error) {
+func (server *VotePermissionServer) GetVotePermissions(ctx context.Context, _ *emptypb.Empty) (*pb.GetVotePermissionsResponse, error) {
 	//entUser, ok := ctx.Value("user").(*ent.User)
 	//if !ok {
 	//	log.Sugar.Error("invalid user")

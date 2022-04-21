@@ -9,6 +9,7 @@ import (
 	"github.com/shifty11/cosmos-gov/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 //goland:noinspection GoNameStartsWithPackageName
@@ -46,7 +47,7 @@ func convertSubscriptionToProtobuf(entUser *ent.User, subscriptions []*database.
 	return rooms
 }
 
-func (server *SubscriptionServer) GetSubscriptions(ctx context.Context, _ *pb.GetSubscriptionsRequest) (*pb.GetSubscriptionsResponse, error) {
+func (server *SubscriptionServer) GetSubscriptions(ctx context.Context, _ *emptypb.Empty) (*pb.GetSubscriptionsResponse, error) {
 	entUser, ok := ctx.Value("user").(*ent.User)
 	if !ok {
 		log.Sugar.Error("invalid user")

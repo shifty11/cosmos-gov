@@ -30,7 +30,7 @@ func Start() {
 	userManager := database.NewUserManager()
 	chainManager := database.NewChainManager()
 	jwtManager := auth.NewJWTManager([]byte(jwtSecretKey), accessTokenDuration, refreshTokenDuration)
-	interceptor := auth.NewAuthInterceptor(jwtManager, auth.AccessibleRoles())
+	interceptor := auth.NewAuthInterceptor(jwtManager, userManager, auth.AccessibleRoles())
 	authServer := auth.NewAuthServer(userManager, jwtManager)
 	subscriptionServer := subscription.NewSubscriptionsServer(database.NewSubscriptionManager(userManager, chainManager))
 	votePermissionServer := vote_permission.NewVotePermissionsServer()

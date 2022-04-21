@@ -19,8 +19,8 @@ type AuthInterceptor struct {
 	accessibleRoles map[string][]Role
 }
 
-func NewAuthInterceptor(jwtManager *JWTManager, accessibleRoles map[string][]Role) *AuthInterceptor {
-	return &AuthInterceptor{jwtManager: jwtManager, accessibleRoles: accessibleRoles}
+func NewAuthInterceptor(jwtManager *JWTManager, userManager *database.UserManager, accessibleRoles map[string][]Role) *AuthInterceptor {
+	return &AuthInterceptor{jwtManager: jwtManager, accessibleRoles: accessibleRoles, userManager: userManager}
 }
 
 func (interceptor *AuthInterceptor) Unary() grpc.UnaryServerInterceptor {
