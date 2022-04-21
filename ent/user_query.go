@@ -12,7 +12,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/shifty11/cosmos-gov/ent/chain"
 	"github.com/shifty11/cosmos-gov/ent/discordchannel"
 	"github.com/shifty11/cosmos-gov/ent/predicate"
 	"github.com/shifty11/cosmos-gov/ent/telegramchat"
@@ -30,7 +29,6 @@ type UserQuery struct {
 	fields     []string
 	predicates []predicate.User
 	// eager-loading edges.
-	withChains          *ChainQuery
 	withTelegramChats   *TelegramChatQuery
 	withDiscordChannels *DiscordChannelQuery
 	withWallets         *WalletQuery
@@ -68,28 +66,6 @@ func (uq *UserQuery) Unique(unique bool) *UserQuery {
 func (uq *UserQuery) Order(o ...OrderFunc) *UserQuery {
 	uq.order = append(uq.order, o...)
 	return uq
-}
-
-// QueryChains chains the current query on the "chains" edge.
-func (uq *UserQuery) QueryChains() *ChainQuery {
-	query := &ChainQuery{config: uq.config}
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := uq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := uq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, selector),
-			sqlgraph.To(chain.Table, chain.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, user.ChainsTable, user.ChainsPrimaryKey...),
-		)
-		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
 }
 
 // QueryTelegramChats chains the current query on the "telegram_chats" edge.
@@ -339,7 +315,6 @@ func (uq *UserQuery) Clone() *UserQuery {
 		offset:              uq.offset,
 		order:               append([]OrderFunc{}, uq.order...),
 		predicates:          append([]predicate.User{}, uq.predicates...),
-		withChains:          uq.withChains.Clone(),
 		withTelegramChats:   uq.withTelegramChats.Clone(),
 		withDiscordChannels: uq.withDiscordChannels.Clone(),
 		withWallets:         uq.withWallets.Clone(),
@@ -348,17 +323,6 @@ func (uq *UserQuery) Clone() *UserQuery {
 		path:   uq.path,
 		unique: uq.unique,
 	}
-}
-
-// WithChains tells the query-builder to eager-load the nodes that are connected to
-// the "chains" edge. The optional arguments are used to configure the query builder of the edge.
-func (uq *UserQuery) WithChains(opts ...func(*ChainQuery)) *UserQuery {
-	query := &ChainQuery{config: uq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	uq.withChains = query
-	return uq
 }
 
 // WithTelegramChats tells the query-builder to eager-load the nodes that are connected to
@@ -459,8 +423,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [4]bool{
-			uq.withChains != nil,
+		loadedTypes = [3]bool{
 			uq.withTelegramChats != nil,
 			uq.withDiscordChannels != nil,
 			uq.withWallets != nil,
@@ -484,71 +447,6 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
-	}
-
-	if query := uq.withChains; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[int64]*User, len(nodes))
-		for _, node := range nodes {
-			ids[node.ID] = node
-			fks = append(fks, node.ID)
-			node.Edges.Chains = []*Chain{}
-		}
-		var (
-			edgeids []int
-			edges   = make(map[int][]*User)
-		)
-		_spec := &sqlgraph.EdgeQuerySpec{
-			Edge: &sqlgraph.EdgeSpec{
-				Inverse: false,
-				Table:   user.ChainsTable,
-				Columns: user.ChainsPrimaryKey,
-			},
-			Predicate: func(s *sql.Selector) {
-				s.Where(sql.InValues(user.ChainsPrimaryKey[0], fks...))
-			},
-			ScanValues: func() [2]interface{} {
-				return [2]interface{}{new(sql.NullInt64), new(sql.NullInt64)}
-			},
-			Assign: func(out, in interface{}) error {
-				eout, ok := out.(*sql.NullInt64)
-				if !ok || eout == nil {
-					return fmt.Errorf("unexpected id value for edge-out")
-				}
-				ein, ok := in.(*sql.NullInt64)
-				if !ok || ein == nil {
-					return fmt.Errorf("unexpected id value for edge-in")
-				}
-				outValue := eout.Int64
-				inValue := int(ein.Int64)
-				node, ok := ids[outValue]
-				if !ok {
-					return fmt.Errorf("unexpected node id in edges: %v", outValue)
-				}
-				if _, ok := edges[inValue]; !ok {
-					edgeids = append(edgeids, inValue)
-				}
-				edges[inValue] = append(edges[inValue], node)
-				return nil
-			},
-		}
-		if err := sqlgraph.QueryEdges(ctx, uq.driver, _spec); err != nil {
-			return nil, fmt.Errorf(`query edges "chains": %w`, err)
-		}
-		query.Where(chain.IDIn(edgeids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, n := range neighbors {
-			nodes, ok := edges[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected "chains" node returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Chains = append(nodes[i].Edges.Chains, n)
-			}
-		}
 	}
 
 	if query := uq.withTelegramChats; query != nil {

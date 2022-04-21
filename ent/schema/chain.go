@@ -34,9 +34,13 @@ func (Chain) Fields() []ent.Field {
 // Edges of the Chain.
 func (Chain) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("users", User.Type). // TODO: has to be removed
-						Ref("chains"),
+		//edge.From("users", User.Type). // TODO: has to be removed
+		//				Ref("chains"),
 		edge.To("proposals", Proposal.Type),
+		edge.From("telegram_chats", TelegramChat.Type).
+			Ref("chains"),
+		edge.From("discord_channels", DiscordChannel.Type).
+			Ref("chains"),
 	}
 }
 

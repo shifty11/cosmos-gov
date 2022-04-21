@@ -114,17 +114,10 @@ func Name(v string) predicate.User {
 	})
 }
 
-// ChatID applies equality check predicate on the "chat_id" field. It's identical to ChatIDEQ.
-func ChatID(v int64) predicate.User {
+// LoginToken applies equality check predicate on the "login_token" field. It's identical to LoginTokenEQ.
+func LoginToken(v string) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldChatID), v))
-	})
-}
-
-// LogingToken applies equality check predicate on the "loging_token" field. It's identical to LogingTokenEQ.
-func LogingToken(v string) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLogingToken), v))
+		s.Where(sql.EQ(s.C(FieldLoginToken), v))
 	})
 }
 
@@ -391,82 +384,6 @@ func NameContainsFold(v string) predicate.User {
 	})
 }
 
-// ChatIDEQ applies the EQ predicate on the "chat_id" field.
-func ChatIDEQ(v int64) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldChatID), v))
-	})
-}
-
-// ChatIDNEQ applies the NEQ predicate on the "chat_id" field.
-func ChatIDNEQ(v int64) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldChatID), v))
-	})
-}
-
-// ChatIDIn applies the In predicate on the "chat_id" field.
-func ChatIDIn(vs ...int64) predicate.User {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.User(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.In(s.C(FieldChatID), v...))
-	})
-}
-
-// ChatIDNotIn applies the NotIn predicate on the "chat_id" field.
-func ChatIDNotIn(vs ...int64) predicate.User {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.User(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.NotIn(s.C(FieldChatID), v...))
-	})
-}
-
-// ChatIDGT applies the GT predicate on the "chat_id" field.
-func ChatIDGT(v int64) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldChatID), v))
-	})
-}
-
-// ChatIDGTE applies the GTE predicate on the "chat_id" field.
-func ChatIDGTE(v int64) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldChatID), v))
-	})
-}
-
-// ChatIDLT applies the LT predicate on the "chat_id" field.
-func ChatIDLT(v int64) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldChatID), v))
-	})
-}
-
-// ChatIDLTE applies the LTE predicate on the "chat_id" field.
-func ChatIDLTE(v int64) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldChatID), v))
-	})
-}
-
 // TypeEQ applies the EQ predicate on the "type" field.
 func TypeEQ(v Type) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
@@ -515,22 +432,22 @@ func TypeNotIn(vs ...Type) predicate.User {
 	})
 }
 
-// LogingTokenEQ applies the EQ predicate on the "loging_token" field.
-func LogingTokenEQ(v string) predicate.User {
+// LoginTokenEQ applies the EQ predicate on the "login_token" field.
+func LoginTokenEQ(v string) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLogingToken), v))
+		s.Where(sql.EQ(s.C(FieldLoginToken), v))
 	})
 }
 
-// LogingTokenNEQ applies the NEQ predicate on the "loging_token" field.
-func LogingTokenNEQ(v string) predicate.User {
+// LoginTokenNEQ applies the NEQ predicate on the "login_token" field.
+func LoginTokenNEQ(v string) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldLogingToken), v))
+		s.Where(sql.NEQ(s.C(FieldLoginToken), v))
 	})
 }
 
-// LogingTokenIn applies the In predicate on the "loging_token" field.
-func LogingTokenIn(vs ...string) predicate.User {
+// LoginTokenIn applies the In predicate on the "login_token" field.
+func LoginTokenIn(vs ...string) predicate.User {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -542,12 +459,12 @@ func LogingTokenIn(vs ...string) predicate.User {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.In(s.C(FieldLogingToken), v...))
+		s.Where(sql.In(s.C(FieldLoginToken), v...))
 	})
 }
 
-// LogingTokenNotIn applies the NotIn predicate on the "loging_token" field.
-func LogingTokenNotIn(vs ...string) predicate.User {
+// LoginTokenNotIn applies the NotIn predicate on the "login_token" field.
+func LoginTokenNotIn(vs ...string) predicate.User {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -559,98 +476,70 @@ func LogingTokenNotIn(vs ...string) predicate.User {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.NotIn(s.C(FieldLogingToken), v...))
+		s.Where(sql.NotIn(s.C(FieldLoginToken), v...))
 	})
 }
 
-// LogingTokenGT applies the GT predicate on the "loging_token" field.
-func LogingTokenGT(v string) predicate.User {
+// LoginTokenGT applies the GT predicate on the "login_token" field.
+func LoginTokenGT(v string) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldLogingToken), v))
+		s.Where(sql.GT(s.C(FieldLoginToken), v))
 	})
 }
 
-// LogingTokenGTE applies the GTE predicate on the "loging_token" field.
-func LogingTokenGTE(v string) predicate.User {
+// LoginTokenGTE applies the GTE predicate on the "login_token" field.
+func LoginTokenGTE(v string) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldLogingToken), v))
+		s.Where(sql.GTE(s.C(FieldLoginToken), v))
 	})
 }
 
-// LogingTokenLT applies the LT predicate on the "loging_token" field.
-func LogingTokenLT(v string) predicate.User {
+// LoginTokenLT applies the LT predicate on the "login_token" field.
+func LoginTokenLT(v string) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldLogingToken), v))
+		s.Where(sql.LT(s.C(FieldLoginToken), v))
 	})
 }
 
-// LogingTokenLTE applies the LTE predicate on the "loging_token" field.
-func LogingTokenLTE(v string) predicate.User {
+// LoginTokenLTE applies the LTE predicate on the "login_token" field.
+func LoginTokenLTE(v string) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldLogingToken), v))
+		s.Where(sql.LTE(s.C(FieldLoginToken), v))
 	})
 }
 
-// LogingTokenContains applies the Contains predicate on the "loging_token" field.
-func LogingTokenContains(v string) predicate.User {
+// LoginTokenContains applies the Contains predicate on the "login_token" field.
+func LoginTokenContains(v string) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldLogingToken), v))
+		s.Where(sql.Contains(s.C(FieldLoginToken), v))
 	})
 }
 
-// LogingTokenHasPrefix applies the HasPrefix predicate on the "loging_token" field.
-func LogingTokenHasPrefix(v string) predicate.User {
+// LoginTokenHasPrefix applies the HasPrefix predicate on the "login_token" field.
+func LoginTokenHasPrefix(v string) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldLogingToken), v))
+		s.Where(sql.HasPrefix(s.C(FieldLoginToken), v))
 	})
 }
 
-// LogingTokenHasSuffix applies the HasSuffix predicate on the "loging_token" field.
-func LogingTokenHasSuffix(v string) predicate.User {
+// LoginTokenHasSuffix applies the HasSuffix predicate on the "login_token" field.
+func LoginTokenHasSuffix(v string) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldLogingToken), v))
+		s.Where(sql.HasSuffix(s.C(FieldLoginToken), v))
 	})
 }
 
-// LogingTokenEqualFold applies the EqualFold predicate on the "loging_token" field.
-func LogingTokenEqualFold(v string) predicate.User {
+// LoginTokenEqualFold applies the EqualFold predicate on the "login_token" field.
+func LoginTokenEqualFold(v string) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldLogingToken), v))
+		s.Where(sql.EqualFold(s.C(FieldLoginToken), v))
 	})
 }
 
-// LogingTokenContainsFold applies the ContainsFold predicate on the "loging_token" field.
-func LogingTokenContainsFold(v string) predicate.User {
+// LoginTokenContainsFold applies the ContainsFold predicate on the "login_token" field.
+func LoginTokenContainsFold(v string) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldLogingToken), v))
-	})
-}
-
-// HasChains applies the HasEdge predicate on the "chains" edge.
-func HasChains() predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(ChainsTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, ChainsTable, ChainsPrimaryKey...),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasChainsWith applies the HasEdge predicate on the "chains" edge with a given conditions (other predicates).
-func HasChainsWith(preds ...predicate.Chain) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(ChainsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, ChainsTable, ChainsPrimaryKey...),
-		)
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
+		s.Where(sql.ContainsFold(s.C(FieldLoginToken), v))
 	})
 }
 

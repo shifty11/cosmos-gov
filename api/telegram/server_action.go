@@ -23,7 +23,7 @@ func SendProposals(entProp *ent.Proposal, entChain *ent.Chain) []int64 {
 	}
 
 	var errIds []int64
-	chatIds := database.GetTelegramChatIds(entChain)
+	chatIds := database.NewTelegramChatManager().GetChatIds(entChain)
 	for _, chatId := range chatIds {
 		msg := tgbotapi.NewMessage(int64(chatId), text)
 		msg.ParseMode = "html"

@@ -3,7 +3,6 @@ package discord
 import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
-	"github.com/shifty11/cosmos-gov/api"
 	"github.com/shifty11/cosmos-gov/common"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/ent/user"
@@ -13,10 +12,10 @@ import (
 
 const NbrOfButtonsPerRow = 5
 
-func createKeyboard(chains *[]database.Subscription) []discordgo.MessageComponent {
+func createKeyboard(chains []*database.Subscription) []discordgo.MessageComponent {
 	var buttons []discordgo.MessageComponent
 	var buttonRows []discordgo.MessageComponent
-	for ix, c := range *chains {
+	for ix, c := range chains {
 		symbol := "❌ "
 		if c.Notify {
 			symbol = "✅ "
@@ -28,7 +27,7 @@ func createKeyboard(chains *[]database.Subscription) []discordgo.MessageComponen
 			CustomID: common.SubscriptionCmd + ":" + c.Name,
 		}
 		buttons = append(buttons, button)
-		if (ix+1)%NbrOfButtonsPerRow == 0 || ix == len(*chains)-1 {
+		if (ix+1)%NbrOfButtonsPerRow == 0 || ix == len(chains)-1 {
 			var buttonRow = discordgo.ActionsRow{Components: buttons}
 			buttonRows = append(buttonRows, buttonRow)
 			buttons = []discordgo.MessageComponent{}
@@ -37,11 +36,11 @@ func createKeyboard(chains *[]database.Subscription) []discordgo.MessageComponen
 	return buttonRows
 }
 
-func chunks(xs []database.Subscription, chunkSize int) [][]database.Subscription {
+func chunks(xs []*database.Subscription, chunkSize int) [][]*database.Subscription {
 	if len(xs) == 0 {
 		return nil
 	}
-	divided := make([][]database.Subscription, (len(xs)+chunkSize-1)/chunkSize)
+	divided := make([][]*database.Subscription, (len(xs)+chunkSize-1)/chunkSize)
 	prev := 0
 	i := 0
 	till := len(xs) - chunkSize
@@ -55,15 +54,35 @@ func chunks(xs []database.Subscription, chunkSize int) [][]database.Subscription
 	return divided
 }
 
-func getSpecificChunk(chunks *[][]database.Subscription, name string) *[]database.Subscription {
-	for _, c1 := range *chunks {
+func getSpecificChunk(chunks [][]*database.Subscription, name string) []*database.Subscription {
+	for _, c1 := range chunks {
 		for _, c2 := range c1 {
 			if c2.Name == name {
-				return &c1
+				return c1
 			}
 		}
 	}
 	return nil
+}
+
+func getOngoingProposalsText(chatId int64) string {
+	text := common.ProposalsMsg
+	chains := database.NewProposalManager().GetProposalsInVotingPeriod(chatId, user.TypeDiscord)
+	if len(chains) == 0 {
+		text = common.NoSubscriptionsMsg
+	} else {
+		for _, chain := range chains {
+			for _, prop := range chain.Edges.Proposals {
+				title := strings.Replace(prop.Title, "_", "\\_", -1)
+				title = strings.Replace(title, "*", "\\*", -1)
+				text += fmt.Sprintf("**%v #%d** _%v_\n\n", chain.DisplayName, prop.ProposalID, title)
+			}
+		}
+		if len(text) == len(common.ProposalsMsg) {
+			text = common.NoProposalsMsg
+		}
+	}
+	return text
 }
 
 var (
@@ -88,14 +107,21 @@ var (
 				return
 			}
 
+			userId := getUserId(i)
+			userName := getUserName(i)
 			channelId := getChannelId(i)
+			channelName := getChannelName(i)
+			isGroup := isGroupChannel(i)
 
-			chains := chunks(database.GetChainsForUser(channelId, user.TypeDiscord), 25)
+			subsManager := database.NewDiscordSubscriptionManager()
+			subs := subsManager.GetOrCreateSubscriptions(userId, userName, channelId, channelName, isGroup)
+
+			chains := chunks(subs, 25)
 			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
 					Content:    sanitizeUrls(common.SubscriptionsMsg),
-					Components: createKeyboard(&chains[0]),
+					Components: createKeyboard(chains[0]),
 				},
 			})
 			if err != nil {
@@ -105,7 +131,7 @@ var (
 				for _, chain := range chains[1:] {
 					_, err := s.ChannelMessageSendComplex(i.ChannelID, &discordgo.MessageSend{
 						Content:    "",
-						Components: createKeyboard(&chain),
+						Components: createKeyboard(chain),
 					})
 					if err != nil {
 						log.Sugar.Errorf("Error while sending subscriptions: %v", err)
@@ -121,7 +147,7 @@ var (
 
 			channelId := getChannelId(i)
 
-			text := api.GetOngoingProposalsText(channelId, user.TypeDiscord, api.MsgFormatMarkdown)
+			text := getOngoingProposalsText(channelId)
 
 			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -163,11 +189,19 @@ var (
 				return
 			}
 
-			userId := getChannelId(i)
+			userId := getUserId(i)
+			userName := getUserName(i)
+			channelId := getChannelId(i)
+			channelName := getChannelName(i)
+			isGroup := isGroupChannel(i)
 
-			database.PerformUpdateSubscription(userId, user.TypeDiscord, action)
-			allChains := chunks(database.GetChainsForUser(userId, user.TypeDiscord), 25)
-			chains := getSpecificChunk(&allChains, action)
+			performUpdateSubscription(channelId, action)
+
+			subsManager := database.NewDiscordSubscriptionManager()
+			subs := subsManager.GetOrCreateSubscriptions(userId, userName, channelId, channelName, isGroup)
+
+			allChains := chunks(subs, 25)
+			chains := getSpecificChunk(allChains, action)
 
 			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseUpdateMessage,

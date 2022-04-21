@@ -257,22 +257,6 @@ func (c *ChainClient) GetX(ctx context.Context, id int) *Chain {
 	return obj
 }
 
-// QueryUsers queries the users edge of a Chain.
-func (c *ChainClient) QueryUsers(ch *Chain) *UserQuery {
-	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := ch.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(chain.Table, chain.FieldID, id),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, chain.UsersTable, chain.UsersPrimaryKey...),
-		)
-		fromV = sqlgraph.Neighbors(ch.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // QueryProposals queries the proposals edge of a Chain.
 func (c *ChainClient) QueryProposals(ch *Chain) *ProposalQuery {
 	query := &ProposalQuery{config: c.config}
@@ -282,6 +266,38 @@ func (c *ChainClient) QueryProposals(ch *Chain) *ProposalQuery {
 			sqlgraph.From(chain.Table, chain.FieldID, id),
 			sqlgraph.To(proposal.Table, proposal.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, chain.ProposalsTable, chain.ProposalsColumn),
+		)
+		fromV = sqlgraph.Neighbors(ch.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTelegramChats queries the telegram_chats edge of a Chain.
+func (c *ChainClient) QueryTelegramChats(ch *Chain) *TelegramChatQuery {
+	query := &TelegramChatQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ch.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(chain.Table, chain.FieldID, id),
+			sqlgraph.To(telegramchat.Table, telegramchat.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, chain.TelegramChatsTable, chain.TelegramChatsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(ch.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDiscordChannels queries the discord_channels edge of a Chain.
+func (c *ChainClient) QueryDiscordChannels(ch *Chain) *DiscordChannelQuery {
+	query := &DiscordChannelQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ch.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(chain.Table, chain.FieldID, id),
+			sqlgraph.To(discordchannel.Table, discordchannel.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, chain.DiscordChannelsTable, chain.DiscordChannelsPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(ch.driver.Dialect(), step)
 		return fromV, nil
@@ -403,7 +419,7 @@ func (c *DiscordChannelClient) QueryChains(dc *DiscordChannel) *ChainQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(discordchannel.Table, discordchannel.FieldID, id),
 			sqlgraph.To(chain.Table, chain.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, discordchannel.ChainsTable, discordchannel.ChainsColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, discordchannel.ChainsTable, discordchannel.ChainsPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(dc.driver.Dialect(), step)
 		return fromV, nil
@@ -811,7 +827,7 @@ func (c *TelegramChatClient) QueryChains(tc *TelegramChat) *ChainQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(telegramchat.Table, telegramchat.FieldID, id),
 			sqlgraph.To(chain.Table, chain.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, telegramchat.ChainsTable, telegramchat.ChainsColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, telegramchat.ChainsTable, telegramchat.ChainsPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(tc.driver.Dialect(), step)
 		return fromV, nil
@@ -907,22 +923,6 @@ func (c *UserClient) GetX(ctx context.Context, id int64) *User {
 		panic(err)
 	}
 	return obj
-}
-
-// QueryChains queries the chains edge of a User.
-func (c *UserClient) QueryChains(u *User) *ChainQuery {
-	query := &ChainQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := u.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(chain.Table, chain.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, user.ChainsTable, user.ChainsPrimaryKey...),
-		)
-		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
 }
 
 // QueryTelegramChats queries the telegram_chats edge of a User.

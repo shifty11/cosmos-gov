@@ -3,7 +3,6 @@ package telegram
 import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/shifty11/cosmos-gov/api"
 	"github.com/shifty11/cosmos-gov/common"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/ent/user"
@@ -38,7 +37,9 @@ func sendSubscriptions(update *tgbotapi.Update) {
 	} else {
 		log.Sugar.Debugf("Send subscriptions to user #%v", chatId)
 	}
-	chains := database.GetChainsForUser(chatId, user.TypeTelegram)
+	userId := getUserIdX(update)
+	subsManager := database.NewTelegramSubscriptionManager()
+	chains := subsManager.GetOrCreateSubscriptions(userId, getUserName(update), chatId, getChatName(update), isGroupX(update))
 
 	var buttons [][]Button
 	var buttonRow []Button
@@ -85,12 +86,29 @@ func sendSubscriptions(update *tgbotapi.Update) {
 	}
 }
 
+func getOngoingProposalsText(chatId int64) string {
+	text := common.ProposalsMsg
+	chains := database.NewProposalManager().GetProposalsInVotingPeriod(chatId, user.TypeTelegram)
+	if len(chains) == 0 {
+		text = common.NoSubscriptionsMsg
+	} else {
+		for _, chain := range chains {
+			for _, prop := range chain.Edges.Proposals {
+				text += fmt.Sprintf("<b>%v #%d</b> <i>%v</i>\n\n", chain.DisplayName, prop.ProposalID, prop.Title)
+			}
+		}
+		if len(text) == len(common.ProposalsMsg) {
+			text = common.NoProposalsMsg
+		}
+	}
+	return text
+}
+
 func sendCurrentProposals(update *tgbotapi.Update) {
 	chatId := getChatIdX(update)
 	log.Sugar.Debugf("Send current proposals to user #%v", chatId)
 
-	format := api.MsgFormatHtml
-	text := api.GetOngoingProposalsText(chatId, user.TypeTelegram, format)
+	text := getOngoingProposalsText(chatId)
 
 	config := createMenuButtonConfig()
 	config.ShowProposals = false
@@ -104,7 +122,7 @@ func sendCurrentProposals(update *tgbotapi.Update) {
 	if update.CallbackQuery == nil {
 		msg := tgbotapi.NewMessage(chatId, text)
 		msg.ReplyMarkup = replyMarkup
-		msg.ParseMode = format.String()
+		msg.ParseMode = "html"
 		err := sendMessage(msg)
 		if err != nil {
 			log.Sugar.Errorf("Error while sendCurrentProposals for user #%v: %v", chatId, err)
@@ -112,7 +130,7 @@ func sendCurrentProposals(update *tgbotapi.Update) {
 	} else {
 		msg := tgbotapi.NewEditMessageText(chatId, update.CallbackQuery.Message.MessageID, text)
 		msg.ReplyMarkup = &replyMarkup
-		msg.ParseMode = format.String()
+		msg.ParseMode = "html"
 		answerCallbackQuery(update)
 		err := sendMessage(msg)
 		if err != nil {

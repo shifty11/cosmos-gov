@@ -44,24 +44,27 @@ const (
 // ChainMutation represents an operation that mutates the Chain nodes in the graph.
 type ChainMutation struct {
 	config
-	op               Op
-	typ              string
-	id               *int
-	created_at       *time.Time
-	updated_at       *time.Time
-	name             *string
-	display_name     *string
-	is_enabled       *bool
-	clearedFields    map[string]struct{}
-	users            map[int64]struct{}
-	removedusers     map[int64]struct{}
-	clearedusers     bool
-	proposals        map[int]struct{}
-	removedproposals map[int]struct{}
-	clearedproposals bool
-	done             bool
-	oldValue         func(context.Context) (*Chain, error)
-	predicates       []predicate.Chain
+	op                      Op
+	typ                     string
+	id                      *int
+	created_at              *time.Time
+	updated_at              *time.Time
+	name                    *string
+	display_name            *string
+	is_enabled              *bool
+	clearedFields           map[string]struct{}
+	proposals               map[int]struct{}
+	removedproposals        map[int]struct{}
+	clearedproposals        bool
+	telegram_chats          map[int64]struct{}
+	removedtelegram_chats   map[int64]struct{}
+	clearedtelegram_chats   bool
+	discord_channels        map[int64]struct{}
+	removeddiscord_channels map[int64]struct{}
+	cleareddiscord_channels bool
+	done                    bool
+	oldValue                func(context.Context) (*Chain, error)
+	predicates              []predicate.Chain
 }
 
 var _ ent.Mutation = (*ChainMutation)(nil)
@@ -342,60 +345,6 @@ func (m *ChainMutation) ResetIsEnabled() {
 	m.is_enabled = nil
 }
 
-// AddUserIDs adds the "users" edge to the User entity by ids.
-func (m *ChainMutation) AddUserIDs(ids ...int64) {
-	if m.users == nil {
-		m.users = make(map[int64]struct{})
-	}
-	for i := range ids {
-		m.users[ids[i]] = struct{}{}
-	}
-}
-
-// ClearUsers clears the "users" edge to the User entity.
-func (m *ChainMutation) ClearUsers() {
-	m.clearedusers = true
-}
-
-// UsersCleared reports if the "users" edge to the User entity was cleared.
-func (m *ChainMutation) UsersCleared() bool {
-	return m.clearedusers
-}
-
-// RemoveUserIDs removes the "users" edge to the User entity by IDs.
-func (m *ChainMutation) RemoveUserIDs(ids ...int64) {
-	if m.removedusers == nil {
-		m.removedusers = make(map[int64]struct{})
-	}
-	for i := range ids {
-		delete(m.users, ids[i])
-		m.removedusers[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedUsers returns the removed IDs of the "users" edge to the User entity.
-func (m *ChainMutation) RemovedUsersIDs() (ids []int64) {
-	for id := range m.removedusers {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// UsersIDs returns the "users" edge IDs in the mutation.
-func (m *ChainMutation) UsersIDs() (ids []int64) {
-	for id := range m.users {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetUsers resets all changes to the "users" edge.
-func (m *ChainMutation) ResetUsers() {
-	m.users = nil
-	m.clearedusers = false
-	m.removedusers = nil
-}
-
 // AddProposalIDs adds the "proposals" edge to the Proposal entity by ids.
 func (m *ChainMutation) AddProposalIDs(ids ...int) {
 	if m.proposals == nil {
@@ -448,6 +397,114 @@ func (m *ChainMutation) ResetProposals() {
 	m.proposals = nil
 	m.clearedproposals = false
 	m.removedproposals = nil
+}
+
+// AddTelegramChatIDs adds the "telegram_chats" edge to the TelegramChat entity by ids.
+func (m *ChainMutation) AddTelegramChatIDs(ids ...int64) {
+	if m.telegram_chats == nil {
+		m.telegram_chats = make(map[int64]struct{})
+	}
+	for i := range ids {
+		m.telegram_chats[ids[i]] = struct{}{}
+	}
+}
+
+// ClearTelegramChats clears the "telegram_chats" edge to the TelegramChat entity.
+func (m *ChainMutation) ClearTelegramChats() {
+	m.clearedtelegram_chats = true
+}
+
+// TelegramChatsCleared reports if the "telegram_chats" edge to the TelegramChat entity was cleared.
+func (m *ChainMutation) TelegramChatsCleared() bool {
+	return m.clearedtelegram_chats
+}
+
+// RemoveTelegramChatIDs removes the "telegram_chats" edge to the TelegramChat entity by IDs.
+func (m *ChainMutation) RemoveTelegramChatIDs(ids ...int64) {
+	if m.removedtelegram_chats == nil {
+		m.removedtelegram_chats = make(map[int64]struct{})
+	}
+	for i := range ids {
+		delete(m.telegram_chats, ids[i])
+		m.removedtelegram_chats[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedTelegramChats returns the removed IDs of the "telegram_chats" edge to the TelegramChat entity.
+func (m *ChainMutation) RemovedTelegramChatsIDs() (ids []int64) {
+	for id := range m.removedtelegram_chats {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// TelegramChatsIDs returns the "telegram_chats" edge IDs in the mutation.
+func (m *ChainMutation) TelegramChatsIDs() (ids []int64) {
+	for id := range m.telegram_chats {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetTelegramChats resets all changes to the "telegram_chats" edge.
+func (m *ChainMutation) ResetTelegramChats() {
+	m.telegram_chats = nil
+	m.clearedtelegram_chats = false
+	m.removedtelegram_chats = nil
+}
+
+// AddDiscordChannelIDs adds the "discord_channels" edge to the DiscordChannel entity by ids.
+func (m *ChainMutation) AddDiscordChannelIDs(ids ...int64) {
+	if m.discord_channels == nil {
+		m.discord_channels = make(map[int64]struct{})
+	}
+	for i := range ids {
+		m.discord_channels[ids[i]] = struct{}{}
+	}
+}
+
+// ClearDiscordChannels clears the "discord_channels" edge to the DiscordChannel entity.
+func (m *ChainMutation) ClearDiscordChannels() {
+	m.cleareddiscord_channels = true
+}
+
+// DiscordChannelsCleared reports if the "discord_channels" edge to the DiscordChannel entity was cleared.
+func (m *ChainMutation) DiscordChannelsCleared() bool {
+	return m.cleareddiscord_channels
+}
+
+// RemoveDiscordChannelIDs removes the "discord_channels" edge to the DiscordChannel entity by IDs.
+func (m *ChainMutation) RemoveDiscordChannelIDs(ids ...int64) {
+	if m.removeddiscord_channels == nil {
+		m.removeddiscord_channels = make(map[int64]struct{})
+	}
+	for i := range ids {
+		delete(m.discord_channels, ids[i])
+		m.removeddiscord_channels[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedDiscordChannels returns the removed IDs of the "discord_channels" edge to the DiscordChannel entity.
+func (m *ChainMutation) RemovedDiscordChannelsIDs() (ids []int64) {
+	for id := range m.removeddiscord_channels {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// DiscordChannelsIDs returns the "discord_channels" edge IDs in the mutation.
+func (m *ChainMutation) DiscordChannelsIDs() (ids []int64) {
+	for id := range m.discord_channels {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetDiscordChannels resets all changes to the "discord_channels" edge.
+func (m *ChainMutation) ResetDiscordChannels() {
+	m.discord_channels = nil
+	m.cleareddiscord_channels = false
+	m.removeddiscord_channels = nil
 }
 
 // Where appends a list predicates to the ChainMutation builder.
@@ -636,12 +693,15 @@ func (m *ChainMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ChainMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.users != nil {
-		edges = append(edges, chain.EdgeUsers)
-	}
+	edges := make([]string, 0, 3)
 	if m.proposals != nil {
 		edges = append(edges, chain.EdgeProposals)
+	}
+	if m.telegram_chats != nil {
+		edges = append(edges, chain.EdgeTelegramChats)
+	}
+	if m.discord_channels != nil {
+		edges = append(edges, chain.EdgeDiscordChannels)
 	}
 	return edges
 }
@@ -650,15 +710,21 @@ func (m *ChainMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *ChainMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case chain.EdgeUsers:
-		ids := make([]ent.Value, 0, len(m.users))
-		for id := range m.users {
-			ids = append(ids, id)
-		}
-		return ids
 	case chain.EdgeProposals:
 		ids := make([]ent.Value, 0, len(m.proposals))
 		for id := range m.proposals {
+			ids = append(ids, id)
+		}
+		return ids
+	case chain.EdgeTelegramChats:
+		ids := make([]ent.Value, 0, len(m.telegram_chats))
+		for id := range m.telegram_chats {
+			ids = append(ids, id)
+		}
+		return ids
+	case chain.EdgeDiscordChannels:
+		ids := make([]ent.Value, 0, len(m.discord_channels))
+		for id := range m.discord_channels {
 			ids = append(ids, id)
 		}
 		return ids
@@ -668,12 +734,15 @@ func (m *ChainMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ChainMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.removedusers != nil {
-		edges = append(edges, chain.EdgeUsers)
-	}
+	edges := make([]string, 0, 3)
 	if m.removedproposals != nil {
 		edges = append(edges, chain.EdgeProposals)
+	}
+	if m.removedtelegram_chats != nil {
+		edges = append(edges, chain.EdgeTelegramChats)
+	}
+	if m.removeddiscord_channels != nil {
+		edges = append(edges, chain.EdgeDiscordChannels)
 	}
 	return edges
 }
@@ -682,15 +751,21 @@ func (m *ChainMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *ChainMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case chain.EdgeUsers:
-		ids := make([]ent.Value, 0, len(m.removedusers))
-		for id := range m.removedusers {
-			ids = append(ids, id)
-		}
-		return ids
 	case chain.EdgeProposals:
 		ids := make([]ent.Value, 0, len(m.removedproposals))
 		for id := range m.removedproposals {
+			ids = append(ids, id)
+		}
+		return ids
+	case chain.EdgeTelegramChats:
+		ids := make([]ent.Value, 0, len(m.removedtelegram_chats))
+		for id := range m.removedtelegram_chats {
+			ids = append(ids, id)
+		}
+		return ids
+	case chain.EdgeDiscordChannels:
+		ids := make([]ent.Value, 0, len(m.removeddiscord_channels))
+		for id := range m.removeddiscord_channels {
 			ids = append(ids, id)
 		}
 		return ids
@@ -700,12 +775,15 @@ func (m *ChainMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ChainMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.clearedusers {
-		edges = append(edges, chain.EdgeUsers)
-	}
+	edges := make([]string, 0, 3)
 	if m.clearedproposals {
 		edges = append(edges, chain.EdgeProposals)
+	}
+	if m.clearedtelegram_chats {
+		edges = append(edges, chain.EdgeTelegramChats)
+	}
+	if m.cleareddiscord_channels {
+		edges = append(edges, chain.EdgeDiscordChannels)
 	}
 	return edges
 }
@@ -714,10 +792,12 @@ func (m *ChainMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *ChainMutation) EdgeCleared(name string) bool {
 	switch name {
-	case chain.EdgeUsers:
-		return m.clearedusers
 	case chain.EdgeProposals:
 		return m.clearedproposals
+	case chain.EdgeTelegramChats:
+		return m.clearedtelegram_chats
+	case chain.EdgeDiscordChannels:
+		return m.cleareddiscord_channels
 	}
 	return false
 }
@@ -734,11 +814,14 @@ func (m *ChainMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *ChainMutation) ResetEdge(name string) error {
 	switch name {
-	case chain.EdgeUsers:
-		m.ResetUsers()
-		return nil
 	case chain.EdgeProposals:
 		m.ResetProposals()
+		return nil
+	case chain.EdgeTelegramChats:
+		m.ResetTelegramChats()
+		return nil
+	case chain.EdgeDiscordChannels:
+		m.ResetDiscordChannels()
 		return nil
 	}
 	return fmt.Errorf("unknown Chain edge %s", name)
@@ -3791,14 +3874,9 @@ type UserMutation struct {
 	created_at              *time.Time
 	updated_at              *time.Time
 	name                    *string
-	chat_id                 *int64
-	addchat_id              *int64
 	_type                   *user.Type
-	loging_token            *string
+	login_token             *string
 	clearedFields           map[string]struct{}
-	chains                  map[int]struct{}
-	removedchains           map[int]struct{}
-	clearedchains           bool
 	telegram_chats          map[int64]struct{}
 	removedtelegram_chats   map[int64]struct{}
 	clearedtelegram_chats   bool
@@ -4025,62 +4103,6 @@ func (m *UserMutation) ResetName() {
 	m.name = nil
 }
 
-// SetChatID sets the "chat_id" field.
-func (m *UserMutation) SetChatID(i int64) {
-	m.chat_id = &i
-	m.addchat_id = nil
-}
-
-// ChatID returns the value of the "chat_id" field in the mutation.
-func (m *UserMutation) ChatID() (r int64, exists bool) {
-	v := m.chat_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldChatID returns the old "chat_id" field's value of the User entity.
-// If the User object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldChatID(ctx context.Context) (v int64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldChatID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldChatID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldChatID: %w", err)
-	}
-	return oldValue.ChatID, nil
-}
-
-// AddChatID adds i to the "chat_id" field.
-func (m *UserMutation) AddChatID(i int64) {
-	if m.addchat_id != nil {
-		*m.addchat_id += i
-	} else {
-		m.addchat_id = &i
-	}
-}
-
-// AddedChatID returns the value that was added to the "chat_id" field in this mutation.
-func (m *UserMutation) AddedChatID() (r int64, exists bool) {
-	v := m.addchat_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetChatID resets all changes to the "chat_id" field.
-func (m *UserMutation) ResetChatID() {
-	m.chat_id = nil
-	m.addchat_id = nil
-}
-
 // SetType sets the "type" field.
 func (m *UserMutation) SetType(u user.Type) {
 	m._type = &u
@@ -4117,94 +4139,40 @@ func (m *UserMutation) ResetType() {
 	m._type = nil
 }
 
-// SetLogingToken sets the "loging_token" field.
-func (m *UserMutation) SetLogingToken(s string) {
-	m.loging_token = &s
+// SetLoginToken sets the "login_token" field.
+func (m *UserMutation) SetLoginToken(s string) {
+	m.login_token = &s
 }
 
-// LogingToken returns the value of the "loging_token" field in the mutation.
-func (m *UserMutation) LogingToken() (r string, exists bool) {
-	v := m.loging_token
+// LoginToken returns the value of the "login_token" field in the mutation.
+func (m *UserMutation) LoginToken() (r string, exists bool) {
+	v := m.login_token
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldLogingToken returns the old "loging_token" field's value of the User entity.
+// OldLoginToken returns the old "login_token" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldLogingToken(ctx context.Context) (v string, err error) {
+func (m *UserMutation) OldLoginToken(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldLogingToken is only allowed on UpdateOne operations")
+		return v, errors.New("OldLoginToken is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldLogingToken requires an ID field in the mutation")
+		return v, errors.New("OldLoginToken requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldLogingToken: %w", err)
+		return v, fmt.Errorf("querying old value for OldLoginToken: %w", err)
 	}
-	return oldValue.LogingToken, nil
+	return oldValue.LoginToken, nil
 }
 
-// ResetLogingToken resets all changes to the "loging_token" field.
-func (m *UserMutation) ResetLogingToken() {
-	m.loging_token = nil
-}
-
-// AddChainIDs adds the "chains" edge to the Chain entity by ids.
-func (m *UserMutation) AddChainIDs(ids ...int) {
-	if m.chains == nil {
-		m.chains = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.chains[ids[i]] = struct{}{}
-	}
-}
-
-// ClearChains clears the "chains" edge to the Chain entity.
-func (m *UserMutation) ClearChains() {
-	m.clearedchains = true
-}
-
-// ChainsCleared reports if the "chains" edge to the Chain entity was cleared.
-func (m *UserMutation) ChainsCleared() bool {
-	return m.clearedchains
-}
-
-// RemoveChainIDs removes the "chains" edge to the Chain entity by IDs.
-func (m *UserMutation) RemoveChainIDs(ids ...int) {
-	if m.removedchains == nil {
-		m.removedchains = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.chains, ids[i])
-		m.removedchains[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedChains returns the removed IDs of the "chains" edge to the Chain entity.
-func (m *UserMutation) RemovedChainsIDs() (ids []int) {
-	for id := range m.removedchains {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ChainsIDs returns the "chains" edge IDs in the mutation.
-func (m *UserMutation) ChainsIDs() (ids []int) {
-	for id := range m.chains {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetChains resets all changes to the "chains" edge.
-func (m *UserMutation) ResetChains() {
-	m.chains = nil
-	m.clearedchains = false
-	m.removedchains = nil
+// ResetLoginToken resets all changes to the "login_token" field.
+func (m *UserMutation) ResetLoginToken() {
+	m.login_token = nil
 }
 
 // AddTelegramChatIDs adds the "telegram_chats" edge to the TelegramChat entity by ids.
@@ -4388,7 +4356,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 5)
 	if m.created_at != nil {
 		fields = append(fields, user.FieldCreatedAt)
 	}
@@ -4398,14 +4366,11 @@ func (m *UserMutation) Fields() []string {
 	if m.name != nil {
 		fields = append(fields, user.FieldName)
 	}
-	if m.chat_id != nil {
-		fields = append(fields, user.FieldChatID)
-	}
 	if m._type != nil {
 		fields = append(fields, user.FieldType)
 	}
-	if m.loging_token != nil {
-		fields = append(fields, user.FieldLogingToken)
+	if m.login_token != nil {
+		fields = append(fields, user.FieldLoginToken)
 	}
 	return fields
 }
@@ -4421,12 +4386,10 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedAt()
 	case user.FieldName:
 		return m.Name()
-	case user.FieldChatID:
-		return m.ChatID()
 	case user.FieldType:
 		return m.GetType()
-	case user.FieldLogingToken:
-		return m.LogingToken()
+	case user.FieldLoginToken:
+		return m.LoginToken()
 	}
 	return nil, false
 }
@@ -4442,12 +4405,10 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldUpdatedAt(ctx)
 	case user.FieldName:
 		return m.OldName(ctx)
-	case user.FieldChatID:
-		return m.OldChatID(ctx)
 	case user.FieldType:
 		return m.OldType(ctx)
-	case user.FieldLogingToken:
-		return m.OldLogingToken(ctx)
+	case user.FieldLoginToken:
+		return m.OldLoginToken(ctx)
 	}
 	return nil, fmt.Errorf("unknown User field %s", name)
 }
@@ -4478,13 +4439,6 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetName(v)
 		return nil
-	case user.FieldChatID:
-		v, ok := value.(int64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetChatID(v)
-		return nil
 	case user.FieldType:
 		v, ok := value.(user.Type)
 		if !ok {
@@ -4492,12 +4446,12 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetType(v)
 		return nil
-	case user.FieldLogingToken:
+	case user.FieldLoginToken:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetLogingToken(v)
+		m.SetLoginToken(v)
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
@@ -4506,21 +4460,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *UserMutation) AddedFields() []string {
-	var fields []string
-	if m.addchat_id != nil {
-		fields = append(fields, user.FieldChatID)
-	}
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case user.FieldChatID:
-		return m.AddedChatID()
-	}
 	return nil, false
 }
 
@@ -4529,13 +4475,6 @@ func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *UserMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case user.FieldChatID:
-		v, ok := value.(int64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddChatID(v)
-		return nil
 	}
 	return fmt.Errorf("unknown User numeric field %s", name)
 }
@@ -4572,14 +4511,11 @@ func (m *UserMutation) ResetField(name string) error {
 	case user.FieldName:
 		m.ResetName()
 		return nil
-	case user.FieldChatID:
-		m.ResetChatID()
-		return nil
 	case user.FieldType:
 		m.ResetType()
 		return nil
-	case user.FieldLogingToken:
-		m.ResetLogingToken()
+	case user.FieldLoginToken:
+		m.ResetLoginToken()
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
@@ -4587,10 +4523,7 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 4)
-	if m.chains != nil {
-		edges = append(edges, user.EdgeChains)
-	}
+	edges := make([]string, 0, 3)
 	if m.telegram_chats != nil {
 		edges = append(edges, user.EdgeTelegramChats)
 	}
@@ -4607,12 +4540,6 @@ func (m *UserMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *UserMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case user.EdgeChains:
-		ids := make([]ent.Value, 0, len(m.chains))
-		for id := range m.chains {
-			ids = append(ids, id)
-		}
-		return ids
 	case user.EdgeTelegramChats:
 		ids := make([]ent.Value, 0, len(m.telegram_chats))
 		for id := range m.telegram_chats {
@@ -4637,10 +4564,7 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 4)
-	if m.removedchains != nil {
-		edges = append(edges, user.EdgeChains)
-	}
+	edges := make([]string, 0, 3)
 	if m.removedtelegram_chats != nil {
 		edges = append(edges, user.EdgeTelegramChats)
 	}
@@ -4657,12 +4581,6 @@ func (m *UserMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case user.EdgeChains:
-		ids := make([]ent.Value, 0, len(m.removedchains))
-		for id := range m.removedchains {
-			ids = append(ids, id)
-		}
-		return ids
 	case user.EdgeTelegramChats:
 		ids := make([]ent.Value, 0, len(m.removedtelegram_chats))
 		for id := range m.removedtelegram_chats {
@@ -4687,10 +4605,7 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 4)
-	if m.clearedchains {
-		edges = append(edges, user.EdgeChains)
-	}
+	edges := make([]string, 0, 3)
 	if m.clearedtelegram_chats {
 		edges = append(edges, user.EdgeTelegramChats)
 	}
@@ -4707,8 +4622,6 @@ func (m *UserMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *UserMutation) EdgeCleared(name string) bool {
 	switch name {
-	case user.EdgeChains:
-		return m.clearedchains
 	case user.EdgeTelegramChats:
 		return m.clearedtelegram_chats
 	case user.EdgeDiscordChannels:
@@ -4731,9 +4644,6 @@ func (m *UserMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *UserMutation) ResetEdge(name string) error {
 	switch name {
-	case user.EdgeChains:
-		m.ResetChains()
-		return nil
 	case user.EdgeTelegramChats:
 		m.ResetTelegramChats()
 		return nil

@@ -21,17 +21,14 @@ const (
 	FieldDisplayName = "display_name"
 	// FieldIsEnabled holds the string denoting the is_enabled field in the database.
 	FieldIsEnabled = "is_enabled"
-	// EdgeUsers holds the string denoting the users edge name in mutations.
-	EdgeUsers = "users"
 	// EdgeProposals holds the string denoting the proposals edge name in mutations.
 	EdgeProposals = "proposals"
+	// EdgeTelegramChats holds the string denoting the telegram_chats edge name in mutations.
+	EdgeTelegramChats = "telegram_chats"
+	// EdgeDiscordChannels holds the string denoting the discord_channels edge name in mutations.
+	EdgeDiscordChannels = "discord_channels"
 	// Table holds the table name of the chain in the database.
 	Table = "chains"
-	// UsersTable is the table that holds the users relation/edge. The primary key declared below.
-	UsersTable = "user_chains"
-	// UsersInverseTable is the table name for the User entity.
-	// It exists in this package in order to avoid circular dependency with the "user" package.
-	UsersInverseTable = "users"
 	// ProposalsTable is the table that holds the proposals relation/edge.
 	ProposalsTable = "proposals"
 	// ProposalsInverseTable is the table name for the Proposal entity.
@@ -39,6 +36,16 @@ const (
 	ProposalsInverseTable = "proposals"
 	// ProposalsColumn is the table column denoting the proposals relation/edge.
 	ProposalsColumn = "chain_proposals"
+	// TelegramChatsTable is the table that holds the telegram_chats relation/edge. The primary key declared below.
+	TelegramChatsTable = "telegram_chat_chains"
+	// TelegramChatsInverseTable is the table name for the TelegramChat entity.
+	// It exists in this package in order to avoid circular dependency with the "telegramchat" package.
+	TelegramChatsInverseTable = "telegram_chats"
+	// DiscordChannelsTable is the table that holds the discord_channels relation/edge. The primary key declared below.
+	DiscordChannelsTable = "discord_channel_chains"
+	// DiscordChannelsInverseTable is the table name for the DiscordChannel entity.
+	// It exists in this package in order to avoid circular dependency with the "discordchannel" package.
+	DiscordChannelsInverseTable = "discord_channels"
 )
 
 // Columns holds all SQL columns for chain fields.
@@ -54,15 +61,16 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "chains"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"discord_channel_chains",
-	"telegram_chat_chains",
 	"wallet_chains",
 }
 
 var (
-	// UsersPrimaryKey and UsersColumn2 are the table columns denoting the
-	// primary key for the users relation (M2M).
-	UsersPrimaryKey = []string{"user_id", "chain_id"}
+	// TelegramChatsPrimaryKey and TelegramChatsColumn2 are the table columns denoting the
+	// primary key for the telegram_chats relation (M2M).
+	TelegramChatsPrimaryKey = []string{"telegram_chat_id", "chain_id"}
+	// DiscordChannelsPrimaryKey and DiscordChannelsColumn2 are the table columns denoting the
+	// primary key for the discord_channels relation (M2M).
+	DiscordChannelsPrimaryKey = []string{"discord_channel_id", "chain_id"}
 )
 
 // ValidColumn reports if the column name is valid (part of the table columns).

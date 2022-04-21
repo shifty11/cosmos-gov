@@ -12,9 +12,10 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/shifty11/cosmos-gov/ent/chain"
+	"github.com/shifty11/cosmos-gov/ent/discordchannel"
 	"github.com/shifty11/cosmos-gov/ent/predicate"
 	"github.com/shifty11/cosmos-gov/ent/proposal"
-	"github.com/shifty11/cosmos-gov/ent/user"
+	"github.com/shifty11/cosmos-gov/ent/telegramchat"
 )
 
 // ChainUpdate is the builder for updating Chain entities.
@@ -62,21 +63,6 @@ func (cu *ChainUpdate) SetNillableIsEnabled(b *bool) *ChainUpdate {
 	return cu
 }
 
-// AddUserIDs adds the "users" edge to the User entity by IDs.
-func (cu *ChainUpdate) AddUserIDs(ids ...int64) *ChainUpdate {
-	cu.mutation.AddUserIDs(ids...)
-	return cu
-}
-
-// AddUsers adds the "users" edges to the User entity.
-func (cu *ChainUpdate) AddUsers(u ...*User) *ChainUpdate {
-	ids := make([]int64, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
-	}
-	return cu.AddUserIDs(ids...)
-}
-
 // AddProposalIDs adds the "proposals" edge to the Proposal entity by IDs.
 func (cu *ChainUpdate) AddProposalIDs(ids ...int) *ChainUpdate {
 	cu.mutation.AddProposalIDs(ids...)
@@ -92,30 +78,39 @@ func (cu *ChainUpdate) AddProposals(p ...*Proposal) *ChainUpdate {
 	return cu.AddProposalIDs(ids...)
 }
 
+// AddTelegramChatIDs adds the "telegram_chats" edge to the TelegramChat entity by IDs.
+func (cu *ChainUpdate) AddTelegramChatIDs(ids ...int64) *ChainUpdate {
+	cu.mutation.AddTelegramChatIDs(ids...)
+	return cu
+}
+
+// AddTelegramChats adds the "telegram_chats" edges to the TelegramChat entity.
+func (cu *ChainUpdate) AddTelegramChats(t ...*TelegramChat) *ChainUpdate {
+	ids := make([]int64, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return cu.AddTelegramChatIDs(ids...)
+}
+
+// AddDiscordChannelIDs adds the "discord_channels" edge to the DiscordChannel entity by IDs.
+func (cu *ChainUpdate) AddDiscordChannelIDs(ids ...int64) *ChainUpdate {
+	cu.mutation.AddDiscordChannelIDs(ids...)
+	return cu
+}
+
+// AddDiscordChannels adds the "discord_channels" edges to the DiscordChannel entity.
+func (cu *ChainUpdate) AddDiscordChannels(d ...*DiscordChannel) *ChainUpdate {
+	ids := make([]int64, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return cu.AddDiscordChannelIDs(ids...)
+}
+
 // Mutation returns the ChainMutation object of the builder.
 func (cu *ChainUpdate) Mutation() *ChainMutation {
 	return cu.mutation
-}
-
-// ClearUsers clears all "users" edges to the User entity.
-func (cu *ChainUpdate) ClearUsers() *ChainUpdate {
-	cu.mutation.ClearUsers()
-	return cu
-}
-
-// RemoveUserIDs removes the "users" edge to User entities by IDs.
-func (cu *ChainUpdate) RemoveUserIDs(ids ...int64) *ChainUpdate {
-	cu.mutation.RemoveUserIDs(ids...)
-	return cu
-}
-
-// RemoveUsers removes "users" edges to User entities.
-func (cu *ChainUpdate) RemoveUsers(u ...*User) *ChainUpdate {
-	ids := make([]int64, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
-	}
-	return cu.RemoveUserIDs(ids...)
 }
 
 // ClearProposals clears all "proposals" edges to the Proposal entity.
@@ -137,6 +132,48 @@ func (cu *ChainUpdate) RemoveProposals(p ...*Proposal) *ChainUpdate {
 		ids[i] = p[i].ID
 	}
 	return cu.RemoveProposalIDs(ids...)
+}
+
+// ClearTelegramChats clears all "telegram_chats" edges to the TelegramChat entity.
+func (cu *ChainUpdate) ClearTelegramChats() *ChainUpdate {
+	cu.mutation.ClearTelegramChats()
+	return cu
+}
+
+// RemoveTelegramChatIDs removes the "telegram_chats" edge to TelegramChat entities by IDs.
+func (cu *ChainUpdate) RemoveTelegramChatIDs(ids ...int64) *ChainUpdate {
+	cu.mutation.RemoveTelegramChatIDs(ids...)
+	return cu
+}
+
+// RemoveTelegramChats removes "telegram_chats" edges to TelegramChat entities.
+func (cu *ChainUpdate) RemoveTelegramChats(t ...*TelegramChat) *ChainUpdate {
+	ids := make([]int64, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return cu.RemoveTelegramChatIDs(ids...)
+}
+
+// ClearDiscordChannels clears all "discord_channels" edges to the DiscordChannel entity.
+func (cu *ChainUpdate) ClearDiscordChannels() *ChainUpdate {
+	cu.mutation.ClearDiscordChannels()
+	return cu
+}
+
+// RemoveDiscordChannelIDs removes the "discord_channels" edge to DiscordChannel entities by IDs.
+func (cu *ChainUpdate) RemoveDiscordChannelIDs(ids ...int64) *ChainUpdate {
+	cu.mutation.RemoveDiscordChannelIDs(ids...)
+	return cu
+}
+
+// RemoveDiscordChannels removes "discord_channels" edges to DiscordChannel entities.
+func (cu *ChainUpdate) RemoveDiscordChannels(d ...*DiscordChannel) *ChainUpdate {
+	ids := make([]int64, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return cu.RemoveDiscordChannelIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -248,60 +285,6 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: chain.FieldIsEnabled,
 		})
 	}
-	if cu.mutation.UsersCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   chain.UsersTable,
-			Columns: chain.UsersPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: user.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := cu.mutation.RemovedUsersIDs(); len(nodes) > 0 && !cu.mutation.UsersCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   chain.UsersTable,
-			Columns: chain.UsersPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: user.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := cu.mutation.UsersIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   chain.UsersTable,
-			Columns: chain.UsersPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: user.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
 	if cu.mutation.ProposalsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -348,6 +331,114 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: proposal.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if cu.mutation.TelegramChatsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chain.TelegramChatsTable,
+			Columns: chain.TelegramChatsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt64,
+					Column: telegramchat.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.RemovedTelegramChatsIDs(); len(nodes) > 0 && !cu.mutation.TelegramChatsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chain.TelegramChatsTable,
+			Columns: chain.TelegramChatsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt64,
+					Column: telegramchat.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.TelegramChatsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chain.TelegramChatsTable,
+			Columns: chain.TelegramChatsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt64,
+					Column: telegramchat.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if cu.mutation.DiscordChannelsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chain.DiscordChannelsTable,
+			Columns: chain.DiscordChannelsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt64,
+					Column: discordchannel.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.RemovedDiscordChannelsIDs(); len(nodes) > 0 && !cu.mutation.DiscordChannelsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chain.DiscordChannelsTable,
+			Columns: chain.DiscordChannelsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt64,
+					Column: discordchannel.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.DiscordChannelsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chain.DiscordChannelsTable,
+			Columns: chain.DiscordChannelsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt64,
+					Column: discordchannel.FieldID,
 				},
 			},
 		}
@@ -407,21 +498,6 @@ func (cuo *ChainUpdateOne) SetNillableIsEnabled(b *bool) *ChainUpdateOne {
 	return cuo
 }
 
-// AddUserIDs adds the "users" edge to the User entity by IDs.
-func (cuo *ChainUpdateOne) AddUserIDs(ids ...int64) *ChainUpdateOne {
-	cuo.mutation.AddUserIDs(ids...)
-	return cuo
-}
-
-// AddUsers adds the "users" edges to the User entity.
-func (cuo *ChainUpdateOne) AddUsers(u ...*User) *ChainUpdateOne {
-	ids := make([]int64, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
-	}
-	return cuo.AddUserIDs(ids...)
-}
-
 // AddProposalIDs adds the "proposals" edge to the Proposal entity by IDs.
 func (cuo *ChainUpdateOne) AddProposalIDs(ids ...int) *ChainUpdateOne {
 	cuo.mutation.AddProposalIDs(ids...)
@@ -437,30 +513,39 @@ func (cuo *ChainUpdateOne) AddProposals(p ...*Proposal) *ChainUpdateOne {
 	return cuo.AddProposalIDs(ids...)
 }
 
+// AddTelegramChatIDs adds the "telegram_chats" edge to the TelegramChat entity by IDs.
+func (cuo *ChainUpdateOne) AddTelegramChatIDs(ids ...int64) *ChainUpdateOne {
+	cuo.mutation.AddTelegramChatIDs(ids...)
+	return cuo
+}
+
+// AddTelegramChats adds the "telegram_chats" edges to the TelegramChat entity.
+func (cuo *ChainUpdateOne) AddTelegramChats(t ...*TelegramChat) *ChainUpdateOne {
+	ids := make([]int64, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return cuo.AddTelegramChatIDs(ids...)
+}
+
+// AddDiscordChannelIDs adds the "discord_channels" edge to the DiscordChannel entity by IDs.
+func (cuo *ChainUpdateOne) AddDiscordChannelIDs(ids ...int64) *ChainUpdateOne {
+	cuo.mutation.AddDiscordChannelIDs(ids...)
+	return cuo
+}
+
+// AddDiscordChannels adds the "discord_channels" edges to the DiscordChannel entity.
+func (cuo *ChainUpdateOne) AddDiscordChannels(d ...*DiscordChannel) *ChainUpdateOne {
+	ids := make([]int64, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return cuo.AddDiscordChannelIDs(ids...)
+}
+
 // Mutation returns the ChainMutation object of the builder.
 func (cuo *ChainUpdateOne) Mutation() *ChainMutation {
 	return cuo.mutation
-}
-
-// ClearUsers clears all "users" edges to the User entity.
-func (cuo *ChainUpdateOne) ClearUsers() *ChainUpdateOne {
-	cuo.mutation.ClearUsers()
-	return cuo
-}
-
-// RemoveUserIDs removes the "users" edge to User entities by IDs.
-func (cuo *ChainUpdateOne) RemoveUserIDs(ids ...int64) *ChainUpdateOne {
-	cuo.mutation.RemoveUserIDs(ids...)
-	return cuo
-}
-
-// RemoveUsers removes "users" edges to User entities.
-func (cuo *ChainUpdateOne) RemoveUsers(u ...*User) *ChainUpdateOne {
-	ids := make([]int64, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
-	}
-	return cuo.RemoveUserIDs(ids...)
 }
 
 // ClearProposals clears all "proposals" edges to the Proposal entity.
@@ -482,6 +567,48 @@ func (cuo *ChainUpdateOne) RemoveProposals(p ...*Proposal) *ChainUpdateOne {
 		ids[i] = p[i].ID
 	}
 	return cuo.RemoveProposalIDs(ids...)
+}
+
+// ClearTelegramChats clears all "telegram_chats" edges to the TelegramChat entity.
+func (cuo *ChainUpdateOne) ClearTelegramChats() *ChainUpdateOne {
+	cuo.mutation.ClearTelegramChats()
+	return cuo
+}
+
+// RemoveTelegramChatIDs removes the "telegram_chats" edge to TelegramChat entities by IDs.
+func (cuo *ChainUpdateOne) RemoveTelegramChatIDs(ids ...int64) *ChainUpdateOne {
+	cuo.mutation.RemoveTelegramChatIDs(ids...)
+	return cuo
+}
+
+// RemoveTelegramChats removes "telegram_chats" edges to TelegramChat entities.
+func (cuo *ChainUpdateOne) RemoveTelegramChats(t ...*TelegramChat) *ChainUpdateOne {
+	ids := make([]int64, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return cuo.RemoveTelegramChatIDs(ids...)
+}
+
+// ClearDiscordChannels clears all "discord_channels" edges to the DiscordChannel entity.
+func (cuo *ChainUpdateOne) ClearDiscordChannels() *ChainUpdateOne {
+	cuo.mutation.ClearDiscordChannels()
+	return cuo
+}
+
+// RemoveDiscordChannelIDs removes the "discord_channels" edge to DiscordChannel entities by IDs.
+func (cuo *ChainUpdateOne) RemoveDiscordChannelIDs(ids ...int64) *ChainUpdateOne {
+	cuo.mutation.RemoveDiscordChannelIDs(ids...)
+	return cuo
+}
+
+// RemoveDiscordChannels removes "discord_channels" edges to DiscordChannel entities.
+func (cuo *ChainUpdateOne) RemoveDiscordChannels(d ...*DiscordChannel) *ChainUpdateOne {
+	ids := make([]int64, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return cuo.RemoveDiscordChannelIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -617,60 +744,6 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 			Column: chain.FieldIsEnabled,
 		})
 	}
-	if cuo.mutation.UsersCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   chain.UsersTable,
-			Columns: chain.UsersPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: user.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := cuo.mutation.RemovedUsersIDs(); len(nodes) > 0 && !cuo.mutation.UsersCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   chain.UsersTable,
-			Columns: chain.UsersPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: user.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := cuo.mutation.UsersIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   chain.UsersTable,
-			Columns: chain.UsersPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: user.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
 	if cuo.mutation.ProposalsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -717,6 +790,114 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: proposal.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if cuo.mutation.TelegramChatsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chain.TelegramChatsTable,
+			Columns: chain.TelegramChatsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt64,
+					Column: telegramchat.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.RemovedTelegramChatsIDs(); len(nodes) > 0 && !cuo.mutation.TelegramChatsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chain.TelegramChatsTable,
+			Columns: chain.TelegramChatsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt64,
+					Column: telegramchat.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.TelegramChatsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chain.TelegramChatsTable,
+			Columns: chain.TelegramChatsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt64,
+					Column: telegramchat.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if cuo.mutation.DiscordChannelsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chain.DiscordChannelsTable,
+			Columns: chain.DiscordChannelsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt64,
+					Column: discordchannel.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.RemovedDiscordChannelsIDs(); len(nodes) > 0 && !cuo.mutation.DiscordChannelsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chain.DiscordChannelsTable,
+			Columns: chain.DiscordChannelsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt64,
+					Column: discordchannel.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.DiscordChannelsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chain.DiscordChannelsTable,
+			Columns: chain.DiscordChannelsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt64,
+					Column: discordchannel.FieldID,
 				},
 			},
 		}

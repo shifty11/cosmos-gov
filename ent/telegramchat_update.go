@@ -240,10 +240,10 @@ func (tcu *TelegramChatUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if tcu.mutation.ChainsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   telegramchat.ChainsTable,
-			Columns: []string{telegramchat.ChainsColumn},
+			Columns: telegramchat.ChainsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -256,10 +256,10 @@ func (tcu *TelegramChatUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := tcu.mutation.RemovedChainsIDs(); len(nodes) > 0 && !tcu.mutation.ChainsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   telegramchat.ChainsTable,
-			Columns: []string{telegramchat.ChainsColumn},
+			Columns: telegramchat.ChainsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -275,10 +275,10 @@ func (tcu *TelegramChatUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := tcu.mutation.ChainsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   telegramchat.ChainsTable,
-			Columns: []string{telegramchat.ChainsColumn},
+			Columns: telegramchat.ChainsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -545,10 +545,10 @@ func (tcuo *TelegramChatUpdateOne) sqlSave(ctx context.Context) (_node *Telegram
 	}
 	if tcuo.mutation.ChainsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   telegramchat.ChainsTable,
-			Columns: []string{telegramchat.ChainsColumn},
+			Columns: telegramchat.ChainsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -561,10 +561,10 @@ func (tcuo *TelegramChatUpdateOne) sqlSave(ctx context.Context) (_node *Telegram
 	}
 	if nodes := tcuo.mutation.RemovedChainsIDs(); len(nodes) > 0 && !tcuo.mutation.ChainsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   telegramchat.ChainsTable,
-			Columns: []string{telegramchat.ChainsColumn},
+			Columns: telegramchat.ChainsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -580,10 +580,10 @@ func (tcuo *TelegramChatUpdateOne) sqlSave(ctx context.Context) (_node *Telegram
 	}
 	if nodes := tcuo.mutation.ChainsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   telegramchat.ChainsTable,
-			Columns: []string{telegramchat.ChainsColumn},
+			Columns: telegramchat.ChainsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

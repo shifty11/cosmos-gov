@@ -34,13 +34,11 @@ const (
 	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
 	UserColumn = "discord_channel_user"
-	// ChainsTable is the table that holds the chains relation/edge.
-	ChainsTable = "chains"
+	// ChainsTable is the table that holds the chains relation/edge. The primary key declared below.
+	ChainsTable = "discord_channel_chains"
 	// ChainsInverseTable is the table name for the Chain entity.
 	// It exists in this package in order to avoid circular dependency with the "chain" package.
 	ChainsInverseTable = "chains"
-	// ChainsColumn is the table column denoting the chains relation/edge.
-	ChainsColumn = "discord_channel_chains"
 )
 
 // Columns holds all SQL columns for discordchannel fields.
@@ -58,6 +56,12 @@ var Columns = []string{
 var ForeignKeys = []string{
 	"discord_channel_user",
 }
+
+var (
+	// ChainsPrimaryKey and ChainsColumn2 are the table columns denoting the
+	// primary key for the chains relation (M2M).
+	ChainsPrimaryKey = []string{"discord_channel_id", "chain_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {

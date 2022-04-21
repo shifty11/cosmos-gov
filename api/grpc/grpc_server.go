@@ -28,10 +28,11 @@ func Start() {
 		log.Sugar.Panic("JWT_SECRET_KEY must be set")
 	}
 	userManager := database.NewUserManager()
+	chainManager := database.NewChainManager()
 	jwtManager := auth.NewJWTManager([]byte(jwtSecretKey), accessTokenDuration, refreshTokenDuration)
 	interceptor := auth.NewAuthInterceptor(jwtManager, auth.AccessibleRoles())
 	authServer := auth.NewAuthServer(userManager, jwtManager)
-	subscriptionServer := subscription.NewSubscriptionsServer(database.NewSubscriptionManager(userManager))
+	subscriptionServer := subscription.NewSubscriptionsServer(database.NewSubscriptionManager(userManager, chainManager))
 	votePermissionServer := vote_permission.NewVotePermissionsServer()
 
 	server := grpc.NewServer(

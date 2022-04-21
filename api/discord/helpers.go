@@ -8,12 +8,32 @@ import (
 	"strings"
 )
 
-func getChannelId(i *discordgo.InteractionCreate) int64 {
-	channelId, err := strconv.ParseInt(i.ChannelID, 10, 64)
+func getUserId(i *discordgo.InteractionCreate) int64 {
+	channelId, err := strconv.ParseInt(i.User.ID, 10, 64)
 	if err != nil {
 		log.Sugar.Panicf("Error while converting user ID to int: %v", err)
 	}
 	return channelId
+}
+
+func getUserName(i *discordgo.InteractionCreate) string {
+	return i.User.Username
+}
+
+func getChannelId(i *discordgo.InteractionCreate) int64 {
+	channelId, err := strconv.ParseInt(i.ChannelID, 10, 64)
+	if err != nil {
+		log.Sugar.Panicf("Error while converting channel ID to int: %v", err)
+	}
+	return channelId
+}
+
+func getChannelName(i *discordgo.InteractionCreate) string {
+	return i.Message.Thread.Name
+}
+
+func isGroupChannel(i *discordgo.InteractionCreate) bool {
+	return i.Message.Thread.Type != discordgo.ChannelTypeDM
 }
 
 type Action struct {

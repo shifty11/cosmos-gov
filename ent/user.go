@@ -22,12 +22,10 @@ type User struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
-	// ChatID holds the value of the "chat_id" field.
-	ChatID int64 `json:"chat_id,omitempty"`
 	// Type holds the value of the "type" field.
 	Type user.Type `json:"type,omitempty"`
-	// LogingToken holds the value of the "loging_token" field.
-	LogingToken string `json:"loging_token,omitempty"`
+	// LoginToken holds the value of the "login_token" field.
+	LoginToken string `json:"login_token,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges UserEdges `json:"edges"`
@@ -35,8 +33,6 @@ type User struct {
 
 // UserEdges holds the relations/edges for other nodes in the graph.
 type UserEdges struct {
-	// Chains holds the value of the chains edge.
-	Chains []*Chain `json:"chains,omitempty"`
 	// TelegramChats holds the value of the telegram_chats edge.
 	TelegramChats []*TelegramChat `json:"telegram_chats,omitempty"`
 	// DiscordChannels holds the value of the discord_channels edge.
@@ -45,22 +41,13 @@ type UserEdges struct {
 	Wallets []*Wallet `json:"wallets,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
-}
-
-// ChainsOrErr returns the Chains value or an error if the edge
-// was not loaded in eager-loading.
-func (e UserEdges) ChainsOrErr() ([]*Chain, error) {
-	if e.loadedTypes[0] {
-		return e.Chains, nil
-	}
-	return nil, &NotLoadedError{edge: "chains"}
+	loadedTypes [3]bool
 }
 
 // TelegramChatsOrErr returns the TelegramChats value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) TelegramChatsOrErr() ([]*TelegramChat, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[0] {
 		return e.TelegramChats, nil
 	}
 	return nil, &NotLoadedError{edge: "telegram_chats"}
@@ -69,7 +56,7 @@ func (e UserEdges) TelegramChatsOrErr() ([]*TelegramChat, error) {
 // DiscordChannelsOrErr returns the DiscordChannels value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) DiscordChannelsOrErr() ([]*DiscordChannel, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[1] {
 		return e.DiscordChannels, nil
 	}
 	return nil, &NotLoadedError{edge: "discord_channels"}
@@ -78,7 +65,7 @@ func (e UserEdges) DiscordChannelsOrErr() ([]*DiscordChannel, error) {
 // WalletsOrErr returns the Wallets value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) WalletsOrErr() ([]*Wallet, error) {
-	if e.loadedTypes[3] {
+	if e.loadedTypes[2] {
 		return e.Wallets, nil
 	}
 	return nil, &NotLoadedError{edge: "wallets"}
@@ -89,9 +76,9 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldID, user.FieldChatID:
+		case user.FieldID:
 			values[i] = new(sql.NullInt64)
-		case user.FieldName, user.FieldType, user.FieldLogingToken:
+		case user.FieldName, user.FieldType, user.FieldLoginToken:
 			values[i] = new(sql.NullString)
 		case user.FieldCreatedAt, user.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -134,32 +121,21 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				u.Name = value.String
 			}
-		case user.FieldChatID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field chat_id", values[i])
-			} else if value.Valid {
-				u.ChatID = value.Int64
-			}
 		case user.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field type", values[i])
 			} else if value.Valid {
 				u.Type = user.Type(value.String)
 			}
-		case user.FieldLogingToken:
+		case user.FieldLoginToken:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field loging_token", values[i])
+				return fmt.Errorf("unexpected type %T for field login_token", values[i])
 			} else if value.Valid {
-				u.LogingToken = value.String
+				u.LoginToken = value.String
 			}
 		}
 	}
 	return nil
-}
-
-// QueryChains queries the "chains" edge of the User entity.
-func (u *User) QueryChains() *ChainQuery {
-	return (&UserClient{config: u.config}).QueryChains(u)
 }
 
 // QueryTelegramChats queries the "telegram_chats" edge of the User entity.
@@ -206,12 +182,10 @@ func (u *User) String() string {
 	builder.WriteString(u.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", name=")
 	builder.WriteString(u.Name)
-	builder.WriteString(", chat_id=")
-	builder.WriteString(fmt.Sprintf("%v", u.ChatID))
 	builder.WriteString(", type=")
 	builder.WriteString(fmt.Sprintf("%v", u.Type))
-	builder.WriteString(", loging_token=")
-	builder.WriteString(u.LogingToken)
+	builder.WriteString(", login_token=")
+	builder.WriteString(u.LoginToken)
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -13,9 +13,10 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/shifty11/cosmos-gov/ent/chain"
+	"github.com/shifty11/cosmos-gov/ent/discordchannel"
 	"github.com/shifty11/cosmos-gov/ent/predicate"
 	"github.com/shifty11/cosmos-gov/ent/proposal"
-	"github.com/shifty11/cosmos-gov/ent/user"
+	"github.com/shifty11/cosmos-gov/ent/telegramchat"
 )
 
 // ChainQuery is the builder for querying Chain entities.
@@ -28,9 +29,10 @@ type ChainQuery struct {
 	fields     []string
 	predicates []predicate.Chain
 	// eager-loading edges.
-	withUsers     *UserQuery
-	withProposals *ProposalQuery
-	withFKs       bool
+	withProposals       *ProposalQuery
+	withTelegramChats   *TelegramChatQuery
+	withDiscordChannels *DiscordChannelQuery
+	withFKs             bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -67,28 +69,6 @@ func (cq *ChainQuery) Order(o ...OrderFunc) *ChainQuery {
 	return cq
 }
 
-// QueryUsers chains the current query on the "users" edge.
-func (cq *ChainQuery) QueryUsers() *UserQuery {
-	query := &UserQuery{config: cq.config}
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := cq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := cq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(chain.Table, chain.FieldID, selector),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, chain.UsersTable, chain.UsersPrimaryKey...),
-		)
-		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
 // QueryProposals chains the current query on the "proposals" edge.
 func (cq *ChainQuery) QueryProposals() *ProposalQuery {
 	query := &ProposalQuery{config: cq.config}
@@ -104,6 +84,50 @@ func (cq *ChainQuery) QueryProposals() *ProposalQuery {
 			sqlgraph.From(chain.Table, chain.FieldID, selector),
 			sqlgraph.To(proposal.Table, proposal.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, chain.ProposalsTable, chain.ProposalsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryTelegramChats chains the current query on the "telegram_chats" edge.
+func (cq *ChainQuery) QueryTelegramChats() *TelegramChatQuery {
+	query := &TelegramChatQuery{config: cq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := cq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := cq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(chain.Table, chain.FieldID, selector),
+			sqlgraph.To(telegramchat.Table, telegramchat.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, chain.TelegramChatsTable, chain.TelegramChatsPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryDiscordChannels chains the current query on the "discord_channels" edge.
+func (cq *ChainQuery) QueryDiscordChannels() *DiscordChannelQuery {
+	query := &DiscordChannelQuery{config: cq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := cq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := cq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(chain.Table, chain.FieldID, selector),
+			sqlgraph.To(discordchannel.Table, discordchannel.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, chain.DiscordChannelsTable, chain.DiscordChannelsPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
 		return fromU, nil
@@ -287,29 +311,19 @@ func (cq *ChainQuery) Clone() *ChainQuery {
 		return nil
 	}
 	return &ChainQuery{
-		config:        cq.config,
-		limit:         cq.limit,
-		offset:        cq.offset,
-		order:         append([]OrderFunc{}, cq.order...),
-		predicates:    append([]predicate.Chain{}, cq.predicates...),
-		withUsers:     cq.withUsers.Clone(),
-		withProposals: cq.withProposals.Clone(),
+		config:              cq.config,
+		limit:               cq.limit,
+		offset:              cq.offset,
+		order:               append([]OrderFunc{}, cq.order...),
+		predicates:          append([]predicate.Chain{}, cq.predicates...),
+		withProposals:       cq.withProposals.Clone(),
+		withTelegramChats:   cq.withTelegramChats.Clone(),
+		withDiscordChannels: cq.withDiscordChannels.Clone(),
 		// clone intermediate query.
 		sql:    cq.sql.Clone(),
 		path:   cq.path,
 		unique: cq.unique,
 	}
-}
-
-// WithUsers tells the query-builder to eager-load the nodes that are connected to
-// the "users" edge. The optional arguments are used to configure the query builder of the edge.
-func (cq *ChainQuery) WithUsers(opts ...func(*UserQuery)) *ChainQuery {
-	query := &UserQuery{config: cq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	cq.withUsers = query
-	return cq
 }
 
 // WithProposals tells the query-builder to eager-load the nodes that are connected to
@@ -320,6 +334,28 @@ func (cq *ChainQuery) WithProposals(opts ...func(*ProposalQuery)) *ChainQuery {
 		opt(query)
 	}
 	cq.withProposals = query
+	return cq
+}
+
+// WithTelegramChats tells the query-builder to eager-load the nodes that are connected to
+// the "telegram_chats" edge. The optional arguments are used to configure the query builder of the edge.
+func (cq *ChainQuery) WithTelegramChats(opts ...func(*TelegramChatQuery)) *ChainQuery {
+	query := &TelegramChatQuery{config: cq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	cq.withTelegramChats = query
+	return cq
+}
+
+// WithDiscordChannels tells the query-builder to eager-load the nodes that are connected to
+// the "discord_channels" edge. The optional arguments are used to configure the query builder of the edge.
+func (cq *ChainQuery) WithDiscordChannels(opts ...func(*DiscordChannelQuery)) *ChainQuery {
+	query := &DiscordChannelQuery{config: cq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	cq.withDiscordChannels = query
 	return cq
 }
 
@@ -389,9 +425,10 @@ func (cq *ChainQuery) sqlAll(ctx context.Context) ([]*Chain, error) {
 		nodes       = []*Chain{}
 		withFKs     = cq.withFKs
 		_spec       = cq.querySpec()
-		loadedTypes = [2]bool{
-			cq.withUsers != nil,
+		loadedTypes = [3]bool{
 			cq.withProposals != nil,
+			cq.withTelegramChats != nil,
+			cq.withDiscordChannels != nil,
 		}
 	)
 	if withFKs {
@@ -415,71 +452,6 @@ func (cq *ChainQuery) sqlAll(ctx context.Context) ([]*Chain, error) {
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
-	}
-
-	if query := cq.withUsers; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[int]*Chain, len(nodes))
-		for _, node := range nodes {
-			ids[node.ID] = node
-			fks = append(fks, node.ID)
-			node.Edges.Users = []*User{}
-		}
-		var (
-			edgeids []int64
-			edges   = make(map[int64][]*Chain)
-		)
-		_spec := &sqlgraph.EdgeQuerySpec{
-			Edge: &sqlgraph.EdgeSpec{
-				Inverse: true,
-				Table:   chain.UsersTable,
-				Columns: chain.UsersPrimaryKey,
-			},
-			Predicate: func(s *sql.Selector) {
-				s.Where(sql.InValues(chain.UsersPrimaryKey[1], fks...))
-			},
-			ScanValues: func() [2]interface{} {
-				return [2]interface{}{new(sql.NullInt64), new(sql.NullInt64)}
-			},
-			Assign: func(out, in interface{}) error {
-				eout, ok := out.(*sql.NullInt64)
-				if !ok || eout == nil {
-					return fmt.Errorf("unexpected id value for edge-out")
-				}
-				ein, ok := in.(*sql.NullInt64)
-				if !ok || ein == nil {
-					return fmt.Errorf("unexpected id value for edge-in")
-				}
-				outValue := int(eout.Int64)
-				inValue := ein.Int64
-				node, ok := ids[outValue]
-				if !ok {
-					return fmt.Errorf("unexpected node id in edges: %v", outValue)
-				}
-				if _, ok := edges[inValue]; !ok {
-					edgeids = append(edgeids, inValue)
-				}
-				edges[inValue] = append(edges[inValue], node)
-				return nil
-			},
-		}
-		if err := sqlgraph.QueryEdges(ctx, cq.driver, _spec); err != nil {
-			return nil, fmt.Errorf(`query edges "users": %w`, err)
-		}
-		query.Where(user.IDIn(edgeids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, n := range neighbors {
-			nodes, ok := edges[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected "users" node returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Users = append(nodes[i].Edges.Users, n)
-			}
-		}
 	}
 
 	if query := cq.withProposals; query != nil {
@@ -508,6 +480,136 @@ func (cq *ChainQuery) sqlAll(ctx context.Context) ([]*Chain, error) {
 				return nil, fmt.Errorf(`unexpected foreign-key "chain_proposals" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Proposals = append(node.Edges.Proposals, n)
+		}
+	}
+
+	if query := cq.withTelegramChats; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		ids := make(map[int]*Chain, len(nodes))
+		for _, node := range nodes {
+			ids[node.ID] = node
+			fks = append(fks, node.ID)
+			node.Edges.TelegramChats = []*TelegramChat{}
+		}
+		var (
+			edgeids []int64
+			edges   = make(map[int64][]*Chain)
+		)
+		_spec := &sqlgraph.EdgeQuerySpec{
+			Edge: &sqlgraph.EdgeSpec{
+				Inverse: true,
+				Table:   chain.TelegramChatsTable,
+				Columns: chain.TelegramChatsPrimaryKey,
+			},
+			Predicate: func(s *sql.Selector) {
+				s.Where(sql.InValues(chain.TelegramChatsPrimaryKey[1], fks...))
+			},
+			ScanValues: func() [2]interface{} {
+				return [2]interface{}{new(sql.NullInt64), new(sql.NullInt64)}
+			},
+			Assign: func(out, in interface{}) error {
+				eout, ok := out.(*sql.NullInt64)
+				if !ok || eout == nil {
+					return fmt.Errorf("unexpected id value for edge-out")
+				}
+				ein, ok := in.(*sql.NullInt64)
+				if !ok || ein == nil {
+					return fmt.Errorf("unexpected id value for edge-in")
+				}
+				outValue := int(eout.Int64)
+				inValue := ein.Int64
+				node, ok := ids[outValue]
+				if !ok {
+					return fmt.Errorf("unexpected node id in edges: %v", outValue)
+				}
+				if _, ok := edges[inValue]; !ok {
+					edgeids = append(edgeids, inValue)
+				}
+				edges[inValue] = append(edges[inValue], node)
+				return nil
+			},
+		}
+		if err := sqlgraph.QueryEdges(ctx, cq.driver, _spec); err != nil {
+			return nil, fmt.Errorf(`query edges "telegram_chats": %w`, err)
+		}
+		query.Where(telegramchat.IDIn(edgeids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := edges[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected "telegram_chats" node returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.TelegramChats = append(nodes[i].Edges.TelegramChats, n)
+			}
+		}
+	}
+
+	if query := cq.withDiscordChannels; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		ids := make(map[int]*Chain, len(nodes))
+		for _, node := range nodes {
+			ids[node.ID] = node
+			fks = append(fks, node.ID)
+			node.Edges.DiscordChannels = []*DiscordChannel{}
+		}
+		var (
+			edgeids []int64
+			edges   = make(map[int64][]*Chain)
+		)
+		_spec := &sqlgraph.EdgeQuerySpec{
+			Edge: &sqlgraph.EdgeSpec{
+				Inverse: true,
+				Table:   chain.DiscordChannelsTable,
+				Columns: chain.DiscordChannelsPrimaryKey,
+			},
+			Predicate: func(s *sql.Selector) {
+				s.Where(sql.InValues(chain.DiscordChannelsPrimaryKey[1], fks...))
+			},
+			ScanValues: func() [2]interface{} {
+				return [2]interface{}{new(sql.NullInt64), new(sql.NullInt64)}
+			},
+			Assign: func(out, in interface{}) error {
+				eout, ok := out.(*sql.NullInt64)
+				if !ok || eout == nil {
+					return fmt.Errorf("unexpected id value for edge-out")
+				}
+				ein, ok := in.(*sql.NullInt64)
+				if !ok || ein == nil {
+					return fmt.Errorf("unexpected id value for edge-in")
+				}
+				outValue := int(eout.Int64)
+				inValue := ein.Int64
+				node, ok := ids[outValue]
+				if !ok {
+					return fmt.Errorf("unexpected node id in edges: %v", outValue)
+				}
+				if _, ok := edges[inValue]; !ok {
+					edgeids = append(edgeids, inValue)
+				}
+				edges[inValue] = append(edges[inValue], node)
+				return nil
+			},
+		}
+		if err := sqlgraph.QueryEdges(ctx, cq.driver, _spec); err != nil {
+			return nil, fmt.Errorf(`query edges "discord_channels": %w`, err)
+		}
+		query.Where(discordchannel.IDIn(edgeids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := edges[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected "discord_channels" node returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.DiscordChannels = append(nodes[i].Edges.DiscordChannels, n)
+			}
 		}
 	}
 

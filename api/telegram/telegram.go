@@ -3,8 +3,6 @@ package telegram
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/shifty11/cosmos-gov/common"
-	"github.com/shifty11/cosmos-gov/database"
-	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/log"
 	"strings"
 )
@@ -112,7 +110,7 @@ func handleCallbackQuery(update *tgbotapi.Update) {
 	callbackData := ToCallbackData(update.CallbackQuery.Data)
 	switch callbackData.Command {
 	case CallbackCmdShowSubscriptions:
-		database.PerformUpdateSubscription(getChatIdX(update), user.TypeTelegram, callbackData.Data)
+		performUpdateSubscription(update, callbackData.Data)
 		sendSubscriptions(update)
 	case CallbackCmdShowProposals:
 		sendCurrentProposals(update)
@@ -144,7 +142,7 @@ func handleCallbackQuery(update *tgbotapi.Update) {
 // groups -> just admins and creators can interact with the bot
 // private -> everything is allowed
 func isInteractionAllowed(update *tgbotapi.Update) bool {
-	if isUpdateFromGroup(update) {
+	if isGroupX(update) {
 		return isUpdateFromCreatorOrAdministrator(update)
 	}
 	return true

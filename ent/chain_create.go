@@ -11,8 +11,9 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/shifty11/cosmos-gov/ent/chain"
+	"github.com/shifty11/cosmos-gov/ent/discordchannel"
 	"github.com/shifty11/cosmos-gov/ent/proposal"
-	"github.com/shifty11/cosmos-gov/ent/user"
+	"github.com/shifty11/cosmos-gov/ent/telegramchat"
 )
 
 // ChainCreate is the builder for creating a Chain entity.
@@ -76,21 +77,6 @@ func (cc *ChainCreate) SetNillableIsEnabled(b *bool) *ChainCreate {
 	return cc
 }
 
-// AddUserIDs adds the "users" edge to the User entity by IDs.
-func (cc *ChainCreate) AddUserIDs(ids ...int64) *ChainCreate {
-	cc.mutation.AddUserIDs(ids...)
-	return cc
-}
-
-// AddUsers adds the "users" edges to the User entity.
-func (cc *ChainCreate) AddUsers(u ...*User) *ChainCreate {
-	ids := make([]int64, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
-	}
-	return cc.AddUserIDs(ids...)
-}
-
 // AddProposalIDs adds the "proposals" edge to the Proposal entity by IDs.
 func (cc *ChainCreate) AddProposalIDs(ids ...int) *ChainCreate {
 	cc.mutation.AddProposalIDs(ids...)
@@ -104,6 +90,36 @@ func (cc *ChainCreate) AddProposals(p ...*Proposal) *ChainCreate {
 		ids[i] = p[i].ID
 	}
 	return cc.AddProposalIDs(ids...)
+}
+
+// AddTelegramChatIDs adds the "telegram_chats" edge to the TelegramChat entity by IDs.
+func (cc *ChainCreate) AddTelegramChatIDs(ids ...int64) *ChainCreate {
+	cc.mutation.AddTelegramChatIDs(ids...)
+	return cc
+}
+
+// AddTelegramChats adds the "telegram_chats" edges to the TelegramChat entity.
+func (cc *ChainCreate) AddTelegramChats(t ...*TelegramChat) *ChainCreate {
+	ids := make([]int64, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return cc.AddTelegramChatIDs(ids...)
+}
+
+// AddDiscordChannelIDs adds the "discord_channels" edge to the DiscordChannel entity by IDs.
+func (cc *ChainCreate) AddDiscordChannelIDs(ids ...int64) *ChainCreate {
+	cc.mutation.AddDiscordChannelIDs(ids...)
+	return cc
+}
+
+// AddDiscordChannels adds the "discord_channels" edges to the DiscordChannel entity.
+func (cc *ChainCreate) AddDiscordChannels(d ...*DiscordChannel) *ChainCreate {
+	ids := make([]int64, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return cc.AddDiscordChannelIDs(ids...)
 }
 
 // Mutation returns the ChainMutation object of the builder.
@@ -275,25 +291,6 @@ func (cc *ChainCreate) createSpec() (*Chain, *sqlgraph.CreateSpec) {
 		})
 		_node.IsEnabled = value
 	}
-	if nodes := cc.mutation.UsersIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   chain.UsersTable,
-			Columns: chain.UsersPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: user.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
 	if nodes := cc.mutation.ProposalsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -305,6 +302,44 @@ func (cc *ChainCreate) createSpec() (*Chain, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: proposal.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := cc.mutation.TelegramChatsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chain.TelegramChatsTable,
+			Columns: chain.TelegramChatsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt64,
+					Column: telegramchat.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := cc.mutation.DiscordChannelsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chain.DiscordChannelsTable,
+			Columns: chain.DiscordChannelsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt64,
+					Column: discordchannel.FieldID,
 				},
 			},
 		}

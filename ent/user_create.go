@@ -10,7 +10,6 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/shifty11/cosmos-gov/ent/chain"
 	"github.com/shifty11/cosmos-gov/ent/discordchannel"
 	"github.com/shifty11/cosmos-gov/ent/telegramchat"
 	"github.com/shifty11/cosmos-gov/ent/user"
@@ -66,28 +65,22 @@ func (uc *UserCreate) SetNillableName(s *string) *UserCreate {
 	return uc
 }
 
-// SetChatID sets the "chat_id" field.
-func (uc *UserCreate) SetChatID(i int64) *UserCreate {
-	uc.mutation.SetChatID(i)
-	return uc
-}
-
 // SetType sets the "type" field.
 func (uc *UserCreate) SetType(u user.Type) *UserCreate {
 	uc.mutation.SetType(u)
 	return uc
 }
 
-// SetLogingToken sets the "loging_token" field.
-func (uc *UserCreate) SetLogingToken(s string) *UserCreate {
-	uc.mutation.SetLogingToken(s)
+// SetLoginToken sets the "login_token" field.
+func (uc *UserCreate) SetLoginToken(s string) *UserCreate {
+	uc.mutation.SetLoginToken(s)
 	return uc
 }
 
-// SetNillableLogingToken sets the "loging_token" field if the given value is not nil.
-func (uc *UserCreate) SetNillableLogingToken(s *string) *UserCreate {
+// SetNillableLoginToken sets the "login_token" field if the given value is not nil.
+func (uc *UserCreate) SetNillableLoginToken(s *string) *UserCreate {
 	if s != nil {
-		uc.SetLogingToken(*s)
+		uc.SetLoginToken(*s)
 	}
 	return uc
 }
@@ -96,21 +89,6 @@ func (uc *UserCreate) SetNillableLogingToken(s *string) *UserCreate {
 func (uc *UserCreate) SetID(i int64) *UserCreate {
 	uc.mutation.SetID(i)
 	return uc
-}
-
-// AddChainIDs adds the "chains" edge to the Chain entity by IDs.
-func (uc *UserCreate) AddChainIDs(ids ...int) *UserCreate {
-	uc.mutation.AddChainIDs(ids...)
-	return uc
-}
-
-// AddChains adds the "chains" edges to the Chain entity.
-func (uc *UserCreate) AddChains(c ...*Chain) *UserCreate {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
-	}
-	return uc.AddChainIDs(ids...)
 }
 
 // AddTelegramChatIDs adds the "telegram_chats" edge to the TelegramChat entity by IDs.
@@ -241,9 +219,9 @@ func (uc *UserCreate) defaults() {
 		v := user.DefaultName
 		uc.mutation.SetName(v)
 	}
-	if _, ok := uc.mutation.LogingToken(); !ok {
-		v := user.DefaultLogingToken
-		uc.mutation.SetLogingToken(v)
+	if _, ok := uc.mutation.LoginToken(); !ok {
+		v := user.DefaultLoginToken
+		uc.mutation.SetLoginToken(v)
 	}
 }
 
@@ -258,9 +236,6 @@ func (uc *UserCreate) check() error {
 	if _, ok := uc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "User.name"`)}
 	}
-	if _, ok := uc.mutation.ChatID(); !ok {
-		return &ValidationError{Name: "chat_id", err: errors.New(`ent: missing required field "User.chat_id"`)}
-	}
 	if _, ok := uc.mutation.GetType(); !ok {
 		return &ValidationError{Name: "type", err: errors.New(`ent: missing required field "User.type"`)}
 	}
@@ -269,8 +244,8 @@ func (uc *UserCreate) check() error {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "User.type": %w`, err)}
 		}
 	}
-	if _, ok := uc.mutation.LogingToken(); !ok {
-		return &ValidationError{Name: "loging_token", err: errors.New(`ent: missing required field "User.loging_token"`)}
+	if _, ok := uc.mutation.LoginToken(); !ok {
+		return &ValidationError{Name: "login_token", err: errors.New(`ent: missing required field "User.login_token"`)}
 	}
 	return nil
 }
@@ -329,14 +304,6 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		})
 		_node.Name = value
 	}
-	if value, ok := uc.mutation.ChatID(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
-			Value:  value,
-			Column: user.FieldChatID,
-		})
-		_node.ChatID = value
-	}
 	if value, ok := uc.mutation.GetType(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeEnum,
@@ -345,32 +312,13 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		})
 		_node.Type = value
 	}
-	if value, ok := uc.mutation.LogingToken(); ok {
+	if value, ok := uc.mutation.LoginToken(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: user.FieldLogingToken,
+			Column: user.FieldLoginToken,
 		})
-		_node.LogingToken = value
-	}
-	if nodes := uc.mutation.ChainsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.ChainsTable,
-			Columns: user.ChainsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: chain.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
+		_node.LoginToken = value
 	}
 	if nodes := uc.mutation.TelegramChatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

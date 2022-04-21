@@ -27,19 +27,20 @@ func isBotAdmin(update *tgbotapi.Update) bool {
 
 func sendUserStatistics(update *tgbotapi.Update) {
 	chatId := getChatIdX(update)
-	chainStatistics, err := database.GetChainStatistics()
+	statsManager := database.NewStatsManager()
+	chainStatistics, err := statsManager.GetChainStats()
 	if err != nil {
 		log.Sugar.Error(err)
 		return
 	}
 
-	telegramStats, err := database.GetUserStatistics(user.TypeTelegram)
+	telegramStats, err := statsManager.GetUserStatistics(user.TypeTelegram)
 	if err != nil {
 		log.Sugar.Error(err)
 		return
 	}
 
-	discordStats, err := database.GetUserStatistics(user.TypeDiscord)
+	discordStats, err := statsManager.GetUserStatistics(user.TypeDiscord)
 	if err != nil {
 		log.Sugar.Error(err)
 		return
@@ -49,7 +50,7 @@ func sendUserStatistics(update *tgbotapi.Update) {
 	sumProposals := 0
 	sumChains := 0
 	chainMsg := fmt.Sprintf("`" + chainStatisticHeaderMsg)
-	for _, chain := range *chainStatistics {
+	for _, chain := range chainStatistics {
 		chainMsg += fmt.Sprintf(chainStatisticRowMsg, chain.DisplayName, chain.Proposals, chain.Subscriptions)
 		sumSubscriptions += chain.Subscriptions
 		sumProposals += chain.Proposals
@@ -104,7 +105,7 @@ func sendBroadcastStart(update *tgbotapi.Update) {
 
 func sendConfirmBroadcastMessage(update *tgbotapi.Update, text string) {
 	chatId := getChatIdX(update)
-	cntUsers := database.CountUsers(user.TypeTelegram)
+	cntUsers := database.NewTelegramChatManager().CountChats()
 	broadcastMsg := tgbotapi.NewMessage(chatId, text)
 	broadcastMsg.DisableWebPagePreview = true
 	broadcastMsg.ParseMode = "html"
@@ -115,7 +116,7 @@ func sendConfirmBroadcastMessage(update *tgbotapi.Update, text string) {
 }
 
 func sendBroadcastMessage(text string) {
-	chatIds := database.GetAllUserChatIds(user.TypeTelegram)
+	chatIds := database.NewTelegramChatManager().GetAllChatIds()
 	log.Sugar.Debugf("Broadcast message to %v users", len(chatIds))
 	for _, chatId := range chatIds {
 		broadcastMsg := tgbotapi.NewMessage(int64(chatId), text)
@@ -130,7 +131,7 @@ func sendBroadcastEndInfoMessage(update *tgbotapi.Update, success bool) {
 	chatId := getChatIdX(update)
 	text := abortBroadcastMsg
 	if success {
-		cntUsers := database.CountUsers(user.TypeTelegram)
+		cntUsers := database.NewTelegramChatManager().CountChats()
 		text = fmt.Sprintf(successBroadcastMsg, cntUsers)
 	}
 	msg := tgbotapi.NewMessage(chatId, text)
@@ -139,7 +140,7 @@ func sendBroadcastEndInfoMessage(update *tgbotapi.Update, success bool) {
 
 func sendChains(update *tgbotapi.Update) {
 	chatId := getChatIdX(update)
-	chains := database.GetChains()
+	chains := database.NewChainManager().All()
 
 	var buttons [][]Button
 	var buttonRow []Button

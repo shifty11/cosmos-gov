@@ -18,14 +18,10 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// FieldChatID holds the string denoting the chat_id field in the database.
-	FieldChatID = "chat_id"
 	// FieldType holds the string denoting the type field in the database.
 	FieldType = "type"
-	// FieldLogingToken holds the string denoting the loging_token field in the database.
-	FieldLogingToken = "loging_token"
-	// EdgeChains holds the string denoting the chains edge name in mutations.
-	EdgeChains = "chains"
+	// FieldLoginToken holds the string denoting the login_token field in the database.
+	FieldLoginToken = "login_token"
 	// EdgeTelegramChats holds the string denoting the telegram_chats edge name in mutations.
 	EdgeTelegramChats = "telegram_chats"
 	// EdgeDiscordChannels holds the string denoting the discord_channels edge name in mutations.
@@ -34,11 +30,6 @@ const (
 	EdgeWallets = "wallets"
 	// Table holds the table name of the user in the database.
 	Table = "users"
-	// ChainsTable is the table that holds the chains relation/edge. The primary key declared below.
-	ChainsTable = "user_chains"
-	// ChainsInverseTable is the table name for the Chain entity.
-	// It exists in this package in order to avoid circular dependency with the "chain" package.
-	ChainsInverseTable = "chains"
 	// TelegramChatsTable is the table that holds the telegram_chats relation/edge.
 	TelegramChatsTable = "telegram_chats"
 	// TelegramChatsInverseTable is the table name for the TelegramChat entity.
@@ -66,15 +57,11 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldName,
-	FieldChatID,
 	FieldType,
-	FieldLogingToken,
+	FieldLoginToken,
 }
 
 var (
-	// ChainsPrimaryKey and ChainsColumn2 are the table columns denoting the
-	// primary key for the chains relation (M2M).
-	ChainsPrimaryKey = []string{"user_id", "chain_id"}
 	// WalletsPrimaryKey and WalletsColumn2 are the table columns denoting the
 	// primary key for the wallets relation (M2M).
 	WalletsPrimaryKey = []string{"user_id", "wallet_id"}
@@ -99,8 +86,8 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 	// DefaultName holds the default value on creation for the "name" field.
 	DefaultName string
-	// DefaultLogingToken holds the default value on creation for the "loging_token" field.
-	DefaultLogingToken string
+	// DefaultLoginToken holds the default value on creation for the "login_token" field.
+	DefaultLoginToken string
 )
 
 // Type defines the type for the "type" enum field.

@@ -4,7 +4,6 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
-	"entgo.io/ent/schema/index"
 	"time"
 )
 
@@ -26,12 +25,12 @@ func (User) Fields() []ent.Field {
 			Immutable(),
 		field.String("name").
 			Default("<not set>"), // TODO: remote Default
-		field.Int64("chat_id"). // TODO: has to be removed
-					Immutable(),
+		//field.Int64("chat_id"). // TODO: has to be removed
+		//			Immutable(),
 		field.Enum("type").
 			Values("telegram", "discord").
 			Immutable(),
-		field.String("loging_token").
+		field.String("login_token").
 			Default(""),
 	}
 }
@@ -39,7 +38,7 @@ func (User) Fields() []ent.Field {
 // Edges of the User.
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("chains", Chain.Type), // TODO: has to be removed
+		//edge.To("chains", Chain.Type), // TODO: has to be removed
 		edge.From("telegram_chats", TelegramChat.Type).
 			Ref("user"),
 		edge.From("discord_channels", DiscordChannel.Type).
@@ -50,7 +49,7 @@ func (User) Edges() []ent.Edge {
 
 func (User) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("chat_id", "type"). // TODO: has to be removed
-							Unique(),
+		//index.Fields("chat_id", "type"). // TODO: has to be removed
+		//					Unique(),
 	}
 }

@@ -516,34 +516,6 @@ func IsEnabledNEQ(v bool) predicate.Chain {
 	})
 }
 
-// HasUsers applies the HasEdge predicate on the "users" edge.
-func HasUsers() predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(UsersTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, UsersTable, UsersPrimaryKey...),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasUsersWith applies the HasEdge predicate on the "users" edge with a given conditions (other predicates).
-func HasUsersWith(preds ...predicate.User) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(UsersInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, UsersTable, UsersPrimaryKey...),
-		)
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // HasProposals applies the HasEdge predicate on the "proposals" edge.
 func HasProposals() predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {
@@ -563,6 +535,62 @@ func HasProposalsWith(preds ...predicate.Proposal) predicate.Chain {
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(ProposalsInverseTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, ProposalsTable, ProposalsColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasTelegramChats applies the HasEdge predicate on the "telegram_chats" edge.
+func HasTelegramChats() predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(TelegramChatsTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, TelegramChatsTable, TelegramChatsPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasTelegramChatsWith applies the HasEdge predicate on the "telegram_chats" edge with a given conditions (other predicates).
+func HasTelegramChatsWith(preds ...predicate.TelegramChat) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(TelegramChatsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, TelegramChatsTable, TelegramChatsPrimaryKey...),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasDiscordChannels applies the HasEdge predicate on the "discord_channels" edge.
+func HasDiscordChannels() predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(DiscordChannelsTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, DiscordChannelsTable, DiscordChannelsPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasDiscordChannelsWith applies the HasEdge predicate on the "discord_channels" edge with a given conditions (other predicates).
+func HasDiscordChannelsWith(preds ...predicate.DiscordChannel) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(DiscordChannelsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, DiscordChannelsTable, DiscordChannelsPrimaryKey...),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

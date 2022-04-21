@@ -550,7 +550,7 @@ func HasChains() predicate.DiscordChannel {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(ChainsTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, ChainsTable, ChainsColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, ChainsTable, ChainsPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -562,7 +562,7 @@ func HasChainsWith(preds ...predicate.Chain) predicate.DiscordChannel {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(ChainsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, ChainsTable, ChainsColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, ChainsTable, ChainsPrimaryKey...),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

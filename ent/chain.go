@@ -28,39 +28,48 @@ type Chain struct {
 	IsEnabled bool `json:"is_enabled,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ChainQuery when eager-loading is set.
-	Edges                  ChainEdges `json:"edges"`
-	discord_channel_chains *int64
-	telegram_chat_chains   *int64
-	wallet_chains          *int
+	Edges         ChainEdges `json:"edges"`
+	wallet_chains *int
 }
 
 // ChainEdges holds the relations/edges for other nodes in the graph.
 type ChainEdges struct {
-	// Users holds the value of the users edge.
-	Users []*User `json:"users,omitempty"`
 	// Proposals holds the value of the proposals edge.
 	Proposals []*Proposal `json:"proposals,omitempty"`
+	// TelegramChats holds the value of the telegram_chats edge.
+	TelegramChats []*TelegramChat `json:"telegram_chats,omitempty"`
+	// DiscordChannels holds the value of the discord_channels edge.
+	DiscordChannels []*DiscordChannel `json:"discord_channels,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
-}
-
-// UsersOrErr returns the Users value or an error if the edge
-// was not loaded in eager-loading.
-func (e ChainEdges) UsersOrErr() ([]*User, error) {
-	if e.loadedTypes[0] {
-		return e.Users, nil
-	}
-	return nil, &NotLoadedError{edge: "users"}
+	loadedTypes [3]bool
 }
 
 // ProposalsOrErr returns the Proposals value or an error if the edge
 // was not loaded in eager-loading.
 func (e ChainEdges) ProposalsOrErr() ([]*Proposal, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[0] {
 		return e.Proposals, nil
 	}
 	return nil, &NotLoadedError{edge: "proposals"}
+}
+
+// TelegramChatsOrErr returns the TelegramChats value or an error if the edge
+// was not loaded in eager-loading.
+func (e ChainEdges) TelegramChatsOrErr() ([]*TelegramChat, error) {
+	if e.loadedTypes[1] {
+		return e.TelegramChats, nil
+	}
+	return nil, &NotLoadedError{edge: "telegram_chats"}
+}
+
+// DiscordChannelsOrErr returns the DiscordChannels value or an error if the edge
+// was not loaded in eager-loading.
+func (e ChainEdges) DiscordChannelsOrErr() ([]*DiscordChannel, error) {
+	if e.loadedTypes[2] {
+		return e.DiscordChannels, nil
+	}
+	return nil, &NotLoadedError{edge: "discord_channels"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -76,11 +85,7 @@ func (*Chain) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullString)
 		case chain.FieldCreatedAt, chain.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
-		case chain.ForeignKeys[0]: // discord_channel_chains
-			values[i] = new(sql.NullInt64)
-		case chain.ForeignKeys[1]: // telegram_chat_chains
-			values[i] = new(sql.NullInt64)
-		case chain.ForeignKeys[2]: // wallet_chains
+		case chain.ForeignKeys[0]: // wallet_chains
 			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Chain", columns[i])
@@ -135,20 +140,6 @@ func (c *Chain) assignValues(columns []string, values []interface{}) error {
 			}
 		case chain.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field discord_channel_chains", value)
-			} else if value.Valid {
-				c.discord_channel_chains = new(int64)
-				*c.discord_channel_chains = int64(value.Int64)
-			}
-		case chain.ForeignKeys[1]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field telegram_chat_chains", value)
-			} else if value.Valid {
-				c.telegram_chat_chains = new(int64)
-				*c.telegram_chat_chains = int64(value.Int64)
-			}
-		case chain.ForeignKeys[2]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field wallet_chains", value)
 			} else if value.Valid {
 				c.wallet_chains = new(int)
@@ -159,14 +150,19 @@ func (c *Chain) assignValues(columns []string, values []interface{}) error {
 	return nil
 }
 
-// QueryUsers queries the "users" edge of the Chain entity.
-func (c *Chain) QueryUsers() *UserQuery {
-	return (&ChainClient{config: c.config}).QueryUsers(c)
-}
-
 // QueryProposals queries the "proposals" edge of the Chain entity.
 func (c *Chain) QueryProposals() *ProposalQuery {
 	return (&ChainClient{config: c.config}).QueryProposals(c)
+}
+
+// QueryTelegramChats queries the "telegram_chats" edge of the Chain entity.
+func (c *Chain) QueryTelegramChats() *TelegramChatQuery {
+	return (&ChainClient{config: c.config}).QueryTelegramChats(c)
+}
+
+// QueryDiscordChannels queries the "discord_channels" edge of the Chain entity.
+func (c *Chain) QueryDiscordChannels() *DiscordChannelQuery {
+	return (&ChainClient{config: c.config}).QueryDiscordChannels(c)
 }
 
 // Update returns a builder for updating this Chain.

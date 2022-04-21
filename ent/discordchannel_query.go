@@ -103,7 +103,7 @@ func (dcq *DiscordChannelQuery) QueryChains() *ChainQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(discordchannel.Table, discordchannel.FieldID, selector),
 			sqlgraph.To(chain.Table, chain.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, discordchannel.ChainsTable, discordchannel.ChainsColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, discordchannel.ChainsTable, discordchannel.ChainsPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(dcq.driver.Dialect(), step)
 		return fromU, nil
@@ -451,30 +451,66 @@ func (dcq *DiscordChannelQuery) sqlAll(ctx context.Context) ([]*DiscordChannel, 
 
 	if query := dcq.withChains; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int64]*DiscordChannel)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Chains = []*Chain{}
+		ids := make(map[int64]*DiscordChannel, len(nodes))
+		for _, node := range nodes {
+			ids[node.ID] = node
+			fks = append(fks, node.ID)
+			node.Edges.Chains = []*Chain{}
 		}
-		query.withFKs = true
-		query.Where(predicate.Chain(func(s *sql.Selector) {
-			s.Where(sql.InValues(discordchannel.ChainsColumn, fks...))
-		}))
+		var (
+			edgeids []int
+			edges   = make(map[int][]*DiscordChannel)
+		)
+		_spec := &sqlgraph.EdgeQuerySpec{
+			Edge: &sqlgraph.EdgeSpec{
+				Inverse: false,
+				Table:   discordchannel.ChainsTable,
+				Columns: discordchannel.ChainsPrimaryKey,
+			},
+			Predicate: func(s *sql.Selector) {
+				s.Where(sql.InValues(discordchannel.ChainsPrimaryKey[0], fks...))
+			},
+			ScanValues: func() [2]interface{} {
+				return [2]interface{}{new(sql.NullInt64), new(sql.NullInt64)}
+			},
+			Assign: func(out, in interface{}) error {
+				eout, ok := out.(*sql.NullInt64)
+				if !ok || eout == nil {
+					return fmt.Errorf("unexpected id value for edge-out")
+				}
+				ein, ok := in.(*sql.NullInt64)
+				if !ok || ein == nil {
+					return fmt.Errorf("unexpected id value for edge-in")
+				}
+				outValue := eout.Int64
+				inValue := int(ein.Int64)
+				node, ok := ids[outValue]
+				if !ok {
+					return fmt.Errorf("unexpected node id in edges: %v", outValue)
+				}
+				if _, ok := edges[inValue]; !ok {
+					edgeids = append(edgeids, inValue)
+				}
+				edges[inValue] = append(edges[inValue], node)
+				return nil
+			},
+		}
+		if err := sqlgraph.QueryEdges(ctx, dcq.driver, _spec); err != nil {
+			return nil, fmt.Errorf(`query edges "chains": %w`, err)
+		}
+		query.Where(chain.IDIn(edgeids...))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.discord_channel_chains
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "discord_channel_chains" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
+			nodes, ok := edges[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "discord_channel_chains" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected "chains" node returned %v`, n.ID)
 			}
-			node.Edges.Chains = append(node.Edges.Chains, n)
+			for i := range nodes {
+				nodes[i].Edges.Chains = append(nodes[i].Edges.Chains, n)
+			}
 		}
 	}
 

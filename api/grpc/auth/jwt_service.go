@@ -31,7 +31,7 @@ func AccessibleRoles() map[string][]Role {
 	return map[string][]Role{
 		authService + "TokenLogin":                   {Unauthenticated, User},
 		authService + "RefreshAccessToken":           {Unauthenticated, User},
-		subsService + "GetSubscriptions":             {User},
+		subsService + "GetOrCreateSubscriptions":     {User},
 		subsService + "ToggleSubscription":           {User},
 		votePermissionService + "GetVotePermissions": {User},
 		votePermissionService + "RefreshPermission":  {User},
@@ -40,7 +40,7 @@ func AccessibleRoles() map[string][]Role {
 
 type Claims struct {
 	jwt.StandardClaims
-	ChatId int64     `json:"chat_id"`
+	UserId int64     `json:"user_id"`
 	Type   user.Type `json:"type"`
 	Role   Role      `json:"role,omitempty"`
 }
@@ -66,7 +66,7 @@ func (manager *JWTManager) GenerateToken(entUser *ent.User, tokenType TokenType)
 	}
 
 	claims := &Claims{
-		ChatId: entUser.ChatID,
+		UserId: entUser.ID,
 		Type:   entUser.Type,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),

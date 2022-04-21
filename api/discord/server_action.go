@@ -54,7 +54,7 @@ func SendProposals(entProp *ent.Proposal, entChain *ent.Chain) []int64 {
 	}
 
 	var errIds []int64
-	channelIds := database.GetDiscordChatIds(entChain)
+	channelIds := database.NewDiscordChannelManager().GetChannelIds(entChain)
 	for _, channelId := range channelIds {
 		log.Sugar.Debugf("Send proposal #%v on %v to discord chat #%v", entProp.ProposalID, entChain.DisplayName, channelId)
 		var _, err = session.ChannelMessageSendComplex(strconv.Itoa(channelId), &discordgo.MessageSend{

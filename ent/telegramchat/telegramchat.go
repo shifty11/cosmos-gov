@@ -32,13 +32,11 @@ const (
 	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
 	UserColumn = "telegram_chat_user"
-	// ChainsTable is the table that holds the chains relation/edge.
-	ChainsTable = "chains"
+	// ChainsTable is the table that holds the chains relation/edge. The primary key declared below.
+	ChainsTable = "telegram_chat_chains"
 	// ChainsInverseTable is the table name for the Chain entity.
 	// It exists in this package in order to avoid circular dependency with the "chain" package.
 	ChainsInverseTable = "chains"
-	// ChainsColumn is the table column denoting the chains relation/edge.
-	ChainsColumn = "telegram_chat_chains"
 )
 
 // Columns holds all SQL columns for telegramchat fields.
@@ -55,6 +53,12 @@ var Columns = []string{
 var ForeignKeys = []string{
 	"telegram_chat_user",
 }
+
+var (
+	// ChainsPrimaryKey and ChainsColumn2 are the table columns denoting the
+	// primary key for the chains relation (M2M).
+	ChainsPrimaryKey = []string{"telegram_chat_id", "chain_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {

@@ -12,7 +12,6 @@ import (
 	"github.com/shifty11/cosmos-gov/common"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/ent"
-	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/log"
 	"github.com/strangelove-ventures/lens/client"
 	"github.com/strangelove-ventures/lens/cmd"
@@ -108,16 +107,16 @@ func fetchProposals(chainId string, proposalStatus types.ProposalStatus, pageReq
 
 func saveAndSendProposals(props *common.Proposals, entChain *ent.Chain) {
 	for _, prop := range props.Proposals {
-		entProp := database.CreateProposalIfNotExists(&prop, entChain)
+		entProp := database.NewProposalManager().CreateIfNotExists(&prop, entChain)
 		if entProp != nil && entChain.IsEnabled {
 			errIds := telegram.SendProposals(entProp, entChain)
 			if len(errIds) > 0 {
-				database.DeleteUsers(errIds, user.TypeTelegram)
+				database.NewTelegramChatManager().DeleteMultiple(errIds)
 			}
 
 			errIds = discord.SendProposals(entProp, entChain)
 			if len(errIds) > 0 {
-				database.DeleteUsers(errIds, user.TypeDiscord)
+				database.NewDiscordChannelManager().DeleteMultiple(errIds)
 			}
 		}
 	}
@@ -157,7 +156,7 @@ func updateProposal(entProp *ent.Proposal, status types.ProposalStatus) bool {
 	}
 	for _, prop := range proposals.Proposals {
 		if prop.ProposalId == entProp.ProposalID {
-			database.CreateOrUpdateProposal(&prop, entProp.Edges.Chain)
+			database.NewProposalManager().CreateOrUpdateProposal(&prop, entProp.Edges.Chain)
 			return false
 		}
 	}
@@ -166,7 +165,7 @@ func updateProposal(entProp *ent.Proposal, status types.ProposalStatus) bool {
 
 // CheckForUpdates checks if proposal that are in voting period need to be updated
 func CheckForUpdates() {
-	votingProposals := database.GetFinishedProposalsInVotingPeriod()
+	votingProposals := database.NewProposalManager().GetFinishedProposalsInVotingPeriod()
 	if len(votingProposals) == 0 { // do nothing if there is no finished votingProposal
 		return
 	}
@@ -187,7 +186,8 @@ func CheckForUpdates() {
 
 func FetchProposals() {
 	log.Sugar.Info("Fetch proposals")
-	for _, chain := range database.GetChains() {
+	chains := database.NewChainManager().All()
+	for _, chain := range chains {
 		proposals, err := fetchProposals(chain.Name, types.StatusVotingPeriod, nil)
 		handleFetchError(chain, err)
 		if err == nil {

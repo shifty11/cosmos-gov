@@ -120,10 +120,10 @@ func init() {
 	userDescName := userFields[3].Descriptor()
 	// user.DefaultName holds the default value on creation for the name field.
 	user.DefaultName = userDescName.Default.(string)
-	// userDescLogingToken is the schema descriptor for loging_token field.
-	userDescLogingToken := userFields[6].Descriptor()
-	// user.DefaultLogingToken holds the default value on creation for the loging_token field.
-	user.DefaultLogingToken = userDescLogingToken.Default.(string)
+	// userDescLoginToken is the schema descriptor for login_token field.
+	userDescLoginToken := userFields[5].Descriptor()
+	// user.DefaultLoginToken holds the default value on creation for the login_token field.
+	user.DefaultLoginToken = userDescLoginToken.Default.(string)
 	walletFields := schema.Wallet{}.Fields()
 	_ = walletFields
 	// walletDescCreatedAt is the schema descriptor for created_at field.

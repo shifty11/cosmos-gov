@@ -43,7 +43,7 @@ func getChainsFromRegistry() ([]string, error) {
 }
 
 func orderChainsByErrorCnt(chains []string) []string {
-	chainInfo := database.GetLensChainInfos()
+	chainInfo := database.NewLensChainInfoManager().GetLensChainInfos()
 	var chainsWithErrors = make(map[int][]string)
 	chainsWithErrors[0] = []string{}
 	for _, chainName := range chains {
@@ -86,7 +86,7 @@ func getNewChains() []string {
 		return nil
 	}
 
-	chains := database.GetChains()
+	chains := database.NewChainManager().All()
 	var chainNames []string
 	for _, chain := range chains {
 		chainNames = append(chainNames, chain.Name)
@@ -119,6 +119,9 @@ func AddNewChains() {
 	log.Sugar.Info("Add new chains")
 	chains := getNewChains()
 	message := ""
+	chainManager := database.NewChainManager()
+	propManager := database.NewProposalManager()
+	lensChainManager := database.NewLensChainInfoManager()
 	for _, chainName := range chains {
 		addOrUpdateChainInLensConfig(chainName)
 		if isChainInConfig(chainName) {
@@ -126,22 +129,22 @@ func AddNewChains() {
 			if err != nil {
 				log.Sugar.Debugf("Chain '%v' has %v errors", chainName, err)
 				removeChainFromLensConfig(chainName)
-				database.AddErrorToLensChainInfo(chainName)
+				lensChainManager.AddErrorToLensChainInfo(chainName)
 			} else {
 				if len(proposals.Proposals) >= 1 {
-					chainEnt := database.CreateChain(chainName)
+					chainEnt := chainManager.Create(chainName)
 					for _, prop := range proposals.Proposals {
-						database.CreateOrUpdateProposal(&prop, chainEnt)
+						propManager.CreateOrUpdateProposal(&prop, chainEnt)
 					}
-					database.DeleteLensChainInfo(chainName)
+					lensChainManager.DeleteLensChainInfo(chainName)
 					message += fmt.Sprintf("Added chain '%v' including %v proposals\n", chainName, len(proposals.Proposals))
 				} else {
 					removeChainFromLensConfig(chainName)
-					database.AddErrorToLensChainInfo(chainName)
+					lensChainManager.AddErrorToLensChainInfo(chainName)
 				}
 			}
 		} else {
-			database.AddErrorToLensChainInfo(chainName)
+			lensChainManager.AddErrorToLensChainInfo(chainName)
 		}
 	}
 	if message != "" {

@@ -5,9 +5,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/shifty11/cosmos-gov/common"
 	"github.com/shifty11/cosmos-gov/database"
-	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/log"
-	"math"
 	"os"
 	"strings"
 )
@@ -120,6 +118,33 @@ func getChatIdX(update *tgbotapi.Update) int64 {
 	return 0
 }
 
+func getChatName(update *tgbotapi.Update) string {
+	if update.CallbackQuery != nil {
+		if isGroupX(update) {
+			return update.CallbackQuery.Message.Chat.Title
+		}
+		return update.CallbackQuery.Message.Chat.UserName
+	}
+	if update.Message != nil {
+		if isGroupX(update) {
+			return update.Message.Chat.Title
+		}
+		return update.Message.Chat.UserName
+	}
+	return ""
+}
+
+func isGroupX(update *tgbotapi.Update) bool {
+	if update.CallbackQuery != nil {
+		return !update.CallbackQuery.Message.Chat.IsPrivate()
+	}
+	if update.Message != nil {
+		return !update.Message.Chat.IsPrivate()
+	}
+	log.Sugar.Panic("isGroupX: unreachable code reached!!!")
+	return false
+}
+
 func getUserIdX(update *tgbotapi.Update) int64 {
 	if update.CallbackQuery != nil {
 		return update.CallbackQuery.From.ID
@@ -129,6 +154,16 @@ func getUserIdX(update *tgbotapi.Update) int64 {
 	}
 	log.Sugar.Panic("getUserIdX: unreachable code reached!!!")
 	return 0
+}
+
+func getUserName(update *tgbotapi.Update) string {
+	if update.CallbackQuery != nil {
+		return update.CallbackQuery.From.UserName
+	}
+	if update.Message != nil {
+		return update.Message.From.UserName
+	}
+	return "<not found>"
 }
 
 func sendMessageX(message tgbotapi.Chattable) {
@@ -169,17 +204,11 @@ func handleError(chatId int, err error) {
 	if err != nil {
 		if common.Contains(forbiddenErrors, err.Error()) {
 			log.Sugar.Debugf("Delete user #%v", chatId)
-			database.DeleteUser(int64(chatId), user.TypeTelegram)
+			database.NewTelegramChatManager().Delete(int64(chatId))
 		} else {
 			log.Sugar.Errorf("Error while sending message to chat #%v: %v", chatId, err)
 		}
 	}
-}
-
-// ChatId is negative for groups
-func isUpdateFromGroup(update *tgbotapi.Update) bool {
-	chatId := getChatIdX(update)
-	return math.Signbit(float64(chatId))
 }
 
 func isUpdateFromCreatorOrAdministrator(update *tgbotapi.Update) bool {
