@@ -51,7 +51,7 @@ func (server *SubscriptionServer) GetSubscriptions(ctx context.Context, _ *empty
 	entUser, ok := ctx.Value("user").(*ent.User)
 	if !ok {
 		log.Sugar.Error("invalid user")
-		return nil, status.Errorf(codes.Internal, "invalid user")
+		return nil, status.Errorf(codes.NotFound, "invalid user")
 	}
 
 	subs := server.subscriptionManager.GetSubscriptions(entUser)
@@ -65,7 +65,7 @@ func (server *SubscriptionServer) ToggleSubscription(ctx context.Context, req *p
 	entUser, ok := ctx.Value("user").(*ent.User)
 	if !ok {
 		log.Sugar.Error("invalid user")
-		return nil, status.Errorf(codes.Internal, "invalid user")
+		return nil, status.Errorf(codes.NotFound, "invalid user")
 	}
 
 	isSubscribed, err := server.subscriptionManager.ToggleSubscription(entUser, req.ChatRoomId, req.Name)
