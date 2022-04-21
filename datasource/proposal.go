@@ -9,7 +9,6 @@ import (
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/shifty11/cosmos-gov/api/discord"
 	"github.com/shifty11/cosmos-gov/api/telegram"
-	"github.com/shifty11/cosmos-gov/common"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/ent"
 	"github.com/shifty11/cosmos-gov/log"
@@ -22,13 +21,13 @@ import (
 var json = jsontime.ConfigWithCustomTimeFormat
 var stripPolicy = bluemonday.StrictPolicy()
 
-func extractContentByRegEx(value []byte) (*common.ProposalContent, error) {
+func extractContentByRegEx(value []byte) (*database.ProposalContent, error) {
 	r := regexp.MustCompile("[ -~]+") // search for all printable characters
 	result := r.FindAll(value[1:], -1)
 	if len(result) >= 2 {
 		description := strings.Replace(string(result[1]), "\\n", "\n", -1)
 		description = stripPolicy.Sanitize(description)
-		return &common.ProposalContent{
+		return &database.ProposalContent{
 			Title:       string(result[0])[1:],
 			Description: description,
 		}, nil
@@ -37,7 +36,7 @@ func extractContentByRegEx(value []byte) (*common.ProposalContent, error) {
 }
 
 // This is a bit a hack. The reason for this is that lens doesn't support chain specific proposals
-func extractContent(cl *client.ChainClient, response types.QueryProposalsResponse, proposalId uint64) (*common.ProposalContent, error) {
+func extractContent(cl *client.ChainClient, response types.QueryProposalsResponse, proposalId uint64) (*database.ProposalContent, error) {
 	// We want just the proposal with proposalId
 	for _, prop := range response.Proposals {
 		if prop.ProposalId == proposalId {
@@ -52,7 +51,7 @@ func extractContent(cl *client.ChainClient, response types.QueryProposalsRespons
 		return extractContentByRegEx(response.Proposals[0].Content.Value) // extract content by regex in this case
 	}
 
-	var proposals common.Proposals
+	var proposals database.Proposals
 	err = json.Unmarshal(proto, &proposals) // transform the json []byte to our proposal structure
 	if err != nil {
 		return nil, err
@@ -60,7 +59,7 @@ func extractContent(cl *client.ChainClient, response types.QueryProposalsRespons
 	if len(proposals.Proposals) == 1 {
 		description := strings.Replace(proposals.Proposals[0].Content.Description, "\\n", "\n", -1)
 		description = stripPolicy.Sanitize(description)
-		return &common.ProposalContent{ // We just need the content
+		return &database.ProposalContent{ // We just need the content
 			Title:       proposals.Proposals[0].Content.Title,
 			Description: description,
 		}, nil
@@ -68,7 +67,7 @@ func extractContent(cl *client.ChainClient, response types.QueryProposalsRespons
 	return nil, errors.New(fmt.Sprintf("Length of proposals is %v. This should never happen!", len(proposals.Proposals)))
 }
 
-func fetchProposals(chainId string, proposalStatus types.ProposalStatus, pageReq *querytypes.PageRequest) (*common.Proposals, error) {
+func fetchProposals(chainId string, proposalStatus types.ProposalStatus, pageReq *querytypes.PageRequest) (*database.Proposals, error) {
 	config, err := cmd.GetConfig(false)
 	if err != nil {
 		log.Sugar.Panicf("Error while reading config %v", err)
@@ -86,14 +85,14 @@ func fetchProposals(chainId string, proposalStatus types.ProposalStatus, pageReq
 	}
 	log.Sugar.Debugf("Got %v proposals", len(response.Proposals))
 
-	var proposals common.Proposals
+	var proposals database.Proposals
 	for _, respProp := range response.Proposals {
 		content, err := extractContent(cl, *response, respProp.ProposalId)
 		if err != nil {
 			log.Sugar.Error(err)
 			continue
 		}
-		prop := common.Proposal{
+		prop := database.Proposal{
 			ProposalId:      respProp.ProposalId,
 			Content:         *content,
 			VotingStartTime: respProp.VotingStartTime,
@@ -105,7 +104,7 @@ func fetchProposals(chainId string, proposalStatus types.ProposalStatus, pageReq
 	return &proposals, nil
 }
 
-func saveAndSendProposals(props *common.Proposals, entChain *ent.Chain) {
+func saveAndSendProposals(props *database.Proposals, entChain *ent.Chain) {
 	for _, prop := range props.Proposals {
 		entProp := database.NewProposalManager().CreateIfNotExists(&prop, entChain)
 		if entProp != nil && entChain.IsEnabled {

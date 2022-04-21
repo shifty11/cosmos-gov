@@ -3,10 +3,10 @@ package telegram
 import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/shifty11/cosmos-gov/common"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/log"
+	"golang.org/x/exp/slices"
 	"os"
 	"strconv"
 	"strings"
@@ -22,7 +22,7 @@ func isBotAdmin(update *tgbotapi.Update) bool {
 		return false
 	}
 	admins := strings.Split(strings.Trim(os.Getenv("ADMIN_IDS"), " "), ",")
-	return common.Contains(admins, strconv.FormatInt(fromId, 10))
+	return slices.Contains(admins, strconv.FormatInt(fromId, 10))
 }
 
 func sendUserStatistics(update *tgbotapi.Update) {

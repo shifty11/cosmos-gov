@@ -5,10 +5,10 @@ import (
 	"github.com/PumpkinSeed/cage"
 	"github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/shifty11/cosmos-gov/api/telegram"
-	"github.com/shifty11/cosmos-gov/common"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/log"
 	"github.com/strangelove-ventures/lens/cmd"
+	"golang.org/x/exp/slices"
 	"sort"
 	"strings"
 )
@@ -94,7 +94,7 @@ func getNewChains() []string {
 
 	var newChains []string
 	for _, chain := range chainsInRegistry {
-		if !common.Contains(chainNames, chain) {
+		if !slices.Contains(chainNames, chain) {
 			newChains = append(newChains, chain)
 		}
 	}

@@ -4,7 +4,6 @@ import (
 	"context"
 	"entgo.io/ent/dialect/sql"
 	"errors"
-	"github.com/shifty11/cosmos-gov/common"
 	"github.com/shifty11/cosmos-gov/ent"
 	"github.com/shifty11/cosmos-gov/ent/chain"
 	"github.com/shifty11/cosmos-gov/ent/discordchannel"
@@ -24,9 +23,24 @@ func NewStatsManager() *StatsManager {
 	return &StatsManager{client: client, ctx: ctx}
 }
 
-func (manager *StatsManager) getChainStats(userType user.Type) ([]*common.ChainStatistic, error) {
+type UserStatistic struct {
+	CntUsers                      int
+	CntUsersSinceYesterday        int
+	CntUsersThisWeek              int
+	ChangeSinceYesterdayInPercent float64
+	ChangeThisWeekInPercent       float64
+}
+
+type ChainStatistic struct {
+	DisplayName   string `json:"display_name"`
+	Proposals     int
+	Subscriptions int
+	IsEnabled     bool `json:"is_enabled"`
+}
+
+func (manager *StatsManager) getChainStats(userType user.Type) ([]*ChainStatistic, error) {
 	client, ctx := connect()
-	var chainsWithNotifications []common.ChainStatistic
+	var chainsWithNotifications []ChainStatistic
 	err := client.Chain.Query().
 		Order(ent.Desc(chain.FieldIsEnabled), ent.Asc(chain.FieldDisplayName)).
 		GroupBy(chain.FieldIsEnabled, chain.FieldDisplayName).
@@ -46,7 +60,7 @@ func (manager *StatsManager) getChainStats(userType user.Type) ([]*common.ChainS
 	if err != nil {
 		return nil, err
 	}
-	var chainsWithProposals []common.ChainStatistic
+	var chainsWithProposals []ChainStatistic
 	err = client.Chain.Query().
 		Order(ent.Desc(chain.FieldIsEnabled), ent.Asc(chain.FieldDisplayName)).
 		GroupBy(chain.FieldIsEnabled, chain.FieldDisplayName).
@@ -61,12 +75,12 @@ func (manager *StatsManager) getChainStats(userType user.Type) ([]*common.ChainS
 	if err != nil {
 		return nil, err
 	}
-	var stats []*common.ChainStatistic
+	var stats []*ChainStatistic
 	for _, cp := range chainsWithProposals {
 		found := false
 		for _, cn := range chainsWithNotifications {
 			if cp.DisplayName == cn.DisplayName {
-				stats = append(stats, &common.ChainStatistic{
+				stats = append(stats, &ChainStatistic{
 					DisplayName:   cp.DisplayName,
 					Proposals:     cp.Proposals,
 					Subscriptions: cn.Subscriptions,
@@ -75,7 +89,7 @@ func (manager *StatsManager) getChainStats(userType user.Type) ([]*common.ChainS
 			}
 		}
 		if !found {
-			stats = append(stats, &common.ChainStatistic{
+			stats = append(stats, &ChainStatistic{
 				DisplayName:   cp.DisplayName,
 				Proposals:     cp.Proposals,
 				Subscriptions: 0,
@@ -85,7 +99,7 @@ func (manager *StatsManager) getChainStats(userType user.Type) ([]*common.ChainS
 	return stats, err
 }
 
-func (manager *StatsManager) GetChainStats() ([]*common.ChainStatistic, error) {
+func (manager *StatsManager) GetChainStats() ([]*ChainStatistic, error) {
 	tgStats, err := manager.getChainStats(user.TypeTelegram)
 	if err != nil {
 		return nil, err
@@ -101,7 +115,7 @@ func (manager *StatsManager) GetChainStats() ([]*common.ChainStatistic, error) {
 	return tgStats, nil
 }
 
-func (manager *StatsManager) GetUserStatistics(userType user.Type) (*common.UserStatistic, error) {
+func (manager *StatsManager) GetUserStatistics(userType user.Type) (*UserStatistic, error) {
 	client, ctx := connect()
 	cntAll, err := client.User.
 		Query().
@@ -135,7 +149,7 @@ func (manager *StatsManager) GetUserStatistics(userType user.Type) (*common.User
 	}
 	changeSinceYesterdayInPercent := float64(cntSinceYesterday) / float64(cntAll) * 100
 	changeThisWeekInPercent := float64(cntSinceSevenDays) / float64(cntAll) * 100
-	return &common.UserStatistic{
+	return &UserStatistic{
 		CntUsers:                      cntAll,
 		CntUsersSinceYesterday:        cntSinceYesterday,
 		CntUsersThisWeek:              cntSinceSevenDays,

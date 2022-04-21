@@ -122,7 +122,7 @@ func sendCurrentProposals(update *tgbotapi.Update) {
 	if update.CallbackQuery == nil {
 		msg := tgbotapi.NewMessage(chatId, text)
 		msg.ReplyMarkup = replyMarkup
-		msg.ParseMode = "html"
+		msg.ParseMode = "markdown"
 		err := sendMessage(msg)
 		if err != nil {
 			log.Sugar.Errorf("Error while sendCurrentProposals for user #%v: %v", chatId, err)
@@ -130,7 +130,7 @@ func sendCurrentProposals(update *tgbotapi.Update) {
 	} else {
 		msg := tgbotapi.NewEditMessageText(chatId, update.CallbackQuery.Message.MessageID, text)
 		msg.ReplyMarkup = &replyMarkup
-		msg.ParseMode = "html"
+		msg.ParseMode = "markdown"
 		answerCallbackQuery(update)
 		err := sendMessage(msg)
 		if err != nil {

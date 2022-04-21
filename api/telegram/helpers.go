@@ -3,9 +3,9 @@ package telegram
 import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/shifty11/cosmos-gov/common"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/log"
+	"golang.org/x/exp/slices"
 	"os"
 	"strings"
 )
@@ -202,7 +202,7 @@ var forbiddenErrors = []string{
 
 func handleError(chatId int, err error) {
 	if err != nil {
-		if common.Contains(forbiddenErrors, err.Error()) {
+		if slices.Contains(forbiddenErrors, err.Error()) {
 			log.Sugar.Debugf("Delete user #%v", chatId)
 			database.NewTelegramChatManager().Delete(int64(chatId))
 		} else {
@@ -224,7 +224,7 @@ func isUpdateFromCreatorOrAdministrator(update *tgbotapi.Update) bool {
 	}
 	member, err := api.GetChatMember(memberConfig)
 	if err != nil {
-		if common.Contains(forbiddenErrors, err.Error()) {
+		if slices.Contains(forbiddenErrors, err.Error()) {
 			log.Sugar.Debugf("Error while getting member (ChatID: %v; UserID: %v): %v", chatId, userId, err)
 			return false
 		}

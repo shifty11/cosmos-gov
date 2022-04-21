@@ -3,15 +3,15 @@ package telegram
 import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/shifty11/cosmos-gov/common"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/ent"
 	"github.com/shifty11/cosmos-gov/log"
+	"golang.org/x/exp/slices"
 )
 
 func shouldDeleteUser(err error) bool {
 	if err != nil {
-		return common.Contains(forbiddenErrors, err.Error())
+		return slices.Contains(forbiddenErrors, err.Error())
 	}
 	return false
 }

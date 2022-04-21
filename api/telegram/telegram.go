@@ -2,8 +2,8 @@ package telegram
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/shifty11/cosmos-gov/common"
 	"github.com/shifty11/cosmos-gov/log"
+	"golang.org/x/exp/slices"
 	"strings"
 )
 
@@ -88,7 +88,7 @@ func handleMessage(update *tgbotapi.Update) {
 	case StateConfirmBroadcast:
 		yesOptions := []string{"yes", "y"}
 		abortOptions := []string{"abort", "a"}
-		if common.Contains(yesOptions, strings.ToLower(update.Message.Text)) {
+		if slices.Contains(yesOptions, strings.ToLower(update.Message.Text)) {
 			data := getStateData(update)
 			if data.BroadcastStateData == nil || data.BroadcastStateData.Message == "" {
 				log.Sugar.Fatal("No message to broadcast. This should never happen!")
@@ -96,7 +96,7 @@ func handleMessage(update *tgbotapi.Update) {
 			sendBroadcastMessage(data.BroadcastStateData.Message)
 			sendBroadcastEndInfoMessage(update, true)
 			setState(update, StateNil, nil)
-		} else if common.Contains(abortOptions, strings.ToLower(update.Message.Text)) {
+		} else if slices.Contains(abortOptions, strings.ToLower(update.Message.Text)) {
 			sendBroadcastEndInfoMessage(update, false)
 			setState(update, StateNil, nil)
 		} else {
