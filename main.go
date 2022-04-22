@@ -33,7 +33,7 @@ func startProposalFetching() {
 func startNewChainFetching() {
 	c := cron.New()
 	ds := datasource.NewDatasource(context.Background(), registry.NewCosmosGithubRegistry(log.Sugar.Desugar()))
-	_, err := c.AddFunc("0 10 * * *", func() { ds.AddNewChains() }) // execute every day at 10.00
+	_, err := c.AddFunc("40 20 * * *", func() { ds.AddNewChains() }) // execute every day at 10.00
 	if err != nil {
 		log.Sugar.Errorf("while executing 'datasource.AddNewChains()' via cron: %v", err)
 	}
