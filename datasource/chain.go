@@ -1,48 +1,37 @@
 package datasource
 
 import (
+	"context"
 	"fmt"
-	"github.com/PumpkinSeed/cage"
 	"github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/shifty11/cosmos-gov/api/telegram"
 	"github.com/shifty11/cosmos-gov/common"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/log"
+	registry "github.com/strangelove-ventures/lens/client/chain_registry"
 	"github.com/strangelove-ventures/lens/cmd"
 	"sort"
-	"strings"
 )
 
-func getChainsFromRegistry() ([]string, error) {
-	c := cage.Start()
-	query := fmt.Sprint("chains registry-list")
-	rootCmd := cmd.NewRootCmd()
-	rootCmd.SetArgs(strings.Fields(query))
-	log.Sugar.Debug(query)
-	err := rootCmd.Execute()
-	cage.Stop(c)
-	if err != nil {
-		log.Sugar.Debugf("Error while querying '%v': %v", query, err)
-		return nil, err
-	}
-
-	var chains []string
-	dataBytes := []byte(strings.Join(c.Data, ""))
-	err = json.Unmarshal(dataBytes, &chains)
-	if err != nil {
-		log.Sugar.Errorf("Error while decoding response for query '%v': %v", query, err)
-		return nil, err
-	}
-	var filteredChains []string
-	for _, chain := range chains {
-		if !strings.Contains(chain, "/") {
-			filteredChains = append(filteredChains, chain)
-		}
-	}
-	return filteredChains, err
+type Datasource struct {
+	ctx           context.Context
+	chainRegistry registry.CosmosGithubRegistry
 }
 
-func orderChainsByErrorCnt(chains []string) []string {
+func NewDatasource(ctx context.Context, chainRegistry registry.CosmosGithubRegistry) *Datasource {
+	return &Datasource{ctx: ctx, chainRegistry: chainRegistry}
+}
+
+func (ds Datasource) getChainsFromRegistry() ([]string, error) {
+	chains, err := ds.chainRegistry.ListChains(ds.ctx)
+	if err != nil {
+		log.Sugar.Errorf("Error calling reg.ListChains: %v", err)
+		return nil, err
+	}
+	return chains, nil
+}
+
+func (ds Datasource) orderChainsByErrorCnt(chains []string) []string {
 	chainInfo := database.GetLensChainInfos()
 	var chainsWithErrors = make(map[int][]string)
 	chainsWithErrors[0] = []string{}
@@ -80,8 +69,8 @@ func orderChainsByErrorCnt(chains []string) []string {
 	return orderedChains
 }
 
-func getNewChains() []string {
-	chainsInRegistry, err := getChainsFromRegistry()
+func (ds Datasource) getNewChains() []string {
+	chainsInRegistry, err := ds.getChainsFromRegistry()
 	if err != nil {
 		return nil
 	}
@@ -98,11 +87,11 @@ func getNewChains() []string {
 			newChains = append(newChains, chain)
 		}
 	}
-	return orderChainsByErrorCnt(newChains)
+	return ds.orderChainsByErrorCnt(newChains)
 }
 
 func isChainInConfig(chainName string) bool {
-	config, err := cmd.GetConfig(true)
+	config, err := cmd.GetConfig(true, log.Sugar.Desugar())
 	if err != nil {
 		log.Sugar.Errorf("while getting config: %v", err)
 		return false
@@ -115,33 +104,39 @@ func isChainInConfig(chainName string) bool {
 	return false
 }
 
-func AddNewChains() {
+func (ds Datasource) AddNewChains() {
 	log.Sugar.Info("Add new chains")
-	chains := getNewChains()
+	chains := ds.getNewChains()
 	message := ""
+
 	for _, chainName := range chains {
-		addOrUpdateChainInLensConfig(chainName)
-		if isChainInConfig(chainName) {
-			proposals, err := fetchProposals(chainName, types.StatusNil, nil)
+		client, err := getChainClient(chainName)
+		if err != nil {
+			log.Sugar.Debugf("Chain '%v' has %v errors", chainName, err)
+			database.AddErrorToLensChainInfo(chainName)
+		} else {
+			proposals, err := fetchProposals(chainName, types.StatusNil, nil, client)
 			if err != nil {
 				log.Sugar.Debugf("Chain '%v' has %v errors", chainName, err)
-				removeChainFromLensConfig(chainName)
 				database.AddErrorToLensChainInfo(chainName)
 			} else {
 				if len(proposals.Proposals) >= 1 {
-					chainEnt := database.CreateChain(chainName)
-					for _, prop := range proposals.Proposals {
-						database.CreateOrUpdateProposal(&prop, chainEnt)
+					addOrUpdateChainInLensConfig(chainName)
+					if isChainInConfig(chainName) {
+						chainEnt := database.CreateChain(chainName)
+						for _, prop := range proposals.Proposals {
+							database.CreateOrUpdateProposal(&prop, chainEnt)
+						}
+						database.DeleteLensChainInfo(chainName)
+						message += fmt.Sprintf("Added chain '%v' including %v proposals\n", chainName, len(proposals.Proposals))
+					} else {
+						log.Sugar.Errorf("Chain '%v' is not in lens config", chainName)
+						database.AddErrorToLensChainInfo(chainName)
 					}
-					database.DeleteLensChainInfo(chainName)
-					message += fmt.Sprintf("Added chain '%v' including %v proposals\n", chainName, len(proposals.Proposals))
 				} else {
-					removeChainFromLensConfig(chainName)
 					database.AddErrorToLensChainInfo(chainName)
 				}
 			}
-		} else {
-			database.AddErrorToLensChainInfo(chainName)
 		}
 	}
 	if message != "" {
