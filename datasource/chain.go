@@ -11,6 +11,7 @@ import (
 	registry "github.com/strangelove-ventures/lens/client/chain_registry"
 	"github.com/strangelove-ventures/lens/cmd"
 	"sort"
+	"strings"
 )
 
 type Datasource struct {
@@ -28,7 +29,13 @@ func (ds Datasource) getChainsFromRegistry() ([]string, error) {
 		log.Sugar.Errorf("Error calling reg.ListChains: %v", err)
 		return nil, err
 	}
-	return chains, nil
+	var filteredChains []string
+	for _, chain := range chains {
+		if !strings.Contains(chain, "/") {
+			filteredChains = append(filteredChains, chain)
+		}
+	}
+	return filteredChains, nil
 }
 
 func (ds Datasource) orderChainsByErrorCnt(chains []string) []string {
