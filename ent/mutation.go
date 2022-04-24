@@ -15,6 +15,7 @@ import (
 	"github.com/shifty11/cosmos-gov/ent/migrationinfo"
 	"github.com/shifty11/cosmos-gov/ent/predicate"
 	"github.com/shifty11/cosmos-gov/ent/proposal"
+	"github.com/shifty11/cosmos-gov/ent/rpcendpoint"
 	"github.com/shifty11/cosmos-gov/ent/telegramchat"
 	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/ent/wallet"
@@ -36,6 +37,7 @@ const (
 	TypeLensChainInfo  = "LensChainInfo"
 	TypeMigrationInfo  = "MigrationInfo"
 	TypeProposal       = "Proposal"
+	TypeRpcEndpoint    = "RpcEndpoint"
 	TypeTelegramChat   = "TelegramChat"
 	TypeUser           = "User"
 	TypeWallet         = "Wallet"
@@ -62,6 +64,9 @@ type ChainMutation struct {
 	discord_channels        map[int64]struct{}
 	removeddiscord_channels map[int64]struct{}
 	cleareddiscord_channels bool
+	rpc_endpoints           map[int]struct{}
+	removedrpc_endpoints    map[int]struct{}
+	clearedrpc_endpoints    bool
 	done                    bool
 	oldValue                func(context.Context) (*Chain, error)
 	predicates              []predicate.Chain
@@ -507,6 +512,60 @@ func (m *ChainMutation) ResetDiscordChannels() {
 	m.removeddiscord_channels = nil
 }
 
+// AddRPCEndpointIDs adds the "rpc_endpoints" edge to the RpcEndpoint entity by ids.
+func (m *ChainMutation) AddRPCEndpointIDs(ids ...int) {
+	if m.rpc_endpoints == nil {
+		m.rpc_endpoints = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.rpc_endpoints[ids[i]] = struct{}{}
+	}
+}
+
+// ClearRPCEndpoints clears the "rpc_endpoints" edge to the RpcEndpoint entity.
+func (m *ChainMutation) ClearRPCEndpoints() {
+	m.clearedrpc_endpoints = true
+}
+
+// RPCEndpointsCleared reports if the "rpc_endpoints" edge to the RpcEndpoint entity was cleared.
+func (m *ChainMutation) RPCEndpointsCleared() bool {
+	return m.clearedrpc_endpoints
+}
+
+// RemoveRPCEndpointIDs removes the "rpc_endpoints" edge to the RpcEndpoint entity by IDs.
+func (m *ChainMutation) RemoveRPCEndpointIDs(ids ...int) {
+	if m.removedrpc_endpoints == nil {
+		m.removedrpc_endpoints = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.rpc_endpoints, ids[i])
+		m.removedrpc_endpoints[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedRPCEndpoints returns the removed IDs of the "rpc_endpoints" edge to the RpcEndpoint entity.
+func (m *ChainMutation) RemovedRPCEndpointsIDs() (ids []int) {
+	for id := range m.removedrpc_endpoints {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// RPCEndpointsIDs returns the "rpc_endpoints" edge IDs in the mutation.
+func (m *ChainMutation) RPCEndpointsIDs() (ids []int) {
+	for id := range m.rpc_endpoints {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetRPCEndpoints resets all changes to the "rpc_endpoints" edge.
+func (m *ChainMutation) ResetRPCEndpoints() {
+	m.rpc_endpoints = nil
+	m.clearedrpc_endpoints = false
+	m.removedrpc_endpoints = nil
+}
+
 // Where appends a list predicates to the ChainMutation builder.
 func (m *ChainMutation) Where(ps ...predicate.Chain) {
 	m.predicates = append(m.predicates, ps...)
@@ -693,7 +752,7 @@ func (m *ChainMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ChainMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.proposals != nil {
 		edges = append(edges, chain.EdgeProposals)
 	}
@@ -702,6 +761,9 @@ func (m *ChainMutation) AddedEdges() []string {
 	}
 	if m.discord_channels != nil {
 		edges = append(edges, chain.EdgeDiscordChannels)
+	}
+	if m.rpc_endpoints != nil {
+		edges = append(edges, chain.EdgeRPCEndpoints)
 	}
 	return edges
 }
@@ -728,13 +790,19 @@ func (m *ChainMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case chain.EdgeRPCEndpoints:
+		ids := make([]ent.Value, 0, len(m.rpc_endpoints))
+		for id := range m.rpc_endpoints {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ChainMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.removedproposals != nil {
 		edges = append(edges, chain.EdgeProposals)
 	}
@@ -743,6 +811,9 @@ func (m *ChainMutation) RemovedEdges() []string {
 	}
 	if m.removeddiscord_channels != nil {
 		edges = append(edges, chain.EdgeDiscordChannels)
+	}
+	if m.removedrpc_endpoints != nil {
+		edges = append(edges, chain.EdgeRPCEndpoints)
 	}
 	return edges
 }
@@ -769,13 +840,19 @@ func (m *ChainMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case chain.EdgeRPCEndpoints:
+		ids := make([]ent.Value, 0, len(m.removedrpc_endpoints))
+		for id := range m.removedrpc_endpoints {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ChainMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.clearedproposals {
 		edges = append(edges, chain.EdgeProposals)
 	}
@@ -784,6 +861,9 @@ func (m *ChainMutation) ClearedEdges() []string {
 	}
 	if m.cleareddiscord_channels {
 		edges = append(edges, chain.EdgeDiscordChannels)
+	}
+	if m.clearedrpc_endpoints {
+		edges = append(edges, chain.EdgeRPCEndpoints)
 	}
 	return edges
 }
@@ -798,6 +878,8 @@ func (m *ChainMutation) EdgeCleared(name string) bool {
 		return m.clearedtelegram_chats
 	case chain.EdgeDiscordChannels:
 		return m.cleareddiscord_channels
+	case chain.EdgeRPCEndpoints:
+		return m.clearedrpc_endpoints
 	}
 	return false
 }
@@ -822,6 +904,9 @@ func (m *ChainMutation) ResetEdge(name string) error {
 		return nil
 	case chain.EdgeDiscordChannels:
 		m.ResetDiscordChannels()
+		return nil
+	case chain.EdgeRPCEndpoints:
+		m.ResetRPCEndpoints()
 		return nil
 	}
 	return fmt.Errorf("unknown Chain edge %s", name)
@@ -3232,6 +3317,494 @@ func (m *ProposalMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown Proposal edge %s", name)
+}
+
+// RpcEndpointMutation represents an operation that mutates the RpcEndpoint nodes in the graph.
+type RpcEndpointMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	created_at    *time.Time
+	updated_at    *time.Time
+	endpoint      *string
+	clearedFields map[string]struct{}
+	chain         *int
+	clearedchain  bool
+	done          bool
+	oldValue      func(context.Context) (*RpcEndpoint, error)
+	predicates    []predicate.RpcEndpoint
+}
+
+var _ ent.Mutation = (*RpcEndpointMutation)(nil)
+
+// rpcendpointOption allows management of the mutation configuration using functional options.
+type rpcendpointOption func(*RpcEndpointMutation)
+
+// newRpcEndpointMutation creates new mutation for the RpcEndpoint entity.
+func newRpcEndpointMutation(c config, op Op, opts ...rpcendpointOption) *RpcEndpointMutation {
+	m := &RpcEndpointMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeRpcEndpoint,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withRpcEndpointID sets the ID field of the mutation.
+func withRpcEndpointID(id int) rpcendpointOption {
+	return func(m *RpcEndpointMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *RpcEndpoint
+		)
+		m.oldValue = func(ctx context.Context) (*RpcEndpoint, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().RpcEndpoint.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withRpcEndpoint sets the old RpcEndpoint of the mutation.
+func withRpcEndpoint(node *RpcEndpoint) rpcendpointOption {
+	return func(m *RpcEndpointMutation) {
+		m.oldValue = func(context.Context) (*RpcEndpoint, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m RpcEndpointMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m RpcEndpointMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *RpcEndpointMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *RpcEndpointMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().RpcEndpoint.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *RpcEndpointMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *RpcEndpointMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the RpcEndpoint entity.
+// If the RpcEndpoint object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RpcEndpointMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *RpcEndpointMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *RpcEndpointMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *RpcEndpointMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the RpcEndpoint entity.
+// If the RpcEndpoint object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RpcEndpointMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *RpcEndpointMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetEndpoint sets the "endpoint" field.
+func (m *RpcEndpointMutation) SetEndpoint(s string) {
+	m.endpoint = &s
+}
+
+// Endpoint returns the value of the "endpoint" field in the mutation.
+func (m *RpcEndpointMutation) Endpoint() (r string, exists bool) {
+	v := m.endpoint
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEndpoint returns the old "endpoint" field's value of the RpcEndpoint entity.
+// If the RpcEndpoint object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RpcEndpointMutation) OldEndpoint(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEndpoint is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEndpoint requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEndpoint: %w", err)
+	}
+	return oldValue.Endpoint, nil
+}
+
+// ResetEndpoint resets all changes to the "endpoint" field.
+func (m *RpcEndpointMutation) ResetEndpoint() {
+	m.endpoint = nil
+}
+
+// SetChainID sets the "chain" edge to the Chain entity by id.
+func (m *RpcEndpointMutation) SetChainID(id int) {
+	m.chain = &id
+}
+
+// ClearChain clears the "chain" edge to the Chain entity.
+func (m *RpcEndpointMutation) ClearChain() {
+	m.clearedchain = true
+}
+
+// ChainCleared reports if the "chain" edge to the Chain entity was cleared.
+func (m *RpcEndpointMutation) ChainCleared() bool {
+	return m.clearedchain
+}
+
+// ChainID returns the "chain" edge ID in the mutation.
+func (m *RpcEndpointMutation) ChainID() (id int, exists bool) {
+	if m.chain != nil {
+		return *m.chain, true
+	}
+	return
+}
+
+// ChainIDs returns the "chain" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ChainID instead. It exists only for internal usage by the builders.
+func (m *RpcEndpointMutation) ChainIDs() (ids []int) {
+	if id := m.chain; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetChain resets all changes to the "chain" edge.
+func (m *RpcEndpointMutation) ResetChain() {
+	m.chain = nil
+	m.clearedchain = false
+}
+
+// Where appends a list predicates to the RpcEndpointMutation builder.
+func (m *RpcEndpointMutation) Where(ps ...predicate.RpcEndpoint) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// Op returns the operation name.
+func (m *RpcEndpointMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (RpcEndpoint).
+func (m *RpcEndpointMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *RpcEndpointMutation) Fields() []string {
+	fields := make([]string, 0, 3)
+	if m.created_at != nil {
+		fields = append(fields, rpcendpoint.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, rpcendpoint.FieldUpdatedAt)
+	}
+	if m.endpoint != nil {
+		fields = append(fields, rpcendpoint.FieldEndpoint)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *RpcEndpointMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case rpcendpoint.FieldCreatedAt:
+		return m.CreatedAt()
+	case rpcendpoint.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case rpcendpoint.FieldEndpoint:
+		return m.Endpoint()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *RpcEndpointMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case rpcendpoint.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case rpcendpoint.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case rpcendpoint.FieldEndpoint:
+		return m.OldEndpoint(ctx)
+	}
+	return nil, fmt.Errorf("unknown RpcEndpoint field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *RpcEndpointMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case rpcendpoint.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case rpcendpoint.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case rpcendpoint.FieldEndpoint:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEndpoint(v)
+		return nil
+	}
+	return fmt.Errorf("unknown RpcEndpoint field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *RpcEndpointMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *RpcEndpointMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *RpcEndpointMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown RpcEndpoint numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *RpcEndpointMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *RpcEndpointMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *RpcEndpointMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown RpcEndpoint nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *RpcEndpointMutation) ResetField(name string) error {
+	switch name {
+	case rpcendpoint.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case rpcendpoint.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case rpcendpoint.FieldEndpoint:
+		m.ResetEndpoint()
+		return nil
+	}
+	return fmt.Errorf("unknown RpcEndpoint field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *RpcEndpointMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.chain != nil {
+		edges = append(edges, rpcendpoint.EdgeChain)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *RpcEndpointMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case rpcendpoint.EdgeChain:
+		if id := m.chain; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *RpcEndpointMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *RpcEndpointMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *RpcEndpointMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedchain {
+		edges = append(edges, rpcendpoint.EdgeChain)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *RpcEndpointMutation) EdgeCleared(name string) bool {
+	switch name {
+	case rpcendpoint.EdgeChain:
+		return m.clearedchain
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *RpcEndpointMutation) ClearEdge(name string) error {
+	switch name {
+	case rpcendpoint.EdgeChain:
+		m.ClearChain()
+		return nil
+	}
+	return fmt.Errorf("unknown RpcEndpoint unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *RpcEndpointMutation) ResetEdge(name string) error {
+	switch name {
+	case rpcendpoint.EdgeChain:
+		m.ResetChain()
+		return nil
+	}
+	return fmt.Errorf("unknown RpcEndpoint edge %s", name)
 }
 
 // TelegramChatMutation represents an operation that mutates the TelegramChat nodes in the graph.

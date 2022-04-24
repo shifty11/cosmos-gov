@@ -21,6 +21,9 @@ type MigrationInfo func(*sql.Selector)
 // Proposal is the predicate function for proposal builders.
 type Proposal func(*sql.Selector)
 
+// RpcEndpoint is the predicate function for rpcendpoint builders.
+type RpcEndpoint func(*sql.Selector)
+
 // TelegramChat is the predicate function for telegramchat builders.
 type TelegramChat func(*sql.Selector)
 

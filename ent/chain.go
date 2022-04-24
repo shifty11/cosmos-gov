@@ -40,9 +40,11 @@ type ChainEdges struct {
 	TelegramChats []*TelegramChat `json:"telegram_chats,omitempty"`
 	// DiscordChannels holds the value of the discord_channels edge.
 	DiscordChannels []*DiscordChannel `json:"discord_channels,omitempty"`
+	// RPCEndpoints holds the value of the rpc_endpoints edge.
+	RPCEndpoints []*RpcEndpoint `json:"rpc_endpoints,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [4]bool
 }
 
 // ProposalsOrErr returns the Proposals value or an error if the edge
@@ -70,6 +72,15 @@ func (e ChainEdges) DiscordChannelsOrErr() ([]*DiscordChannel, error) {
 		return e.DiscordChannels, nil
 	}
 	return nil, &NotLoadedError{edge: "discord_channels"}
+}
+
+// RPCEndpointsOrErr returns the RPCEndpoints value or an error if the edge
+// was not loaded in eager-loading.
+func (e ChainEdges) RPCEndpointsOrErr() ([]*RpcEndpoint, error) {
+	if e.loadedTypes[3] {
+		return e.RPCEndpoints, nil
+	}
+	return nil, &NotLoadedError{edge: "rpc_endpoints"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -163,6 +174,11 @@ func (c *Chain) QueryTelegramChats() *TelegramChatQuery {
 // QueryDiscordChannels queries the "discord_channels" edge of the Chain entity.
 func (c *Chain) QueryDiscordChannels() *DiscordChannelQuery {
 	return (&ChainClient{config: c.config}).QueryDiscordChannels(c)
+}
+
+// QueryRPCEndpoints queries the "rpc_endpoints" edge of the Chain entity.
+func (c *Chain) QueryRPCEndpoints() *RpcEndpointQuery {
+	return (&ChainClient{config: c.config}).QueryRPCEndpoints(c)
 }
 
 // Update returns a builder for updating this Chain.

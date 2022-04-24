@@ -16,6 +16,7 @@ import (
 	"github.com/shifty11/cosmos-gov/ent/discordchannel"
 	"github.com/shifty11/cosmos-gov/ent/predicate"
 	"github.com/shifty11/cosmos-gov/ent/proposal"
+	"github.com/shifty11/cosmos-gov/ent/rpcendpoint"
 	"github.com/shifty11/cosmos-gov/ent/telegramchat"
 )
 
@@ -32,6 +33,7 @@ type ChainQuery struct {
 	withProposals       *ProposalQuery
 	withTelegramChats   *TelegramChatQuery
 	withDiscordChannels *DiscordChannelQuery
+	withRPCEndpoints    *RpcEndpointQuery
 	withFKs             bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -128,6 +130,28 @@ func (cq *ChainQuery) QueryDiscordChannels() *DiscordChannelQuery {
 			sqlgraph.From(chain.Table, chain.FieldID, selector),
 			sqlgraph.To(discordchannel.Table, discordchannel.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, chain.DiscordChannelsTable, chain.DiscordChannelsPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryRPCEndpoints chains the current query on the "rpc_endpoints" edge.
+func (cq *ChainQuery) QueryRPCEndpoints() *RpcEndpointQuery {
+	query := &RpcEndpointQuery{config: cq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := cq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := cq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(chain.Table, chain.FieldID, selector),
+			sqlgraph.To(rpcendpoint.Table, rpcendpoint.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, chain.RPCEndpointsTable, chain.RPCEndpointsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
 		return fromU, nil
@@ -319,6 +343,7 @@ func (cq *ChainQuery) Clone() *ChainQuery {
 		withProposals:       cq.withProposals.Clone(),
 		withTelegramChats:   cq.withTelegramChats.Clone(),
 		withDiscordChannels: cq.withDiscordChannels.Clone(),
+		withRPCEndpoints:    cq.withRPCEndpoints.Clone(),
 		// clone intermediate query.
 		sql:    cq.sql.Clone(),
 		path:   cq.path,
@@ -356,6 +381,17 @@ func (cq *ChainQuery) WithDiscordChannels(opts ...func(*DiscordChannelQuery)) *C
 		opt(query)
 	}
 	cq.withDiscordChannels = query
+	return cq
+}
+
+// WithRPCEndpoints tells the query-builder to eager-load the nodes that are connected to
+// the "rpc_endpoints" edge. The optional arguments are used to configure the query builder of the edge.
+func (cq *ChainQuery) WithRPCEndpoints(opts ...func(*RpcEndpointQuery)) *ChainQuery {
+	query := &RpcEndpointQuery{config: cq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	cq.withRPCEndpoints = query
 	return cq
 }
 
@@ -425,10 +461,11 @@ func (cq *ChainQuery) sqlAll(ctx context.Context) ([]*Chain, error) {
 		nodes       = []*Chain{}
 		withFKs     = cq.withFKs
 		_spec       = cq.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [4]bool{
 			cq.withProposals != nil,
 			cq.withTelegramChats != nil,
 			cq.withDiscordChannels != nil,
+			cq.withRPCEndpoints != nil,
 		}
 	)
 	if withFKs {
@@ -610,6 +647,35 @@ func (cq *ChainQuery) sqlAll(ctx context.Context) ([]*Chain, error) {
 			for i := range nodes {
 				nodes[i].Edges.DiscordChannels = append(nodes[i].Edges.DiscordChannels, n)
 			}
+		}
+	}
+
+	if query := cq.withRPCEndpoints; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*Chain)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.RPCEndpoints = []*RpcEndpoint{}
+		}
+		query.withFKs = true
+		query.Where(predicate.RpcEndpoint(func(s *sql.Selector) {
+			s.Where(sql.InValues(chain.RPCEndpointsColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.chain_rpc_endpoints
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "chain_rpc_endpoints" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "chain_rpc_endpoints" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.RPCEndpoints = append(node.Edges.RPCEndpoints, n)
 		}
 	}
 

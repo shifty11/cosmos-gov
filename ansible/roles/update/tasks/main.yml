@@ -24,3 +24,11 @@
     enabled: true
   changed_when: false
 
+- name: Start cosmosgov-discord service
+  systemd:
+    name: cosmosgov-discord
+    state: restarted
+    daemon_reload: true
+    enabled: true
+  changed_when: false
+

@@ -4,7 +4,6 @@ go 1.18
 
 require (
 	entgo.io/ent v0.10.1
-	github.com/PumpkinSeed/cage v0.1.0
 	github.com/TheZeroSlave/zapsentry v1.9.0
 	github.com/bwmarrin/discordgo v0.25.0
 	github.com/cosmos/cosmos-sdk v0.45.1
@@ -16,7 +15,7 @@ require (
 	github.com/robfig/cron/v3 v3.0.0
 	github.com/strangelove-ventures/lens v0.2.1
 	github.com/zach-klippenstein/goregen v0.0.0-20160303162051-795b5e3961ea
-	go.uber.org/zap v1.20.0
+	go.uber.org/zap v1.21.0
 	golang.org/x/exp v0.0.0-20220328175248-053ad81199eb
 	golang.org/x/text v0.3.7
 	google.golang.org/grpc v1.45.0
@@ -32,17 +31,18 @@ require (
 	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/armon/go-metrics v0.3.10 // indirect
+	github.com/avast/retry-go/v4 v4.0.4 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bgentry/speakeasy v0.1.0 // indirect
 	github.com/btcsuite/btcd v0.22.0-beta // indirect
 	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
-	github.com/confio/ics23/go v0.6.6 // indirect
+	github.com/confio/ics23/go v0.7.0 // indirect
 	github.com/cosmos/btcutil v1.0.4 // indirect
 	github.com/cosmos/go-bip39 v1.0.0 // indirect
 	github.com/cosmos/iavl v0.17.3 // indirect
-	github.com/cosmos/ibc-go/v2 v2.0.2 // indirect
+	github.com/cosmos/ibc-go/v3 v3.0.0 // indirect
 	github.com/cosmos/ledger-cosmos-go v0.11.1 // indirect
 	github.com/cosmos/ledger-go v0.9.2 // indirect
 	github.com/danieljoos/wincred v1.0.2 // indirect
@@ -64,7 +64,7 @@ require (
 	github.com/golang/snappy v0.0.3 // indirect
 	github.com/google/btree v1.0.0 // indirect
 	github.com/google/go-cmp v0.5.7 // indirect
-	github.com/google/go-github v17.0.0+incompatible // indirect
+	github.com/google/go-github/v43 v43.0.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/gxui v0.0.0-20151028112939-f85e0a97b3a4 // indirect
@@ -129,7 +129,7 @@ require (
 	github.com/zondax/hid v0.9.0 // indirect
 	go.etcd.io/bbolt v1.3.6 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
-	go.uber.org/multierr v1.7.0 // indirect
+	go.uber.org/multierr v1.8.0 // indirect
 	golang.org/x/crypto v0.0.0-20220411220226-7b82a4e95df4 // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220106191415-9b9b3d81d5e3 // indirect
 	golang.org/x/net v0.0.0-20220225172249-27dd8689420f // indirect
@@ -142,8 +142,8 @@ require (
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
 
-replace google.golang.org/grpc => google.golang.org/grpc v1.33.2
+//replace google.golang.org/grpc => google.golang.org/grpc v1.33.2
 
 replace github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
 
-replace github.com/strangelove-ventures/lens => github.com/shifty11/lens v1.2.0
+replace github.com/strangelove-ventures/lens => github.com/shifty11/lens-gov v0.4.4

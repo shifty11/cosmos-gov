@@ -22,6 +22,8 @@ type Tx struct {
 	MigrationInfo *MigrationInfoClient
 	// Proposal is the client for interacting with the Proposal builders.
 	Proposal *ProposalClient
+	// RpcEndpoint is the client for interacting with the RpcEndpoint builders.
+	RpcEndpoint *RpcEndpointClient
 	// TelegramChat is the client for interacting with the TelegramChat builders.
 	TelegramChat *TelegramChatClient
 	// User is the client for interacting with the User builders.
@@ -168,6 +170,7 @@ func (tx *Tx) init() {
 	tx.LensChainInfo = NewLensChainInfoClient(tx.config)
 	tx.MigrationInfo = NewMigrationInfoClient(tx.config)
 	tx.Proposal = NewProposalClient(tx.config)
+	tx.RpcEndpoint = NewRpcEndpointClient(tx.config)
 	tx.TelegramChat = NewTelegramChatClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 	tx.Wallet = NewWalletClient(tx.config)

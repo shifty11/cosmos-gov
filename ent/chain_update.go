@@ -15,6 +15,7 @@ import (
 	"github.com/shifty11/cosmos-gov/ent/discordchannel"
 	"github.com/shifty11/cosmos-gov/ent/predicate"
 	"github.com/shifty11/cosmos-gov/ent/proposal"
+	"github.com/shifty11/cosmos-gov/ent/rpcendpoint"
 	"github.com/shifty11/cosmos-gov/ent/telegramchat"
 )
 
@@ -108,6 +109,21 @@ func (cu *ChainUpdate) AddDiscordChannels(d ...*DiscordChannel) *ChainUpdate {
 	return cu.AddDiscordChannelIDs(ids...)
 }
 
+// AddRPCEndpointIDs adds the "rpc_endpoints" edge to the RpcEndpoint entity by IDs.
+func (cu *ChainUpdate) AddRPCEndpointIDs(ids ...int) *ChainUpdate {
+	cu.mutation.AddRPCEndpointIDs(ids...)
+	return cu
+}
+
+// AddRPCEndpoints adds the "rpc_endpoints" edges to the RpcEndpoint entity.
+func (cu *ChainUpdate) AddRPCEndpoints(r ...*RpcEndpoint) *ChainUpdate {
+	ids := make([]int, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return cu.AddRPCEndpointIDs(ids...)
+}
+
 // Mutation returns the ChainMutation object of the builder.
 func (cu *ChainUpdate) Mutation() *ChainMutation {
 	return cu.mutation
@@ -174,6 +190,27 @@ func (cu *ChainUpdate) RemoveDiscordChannels(d ...*DiscordChannel) *ChainUpdate 
 		ids[i] = d[i].ID
 	}
 	return cu.RemoveDiscordChannelIDs(ids...)
+}
+
+// ClearRPCEndpoints clears all "rpc_endpoints" edges to the RpcEndpoint entity.
+func (cu *ChainUpdate) ClearRPCEndpoints() *ChainUpdate {
+	cu.mutation.ClearRPCEndpoints()
+	return cu
+}
+
+// RemoveRPCEndpointIDs removes the "rpc_endpoints" edge to RpcEndpoint entities by IDs.
+func (cu *ChainUpdate) RemoveRPCEndpointIDs(ids ...int) *ChainUpdate {
+	cu.mutation.RemoveRPCEndpointIDs(ids...)
+	return cu
+}
+
+// RemoveRPCEndpoints removes "rpc_endpoints" edges to RpcEndpoint entities.
+func (cu *ChainUpdate) RemoveRPCEndpoints(r ...*RpcEndpoint) *ChainUpdate {
+	ids := make([]int, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return cu.RemoveRPCEndpointIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -447,6 +484,60 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if cu.mutation.RPCEndpointsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.RPCEndpointsTable,
+			Columns: []string{chain.RPCEndpointsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: rpcendpoint.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.RemovedRPCEndpointsIDs(); len(nodes) > 0 && !cu.mutation.RPCEndpointsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.RPCEndpointsTable,
+			Columns: []string{chain.RPCEndpointsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: rpcendpoint.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.RPCEndpointsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.RPCEndpointsTable,
+			Columns: []string{chain.RPCEndpointsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: rpcendpoint.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{chain.Label}
@@ -543,6 +634,21 @@ func (cuo *ChainUpdateOne) AddDiscordChannels(d ...*DiscordChannel) *ChainUpdate
 	return cuo.AddDiscordChannelIDs(ids...)
 }
 
+// AddRPCEndpointIDs adds the "rpc_endpoints" edge to the RpcEndpoint entity by IDs.
+func (cuo *ChainUpdateOne) AddRPCEndpointIDs(ids ...int) *ChainUpdateOne {
+	cuo.mutation.AddRPCEndpointIDs(ids...)
+	return cuo
+}
+
+// AddRPCEndpoints adds the "rpc_endpoints" edges to the RpcEndpoint entity.
+func (cuo *ChainUpdateOne) AddRPCEndpoints(r ...*RpcEndpoint) *ChainUpdateOne {
+	ids := make([]int, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return cuo.AddRPCEndpointIDs(ids...)
+}
+
 // Mutation returns the ChainMutation object of the builder.
 func (cuo *ChainUpdateOne) Mutation() *ChainMutation {
 	return cuo.mutation
@@ -609,6 +715,27 @@ func (cuo *ChainUpdateOne) RemoveDiscordChannels(d ...*DiscordChannel) *ChainUpd
 		ids[i] = d[i].ID
 	}
 	return cuo.RemoveDiscordChannelIDs(ids...)
+}
+
+// ClearRPCEndpoints clears all "rpc_endpoints" edges to the RpcEndpoint entity.
+func (cuo *ChainUpdateOne) ClearRPCEndpoints() *ChainUpdateOne {
+	cuo.mutation.ClearRPCEndpoints()
+	return cuo
+}
+
+// RemoveRPCEndpointIDs removes the "rpc_endpoints" edge to RpcEndpoint entities by IDs.
+func (cuo *ChainUpdateOne) RemoveRPCEndpointIDs(ids ...int) *ChainUpdateOne {
+	cuo.mutation.RemoveRPCEndpointIDs(ids...)
+	return cuo
+}
+
+// RemoveRPCEndpoints removes "rpc_endpoints" edges to RpcEndpoint entities.
+func (cuo *ChainUpdateOne) RemoveRPCEndpoints(r ...*RpcEndpoint) *ChainUpdateOne {
+	ids := make([]int, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return cuo.RemoveRPCEndpointIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -898,6 +1025,60 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt64,
 					Column: discordchannel.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if cuo.mutation.RPCEndpointsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.RPCEndpointsTable,
+			Columns: []string{chain.RPCEndpointsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: rpcendpoint.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.RemovedRPCEndpointsIDs(); len(nodes) > 0 && !cuo.mutation.RPCEndpointsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.RPCEndpointsTable,
+			Columns: []string{chain.RPCEndpointsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: rpcendpoint.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.RPCEndpointsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.RPCEndpointsTable,
+			Columns: []string{chain.RPCEndpointsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: rpcendpoint.FieldID,
 				},
 			},
 		}

@@ -29,6 +29,7 @@ type hooks struct {
 	LensChainInfo  []ent.Hook
 	MigrationInfo  []ent.Hook
 	Proposal       []ent.Hook
+	RpcEndpoint    []ent.Hook
 	TelegramChat   []ent.Hook
 	User           []ent.Hook
 	Wallet         []ent.Hook

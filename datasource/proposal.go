@@ -1,6 +1,7 @@
 package datasource
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	querytypes "github.com/cosmos/cosmos-sdk/types/query"
@@ -11,9 +12,11 @@ import (
 	"github.com/shifty11/cosmos-gov/api/telegram"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/ent"
+	"github.com/shifty11/cosmos-gov/ent/chain"
 	"github.com/shifty11/cosmos-gov/log"
-	"github.com/strangelove-ventures/lens/client"
-	"github.com/strangelove-ventures/lens/cmd"
+	lens "github.com/strangelove-ventures/lens/client"
+	registry "github.com/strangelove-ventures/lens/client/chain_registry"
+	"os"
 	"regexp"
 	"strings"
 )
@@ -36,7 +39,7 @@ func extractContentByRegEx(value []byte) (*database.ProposalContent, error) {
 }
 
 // This is a bit a hack. The reason for this is that lens doesn't support chain specific proposals
-func extractContent(cl *client.ChainClient, response types.QueryProposalsResponse, proposalId uint64) (*database.ProposalContent, error) {
+func extractContent(cl *lens.ChainClient, response types.QueryProposalsResponse, proposalId uint64) (*database.ProposalContent, error) {
 	// We want just the proposal with proposalId
 	for _, prop := range response.Proposals {
 		if prop.ProposalId == proposalId {
@@ -67,27 +70,18 @@ func extractContent(cl *client.ChainClient, response types.QueryProposalsRespons
 	return nil, errors.New(fmt.Sprintf("Length of proposals is %v. This should never happen!", len(proposals.Proposals)))
 }
 
-func fetchProposals(chainId string, proposalStatus types.ProposalStatus, pageReq *querytypes.PageRequest) (*database.Proposals, error) {
-	config, err := cmd.GetConfig(false)
-	if err != nil {
-		log.Sugar.Panicf("Error while reading config %v", err)
-	}
-	cl := config.GetClient(chainId)
-	if cl == nil {
-		log.Sugar.Panicf("Chain client '%v' not found ", chainId)
-	}
-
+func fetchProposals(chainId string, proposalStatus types.ProposalStatus, pageReq *querytypes.PageRequest, client *lens.ChainClient) (*database.Proposals, error) {
 	log.Sugar.Debugf("QueryGovernanceProposals on %v --status %v", chainId, strings.ToLower(strings.Replace(proposalStatus.String(), "PROPOSAL_STATUS_", "", 1)))
-	response, err := cl.QueryGovernanceProposals(proposalStatus, "", "", pageReq)
+
+	response, err := client.QueryGovProposals(context.Background(), proposalStatus, pageReq)
 	if err != nil {
 		log.Sugar.Debugf("Error while querying proposals on %v: %v", chainId, err)
 		return nil, err
 	}
-	log.Sugar.Debugf("Got %v proposals", len(response.Proposals))
 
 	var proposals database.Proposals
 	for _, respProp := range response.Proposals {
-		content, err := extractContent(cl, *response, respProp.ProposalId)
+		content, err := extractContent(client, *response, respProp.ProposalId)
 		if err != nil {
 			log.Sugar.Error(err)
 			continue
@@ -102,6 +96,118 @@ func fetchProposals(chainId string, proposalStatus types.ProposalStatus, pageReq
 		proposals.Proposals = append(proposals.Proposals, prop)
 	}
 	return &proposals, nil
+}
+
+func getChainInfo(chainName string) (*lens.ChainClient, []string, error) {
+	chainInfo, err := registry.DefaultChainRegistry(log.Sugar.Desugar()).GetChain(context.Background(), chainName)
+	if err != nil {
+		log.Sugar.Errorf("Failed to get chain client on %v: %v \n", chainName, err)
+		return nil, nil, err
+	}
+
+	//	Use Chain info to select random endpoint
+	rpcs, err := chainInfo.GetRPCEndpoints(context.Background())
+	if err != nil {
+		log.Sugar.Errorf("Failed to get RPC endpoints on chain %s: %v \n", chainInfo.ChainID, err)
+		return nil, nil, err
+	}
+
+	if len(rpcs) <= 0 {
+		log.Sugar.Errorf("Found no working RPC endpoints on chain %s: %v \n", chainInfo.ChainID, err)
+		return nil, nil, err
+	}
+
+	pwd, _ := os.Getwd()
+	key_dir := pwd + "/keys"
+
+	chainConfig := lens.ChainClientConfig{
+		Key:            "default",
+		ChainID:        chainInfo.ChainID,
+		RPCAddr:        rpcs[0],
+		KeyringBackend: "test",
+		Debug:          true,
+		Timeout:        "20s",
+		Modules:        lens.ModuleBasics,
+	}
+
+	// Creates client object to pull chain info
+	chainClient, err := lens.NewChainClient(log.Sugar.Desugar(), &chainConfig, key_dir, os.Stdin, os.Stdout)
+	if err != nil {
+		log.Sugar.Fatalf("Failed to build new chain client for %s. Err: %v \n", chainInfo.ChainID, err)
+	}
+	return chainClient, rpcs, nil
+}
+
+func getChainClient(chainName string) (*lens.ChainClient, error) {
+	chainInfo, err := registry.DefaultChainRegistry(log.Sugar.Desugar()).GetChain(context.Background(), chainName)
+	if err != nil {
+		log.Sugar.Errorf("Failed to get chain client on %v: %v \n", chainName, err)
+		return nil, err
+	}
+
+	//	Use Chain info to select random endpoint
+	rpc, err := chainInfo.GetRandomRPCEndpoint(context.Background())
+	if err != nil {
+		log.Sugar.Errorf("Failed to get random RPC endpoint on chain %s: %v \n", chainInfo.ChainID, err)
+		return nil, err
+	}
+
+	// For this example, lets place the key directory in your PWD.
+	pwd, _ := os.Getwd()
+	key_dir := pwd + "/keys"
+
+	// Build chain config
+	chainConfig := lens.ChainClientConfig{
+		Key:     "default",
+		ChainID: chainInfo.ChainID,
+		RPCAddr: rpc,
+		// GRPCAddr       string,
+		//AccountPrefix:  chainInfo.Bech32Prefix,
+		KeyringBackend: "test",
+		//GasAdjustment:  1.2,
+		//GasPrices:      "0.01uosmo",
+		//KeyDirectory:   key_dir,
+		Debug:   true,
+		Timeout: "20s",
+		//OutputFormat:   "json",
+		//SignModeStr:    "direct",
+		Modules: lens.ModuleBasics,
+	}
+
+	// Creates client object to pull chain info
+	chainClient, err := lens.NewChainClient(log.Sugar.Desugar(), &chainConfig, key_dir, os.Stdin, os.Stdout)
+	if err != nil {
+		log.Sugar.Fatalf("Failed to build new chain client for %s. Err: %v \n", chainInfo.ChainID, err)
+	}
+	return chainClient, nil
+}
+
+func getChainClientFromDb(entChain *ent.Chain) (*lens.ChainClient, error) {
+	rpc, err := entChain.
+		QueryRPCEndpoints().
+		First(context.Background())
+	if err != nil {
+		log.Sugar.Fatalf("Failed to build new chain client for %s. Err: %v \n", entChain.DisplayName, err)
+	}
+
+	pwd, _ := os.Getwd()
+	key_dir := pwd + "/keys"
+
+	chainConfig := lens.ChainClientConfig{
+		Key:            "default",
+		ChainID:        entChain.Name,
+		RPCAddr:        rpc.Endpoint,
+		KeyringBackend: "test",
+		Debug:          true,
+		Timeout:        "20s",
+		Modules:        lens.ModuleBasics,
+	}
+
+	chainClient, err := lens.NewChainClient(log.Sugar.Desugar(), &chainConfig, key_dir, os.Stdin, os.Stdout)
+	if err != nil {
+		log.Sugar.Fatalf("Failed to build new chain client for %s. Err: %v \n", entChain.DisplayName, err)
+	}
+	return chainClient, nil
 }
 
 func saveAndSendProposals(props *database.Proposals, entChain *ent.Chain) {
@@ -130,7 +236,7 @@ func handleFetchError(chain *ent.Chain, err error) {
 	if err != nil {
 		fetchErrors[chain.ID] += 1
 		if fetchErrors[chain.ID] >= maxFetchErrorsUntilAttemptToFix {
-			addOrUpdateChainInLensConfig(chain.Name)
+			updateRpcs(chain.Name)
 		}
 		if fetchErrors[chain.ID] >= maxFetchErrorsUntilReport {
 			log.Sugar.Errorf("Chain '%v' has %v errors", chain.DisplayName, fetchErrors[chain.ID])
@@ -148,7 +254,11 @@ func updateProposal(entProp *ent.Proposal, status types.ProposalStatus) bool {
 		CountTotal: false,
 		Reverse:    true,
 	}
-	proposals, err := fetchProposals(entProp.Edges.Chain.Name, status, &pageRequest)
+	client, err := getChainClientFromDb(entProp.Edges.Chain)
+	if err != nil {
+		log.Sugar.Fatalf("Could not get client for chain %v. It's probably not saved into the db.", chain.Name)
+	}
+	proposals, err := fetchProposals(entProp.Edges.Chain.Name, status, &pageRequest, client)
 	handleFetchError(entProp.Edges.Chain, err)
 	if err != nil {
 		return false
@@ -186,11 +296,16 @@ func CheckForUpdates() {
 func FetchProposals() {
 	log.Sugar.Info("Fetch proposals")
 	chains := database.NewChainManager().All()
-	for _, chain := range chains {
-		proposals, err := fetchProposals(chain.Name, types.StatusVotingPeriod, nil)
-		handleFetchError(chain, err)
+	for _, c := range chains {
+		client, err := getChainClientFromDb(c)
+		if err != nil {
+			log.Sugar.Errorf("Could not get client for chain %v. It's probably not saved into the db.", c.Name)
+			continue
+		}
+		proposals, err := fetchProposals(c.Name, types.StatusVotingPeriod, nil, client)
+		handleFetchError(c, err)
 		if err == nil {
-			saveAndSendProposals(proposals, chain)
+			saveAndSendProposals(proposals, c)
 		}
 	}
 }

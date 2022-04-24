@@ -9,16 +9,19 @@ Powered by [DeCrypto](https://decrypto.online)
 `
 
 const ProposalsCmd = "proposals"
-const ProposalsMsg = `🗳 *Proposals*
+const ProposalsTitleMarkdownMsg = "🗳 *Proposals*"
+const ProposalsTitleHtmlMsg = "🗳 <b>Proposals</b>"
+const ProposalsMsg = `
 
 This are all ongoing proposals for your subscriptions.
 
 `
-const NoSubscriptionsMsg = `🗳 *Proposals*
+const NoSubscriptionsMsg = `
+
 You are not subscribed to any project.
 Type /subscriptions to select the projects that you want to follow.
 `
-const NoProposalsMsg = `🗳 *Proposals*
+const NoProposalsMsg = `
 
 There are currently no proposals in voting period.`
 

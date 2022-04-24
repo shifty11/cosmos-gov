@@ -41,6 +41,7 @@ func (Chain) Edges() []ent.Edge {
 			Ref("chains"),
 		edge.From("discord_channels", DiscordChannel.Type).
 			Ref("chains"),
+		edge.To("rpc_endpoints", RpcEndpoint.Type),
 	}
 }
 

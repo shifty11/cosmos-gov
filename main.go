@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	_ "github.com/lib/pq"
 	"github.com/robfig/cron/v3"
 	"github.com/shifty11/cosmos-gov/api/discord"
@@ -10,6 +11,7 @@ import (
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/datasource"
 	"github.com/shifty11/cosmos-gov/log"
+	registry "github.com/strangelove-ventures/lens/client/chain_registry"
 	"os"
 	"time"
 )
@@ -32,7 +34,8 @@ func startProposalFetching() {
 
 func startNewChainFetching() {
 	c := cron.New()
-	_, err := c.AddFunc("0 10 * * *", func() { datasource.AddNewChains() }) // execute every day at 10.00
+	ds := datasource.NewDatasource(context.Background(), registry.NewCosmosGithubRegistry(log.Sugar.Desugar()))
+	_, err := c.AddFunc("0 10 * * *", func() { ds.AddNewChains() }) // execute every day at 10.00
 	if err != nil {
 		log.Sugar.Errorf("while executing 'datasource.AddNewChains()' via cron: %v", err)
 	}
@@ -71,9 +74,9 @@ func main() {
 	args := os.Args[1:]
 	if len(args) > 0 && args[0] == "fetching" {
 		initDatabase()
-		startProposalFetching()
+		//startProposalFetching()
 		startNewChainFetching()
-		startProposalUpdating()
+		//startProposalUpdating()
 	} else if len(args) > 0 && args[0] == "telegram" {
 		startTelegramServer()
 	} else if len(args) > 0 && args[0] == "discord" {

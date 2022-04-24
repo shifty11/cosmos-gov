@@ -9,6 +9,7 @@ import (
 )
 
 func getUserId(i *discordgo.InteractionCreate) int64 {
+	//TODO: fix this
 	channelId, err := strconv.ParseInt(i.User.ID, 10, 64)
 	if err != nil {
 		log.Sugar.Panicf("Error while converting user ID to int: %v", err)
@@ -29,11 +30,19 @@ func getChannelId(i *discordgo.InteractionCreate) int64 {
 }
 
 func getChannelName(i *discordgo.InteractionCreate) string {
-	return i.Message.Thread.Name
+	//TODO: fix this
+	//if i.Message != nil {
+	//	return i.Message.Thread.Name
+	//}
+	return ""
 }
 
 func isGroupChannel(i *discordgo.InteractionCreate) bool {
-	return i.Message.Thread.Type != discordgo.ChannelTypeDM
+	//TODO: fix this
+	//if i.Message != nil {
+	//	return i.Message.Thread.Type != discordgo.ChannelTypeDM
+	//}
+	return false
 }
 
 type Action struct {
@@ -65,7 +74,10 @@ func canInteractWithBot(s *discordgo.Session, i *discordgo.InteractionCreate) bo
 		return false
 	}
 
-	return p&discordgo.PermissionManageMessages == discordgo.PermissionManageMessages
+	permAdmin := int64(discordgo.PermissionAdministrator)
+	permManChan := int64(discordgo.PermissionManageChannels)
+	permManServ := int64(discordgo.PermissionManageServer)
+	return p&permAdmin == permAdmin || p&permManChan == permManChan || p&permManServ == permManServ
 }
 
 func sendEmptyResponse(s *discordgo.Session, i *discordgo.InteractionCreate) {

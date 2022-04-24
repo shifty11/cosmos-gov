@@ -27,6 +27,8 @@ const (
 	EdgeTelegramChats = "telegram_chats"
 	// EdgeDiscordChannels holds the string denoting the discord_channels edge name in mutations.
 	EdgeDiscordChannels = "discord_channels"
+	// EdgeRPCEndpoints holds the string denoting the rpc_endpoints edge name in mutations.
+	EdgeRPCEndpoints = "rpc_endpoints"
 	// Table holds the table name of the chain in the database.
 	Table = "chains"
 	// ProposalsTable is the table that holds the proposals relation/edge.
@@ -46,6 +48,13 @@ const (
 	// DiscordChannelsInverseTable is the table name for the DiscordChannel entity.
 	// It exists in this package in order to avoid circular dependency with the "discordchannel" package.
 	DiscordChannelsInverseTable = "discord_channels"
+	// RPCEndpointsTable is the table that holds the rpc_endpoints relation/edge.
+	RPCEndpointsTable = "rpc_endpoints"
+	// RPCEndpointsInverseTable is the table name for the RpcEndpoint entity.
+	// It exists in this package in order to avoid circular dependency with the "rpcendpoint" package.
+	RPCEndpointsInverseTable = "rpc_endpoints"
+	// RPCEndpointsColumn is the table column denoting the rpc_endpoints relation/edge.
+	RPCEndpointsColumn = "chain_rpc_endpoints"
 )
 
 // Columns holds all SQL columns for chain fields.

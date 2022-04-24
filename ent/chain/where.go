@@ -600,6 +600,34 @@ func HasDiscordChannelsWith(preds ...predicate.DiscordChannel) predicate.Chain {
 	})
 }
 
+// HasRPCEndpoints applies the HasEdge predicate on the "rpc_endpoints" edge.
+func HasRPCEndpoints() predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(RPCEndpointsTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, RPCEndpointsTable, RPCEndpointsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasRPCEndpointsWith applies the HasEdge predicate on the "rpc_endpoints" edge with a given conditions (other predicates).
+func HasRPCEndpointsWith(preds ...predicate.RpcEndpoint) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(RPCEndpointsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, RPCEndpointsTable, RPCEndpointsColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Chain) predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {

@@ -14,6 +14,7 @@ import (
 	"github.com/shifty11/cosmos-gov/ent/lenschaininfo"
 	"github.com/shifty11/cosmos-gov/ent/migrationinfo"
 	"github.com/shifty11/cosmos-gov/ent/proposal"
+	"github.com/shifty11/cosmos-gov/ent/rpcendpoint"
 	"github.com/shifty11/cosmos-gov/ent/telegramchat"
 	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/ent/wallet"
@@ -38,6 +39,8 @@ type Client struct {
 	MigrationInfo *MigrationInfoClient
 	// Proposal is the client for interacting with the Proposal builders.
 	Proposal *ProposalClient
+	// RpcEndpoint is the client for interacting with the RpcEndpoint builders.
+	RpcEndpoint *RpcEndpointClient
 	// TelegramChat is the client for interacting with the TelegramChat builders.
 	TelegramChat *TelegramChatClient
 	// User is the client for interacting with the User builders.
@@ -62,6 +65,7 @@ func (c *Client) init() {
 	c.LensChainInfo = NewLensChainInfoClient(c.config)
 	c.MigrationInfo = NewMigrationInfoClient(c.config)
 	c.Proposal = NewProposalClient(c.config)
+	c.RpcEndpoint = NewRpcEndpointClient(c.config)
 	c.TelegramChat = NewTelegramChatClient(c.config)
 	c.User = NewUserClient(c.config)
 	c.Wallet = NewWalletClient(c.config)
@@ -103,6 +107,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		LensChainInfo:  NewLensChainInfoClient(cfg),
 		MigrationInfo:  NewMigrationInfoClient(cfg),
 		Proposal:       NewProposalClient(cfg),
+		RpcEndpoint:    NewRpcEndpointClient(cfg),
 		TelegramChat:   NewTelegramChatClient(cfg),
 		User:           NewUserClient(cfg),
 		Wallet:         NewWalletClient(cfg),
@@ -130,6 +135,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		LensChainInfo:  NewLensChainInfoClient(cfg),
 		MigrationInfo:  NewMigrationInfoClient(cfg),
 		Proposal:       NewProposalClient(cfg),
+		RpcEndpoint:    NewRpcEndpointClient(cfg),
 		TelegramChat:   NewTelegramChatClient(cfg),
 		User:           NewUserClient(cfg),
 		Wallet:         NewWalletClient(cfg),
@@ -167,6 +173,7 @@ func (c *Client) Use(hooks ...Hook) {
 	c.LensChainInfo.Use(hooks...)
 	c.MigrationInfo.Use(hooks...)
 	c.Proposal.Use(hooks...)
+	c.RpcEndpoint.Use(hooks...)
 	c.TelegramChat.Use(hooks...)
 	c.User.Use(hooks...)
 	c.Wallet.Use(hooks...)
@@ -298,6 +305,22 @@ func (c *ChainClient) QueryDiscordChannels(ch *Chain) *DiscordChannelQuery {
 			sqlgraph.From(chain.Table, chain.FieldID, id),
 			sqlgraph.To(discordchannel.Table, discordchannel.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, chain.DiscordChannelsTable, chain.DiscordChannelsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(ch.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryRPCEndpoints queries the rpc_endpoints edge of a Chain.
+func (c *ChainClient) QueryRPCEndpoints(ch *Chain) *RpcEndpointQuery {
+	query := &RpcEndpointQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ch.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(chain.Table, chain.FieldID, id),
+			sqlgraph.To(rpcendpoint.Table, rpcendpoint.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, chain.RPCEndpointsTable, chain.RPCEndpointsColumn),
 		)
 		fromV = sqlgraph.Neighbors(ch.driver.Dialect(), step)
 		return fromV, nil
@@ -716,6 +739,112 @@ func (c *ProposalClient) QueryChain(pr *Proposal) *ChainQuery {
 // Hooks returns the client hooks.
 func (c *ProposalClient) Hooks() []Hook {
 	return c.hooks.Proposal
+}
+
+// RpcEndpointClient is a client for the RpcEndpoint schema.
+type RpcEndpointClient struct {
+	config
+}
+
+// NewRpcEndpointClient returns a client for the RpcEndpoint from the given config.
+func NewRpcEndpointClient(c config) *RpcEndpointClient {
+	return &RpcEndpointClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `rpcendpoint.Hooks(f(g(h())))`.
+func (c *RpcEndpointClient) Use(hooks ...Hook) {
+	c.hooks.RpcEndpoint = append(c.hooks.RpcEndpoint, hooks...)
+}
+
+// Create returns a create builder for RpcEndpoint.
+func (c *RpcEndpointClient) Create() *RpcEndpointCreate {
+	mutation := newRpcEndpointMutation(c.config, OpCreate)
+	return &RpcEndpointCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of RpcEndpoint entities.
+func (c *RpcEndpointClient) CreateBulk(builders ...*RpcEndpointCreate) *RpcEndpointCreateBulk {
+	return &RpcEndpointCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for RpcEndpoint.
+func (c *RpcEndpointClient) Update() *RpcEndpointUpdate {
+	mutation := newRpcEndpointMutation(c.config, OpUpdate)
+	return &RpcEndpointUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *RpcEndpointClient) UpdateOne(re *RpcEndpoint) *RpcEndpointUpdateOne {
+	mutation := newRpcEndpointMutation(c.config, OpUpdateOne, withRpcEndpoint(re))
+	return &RpcEndpointUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *RpcEndpointClient) UpdateOneID(id int) *RpcEndpointUpdateOne {
+	mutation := newRpcEndpointMutation(c.config, OpUpdateOne, withRpcEndpointID(id))
+	return &RpcEndpointUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for RpcEndpoint.
+func (c *RpcEndpointClient) Delete() *RpcEndpointDelete {
+	mutation := newRpcEndpointMutation(c.config, OpDelete)
+	return &RpcEndpointDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *RpcEndpointClient) DeleteOne(re *RpcEndpoint) *RpcEndpointDeleteOne {
+	return c.DeleteOneID(re.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *RpcEndpointClient) DeleteOneID(id int) *RpcEndpointDeleteOne {
+	builder := c.Delete().Where(rpcendpoint.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &RpcEndpointDeleteOne{builder}
+}
+
+// Query returns a query builder for RpcEndpoint.
+func (c *RpcEndpointClient) Query() *RpcEndpointQuery {
+	return &RpcEndpointQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a RpcEndpoint entity by its id.
+func (c *RpcEndpointClient) Get(ctx context.Context, id int) (*RpcEndpoint, error) {
+	return c.Query().Where(rpcendpoint.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *RpcEndpointClient) GetX(ctx context.Context, id int) *RpcEndpoint {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryChain queries the chain edge of a RpcEndpoint.
+func (c *RpcEndpointClient) QueryChain(re *RpcEndpoint) *ChainQuery {
+	query := &ChainQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := re.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(rpcendpoint.Table, rpcendpoint.FieldID, id),
+			sqlgraph.To(chain.Table, chain.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, rpcendpoint.ChainTable, rpcendpoint.ChainColumn),
+		)
+		fromV = sqlgraph.Neighbors(re.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *RpcEndpointClient) Hooks() []Hook {
+	return c.hooks.RpcEndpoint
 }
 
 // TelegramChatClient is a client for the TelegramChat schema.

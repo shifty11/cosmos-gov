@@ -1,30 +1,21 @@
 package datasource
 
 import (
-	"fmt"
+	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/log"
-	"github.com/strangelove-ventures/lens/cmd"
-	"strings"
 )
 
-func addOrUpdateChainInLensConfig(chainName string) {
-	query := fmt.Sprintf("chains add %v", chainName)
-	rootCmd := cmd.NewRootCmd()
-	rootCmd.SetArgs(strings.Fields(query))
-	log.Sugar.Debugf("Add/update chain %v in lens config: 'lens %v'", chainName, query)
-	err := rootCmd.Execute()
+func updateRpcs(chainName string) {
+	_, rpcs, err := getChainInfo(chainName)
 	if err != nil {
-		log.Sugar.Debugf("Error while executing query '%v': %v", query, err)
+		log.Sugar.Errorf("Error getting RPC's for chain %v: %v", chainName, err)
 	}
-}
-
-func removeChainFromLensConfig(chainName string) {
-	query := fmt.Sprintf("chains delete %v", chainName)
-	rootCmd := cmd.NewRootCmd()
-	rootCmd.SetArgs(strings.Fields(query))
-	log.Sugar.Debugf("Remove chain %v from lens config: 'lens %v'", chainName, query)
-	err := rootCmd.Execute()
+	if len(rpcs) == 0 {
+		log.Sugar.Errorf("Found no RPC's for chain %v: %v", chainName, err)
+		return
+	}
+	err = database.NewChainManager().UpdateRpcs(chainName, rpcs)
 	if err != nil {
-		log.Sugar.Errorf("Error while executing query '%v': %v", query, err)
+		log.Sugar.Errorf("Error while updating RPC's for chain %v: %v", chainName, err)
 	}
 }
