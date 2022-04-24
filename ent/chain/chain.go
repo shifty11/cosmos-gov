@@ -25,6 +25,8 @@ const (
 	EdgeUsers = "users"
 	// EdgeProposals holds the string denoting the proposals edge name in mutations.
 	EdgeProposals = "proposals"
+	// EdgeRPCEndpoints holds the string denoting the rpc_endpoints edge name in mutations.
+	EdgeRPCEndpoints = "rpc_endpoints"
 	// Table holds the table name of the chain in the database.
 	Table = "chains"
 	// UsersTable is the table that holds the users relation/edge. The primary key declared below.
@@ -39,6 +41,13 @@ const (
 	ProposalsInverseTable = "proposals"
 	// ProposalsColumn is the table column denoting the proposals relation/edge.
 	ProposalsColumn = "chain_proposals"
+	// RPCEndpointsTable is the table that holds the rpc_endpoints relation/edge.
+	RPCEndpointsTable = "rpc_endpoints"
+	// RPCEndpointsInverseTable is the table name for the RpcEndpoint entity.
+	// It exists in this package in order to avoid circular dependency with the "rpcendpoint" package.
+	RPCEndpointsInverseTable = "rpc_endpoints"
+	// RPCEndpointsColumn is the table column denoting the rpc_endpoints relation/edge.
+	RPCEndpointsColumn = "chain_rpc_endpoints"
 )
 
 // Columns holds all SQL columns for chain fields.

@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"github.com/shifty11/cosmos-gov/ent/migrate"
+	registry "github.com/strangelove-ventures/lens/client/chain_registry"
 	"os"
 
 	"github.com/shifty11/cosmos-gov/ent"
@@ -46,5 +47,49 @@ func MigrateDatabase() {
 	)
 	if err != nil {
 		log.Sugar.Panic("Failed creating schema resources: %v", err)
+	}
+	migrateChains()
+}
+
+func migrateChains() {
+	client, ctx := connect()
+
+	chains := client.Chain.Query().AllX(ctx)
+	reg := registry.DefaultChainRegistry(log.Sugar.Desugar())
+
+	for _, c := range chains {
+		exist, err := c.QueryRPCEndpoints().Exist(ctx)
+		if err != nil {
+			log.Sugar.Errorf("Failed to query rpcs on %v: %v \n", c.Name, err)
+			continue
+		}
+		if exist {
+			log.Sugar.Debugf("Skip %s:", c.Name)
+			continue
+		}
+
+		chainInfo, err := reg.GetChain(context.Background(), c.Name)
+		if err != nil {
+			log.Sugar.Errorf("Failed to get chain client on %v: %v \n", c.Name, err)
+			continue
+		}
+
+		rpcs, err := chainInfo.GetRPCEndpoints(context.Background())
+		if err != nil {
+			log.Sugar.Errorf("Failed to get RPC endpoints on chain %s: %v \n", chainInfo.ChainID, err)
+			continue
+		}
+		for _, rpc := range rpcs {
+			_, err := client.RpcEndpoint.
+				Create().
+				SetEndpoint(rpc).
+				SetChain(c).
+				Save(ctx)
+			if err != nil {
+				log.Sugar.Errorf("Failed to save RPC endpoint on chain %s: %v \n", chainInfo.ChainID, err)
+				continue
+			}
+		}
+		log.Sugar.Infof("Added %v RPC's for chain %v", len(rpcs), c.DisplayName)
 	}
 }

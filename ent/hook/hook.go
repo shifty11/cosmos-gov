@@ -48,6 +48,19 @@ func (f ProposalFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, er
 	return f(ctx, mv)
 }
 
+// The RpcEndpointFunc type is an adapter to allow the use of ordinary
+// function as RpcEndpoint mutator.
+type RpcEndpointFunc func(context.Context, *ent.RpcEndpointMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f RpcEndpointFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.RpcEndpointMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RpcEndpointMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The UserFunc type is an adapter to allow the use of ordinary
 // function as User mutator.
 type UserFunc func(context.Context, *ent.UserMutation) (ent.Value, error)

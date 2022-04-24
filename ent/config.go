@@ -27,6 +27,7 @@ type hooks struct {
 	Chain         []ent.Hook
 	LensChainInfo []ent.Hook
 	Proposal      []ent.Hook
+	RpcEndpoint   []ent.Hook
 	User          []ent.Hook
 }
 

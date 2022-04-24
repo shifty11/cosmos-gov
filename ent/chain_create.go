@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/shifty11/cosmos-gov/ent/chain"
 	"github.com/shifty11/cosmos-gov/ent/proposal"
+	"github.com/shifty11/cosmos-gov/ent/rpcendpoint"
 	"github.com/shifty11/cosmos-gov/ent/user"
 )
 
@@ -104,6 +105,21 @@ func (cc *ChainCreate) AddProposals(p ...*Proposal) *ChainCreate {
 		ids[i] = p[i].ID
 	}
 	return cc.AddProposalIDs(ids...)
+}
+
+// AddRPCEndpointIDs adds the "rpc_endpoints" edge to the RpcEndpoint entity by IDs.
+func (cc *ChainCreate) AddRPCEndpointIDs(ids ...int) *ChainCreate {
+	cc.mutation.AddRPCEndpointIDs(ids...)
+	return cc
+}
+
+// AddRPCEndpoints adds the "rpc_endpoints" edges to the RpcEndpoint entity.
+func (cc *ChainCreate) AddRPCEndpoints(r ...*RpcEndpoint) *ChainCreate {
+	ids := make([]int, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return cc.AddRPCEndpointIDs(ids...)
 }
 
 // Mutation returns the ChainMutation object of the builder.
@@ -305,6 +321,25 @@ func (cc *ChainCreate) createSpec() (*Chain, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: proposal.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := cc.mutation.RPCEndpointsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.RPCEndpointsTable,
+			Columns: []string{chain.RPCEndpointsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: rpcendpoint.FieldID,
 				},
 			},
 		}

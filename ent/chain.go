@@ -37,9 +37,11 @@ type ChainEdges struct {
 	Users []*User `json:"users,omitempty"`
 	// Proposals holds the value of the proposals edge.
 	Proposals []*Proposal `json:"proposals,omitempty"`
+	// RPCEndpoints holds the value of the rpc_endpoints edge.
+	RPCEndpoints []*RpcEndpoint `json:"rpc_endpoints,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // UsersOrErr returns the Users value or an error if the edge
@@ -58,6 +60,15 @@ func (e ChainEdges) ProposalsOrErr() ([]*Proposal, error) {
 		return e.Proposals, nil
 	}
 	return nil, &NotLoadedError{edge: "proposals"}
+}
+
+// RPCEndpointsOrErr returns the RPCEndpoints value or an error if the edge
+// was not loaded in eager-loading.
+func (e ChainEdges) RPCEndpointsOrErr() ([]*RpcEndpoint, error) {
+	if e.loadedTypes[2] {
+		return e.RPCEndpoints, nil
+	}
+	return nil, &NotLoadedError{edge: "rpc_endpoints"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -137,6 +148,11 @@ func (c *Chain) QueryUsers() *UserQuery {
 // QueryProposals queries the "proposals" edge of the Chain entity.
 func (c *Chain) QueryProposals() *ProposalQuery {
 	return (&ChainClient{config: c.config}).QueryProposals(c)
+}
+
+// QueryRPCEndpoints queries the "rpc_endpoints" edge of the Chain entity.
+func (c *Chain) QueryRPCEndpoints() *RpcEndpointQuery {
+	return (&ChainClient{config: c.config}).QueryRPCEndpoints(c)
 }
 
 // Update returns a builder for updating this Chain.

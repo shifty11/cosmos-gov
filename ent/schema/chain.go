@@ -37,6 +37,7 @@ func (Chain) Edges() []ent.Edge {
 		edge.From("users", User.Type).
 			Ref("chains"),
 		edge.To("proposals", Proposal.Type),
+		edge.To("rpc_endpoints", RpcEndpoint.Type),
 	}
 }
 

@@ -18,6 +18,8 @@ type Tx struct {
 	LensChainInfo *LensChainInfoClient
 	// Proposal is the client for interacting with the Proposal builders.
 	Proposal *ProposalClient
+	// RpcEndpoint is the client for interacting with the RpcEndpoint builders.
+	RpcEndpoint *RpcEndpointClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 
@@ -158,6 +160,7 @@ func (tx *Tx) init() {
 	tx.Chain = NewChainClient(tx.config)
 	tx.LensChainInfo = NewLensChainInfoClient(tx.config)
 	tx.Proposal = NewProposalClient(tx.config)
+	tx.RpcEndpoint = NewRpcEndpointClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }
 

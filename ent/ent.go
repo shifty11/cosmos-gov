@@ -11,6 +11,7 @@ import (
 	"github.com/shifty11/cosmos-gov/ent/chain"
 	"github.com/shifty11/cosmos-gov/ent/lenschaininfo"
 	"github.com/shifty11/cosmos-gov/ent/proposal"
+	"github.com/shifty11/cosmos-gov/ent/rpcendpoint"
 	"github.com/shifty11/cosmos-gov/ent/user"
 )
 
@@ -35,6 +36,7 @@ func columnChecker(table string) func(string) error {
 		chain.Table:         chain.ValidColumn,
 		lenschaininfo.Table: lenschaininfo.ValidColumn,
 		proposal.Table:      proposal.ValidColumn,
+		rpcendpoint.Table:   rpcendpoint.ValidColumn,
 		user.Table:          user.ValidColumn,
 	}
 	check, ok := checks[table]

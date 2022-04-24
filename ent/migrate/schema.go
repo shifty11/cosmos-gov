@@ -85,6 +85,35 @@ var (
 			},
 		},
 	}
+	// RPCEndpointsColumns holds the columns for the "rpc_endpoints" table.
+	RPCEndpointsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "endpoint", Type: field.TypeString, Unique: true},
+		{Name: "chain_rpc_endpoints", Type: field.TypeInt, Nullable: true},
+	}
+	// RPCEndpointsTable holds the schema information for the "rpc_endpoints" table.
+	RPCEndpointsTable = &schema.Table{
+		Name:       "rpc_endpoints",
+		Columns:    RPCEndpointsColumns,
+		PrimaryKey: []*schema.Column{RPCEndpointsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "rpc_endpoints_chains_rpc_endpoints",
+				Columns:    []*schema.Column{RPCEndpointsColumns[4]},
+				RefColumns: []*schema.Column{ChainsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "rpcendpoint_endpoint",
+				Unique:  true,
+				Columns: []*schema.Column{RPCEndpointsColumns[3]},
+			},
+		},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -136,6 +165,7 @@ var (
 		ChainsTable,
 		LensChainInfosTable,
 		ProposalsTable,
+		RPCEndpointsTable,
 		UsersTable,
 		UserChainsTable,
 	}
@@ -143,6 +173,7 @@ var (
 
 func init() {
 	ProposalsTable.ForeignKeys[0].RefTable = ChainsTable
+	RPCEndpointsTable.ForeignKeys[0].RefTable = ChainsTable
 	UserChainsTable.ForeignKeys[0].RefTable = UsersTable
 	UserChainsTable.ForeignKeys[1].RefTable = ChainsTable
 }

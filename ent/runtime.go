@@ -8,6 +8,7 @@ import (
 	"github.com/shifty11/cosmos-gov/ent/chain"
 	"github.com/shifty11/cosmos-gov/ent/lenschaininfo"
 	"github.com/shifty11/cosmos-gov/ent/proposal"
+	"github.com/shifty11/cosmos-gov/ent/rpcendpoint"
 	"github.com/shifty11/cosmos-gov/ent/schema"
 	"github.com/shifty11/cosmos-gov/ent/user"
 )
@@ -56,6 +57,18 @@ func init() {
 	proposal.DefaultUpdatedAt = proposalDescUpdatedAt.Default.(func() time.Time)
 	// proposal.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	proposal.UpdateDefaultUpdatedAt = proposalDescUpdatedAt.UpdateDefault.(func() time.Time)
+	rpcendpointFields := schema.RpcEndpoint{}.Fields()
+	_ = rpcendpointFields
+	// rpcendpointDescCreatedAt is the schema descriptor for created_at field.
+	rpcendpointDescCreatedAt := rpcendpointFields[0].Descriptor()
+	// rpcendpoint.DefaultCreatedAt holds the default value on creation for the created_at field.
+	rpcendpoint.DefaultCreatedAt = rpcendpointDescCreatedAt.Default.(func() time.Time)
+	// rpcendpointDescUpdatedAt is the schema descriptor for updated_at field.
+	rpcendpointDescUpdatedAt := rpcendpointFields[1].Descriptor()
+	// rpcendpoint.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	rpcendpoint.DefaultUpdatedAt = rpcendpointDescUpdatedAt.Default.(func() time.Time)
+	// rpcendpoint.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	rpcendpoint.UpdateDefaultUpdatedAt = rpcendpointDescUpdatedAt.UpdateDefault.(func() time.Time)
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescCreatedAt is the schema descriptor for created_at field.

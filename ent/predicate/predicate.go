@@ -15,5 +15,8 @@ type LensChainInfo func(*sql.Selector)
 // Proposal is the predicate function for proposal builders.
 type Proposal func(*sql.Selector)
 
+// RpcEndpoint is the predicate function for rpcendpoint builders.
+type RpcEndpoint func(*sql.Selector)
+
 // User is the predicate function for user builders.
 type User func(*sql.Selector)
