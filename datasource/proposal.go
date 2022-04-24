@@ -13,11 +13,11 @@ import (
 	"github.com/shifty11/cosmos-gov/common"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/ent"
+	"github.com/shifty11/cosmos-gov/ent/chain"
 	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/log"
 	lens "github.com/strangelove-ventures/lens/client"
 	registry "github.com/strangelove-ventures/lens/client/chain_registry"
-	"github.com/strangelove-ventures/lens/cmd"
 	"os"
 	"regexp"
 	"strings"
@@ -144,6 +144,34 @@ func getChainClient(chainName string) (*lens.ChainClient, error) {
 	return chainClient, nil
 }
 
+func getChainClientFromDb(entChain *ent.Chain) (*lens.ChainClient, error) {
+	rpc, err := entChain.
+		QueryRPCEndpoints().
+		First(context.Background())
+	if err != nil {
+		log.Sugar.Fatalf("Failed to build new chain client for %s. Err: %v \n", entChain.DisplayName, err)
+	}
+
+	pwd, _ := os.Getwd()
+	key_dir := pwd + "/keys"
+
+	chainConfig := lens.ChainClientConfig{
+		Key:            "default",
+		ChainID:        entChain.Name,
+		RPCAddr:        rpc.Endpoint,
+		KeyringBackend: "test",
+		Debug:          true,
+		Timeout:        "20s",
+		Modules:        lens.ModuleBasics,
+	}
+
+	chainClient, err := lens.NewChainClient(log.Sugar.Desugar(), &chainConfig, key_dir, os.Stdin, os.Stdout)
+	if err != nil {
+		log.Sugar.Fatalf("Failed to build new chain client for %s. Err: %v \n", entChain.DisplayName, err)
+	}
+	return chainClient, nil
+}
+
 func saveAndSendProposals(props *common.Proposals, entChain *ent.Chain) {
 	for _, prop := range props.Proposals {
 		entProp := database.CreateProposalIfNotExists(&prop, entChain)
@@ -188,15 +216,11 @@ func updateProposal(entProp *ent.Proposal, status types.ProposalStatus) bool {
 		CountTotal: false,
 		Reverse:    true,
 	}
-	config, err := cmd.GetConfig(false, log.Sugar.Desugar())
+	client, err := getChainClientFromDb(entProp.Edges.Chain)
 	if err != nil {
-		log.Sugar.Fatalf("Could not get config: %v", err)
+		log.Sugar.Fatalf("Could not get client for chain %v. It's probably not saved into the db.", chain.Name)
 	}
-	client := config.GetClient(entProp.Edges.Chain.Name)
-	if client == nil {
-		log.Sugar.Fatalf("Could not get client for chain %v. It's probably not saved into the lens config", entProp.Edges.Chain.Name)
-	}
-	proposals, err := fetchProposals(entProp.Edges.Chain.Name, status, &pageRequest, nil)
+	proposals, err := fetchProposals(entProp.Edges.Chain.Name, status, &pageRequest, client)
 	handleFetchError(entProp.Edges.Chain, err)
 	if err != nil {
 		return false
@@ -233,14 +257,11 @@ func CheckForUpdates() {
 
 func FetchProposals() {
 	log.Sugar.Info("Fetch proposals")
-	config, err := cmd.GetConfig(false, log.Sugar.Desugar())
-	if err != nil {
-		log.Sugar.Fatalf("Could not get config: %v", err)
-	}
 	for _, chain := range database.GetChains() {
-		client := config.GetClient(chain.Name)
-		if client == nil {
-			log.Sugar.Fatalf("Could not get client for chain %v. It's probably not saved into the lens config", chain.Name)
+		client, err := getChainClientFromDb(chain)
+		if err != nil {
+			log.Sugar.Errorf("Could not get client for chain %v. It's probably not saved into the db.", chain.Name)
+			continue
 		}
 		proposals, err := fetchProposals(chain.Name, types.StatusVotingPeriod, nil, client)
 		handleFetchError(chain, err)
