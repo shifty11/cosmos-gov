@@ -6,6 +6,7 @@ import (
 	"github.com/shifty11/cosmos-gov/ent"
 	"github.com/shifty11/cosmos-gov/ent/chain"
 	"github.com/shifty11/cosmos-gov/ent/proposal"
+	"github.com/shifty11/cosmos-gov/ent/rpcendpoint"
 	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/log"
 	"strings"
@@ -81,7 +82,7 @@ func GetChainsForUser(chatId int64, userType user.Type) []common.Chain {
 	return chains
 }
 
-func CreateChain(chainName string) *ent.Chain {
+func CreateChain(chainName string, rpcs []string) *ent.Chain {
 	client, ctx := connect()
 	c, err := client.Chain.
 		Query().
@@ -98,8 +99,48 @@ func CreateChain(chainName string) *ent.Chain {
 		if err != nil {
 			log.Sugar.Panic("Error while creating chain: %v", err)
 		}
+		for _, rpc := range rpcs {
+			_, err := client.RpcEndpoint.
+				Create().
+				SetEndpoint(rpc).
+				SetChain(c).
+				Save(ctx)
+			if err != nil {
+				log.Sugar.Panic("Error while creating chain: %v", err)
+			}
+		}
 	}
 	return c
+}
+
+func UpdateRpcs(chainName string, rpcs []string) error {
+	client, ctx := connect()
+	c, err := client.Chain.
+		Query().
+		Where(chain.NameEQ(chainName)).
+		WithRPCEndpoints().
+		Only(ctx)
+	if err != nil {
+		return err
+	}
+	_, err = client.RpcEndpoint.
+		Delete().
+		Where(rpcendpoint.HasChainWith(chain.IDEQ(c.ID))).
+		Exec(ctx)
+	if err != nil {
+		return err
+	}
+	for _, rpc := range rpcs {
+		_, err := client.RpcEndpoint.
+			Create().
+			SetEndpoint(rpc).
+			SetChain(c).
+			Save(ctx)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func GetChains() []*ent.Chain {

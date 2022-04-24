@@ -9,7 +9,6 @@ import (
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/log"
 	registry "github.com/strangelove-ventures/lens/client/chain_registry"
-	"github.com/strangelove-ventures/lens/cmd"
 	"sort"
 	"strings"
 )
@@ -97,27 +96,13 @@ func (ds Datasource) getNewChains() []string {
 	return ds.orderChainsByErrorCnt(newChains)
 }
 
-func isChainInConfig(chainName string) bool {
-	config, err := cmd.GetConfig(true, log.Sugar.Desugar())
-	if err != nil {
-		log.Sugar.Errorf("while getting config: %v", err)
-		return false
-	}
-	for key := range config.Chains {
-		if key == chainName {
-			return true
-		}
-	}
-	return false
-}
-
 func (ds Datasource) AddNewChains() {
 	log.Sugar.Info("Add new chains")
 	chains := ds.getNewChains()
 	message := ""
 
 	for _, chainName := range chains {
-		client, err := getChainClient(chainName)
+		client, rpcs, err := getChainInfo(chainName)
 		if err != nil {
 			log.Sugar.Debugf("Chain '%v' has %v errors", chainName, err)
 			database.AddErrorToLensChainInfo(chainName)
@@ -128,19 +113,14 @@ func (ds Datasource) AddNewChains() {
 				database.AddErrorToLensChainInfo(chainName)
 			} else {
 				if len(proposals.Proposals) >= 1 {
-					addOrUpdateChainInLensConfig(chainName)
-					if isChainInConfig(chainName) {
-						chainEnt := database.CreateChain(chainName)
-						for _, prop := range proposals.Proposals {
-							database.CreateOrUpdateProposal(&prop, chainEnt)
-						}
-						database.DeleteLensChainInfo(chainName)
-						message += fmt.Sprintf("Added chain '%v' including %v proposals\n", chainName, len(proposals.Proposals))
-					} else {
-						log.Sugar.Errorf("Chain '%v' is not in lens config", chainName)
-						database.AddErrorToLensChainInfo(chainName)
+					chainEnt := database.CreateChain(chainName, rpcs)
+					for _, prop := range proposals.Proposals {
+						database.CreateOrUpdateProposal(&prop, chainEnt)
 					}
+					database.DeleteLensChainInfo(chainName)
+					message += fmt.Sprintf("Added chain '%v' including %v proposals\n", chainName, len(proposals.Proposals))
 				} else {
+					log.Sugar.Errorf("Chain '%v' is not in lens config", chainName)
 					database.AddErrorToLensChainInfo(chainName)
 				}
 			}

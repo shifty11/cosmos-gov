@@ -100,6 +100,46 @@ func fetchProposals(chainId string, proposalStatus types.ProposalStatus, pageReq
 	return &proposals, nil
 }
 
+func getChainInfo(chainName string) (*lens.ChainClient, []string, error) {
+	chainInfo, err := registry.DefaultChainRegistry(log.Sugar.Desugar()).GetChain(context.Background(), chainName)
+	if err != nil {
+		log.Sugar.Errorf("Failed to get chain client on %v: %v \n", chainName, err)
+		return nil, nil, err
+	}
+
+	//	Use Chain info to select random endpoint
+	rpcs, err := chainInfo.GetRPCEndpoints(context.Background())
+	if err != nil {
+		log.Sugar.Errorf("Failed to get RPC endpoints on chain %s: %v \n", chainInfo.ChainID, err)
+		return nil, nil, err
+	}
+
+	if len(rpcs) <= 0 {
+		log.Sugar.Errorf("Found no working RPC endpoints on chain %s: %v \n", chainInfo.ChainID, err)
+		return nil, nil, err
+	}
+
+	pwd, _ := os.Getwd()
+	key_dir := pwd + "/keys"
+
+	chainConfig := lens.ChainClientConfig{
+		Key:            "default",
+		ChainID:        chainInfo.ChainID,
+		RPCAddr:        rpcs[0],
+		KeyringBackend: "test",
+		Debug:          true,
+		Timeout:        "20s",
+		Modules:        lens.ModuleBasics,
+	}
+
+	// Creates client object to pull chain info
+	chainClient, err := lens.NewChainClient(log.Sugar.Desugar(), &chainConfig, key_dir, os.Stdin, os.Stdout)
+	if err != nil {
+		log.Sugar.Fatalf("Failed to build new chain client for %s. Err: %v \n", chainInfo.ChainID, err)
+	}
+	return chainClient, rpcs, nil
+}
+
 func getChainClient(chainName string) (*lens.ChainClient, error) {
 	chainInfo, err := registry.DefaultChainRegistry(log.Sugar.Desugar()).GetChain(context.Background(), chainName)
 	if err != nil {
@@ -198,7 +238,7 @@ func handleFetchError(chain *ent.Chain, err error) {
 	if err != nil {
 		fetchErrors[chain.ID] += 1
 		if fetchErrors[chain.ID] >= maxFetchErrorsUntilAttemptToFix {
-			addOrUpdateChainInLensConfig(chain.Name)
+			updateRpcs(chain.Name)
 		}
 		if fetchErrors[chain.ID] >= maxFetchErrorsUntilReport {
 			log.Sugar.Errorf("Chain '%v' has %v errors", chain.DisplayName, fetchErrors[chain.ID])
