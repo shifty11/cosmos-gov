@@ -3,7 +3,7 @@ package discord
 import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
-	"github.com/shifty11/cosmos-gov/common"
+	"github.com/shifty11/cosmos-gov/api"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/log"
@@ -24,7 +24,7 @@ func createKeyboard(chains []*database.Subscription) []discordgo.MessageComponen
 			Label:    symbol + " " + c.DisplayName,
 			Style:    discordgo.SecondaryButton,
 			Disabled: false,
-			CustomID: common.SubscriptionCmd + ":" + c.Name,
+			CustomID: messages.SubscriptionCmd + ":" + c.Name,
 		}
 		buttons = append(buttons, button)
 		if (ix+1)%NbrOfButtonsPerRow == 0 || ix == len(chains)-1 {
@@ -66,10 +66,10 @@ func getSpecificChunk(chunks [][]*database.Subscription, name string) []*databas
 }
 
 func getOngoingProposalsText(chatId int64) string {
-	text := common.ProposalsMsg
+	text := messages.ProposalsMsg
 	chains := database.NewProposalManager().GetProposalsInVotingPeriod(chatId, user.TypeDiscord)
 	if len(chains) == 0 {
-		text = common.NoSubscriptionsMsg
+		text = messages.NoSubscriptionsMsg
 	} else {
 		for _, chain := range chains {
 			for _, prop := range chain.Edges.Proposals {
@@ -78,8 +78,8 @@ func getOngoingProposalsText(chatId int64) string {
 				text += fmt.Sprintf("**%v #%d** _%v_\n\n", chain.DisplayName, prop.ProposalID, title)
 			}
 		}
-		if len(text) == len(common.ProposalsMsg) {
-			text = common.NoProposalsMsg
+		if len(text) == len(messages.ProposalsMsg) {
+			text = messages.NoProposalsMsg
 		}
 	}
 	return text
@@ -88,20 +88,20 @@ func getOngoingProposalsText(chatId int64) string {
 var (
 	cmds = []*discordgo.ApplicationCommand{
 		{
-			Name:        common.SubscriptionCmd,
+			Name:        messages.SubscriptionCmd,
 			Description: "Manage your Subscriptions",
 		},
 		{
-			Name:        common.ProposalsCmd,
+			Name:        messages.ProposalsCmd,
 			Description: "Show ongoing proposals",
 		},
 		//{
-		//	Name:        common.SupportCmd,
+		//	Name:        messages.SupportCmd,
 		//	Description: "Show ongoing proposals",
 		//},
 	}
 	cmdHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
-		common.SubscriptionCmd: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		messages.SubscriptionCmd: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			if !canInteractWithBot(s, i) {
 				sendEmptyResponse(s, i)
 				return
@@ -120,7 +120,7 @@ var (
 			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content:    sanitizeUrls(common.SubscriptionsMsg),
+					Content:    sanitizeUrls(messages.SubscriptionsMsg),
 					Components: createKeyboard(chains[0]),
 				},
 			})
@@ -139,7 +139,7 @@ var (
 				}
 			}
 		},
-		common.ProposalsCmd: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		messages.ProposalsCmd: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			if !canInteractWithBot(s, i) {
 				sendEmptyResponse(s, i)
 				return
@@ -159,13 +159,13 @@ var (
 				log.Sugar.Errorf("Error while sending subscriptions: %v", err)
 			}
 		},
-		common.SupportCmd: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		messages.SupportCmd: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			if !canInteractWithBot(s, i) {
 				sendEmptyResponse(s, i)
 				return
 			}
 
-			text := fmt.Sprintf(common.SupportMsg, "[Rapha](https://discordapp.com/users/228978159440232453/)")
+			text := fmt.Sprintf(messages.SupportMsg, "[Rapha](https://discordapp.com/users/228978159440232453/)")
 			text = strings.Replace(text, "*", "**", -1)
 
 			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -183,7 +183,7 @@ var (
 
 var (
 	actionHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate, action string){
-		common.SubscriptionCmd: func(s *discordgo.Session, i *discordgo.InteractionCreate, action string) {
+		messages.SubscriptionCmd: func(s *discordgo.Session, i *discordgo.InteractionCreate, action string) {
 			if !canInteractWithBot(s, i) {
 				sendEmptyResponse(s, i)
 				return

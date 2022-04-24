@@ -3,7 +3,7 @@ package telegram
 import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/shifty11/cosmos-gov/common"
+	"github.com/shifty11/cosmos-gov/api"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/log"
@@ -65,7 +65,7 @@ func sendSubscriptions(update *tgbotapi.Update) {
 	replyMarkup := createKeyboard(buttons)
 
 	if update.CallbackQuery == nil {
-		msg := tgbotapi.NewMessage(chatId, common.SubscriptionsMsg)
+		msg := tgbotapi.NewMessage(chatId, messages.SubscriptionsMsg)
 		msg.ReplyMarkup = replyMarkup
 		msg.ParseMode = "markdown"
 		msg.DisableWebPagePreview = true
@@ -74,7 +74,7 @@ func sendSubscriptions(update *tgbotapi.Update) {
 			log.Sugar.Errorf("Error while sendSubscriptions for user #%v: %v", chatId, err)
 		}
 	} else {
-		msg := tgbotapi.NewEditMessageText(chatId, update.CallbackQuery.Message.MessageID, common.SubscriptionsMsg)
+		msg := tgbotapi.NewEditMessageText(chatId, update.CallbackQuery.Message.MessageID, messages.SubscriptionsMsg)
 		msg.ReplyMarkup = &replyMarkup
 		msg.ParseMode = "markdown"
 		msg.DisableWebPagePreview = true
@@ -87,18 +87,18 @@ func sendSubscriptions(update *tgbotapi.Update) {
 }
 
 func getOngoingProposalsText(chatId int64) string {
-	text := common.ProposalsMsg
+	text := messages.ProposalsMsg
 	chains := database.NewProposalManager().GetProposalsInVotingPeriod(chatId, user.TypeTelegram)
 	if len(chains) == 0 {
-		text = common.NoSubscriptionsMsg
+		text = messages.NoSubscriptionsMsg
 	} else {
 		for _, chain := range chains {
 			for _, prop := range chain.Edges.Proposals {
 				text += fmt.Sprintf("<b>%v #%d</b> <i>%v</i>\n\n", chain.DisplayName, prop.ProposalID, prop.Title)
 			}
 		}
-		if len(text) == len(common.ProposalsMsg) {
-			text = common.NoProposalsMsg
+		if len(text) == len(messages.ProposalsMsg) {
+			text = messages.NoProposalsMsg
 		}
 	}
 	return text
@@ -189,7 +189,7 @@ func sendSupport(update *tgbotapi.Update) {
 	}
 	replyMarkup := createKeyboard(buttons)
 
-	text := fmt.Sprintf(common.SupportMsg, "@rapha\\_decrypto")
+	text := fmt.Sprintf(messages.SupportMsg, "@rapha\\_decrypto")
 	if update.CallbackQuery == nil {
 		msg := tgbotapi.NewMessage(chatId, text)
 		msg.ReplyMarkup = replyMarkup

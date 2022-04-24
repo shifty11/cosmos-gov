@@ -1,4 +1,4 @@
-package common
+package messages
 
 const SubscriptionCmd = "subscriptions"
 const SubscriptionsMsg = `🔔 *Subscriptions*
@@ -9,8 +9,6 @@ Powered by [DeCrypto](https://decrypto.online)
 `
 
 const ProposalsCmd = "proposals"
-const ProposalsTitleMarkdownMsg = "🗳 *Proposals*"
-const ProposalsTitleHtmlMsg = "🗳 <b>Proposals</b>"
 const ProposalsMsg = `
 
 This are all ongoing proposals for your subscriptions.
