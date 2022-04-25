@@ -127,8 +127,8 @@ func (ds Datasource) AddNewChains() {
 					lensChainManager.DeleteLensChainInfo(chainName)
 					message += fmt.Sprintf("Added chain '%v' including %v proposals\n", chainName, len(proposals.Proposals))
 				} else {
+					log.Sugar.Debugf("Chain '%v' has no proposals", chainName)
 					lensChainManager.AddErrorToLensChainInfo(chainName)
-					log.Sugar.Errorf("Chain '%v' is not in lens config", chainName)
 				}
 			}
 		}
