@@ -8,7 +8,7 @@ require (
 	github.com/bwmarrin/discordgo v0.25.0
 	github.com/cosmos/cosmos-sdk v0.45.1
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
-	github.com/golang-jwt/jwt v3.2.2+incompatible
+	github.com/golang-jwt/jwt/v4 v4.4.1
 	github.com/liamylian/jsontime v1.0.1
 	github.com/lib/pq v1.10.5
 	github.com/microcosm-cc/bluemonday v1.0.18

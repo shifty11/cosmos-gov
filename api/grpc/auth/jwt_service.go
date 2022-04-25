@@ -2,7 +2,7 @@ package auth
 
 import (
 	"fmt"
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/shifty11/cosmos-gov/ent"
 	"github.com/shifty11/cosmos-gov/ent/user"
 	"time"
@@ -39,7 +39,7 @@ func AccessibleRoles() map[string][]Role {
 }
 
 type Claims struct {
-	jwt.StandardClaims
+	jwt.RegisteredClaims
 	UserId int64     `json:"user_id"`
 	Type   user.Type `json:"type"`
 	Role   Role      `json:"role,omitempty"`
@@ -68,8 +68,8 @@ func (manager *JWTManager) GenerateToken(entUser *ent.User, tokenType TokenType)
 	claims := &Claims{
 		UserId: entUser.ID,
 		Type:   entUser.Type,
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: expirationTime.Unix(),
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(expirationTime),
 		},
 		Role: User,
 	}
