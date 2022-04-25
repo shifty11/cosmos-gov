@@ -1,26 +1,15 @@
 package datasource
 
 import (
-	"context"
 	"fmt"
 	"github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/shifty11/cosmos-gov/api/telegram"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/log"
-	registry "github.com/strangelove-ventures/lens/client/chain_registry"
 	"golang.org/x/exp/slices"
 	"sort"
 	"strings"
 )
-
-type Datasource struct {
-	ctx           context.Context
-	chainRegistry registry.CosmosGithubRegistry
-}
-
-func NewDatasource(ctx context.Context, chainRegistry registry.CosmosGithubRegistry) *Datasource {
-	return &Datasource{ctx: ctx, chainRegistry: chainRegistry}
-}
 
 func (ds Datasource) getChainsFromRegistry() ([]string, error) {
 	chains, err := ds.chainRegistry.ListChains(ds.ctx)
@@ -96,6 +85,21 @@ func (ds Datasource) getNewChains() []string {
 	return ds.orderChainsByErrorCnt(newChains)
 }
 
+func (ds Datasource) updateRpcs(chainName string) {
+	_, rpcs, err := ds.getChainInfo(chainName)
+	if err != nil {
+		log.Sugar.Errorf("Error getting RPC's for chain %v: %v", chainName, err)
+	}
+	if len(rpcs) == 0 {
+		log.Sugar.Errorf("Found no RPC's for chain %v: %v", chainName, err)
+		return
+	}
+	err = ds.chainManager.UpdateRpcs(chainName, rpcs)
+	if err != nil {
+		log.Sugar.Errorf("Error while updating RPC's for chain %v: %v", chainName, err)
+	}
+}
+
 func (ds Datasource) AddNewChains() {
 	log.Sugar.Info("Add new chains")
 	chains := ds.getNewChains()
@@ -105,7 +109,7 @@ func (ds Datasource) AddNewChains() {
 	lensChainManager := database.NewLensChainInfoManager()
 
 	for _, chainName := range chains {
-		client, rpcs, err := getChainInfo(chainName)
+		client, rpcs, err := ds.getChainInfo(chainName)
 		if err != nil {
 			log.Sugar.Debugf("Chain '%v' has %v errors", chainName, err)
 			lensChainManager.AddErrorToLensChainInfo(chainName)

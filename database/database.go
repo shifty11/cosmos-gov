@@ -128,3 +128,29 @@ func migrateUsers() {
 	//}
 	//log.Sugar.Info("User migration successful")
 }
+
+type DbManagers struct {
+	ChainManager          *ChainManager
+	UserManager           *UserManager
+	TelegramChatManager   *TelegramChatManager
+	DiscordChannelManager *DiscordChannelManager
+	ProposalManager       *ProposalManager
+	SubscriptionManager   *SubscriptionManager
+	LensChainInfoManager  *LensChainInfoManager
+	StatsManager          *StatsManager
+}
+
+func NewDefaultDbManagers() DbManagers {
+	chainManager := NewChainManager()
+	userManager := NewUserManager()
+	return DbManagers{
+		ChainManager:          chainManager,
+		UserManager:           userManager,
+		TelegramChatManager:   NewTelegramChatManager(),
+		DiscordChannelManager: NewDiscordChannelManager(),
+		ProposalManager:       NewProposalManager(),
+		SubscriptionManager:   NewSubscriptionManager(userManager, chainManager),
+		LensChainInfoManager:  NewLensChainInfoManager(),
+		StatsManager:          NewStatsManager(),
+	}
+}

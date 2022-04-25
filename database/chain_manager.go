@@ -47,7 +47,7 @@ func (manager *ChainManager) All() []*ent.Chain {
 		Order(ent.Asc(chain.FieldDisplayName)).
 		All(manager.ctx)
 	if err != nil {
-		log.Sugar.Panic("Error while querying chains: %v", err)
+		log.Sugar.Panicf("Error while querying chains: %v", err)
 	}
 	return chains
 }
@@ -81,7 +81,7 @@ func (manager *ChainManager) Create(chainName string, rpcs []string) *ent.Chain 
 			SetIsEnabled(false).
 			Save(manager.ctx)
 		if err != nil {
-			log.Sugar.Panic("Error while creating chain: %v", err)
+			log.Sugar.Panicf("Error while creating chain: %v", err)
 		}
 		for _, rpc := range rpcs {
 			_, err := manager.client.RpcEndpoint.
@@ -90,7 +90,7 @@ func (manager *ChainManager) Create(chainName string, rpcs []string) *ent.Chain 
 				SetChain(c).
 				Save(manager.ctx)
 			if err != nil {
-				log.Sugar.Panic("Error while creating chain: %v", err)
+				log.Sugar.Panicf("Error while creating chain: %v", err)
 			}
 		}
 	}
@@ -125,4 +125,14 @@ func (manager *ChainManager) UpdateRpcs(chainName string, rpcs []string) error {
 		}
 	}
 	return nil
+}
+
+func (manager *ChainManager) GetFirstRpc(entChain *ent.Chain) *ent.RpcEndpoint {
+	rpc, err := entChain.
+		QueryRPCEndpoints().
+		First(context.Background())
+	if err != nil {
+		log.Sugar.Panicf("Error while getting firs rpc of chain %v: %v", entChain.Name, err)
+	}
+	return rpc
 }
