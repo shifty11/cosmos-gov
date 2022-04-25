@@ -31,8 +31,8 @@ func NewSubscriptionManager(userManager *UserManager, chainManager *ChainManager
 	return &SubscriptionManager{client: client, ctx: ctx, userManager: userManager, chainManager: chainManager}
 }
 
-func getSubscriptions(chainsOfUser []*ent.Chain) []*Subscription {
-	allChains := NewChainManager().Enabled()
+func getSubscriptions(chainManager *ChainManager, chainsOfUser []*ent.Chain) []*Subscription {
+	allChains := chainManager.Enabled()
 	var chains []*Subscription
 	for _, c := range allChains {
 		var chainEntry = Subscription{Name: c.Name, DisplayName: c.DisplayName, Notify: false}
@@ -69,7 +69,7 @@ func (manager *SubscriptionManager) GetSubscriptions(entUser *ent.User) []*ChatR
 			chats = append(chats, &ChatRoom{
 				Id:            tgChat.ID,
 				Name:          tgChat.Name,
-				Subscriptions: getSubscriptions(tgChat.Edges.Chains),
+				Subscriptions: getSubscriptions(manager.chainManager, tgChat.Edges.Chains),
 			})
 		}
 		return chats
@@ -87,7 +87,7 @@ func (manager *SubscriptionManager) GetSubscriptions(entUser *ent.User) []*ChatR
 			chats = append(chats, &ChatRoom{
 				Id:            dChannel.ID,
 				Name:          dChannel.Name,
-				Subscriptions: getSubscriptions(dChannel.Edges.Chains),
+				Subscriptions: getSubscriptions(manager.chainManager, dChannel.Edges.Chains),
 			})
 		}
 		return chats
@@ -95,47 +95,69 @@ func (manager *SubscriptionManager) GetSubscriptions(entUser *ent.User) []*ChatR
 }
 
 type TelegramSubscriptionManager struct {
-	client *ent.Client
-	ctx    context.Context
+	client        *ent.Client
+	ctx           context.Context
+	userManager   *TypedUserManager
+	chainManager  *ChainManager
+	tgChatManager *TelegramChatManager
 }
 
-func NewTelegramSubscriptionManager() *TelegramSubscriptionManager {
+func NewTelegramSubscriptionManager(
+	userManager *TypedUserManager,
+	chainManager *ChainManager,
+	tgChatManager *TelegramChatManager,
+) *TelegramSubscriptionManager {
 	client, ctx := connect()
-	return &TelegramSubscriptionManager{client: client, ctx: ctx}
+	return &TelegramSubscriptionManager{
+		client:        client,
+		ctx:           ctx,
+		userManager:   userManager,
+		chainManager:  chainManager,
+		tgChatManager: tgChatManager,
+	}
 }
 
 type DiscordSubscriptionManager struct {
-	client *ent.Client
-	ctx    context.Context
+	client                *ent.Client
+	ctx                   context.Context
+	userManager           *TypedUserManager
+	chainManager          *ChainManager
+	discordChannelManager *DiscordChannelManager
 }
 
-func NewDiscordSubscriptionManager() *DiscordSubscriptionManager {
+func NewDiscordSubscriptionManager(
+	userManager *TypedUserManager,
+	chainManager *ChainManager,
+	discordChannelManager *DiscordChannelManager,
+) *DiscordSubscriptionManager {
 	client, ctx := connect()
-	return &DiscordSubscriptionManager{client: client, ctx: ctx}
+	return &DiscordSubscriptionManager{
+		client:                client,
+		ctx:                   ctx,
+		userManager:           userManager,
+		chainManager:          chainManager,
+		discordChannelManager: discordChannelManager,
+	}
 }
 
 func (manager *TelegramSubscriptionManager) GetOrCreateSubscriptions(userId int64, userName string, chatId int64, chatName string, isGroup bool) []*Subscription {
-	userManager := NewTypedUserManager(user.TypeTelegram)
-	entUser := userManager.GetOrCreateUser(userId, userName)
-	tgChatManager := NewTelegramChatManager()
-	tgChat := tgChatManager.GetOrCreateTelegramChat(entUser, chatId, chatName, isGroup)
+	entUser := manager.userManager.GetOrCreateUser(userId, userName)
+	tgChat := manager.tgChatManager.GetOrCreateTelegramChat(entUser, chatId, chatName, isGroup)
 
 	chainsOfUser, err := tgChat.QueryChains().All(manager.ctx)
 	if err != nil {
 		log.Sugar.Panicf("Error while fetching chains for chat %v (%v): %v", tgChat.Name, tgChat.ID, err)
 	}
-	return getSubscriptions(chainsOfUser)
+	return getSubscriptions(manager.chainManager, chainsOfUser)
 }
 
 func (manager *DiscordSubscriptionManager) GetOrCreateSubscriptions(userId int64, userName string, channelId int64, channelName string, isGroup bool) []*Subscription {
-	userManager := NewTypedUserManager(user.TypeDiscord)
-	entUser := userManager.GetOrCreateUser(userId, userName)
-	dChannelManager := NewDiscordChannelManager()
-	dChannel := dChannelManager.GetOrCreateDiscordChannel(entUser, channelId, channelName, isGroup)
+	entUser := manager.userManager.GetOrCreateUser(userId, userName)
+	dChannel := manager.discordChannelManager.GetOrCreateDiscordChannel(entUser, channelId, channelName, isGroup)
 
 	chainsOfUser, err := dChannel.QueryChains().All(manager.ctx)
 	if err != nil {
 		log.Sugar.Panicf("Error while fetching chains for chat %v (%v): %v", dChannel.Name, dChannel.ID, err)
 	}
-	return getSubscriptions(chainsOfUser)
+	return getSubscriptions(manager.chainManager, chainsOfUser)
 }

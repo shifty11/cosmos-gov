@@ -113,7 +113,11 @@ var (
 			channelName := getChannelName(i)
 			isGroup := isGroupChannel(i)
 
-			subsManager := database.NewDiscordSubscriptionManager()
+			//TODO: fix this
+			userManager := database.NewTypedUserManager(user.TypeDiscord)
+			chainManager := database.NewChainManager()
+			discordChannelManager := database.NewDiscordChannelManager()
+			subsManager := database.NewDiscordSubscriptionManager(userManager, chainManager, discordChannelManager)
 			subs := subsManager.GetOrCreateSubscriptions(userId, userName, channelId, channelName, isGroup)
 
 			chains := chunks(subs, 25)
@@ -197,7 +201,11 @@ var (
 
 			performUpdateSubscription(channelId, action)
 
-			subsManager := database.NewDiscordSubscriptionManager()
+			//TODO: fix this
+			userManager := database.NewTypedUserManager(user.TypeDiscord)
+			chainManager := database.NewChainManager()
+			discordChannelManager := database.NewDiscordChannelManager()
+			subsManager := database.NewDiscordSubscriptionManager(userManager, chainManager, discordChannelManager)
 			subs := subsManager.GetOrCreateSubscriptions(userId, userName, channelId, channelName, isGroup)
 
 			allChains := chunks(subs, 25)

@@ -26,6 +26,8 @@ func performUpdateSubscription(update *tgbotapi.Update, chainName string) {
 	tgChatId := getChatIdX(update)
 	chatName := getChatName(update)
 	log.Sugar.Debugf("Toggle subscription %v for Telegram chat %v (%v)", chainName, chatName, tgChatId)
+
+	//TODO: fix this
 	manager := database.NewTelegramChatManager()
 	_, err := manager.AddOrRemoveChain(tgChatId, chainName)
 	if err != nil {

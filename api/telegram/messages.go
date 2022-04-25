@@ -38,7 +38,12 @@ func sendSubscriptions(update *tgbotapi.Update) {
 		log.Sugar.Debugf("Send subscriptions to user #%v", chatId)
 	}
 	userId := getUserIdX(update)
-	subsManager := database.NewTelegramSubscriptionManager()
+
+	//TODO: fix this
+	userManager := database.NewTypedUserManager(user.TypeTelegram)
+	chainManager := database.NewChainManager()
+	tgChatManager := database.NewTelegramChatManager()
+	subsManager := database.NewTelegramSubscriptionManager(userManager, chainManager, tgChatManager)
 	chains := subsManager.GetOrCreateSubscriptions(userId, getUserName(update), chatId, getChatName(update), isGroupX(update))
 
 	var buttons [][]Button
