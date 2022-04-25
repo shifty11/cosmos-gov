@@ -112,7 +112,7 @@ func (ds Datasource) getChainInfo(chainName string) (*lens.ChainClient, []string
 
 	if len(rpcs) <= 0 {
 		log.Sugar.Errorf("Found no working RPC endpoints on chain %s: %v \n", chainInfo.ChainID, err)
-		return nil, nil, err
+		return nil, nil, errors.New("found no working RPC endpoints")
 	}
 
 	pwd, _ := os.Getwd()
