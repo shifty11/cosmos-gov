@@ -6,8 +6,10 @@ import (
 	"github.com/shifty11/cosmos-gov/ent/chain"
 	"github.com/shifty11/cosmos-gov/ent/rpcendpoint"
 	"github.com/shifty11/cosmos-gov/log"
+	lens "github.com/strangelove-ventures/lens/client"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
+	"os"
 )
 
 var caser = cases.Title(language.English)
@@ -90,7 +92,7 @@ func (manager *ChainManager) Create(chainName string, rpcs []string) *ent.Chain 
 				SetChain(c).
 				Save(manager.ctx)
 			if err != nil {
-				log.Sugar.Panicf("Error while creating chain: %v", err)
+				log.Sugar.Panicf("Error while creating rpc endpoint: %v", err)
 			}
 		}
 	}
@@ -135,4 +137,27 @@ func (manager *ChainManager) GetFirstRpc(entChain *ent.Chain) *ent.RpcEndpoint {
 		log.Sugar.Panicf("Error while getting firs rpc of chain %v: %v", entChain.Name, err)
 	}
 	return rpc
+}
+
+func (manager *ChainManager) BuildLensClient(entChain *ent.Chain) (*lens.ChainClient, error) {
+	rpc := manager.GetFirstRpc(entChain)
+
+	pwd, _ := os.Getwd()
+	key_dir := pwd + "/keys"
+
+	chainConfig := lens.ChainClientConfig{
+		Key:            "default",
+		ChainID:        entChain.Name,
+		RPCAddr:        rpc.Endpoint,
+		KeyringBackend: "test",
+		Debug:          true,
+		Timeout:        "20s",
+		Modules:        lens.ModuleBasics,
+	}
+
+	chainClient, err := lens.NewChainClient(log.Sugar.Desugar(), &chainConfig, key_dir, os.Stdin, os.Stdout)
+	if err != nil {
+		log.Sugar.Fatalf("Failed to build new chain client for %s. Err: %v \n", entChain.DisplayName, err)
+	}
+	return chainClient, nil
 }

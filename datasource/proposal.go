@@ -136,29 +136,6 @@ func (ds Datasource) getChainInfo(chainName string) (*lens.ChainClient, []string
 	return chainClient, rpcs, nil
 }
 
-func (ds Datasource) getChainClientFromDb(entChain *ent.Chain) (*lens.ChainClient, error) {
-	rpc := ds.chainManager.GetFirstRpc(entChain)
-
-	pwd, _ := os.Getwd()
-	key_dir := pwd + "/keys"
-
-	chainConfig := lens.ChainClientConfig{
-		Key:            "default",
-		ChainID:        entChain.Name,
-		RPCAddr:        rpc.Endpoint,
-		KeyringBackend: "test",
-		Debug:          true,
-		Timeout:        "20s",
-		Modules:        lens.ModuleBasics,
-	}
-
-	chainClient, err := lens.NewChainClient(log.Sugar.Desugar(), &chainConfig, key_dir, os.Stdin, os.Stdout)
-	if err != nil {
-		log.Sugar.Fatalf("Failed to build new chain client for %s. Err: %v \n", entChain.DisplayName, err)
-	}
-	return chainClient, nil
-}
-
 func (ds Datasource) saveAndSendProposals(props *database.Proposals, entChain *ent.Chain) {
 	for _, prop := range props.Proposals {
 		entProp := ds.proposalManager.CreateIfNotExists(&prop, entChain)
@@ -198,7 +175,7 @@ func (ds Datasource) updateProposal(entProp *ent.Proposal, status types.Proposal
 		CountTotal: false,
 		Reverse:    true,
 	}
-	client, err := ds.getChainClientFromDb(entProp.Edges.Chain)
+	client, err := ds.chainManager.BuildLensClient(entProp.Edges.Chain)
 	if err != nil {
 		log.Sugar.Fatalf("Could not get client for chain %v. It's probably not saved into the db.", chain.Name)
 	}
@@ -241,7 +218,7 @@ func (ds Datasource) FetchProposals() {
 	log.Sugar.Info("Fetch proposals")
 	chains := ds.chainManager.All()
 	for _, c := range chains {
-		client, err := ds.getChainClientFromDb(c)
+		client, err := ds.chainManager.BuildLensClient(c)
 		if err != nil {
 			log.Sugar.Errorf("Could not get client for chain %v. It's probably not saved into the db.", c.Name)
 			continue
