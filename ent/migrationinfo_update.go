@@ -28,9 +28,9 @@ func (miu *MigrationInfoUpdate) Where(ps ...predicate.MigrationInfo) *MigrationI
 	return miu
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (miu *MigrationInfoUpdate) SetUpdatedAt(t time.Time) *MigrationInfoUpdate {
-	miu.mutation.SetUpdatedAt(t)
+// SetUpdateTime sets the "update_time" field.
+func (miu *MigrationInfoUpdate) SetUpdateTime(t time.Time) *MigrationInfoUpdate {
+	miu.mutation.SetUpdateTime(t)
 	return miu
 }
 
@@ -110,9 +110,9 @@ func (miu *MigrationInfoUpdate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (miu *MigrationInfoUpdate) defaults() {
-	if _, ok := miu.mutation.UpdatedAt(); !ok {
-		v := migrationinfo.UpdateDefaultUpdatedAt()
-		miu.mutation.SetUpdatedAt(v)
+	if _, ok := miu.mutation.UpdateTime(); !ok {
+		v := migrationinfo.UpdateDefaultUpdateTime()
+		miu.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -134,11 +134,11 @@ func (miu *MigrationInfoUpdate) sqlSave(ctx context.Context) (n int, err error) 
 			}
 		}
 	}
-	if value, ok := miu.mutation.UpdatedAt(); ok {
+	if value, ok := miu.mutation.UpdateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: migrationinfo.FieldUpdatedAt,
+			Column: migrationinfo.FieldUpdateTime,
 		})
 	}
 	if value, ok := miu.mutation.IsMigrated(); ok {
@@ -167,9 +167,9 @@ type MigrationInfoUpdateOne struct {
 	mutation *MigrationInfoMutation
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (miuo *MigrationInfoUpdateOne) SetUpdatedAt(t time.Time) *MigrationInfoUpdateOne {
-	miuo.mutation.SetUpdatedAt(t)
+// SetUpdateTime sets the "update_time" field.
+func (miuo *MigrationInfoUpdateOne) SetUpdateTime(t time.Time) *MigrationInfoUpdateOne {
+	miuo.mutation.SetUpdateTime(t)
 	return miuo
 }
 
@@ -256,9 +256,9 @@ func (miuo *MigrationInfoUpdateOne) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (miuo *MigrationInfoUpdateOne) defaults() {
-	if _, ok := miuo.mutation.UpdatedAt(); !ok {
-		v := migrationinfo.UpdateDefaultUpdatedAt()
-		miuo.mutation.SetUpdatedAt(v)
+	if _, ok := miuo.mutation.UpdateTime(); !ok {
+		v := migrationinfo.UpdateDefaultUpdateTime()
+		miuo.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -297,11 +297,11 @@ func (miuo *MigrationInfoUpdateOne) sqlSave(ctx context.Context) (_node *Migrati
 			}
 		}
 	}
-	if value, ok := miuo.mutation.UpdatedAt(); ok {
+	if value, ok := miuo.mutation.UpdateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: migrationinfo.FieldUpdatedAt,
+			Column: migrationinfo.FieldUpdateTime,
 		})
 	}
 	if value, ok := miuo.mutation.IsMigrated(); ok {

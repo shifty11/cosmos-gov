@@ -8,6 +8,7 @@ import (
 	"github.com/shifty11/cosmos-gov/api/grpc/protobuf/go/vote_permission_service"
 	"github.com/shifty11/cosmos-gov/api/grpc/subscription"
 	"github.com/shifty11/cosmos-gov/api/grpc/vote_permission"
+	"github.com/shifty11/cosmos-gov/authz"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/log"
 	"google.golang.org/grpc"
@@ -27,13 +28,16 @@ func Start() {
 	if jwtSecretKey == "" {
 		log.Sugar.Panic("JWT_SECRET_KEY must be set")
 	}
-	userManager := database.NewUserManager()
-	chainManager := database.NewChainManager()
+	managers := database.NewDefaultDbManagers()
+
 	jwtManager := auth.NewJWTManager([]byte(jwtSecretKey), accessTokenDuration, refreshTokenDuration)
-	interceptor := auth.NewAuthInterceptor(jwtManager, userManager, auth.AccessibleRoles())
-	authServer := auth.NewAuthServer(userManager, jwtManager)
-	subscriptionServer := subscription.NewSubscriptionsServer(database.NewSubscriptionManager(userManager, chainManager))
-	votePermissionServer := vote_permission.NewVotePermissionsServer()
+	interceptor := auth.NewAuthInterceptor(jwtManager, managers.UserManager, auth.AccessibleRoles())
+
+	authzClient := authz.NewAuthzClient(managers.ChainManager)
+
+	authServer := auth.NewAuthServer(managers.UserManager, jwtManager)
+	subscriptionServer := subscription.NewSubscriptionsServer(managers.SubscriptionManager)
+	votePermissionServer := vote_permission.NewVotePermissionsServer(authzClient, managers.WalletManager)
 
 	server := grpc.NewServer(
 		grpc.UnaryInterceptor(interceptor.Unary()),

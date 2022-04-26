@@ -29,9 +29,9 @@ func (reu *RpcEndpointUpdate) Where(ps ...predicate.RpcEndpoint) *RpcEndpointUpd
 	return reu
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (reu *RpcEndpointUpdate) SetUpdatedAt(t time.Time) *RpcEndpointUpdate {
-	reu.mutation.SetUpdatedAt(t)
+// SetUpdateTime sets the "update_time" field.
+func (reu *RpcEndpointUpdate) SetUpdateTime(t time.Time) *RpcEndpointUpdate {
+	reu.mutation.SetUpdateTime(t)
 	return reu
 }
 
@@ -128,9 +128,9 @@ func (reu *RpcEndpointUpdate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (reu *RpcEndpointUpdate) defaults() {
-	if _, ok := reu.mutation.UpdatedAt(); !ok {
-		v := rpcendpoint.UpdateDefaultUpdatedAt()
-		reu.mutation.SetUpdatedAt(v)
+	if _, ok := reu.mutation.UpdateTime(); !ok {
+		v := rpcendpoint.UpdateDefaultUpdateTime()
+		reu.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -152,11 +152,11 @@ func (reu *RpcEndpointUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := reu.mutation.UpdatedAt(); ok {
+	if value, ok := reu.mutation.UpdateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: rpcendpoint.FieldUpdatedAt,
+			Column: rpcendpoint.FieldUpdateTime,
 		})
 	}
 	if value, ok := reu.mutation.Endpoint(); ok {
@@ -220,9 +220,9 @@ type RpcEndpointUpdateOne struct {
 	mutation *RpcEndpointMutation
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (reuo *RpcEndpointUpdateOne) SetUpdatedAt(t time.Time) *RpcEndpointUpdateOne {
-	reuo.mutation.SetUpdatedAt(t)
+// SetUpdateTime sets the "update_time" field.
+func (reuo *RpcEndpointUpdateOne) SetUpdateTime(t time.Time) *RpcEndpointUpdateOne {
+	reuo.mutation.SetUpdateTime(t)
 	return reuo
 }
 
@@ -326,9 +326,9 @@ func (reuo *RpcEndpointUpdateOne) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (reuo *RpcEndpointUpdateOne) defaults() {
-	if _, ok := reuo.mutation.UpdatedAt(); !ok {
-		v := rpcendpoint.UpdateDefaultUpdatedAt()
-		reuo.mutation.SetUpdatedAt(v)
+	if _, ok := reuo.mutation.UpdateTime(); !ok {
+		v := rpcendpoint.UpdateDefaultUpdateTime()
+		reuo.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -367,11 +367,11 @@ func (reuo *RpcEndpointUpdateOne) sqlSave(ctx context.Context) (_node *RpcEndpoi
 			}
 		}
 	}
-	if value, ok := reuo.mutation.UpdatedAt(); ok {
+	if value, ok := reuo.mutation.UpdateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: rpcendpoint.FieldUpdatedAt,
+			Column: rpcendpoint.FieldUpdateTime,
 		})
 	}
 	if value, ok := reuo.mutation.Endpoint(); ok {

@@ -30,9 +30,9 @@ func (tcu *TelegramChatUpdate) Where(ps ...predicate.TelegramChat) *TelegramChat
 	return tcu
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (tcu *TelegramChatUpdate) SetUpdatedAt(t time.Time) *TelegramChatUpdate {
-	tcu.mutation.SetUpdatedAt(t)
+// SetUpdateTime sets the "update_time" field.
+func (tcu *TelegramChatUpdate) SetUpdateTime(t time.Time) *TelegramChatUpdate {
+	tcu.mutation.SetUpdateTime(t)
 	return tcu
 }
 
@@ -165,9 +165,9 @@ func (tcu *TelegramChatUpdate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (tcu *TelegramChatUpdate) defaults() {
-	if _, ok := tcu.mutation.UpdatedAt(); !ok {
-		v := telegramchat.UpdateDefaultUpdatedAt()
-		tcu.mutation.SetUpdatedAt(v)
+	if _, ok := tcu.mutation.UpdateTime(); !ok {
+		v := telegramchat.UpdateDefaultUpdateTime()
+		tcu.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -189,11 +189,11 @@ func (tcu *TelegramChatUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := tcu.mutation.UpdatedAt(); ok {
+	if value, ok := tcu.mutation.UpdateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: telegramchat.FieldUpdatedAt,
+			Column: telegramchat.FieldUpdateTime,
 		})
 	}
 	if value, ok := tcu.mutation.Name(); ok {
@@ -311,9 +311,9 @@ type TelegramChatUpdateOne struct {
 	mutation *TelegramChatMutation
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (tcuo *TelegramChatUpdateOne) SetUpdatedAt(t time.Time) *TelegramChatUpdateOne {
-	tcuo.mutation.SetUpdatedAt(t)
+// SetUpdateTime sets the "update_time" field.
+func (tcuo *TelegramChatUpdateOne) SetUpdateTime(t time.Time) *TelegramChatUpdateOne {
+	tcuo.mutation.SetUpdateTime(t)
 	return tcuo
 }
 
@@ -453,9 +453,9 @@ func (tcuo *TelegramChatUpdateOne) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (tcuo *TelegramChatUpdateOne) defaults() {
-	if _, ok := tcuo.mutation.UpdatedAt(); !ok {
-		v := telegramchat.UpdateDefaultUpdatedAt()
-		tcuo.mutation.SetUpdatedAt(v)
+	if _, ok := tcuo.mutation.UpdateTime(); !ok {
+		v := telegramchat.UpdateDefaultUpdateTime()
+		tcuo.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -494,11 +494,11 @@ func (tcuo *TelegramChatUpdateOne) sqlSave(ctx context.Context) (_node *Telegram
 			}
 		}
 	}
-	if value, ok := tcuo.mutation.UpdatedAt(); ok {
+	if value, ok := tcuo.mutation.UpdateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: telegramchat.FieldUpdatedAt,
+			Column: telegramchat.FieldUpdateTime,
 		})
 	}
 	if value, ok := tcuo.mutation.Name(); ok {

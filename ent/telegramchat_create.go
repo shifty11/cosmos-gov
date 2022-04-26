@@ -22,30 +22,30 @@ type TelegramChatCreate struct {
 	hooks    []Hook
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (tcc *TelegramChatCreate) SetCreatedAt(t time.Time) *TelegramChatCreate {
-	tcc.mutation.SetCreatedAt(t)
+// SetCreateTime sets the "create_time" field.
+func (tcc *TelegramChatCreate) SetCreateTime(t time.Time) *TelegramChatCreate {
+	tcc.mutation.SetCreateTime(t)
 	return tcc
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (tcc *TelegramChatCreate) SetNillableCreatedAt(t *time.Time) *TelegramChatCreate {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (tcc *TelegramChatCreate) SetNillableCreateTime(t *time.Time) *TelegramChatCreate {
 	if t != nil {
-		tcc.SetCreatedAt(*t)
+		tcc.SetCreateTime(*t)
 	}
 	return tcc
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (tcc *TelegramChatCreate) SetUpdatedAt(t time.Time) *TelegramChatCreate {
-	tcc.mutation.SetUpdatedAt(t)
+// SetUpdateTime sets the "update_time" field.
+func (tcc *TelegramChatCreate) SetUpdateTime(t time.Time) *TelegramChatCreate {
+	tcc.mutation.SetUpdateTime(t)
 	return tcc
 }
 
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (tcc *TelegramChatCreate) SetNillableUpdatedAt(t *time.Time) *TelegramChatCreate {
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (tcc *TelegramChatCreate) SetNillableUpdateTime(t *time.Time) *TelegramChatCreate {
 	if t != nil {
-		tcc.SetUpdatedAt(*t)
+		tcc.SetUpdateTime(*t)
 	}
 	return tcc
 }
@@ -173,23 +173,23 @@ func (tcc *TelegramChatCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (tcc *TelegramChatCreate) defaults() {
-	if _, ok := tcc.mutation.CreatedAt(); !ok {
-		v := telegramchat.DefaultCreatedAt()
-		tcc.mutation.SetCreatedAt(v)
+	if _, ok := tcc.mutation.CreateTime(); !ok {
+		v := telegramchat.DefaultCreateTime()
+		tcc.mutation.SetCreateTime(v)
 	}
-	if _, ok := tcc.mutation.UpdatedAt(); !ok {
-		v := telegramchat.DefaultUpdatedAt()
-		tcc.mutation.SetUpdatedAt(v)
+	if _, ok := tcc.mutation.UpdateTime(); !ok {
+		v := telegramchat.DefaultUpdateTime()
+		tcc.mutation.SetUpdateTime(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (tcc *TelegramChatCreate) check() error {
-	if _, ok := tcc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "TelegramChat.created_at"`)}
+	if _, ok := tcc.mutation.CreateTime(); !ok {
+		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "TelegramChat.create_time"`)}
 	}
-	if _, ok := tcc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "TelegramChat.updated_at"`)}
+	if _, ok := tcc.mutation.UpdateTime(); !ok {
+		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "TelegramChat.update_time"`)}
 	}
 	if _, ok := tcc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "TelegramChat.name"`)}
@@ -230,21 +230,21 @@ func (tcc *TelegramChatCreate) createSpec() (*TelegramChat, *sqlgraph.CreateSpec
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := tcc.mutation.CreatedAt(); ok {
+	if value, ok := tcc.mutation.CreateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: telegramchat.FieldCreatedAt,
+			Column: telegramchat.FieldCreateTime,
 		})
-		_node.CreatedAt = value
+		_node.CreateTime = value
 	}
-	if value, ok := tcc.mutation.UpdatedAt(); ok {
+	if value, ok := tcc.mutation.UpdateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: telegramchat.FieldUpdatedAt,
+			Column: telegramchat.FieldUpdateTime,
 		})
-		_node.UpdatedAt = value
+		_node.UpdateTime = value
 	}
 	if value, ok := tcc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

@@ -28,9 +28,9 @@ func (lciu *LensChainInfoUpdate) Where(ps ...predicate.LensChainInfo) *LensChain
 	return lciu
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (lciu *LensChainInfoUpdate) SetUpdatedAt(t time.Time) *LensChainInfoUpdate {
-	lciu.mutation.SetUpdatedAt(t)
+// SetUpdateTime sets the "update_time" field.
+func (lciu *LensChainInfoUpdate) SetUpdateTime(t time.Time) *LensChainInfoUpdate {
+	lciu.mutation.SetUpdateTime(t)
 	return lciu
 }
 
@@ -115,9 +115,9 @@ func (lciu *LensChainInfoUpdate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (lciu *LensChainInfoUpdate) defaults() {
-	if _, ok := lciu.mutation.UpdatedAt(); !ok {
-		v := lenschaininfo.UpdateDefaultUpdatedAt()
-		lciu.mutation.SetUpdatedAt(v)
+	if _, ok := lciu.mutation.UpdateTime(); !ok {
+		v := lenschaininfo.UpdateDefaultUpdateTime()
+		lciu.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -139,11 +139,11 @@ func (lciu *LensChainInfoUpdate) sqlSave(ctx context.Context) (n int, err error)
 			}
 		}
 	}
-	if value, ok := lciu.mutation.UpdatedAt(); ok {
+	if value, ok := lciu.mutation.UpdateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: lenschaininfo.FieldUpdatedAt,
+			Column: lenschaininfo.FieldUpdateTime,
 		})
 	}
 	if value, ok := lciu.mutation.Name(); ok {
@@ -186,9 +186,9 @@ type LensChainInfoUpdateOne struct {
 	mutation *LensChainInfoMutation
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (lciuo *LensChainInfoUpdateOne) SetUpdatedAt(t time.Time) *LensChainInfoUpdateOne {
-	lciuo.mutation.SetUpdatedAt(t)
+// SetUpdateTime sets the "update_time" field.
+func (lciuo *LensChainInfoUpdateOne) SetUpdateTime(t time.Time) *LensChainInfoUpdateOne {
+	lciuo.mutation.SetUpdateTime(t)
 	return lciuo
 }
 
@@ -280,9 +280,9 @@ func (lciuo *LensChainInfoUpdateOne) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (lciuo *LensChainInfoUpdateOne) defaults() {
-	if _, ok := lciuo.mutation.UpdatedAt(); !ok {
-		v := lenschaininfo.UpdateDefaultUpdatedAt()
-		lciuo.mutation.SetUpdatedAt(v)
+	if _, ok := lciuo.mutation.UpdateTime(); !ok {
+		v := lenschaininfo.UpdateDefaultUpdateTime()
+		lciuo.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -321,11 +321,11 @@ func (lciuo *LensChainInfoUpdateOne) sqlSave(ctx context.Context) (_node *LensCh
 			}
 		}
 	}
-	if value, ok := lciuo.mutation.UpdatedAt(); ok {
+	if value, ok := lciuo.mutation.UpdateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: lenschaininfo.FieldUpdatedAt,
+			Column: lenschaininfo.FieldUpdateTime,
 		})
 	}
 	if value, ok := lciuo.mutation.Name(); ok {

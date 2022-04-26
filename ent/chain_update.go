@@ -17,6 +17,7 @@ import (
 	"github.com/shifty11/cosmos-gov/ent/proposal"
 	"github.com/shifty11/cosmos-gov/ent/rpcendpoint"
 	"github.com/shifty11/cosmos-gov/ent/telegramchat"
+	"github.com/shifty11/cosmos-gov/ent/wallet"
 )
 
 // ChainUpdate is the builder for updating Chain entities.
@@ -32,9 +33,9 @@ func (cu *ChainUpdate) Where(ps ...predicate.Chain) *ChainUpdate {
 	return cu
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (cu *ChainUpdate) SetUpdatedAt(t time.Time) *ChainUpdate {
-	cu.mutation.SetUpdatedAt(t)
+// SetUpdateTime sets the "update_time" field.
+func (cu *ChainUpdate) SetUpdateTime(t time.Time) *ChainUpdate {
+	cu.mutation.SetUpdateTime(t)
 	return cu
 }
 
@@ -122,6 +123,21 @@ func (cu *ChainUpdate) AddRPCEndpoints(r ...*RpcEndpoint) *ChainUpdate {
 		ids[i] = r[i].ID
 	}
 	return cu.AddRPCEndpointIDs(ids...)
+}
+
+// AddWalletIDs adds the "wallets" edge to the Wallet entity by IDs.
+func (cu *ChainUpdate) AddWalletIDs(ids ...int) *ChainUpdate {
+	cu.mutation.AddWalletIDs(ids...)
+	return cu
+}
+
+// AddWallets adds the "wallets" edges to the Wallet entity.
+func (cu *ChainUpdate) AddWallets(w ...*Wallet) *ChainUpdate {
+	ids := make([]int, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return cu.AddWalletIDs(ids...)
 }
 
 // Mutation returns the ChainMutation object of the builder.
@@ -213,6 +229,27 @@ func (cu *ChainUpdate) RemoveRPCEndpoints(r ...*RpcEndpoint) *ChainUpdate {
 	return cu.RemoveRPCEndpointIDs(ids...)
 }
 
+// ClearWallets clears all "wallets" edges to the Wallet entity.
+func (cu *ChainUpdate) ClearWallets() *ChainUpdate {
+	cu.mutation.ClearWallets()
+	return cu
+}
+
+// RemoveWalletIDs removes the "wallets" edge to Wallet entities by IDs.
+func (cu *ChainUpdate) RemoveWalletIDs(ids ...int) *ChainUpdate {
+	cu.mutation.RemoveWalletIDs(ids...)
+	return cu
+}
+
+// RemoveWallets removes "wallets" edges to Wallet entities.
+func (cu *ChainUpdate) RemoveWallets(w ...*Wallet) *ChainUpdate {
+	ids := make([]int, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return cu.RemoveWalletIDs(ids...)
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (cu *ChainUpdate) Save(ctx context.Context) (int, error) {
 	var (
@@ -270,9 +307,9 @@ func (cu *ChainUpdate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (cu *ChainUpdate) defaults() {
-	if _, ok := cu.mutation.UpdatedAt(); !ok {
-		v := chain.UpdateDefaultUpdatedAt()
-		cu.mutation.SetUpdatedAt(v)
+	if _, ok := cu.mutation.UpdateTime(); !ok {
+		v := chain.UpdateDefaultUpdateTime()
+		cu.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -294,11 +331,11 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := cu.mutation.UpdatedAt(); ok {
+	if value, ok := cu.mutation.UpdateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: chain.FieldUpdatedAt,
+			Column: chain.FieldUpdateTime,
 		})
 	}
 	if value, ok := cu.mutation.Name(); ok {
@@ -538,6 +575,60 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if cu.mutation.WalletsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.WalletsTable,
+			Columns: []string{chain.WalletsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: wallet.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.RemovedWalletsIDs(); len(nodes) > 0 && !cu.mutation.WalletsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.WalletsTable,
+			Columns: []string{chain.WalletsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: wallet.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.WalletsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.WalletsTable,
+			Columns: []string{chain.WalletsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: wallet.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{chain.Label}
@@ -557,9 +648,9 @@ type ChainUpdateOne struct {
 	mutation *ChainMutation
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (cuo *ChainUpdateOne) SetUpdatedAt(t time.Time) *ChainUpdateOne {
-	cuo.mutation.SetUpdatedAt(t)
+// SetUpdateTime sets the "update_time" field.
+func (cuo *ChainUpdateOne) SetUpdateTime(t time.Time) *ChainUpdateOne {
+	cuo.mutation.SetUpdateTime(t)
 	return cuo
 }
 
@@ -647,6 +738,21 @@ func (cuo *ChainUpdateOne) AddRPCEndpoints(r ...*RpcEndpoint) *ChainUpdateOne {
 		ids[i] = r[i].ID
 	}
 	return cuo.AddRPCEndpointIDs(ids...)
+}
+
+// AddWalletIDs adds the "wallets" edge to the Wallet entity by IDs.
+func (cuo *ChainUpdateOne) AddWalletIDs(ids ...int) *ChainUpdateOne {
+	cuo.mutation.AddWalletIDs(ids...)
+	return cuo
+}
+
+// AddWallets adds the "wallets" edges to the Wallet entity.
+func (cuo *ChainUpdateOne) AddWallets(w ...*Wallet) *ChainUpdateOne {
+	ids := make([]int, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return cuo.AddWalletIDs(ids...)
 }
 
 // Mutation returns the ChainMutation object of the builder.
@@ -738,6 +844,27 @@ func (cuo *ChainUpdateOne) RemoveRPCEndpoints(r ...*RpcEndpoint) *ChainUpdateOne
 	return cuo.RemoveRPCEndpointIDs(ids...)
 }
 
+// ClearWallets clears all "wallets" edges to the Wallet entity.
+func (cuo *ChainUpdateOne) ClearWallets() *ChainUpdateOne {
+	cuo.mutation.ClearWallets()
+	return cuo
+}
+
+// RemoveWalletIDs removes the "wallets" edge to Wallet entities by IDs.
+func (cuo *ChainUpdateOne) RemoveWalletIDs(ids ...int) *ChainUpdateOne {
+	cuo.mutation.RemoveWalletIDs(ids...)
+	return cuo
+}
+
+// RemoveWallets removes "wallets" edges to Wallet entities.
+func (cuo *ChainUpdateOne) RemoveWallets(w ...*Wallet) *ChainUpdateOne {
+	ids := make([]int, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return cuo.RemoveWalletIDs(ids...)
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (cuo *ChainUpdateOne) Select(field string, fields ...string) *ChainUpdateOne {
@@ -802,9 +929,9 @@ func (cuo *ChainUpdateOne) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (cuo *ChainUpdateOne) defaults() {
-	if _, ok := cuo.mutation.UpdatedAt(); !ok {
-		v := chain.UpdateDefaultUpdatedAt()
-		cuo.mutation.SetUpdatedAt(v)
+	if _, ok := cuo.mutation.UpdateTime(); !ok {
+		v := chain.UpdateDefaultUpdateTime()
+		cuo.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -843,11 +970,11 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 			}
 		}
 	}
-	if value, ok := cuo.mutation.UpdatedAt(); ok {
+	if value, ok := cuo.mutation.UpdateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: chain.FieldUpdatedAt,
+			Column: chain.FieldUpdateTime,
 		})
 	}
 	if value, ok := cuo.mutation.Name(); ok {
@@ -1079,6 +1206,60 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: rpcendpoint.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if cuo.mutation.WalletsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.WalletsTable,
+			Columns: []string{chain.WalletsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: wallet.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.RemovedWalletsIDs(); len(nodes) > 0 && !cuo.mutation.WalletsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.WalletsTable,
+			Columns: []string{chain.WalletsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: wallet.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.WalletsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.WalletsTable,
+			Columns: []string{chain.WalletsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: wallet.FieldID,
 				},
 			},
 		}

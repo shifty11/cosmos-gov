@@ -11,16 +11,18 @@ const (
 	Label = "wallet"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldCreatedAt holds the string denoting the created_at field in the database.
-	FieldCreatedAt = "created_at"
-	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
-	FieldUpdatedAt = "updated_at"
+	// FieldCreateTime holds the string denoting the create_time field in the database.
+	FieldCreateTime = "create_time"
+	// FieldUpdateTime holds the string denoting the update_time field in the database.
+	FieldUpdateTime = "update_time"
 	// FieldAddress holds the string denoting the address field in the database.
 	FieldAddress = "address"
 	// EdgeUsers holds the string denoting the users edge name in mutations.
 	EdgeUsers = "users"
-	// EdgeChains holds the string denoting the chains edge name in mutations.
-	EdgeChains = "chains"
+	// EdgeChain holds the string denoting the chain edge name in mutations.
+	EdgeChain = "chain"
+	// EdgeGrants holds the string denoting the grants edge name in mutations.
+	EdgeGrants = "grants"
 	// Table holds the table name of the wallet in the database.
 	Table = "wallets"
 	// UsersTable is the table that holds the users relation/edge. The primary key declared below.
@@ -28,21 +30,34 @@ const (
 	// UsersInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	UsersInverseTable = "users"
-	// ChainsTable is the table that holds the chains relation/edge.
-	ChainsTable = "chains"
-	// ChainsInverseTable is the table name for the Chain entity.
+	// ChainTable is the table that holds the chain relation/edge.
+	ChainTable = "wallets"
+	// ChainInverseTable is the table name for the Chain entity.
 	// It exists in this package in order to avoid circular dependency with the "chain" package.
-	ChainsInverseTable = "chains"
-	// ChainsColumn is the table column denoting the chains relation/edge.
-	ChainsColumn = "wallet_chains"
+	ChainInverseTable = "chains"
+	// ChainColumn is the table column denoting the chain relation/edge.
+	ChainColumn = "chain_wallets"
+	// GrantsTable is the table that holds the grants relation/edge.
+	GrantsTable = "grants"
+	// GrantsInverseTable is the table name for the Grant entity.
+	// It exists in this package in order to avoid circular dependency with the "grant" package.
+	GrantsInverseTable = "grants"
+	// GrantsColumn is the table column denoting the grants relation/edge.
+	GrantsColumn = "wallet_grants"
 )
 
 // Columns holds all SQL columns for wallet fields.
 var Columns = []string{
 	FieldID,
-	FieldCreatedAt,
-	FieldUpdatedAt,
+	FieldCreateTime,
+	FieldUpdateTime,
 	FieldAddress,
+}
+
+// ForeignKeys holds the SQL foreign-keys that are owned by the "wallets"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"chain_wallets",
 }
 
 var (
@@ -58,14 +73,19 @@ func ValidColumn(column string) bool {
 			return true
 		}
 	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
+			return true
+		}
+	}
 	return false
 }
 
 var (
-	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
-	DefaultCreatedAt func() time.Time
-	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
-	DefaultUpdatedAt func() time.Time
-	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
-	UpdateDefaultUpdatedAt func() time.Time
+	// DefaultCreateTime holds the default value on creation for the "create_time" field.
+	DefaultCreateTime func() time.Time
+	// DefaultUpdateTime holds the default value on creation for the "update_time" field.
+	DefaultUpdateTime func() time.Time
+	// UpdateDefaultUpdateTime holds the default value on update for the "update_time" field.
+	UpdateDefaultUpdateTime func() time.Time
 )

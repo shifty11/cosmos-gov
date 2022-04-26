@@ -21,30 +21,30 @@ type ProposalCreate struct {
 	hooks    []Hook
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (pc *ProposalCreate) SetCreatedAt(t time.Time) *ProposalCreate {
-	pc.mutation.SetCreatedAt(t)
+// SetCreateTime sets the "create_time" field.
+func (pc *ProposalCreate) SetCreateTime(t time.Time) *ProposalCreate {
+	pc.mutation.SetCreateTime(t)
 	return pc
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (pc *ProposalCreate) SetNillableCreatedAt(t *time.Time) *ProposalCreate {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (pc *ProposalCreate) SetNillableCreateTime(t *time.Time) *ProposalCreate {
 	if t != nil {
-		pc.SetCreatedAt(*t)
+		pc.SetCreateTime(*t)
 	}
 	return pc
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (pc *ProposalCreate) SetUpdatedAt(t time.Time) *ProposalCreate {
-	pc.mutation.SetUpdatedAt(t)
+// SetUpdateTime sets the "update_time" field.
+func (pc *ProposalCreate) SetUpdateTime(t time.Time) *ProposalCreate {
+	pc.mutation.SetUpdateTime(t)
 	return pc
 }
 
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (pc *ProposalCreate) SetNillableUpdatedAt(t *time.Time) *ProposalCreate {
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (pc *ProposalCreate) SetNillableUpdateTime(t *time.Time) *ProposalCreate {
 	if t != nil {
-		pc.SetUpdatedAt(*t)
+		pc.SetUpdateTime(*t)
 	}
 	return pc
 }
@@ -175,23 +175,23 @@ func (pc *ProposalCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (pc *ProposalCreate) defaults() {
-	if _, ok := pc.mutation.CreatedAt(); !ok {
-		v := proposal.DefaultCreatedAt()
-		pc.mutation.SetCreatedAt(v)
+	if _, ok := pc.mutation.CreateTime(); !ok {
+		v := proposal.DefaultCreateTime()
+		pc.mutation.SetCreateTime(v)
 	}
-	if _, ok := pc.mutation.UpdatedAt(); !ok {
-		v := proposal.DefaultUpdatedAt()
-		pc.mutation.SetUpdatedAt(v)
+	if _, ok := pc.mutation.UpdateTime(); !ok {
+		v := proposal.DefaultUpdateTime()
+		pc.mutation.SetUpdateTime(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (pc *ProposalCreate) check() error {
-	if _, ok := pc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Proposal.created_at"`)}
+	if _, ok := pc.mutation.CreateTime(); !ok {
+		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "Proposal.create_time"`)}
 	}
-	if _, ok := pc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Proposal.updated_at"`)}
+	if _, ok := pc.mutation.UpdateTime(); !ok {
+		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "Proposal.update_time"`)}
 	}
 	if _, ok := pc.mutation.ProposalID(); !ok {
 		return &ValidationError{Name: "proposal_id", err: errors.New(`ent: missing required field "Proposal.proposal_id"`)}
@@ -243,21 +243,21 @@ func (pc *ProposalCreate) createSpec() (*Proposal, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
-	if value, ok := pc.mutation.CreatedAt(); ok {
+	if value, ok := pc.mutation.CreateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: proposal.FieldCreatedAt,
+			Column: proposal.FieldCreateTime,
 		})
-		_node.CreatedAt = value
+		_node.CreateTime = value
 	}
-	if value, ok := pc.mutation.UpdatedAt(); ok {
+	if value, ok := pc.mutation.UpdateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: proposal.FieldUpdatedAt,
+			Column: proposal.FieldUpdateTime,
 		})
-		_node.UpdatedAt = value
+		_node.UpdateTime = value
 	}
 	if value, ok := pc.mutation.ProposalID(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

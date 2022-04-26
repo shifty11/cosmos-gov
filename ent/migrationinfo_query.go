@@ -254,12 +254,12 @@ func (miq *MigrationInfoQuery) Clone() *MigrationInfoQuery {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		CreateTime time.Time `json:"create_time,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.MigrationInfo.Query().
-//		GroupBy(migrationinfo.FieldCreatedAt).
+//		GroupBy(migrationinfo.FieldCreateTime).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -281,11 +281,11 @@ func (miq *MigrationInfoQuery) GroupBy(field string, fields ...string) *Migratio
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		CreateTime time.Time `json:"create_time,omitempty"`
 //	}
 //
 //	client.MigrationInfo.Query().
-//		Select(migrationinfo.FieldCreatedAt).
+//		Select(migrationinfo.FieldCreateTime).
 //		Scan(ctx, &v)
 //
 func (miq *MigrationInfoQuery) Select(fields ...string) *MigrationInfoSelect {

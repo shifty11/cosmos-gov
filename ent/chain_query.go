@@ -18,6 +18,7 @@ import (
 	"github.com/shifty11/cosmos-gov/ent/proposal"
 	"github.com/shifty11/cosmos-gov/ent/rpcendpoint"
 	"github.com/shifty11/cosmos-gov/ent/telegramchat"
+	"github.com/shifty11/cosmos-gov/ent/wallet"
 )
 
 // ChainQuery is the builder for querying Chain entities.
@@ -34,7 +35,7 @@ type ChainQuery struct {
 	withTelegramChats   *TelegramChatQuery
 	withDiscordChannels *DiscordChannelQuery
 	withRPCEndpoints    *RpcEndpointQuery
-	withFKs             bool
+	withWallets         *WalletQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -152,6 +153,28 @@ func (cq *ChainQuery) QueryRPCEndpoints() *RpcEndpointQuery {
 			sqlgraph.From(chain.Table, chain.FieldID, selector),
 			sqlgraph.To(rpcendpoint.Table, rpcendpoint.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, chain.RPCEndpointsTable, chain.RPCEndpointsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryWallets chains the current query on the "wallets" edge.
+func (cq *ChainQuery) QueryWallets() *WalletQuery {
+	query := &WalletQuery{config: cq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := cq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := cq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(chain.Table, chain.FieldID, selector),
+			sqlgraph.To(wallet.Table, wallet.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, chain.WalletsTable, chain.WalletsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
 		return fromU, nil
@@ -344,6 +367,7 @@ func (cq *ChainQuery) Clone() *ChainQuery {
 		withTelegramChats:   cq.withTelegramChats.Clone(),
 		withDiscordChannels: cq.withDiscordChannels.Clone(),
 		withRPCEndpoints:    cq.withRPCEndpoints.Clone(),
+		withWallets:         cq.withWallets.Clone(),
 		// clone intermediate query.
 		sql:    cq.sql.Clone(),
 		path:   cq.path,
@@ -395,18 +419,29 @@ func (cq *ChainQuery) WithRPCEndpoints(opts ...func(*RpcEndpointQuery)) *ChainQu
 	return cq
 }
 
+// WithWallets tells the query-builder to eager-load the nodes that are connected to
+// the "wallets" edge. The optional arguments are used to configure the query builder of the edge.
+func (cq *ChainQuery) WithWallets(opts ...func(*WalletQuery)) *ChainQuery {
+	query := &WalletQuery{config: cq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	cq.withWallets = query
+	return cq
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		CreateTime time.Time `json:"create_time,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Chain.Query().
-//		GroupBy(chain.FieldCreatedAt).
+//		GroupBy(chain.FieldCreateTime).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -428,11 +463,11 @@ func (cq *ChainQuery) GroupBy(field string, fields ...string) *ChainGroupBy {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		CreateTime time.Time `json:"create_time,omitempty"`
 //	}
 //
 //	client.Chain.Query().
-//		Select(chain.FieldCreatedAt).
+//		Select(chain.FieldCreateTime).
 //		Scan(ctx, &v)
 //
 func (cq *ChainQuery) Select(fields ...string) *ChainSelect {
@@ -459,18 +494,15 @@ func (cq *ChainQuery) prepareQuery(ctx context.Context) error {
 func (cq *ChainQuery) sqlAll(ctx context.Context) ([]*Chain, error) {
 	var (
 		nodes       = []*Chain{}
-		withFKs     = cq.withFKs
 		_spec       = cq.querySpec()
-		loadedTypes = [4]bool{
+		loadedTypes = [5]bool{
 			cq.withProposals != nil,
 			cq.withTelegramChats != nil,
 			cq.withDiscordChannels != nil,
 			cq.withRPCEndpoints != nil,
+			cq.withWallets != nil,
 		}
 	)
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, chain.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &Chain{config: cq.config}
 		nodes = append(nodes, node)
@@ -676,6 +708,35 @@ func (cq *ChainQuery) sqlAll(ctx context.Context) ([]*Chain, error) {
 				return nil, fmt.Errorf(`unexpected foreign-key "chain_rpc_endpoints" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.RPCEndpoints = append(node.Edges.RPCEndpoints, n)
+		}
+	}
+
+	if query := cq.withWallets; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*Chain)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Wallets = []*Wallet{}
+		}
+		query.withFKs = true
+		query.Where(predicate.Wallet(func(s *sql.Selector) {
+			s.Where(sql.InValues(chain.WalletsColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.chain_wallets
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "chain_wallets" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "chain_wallets" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Wallets = append(node.Edges.Wallets, n)
 		}
 	}
 

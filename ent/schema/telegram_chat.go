@@ -5,7 +5,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
-	"time"
+	"entgo.io/ent/schema/mixin"
 )
 
 // TelegramChat holds the schema definition for the TelegramChat entity.
@@ -13,18 +13,18 @@ type TelegramChat struct {
 	ent.Schema
 }
 
+func (TelegramChat) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		mixin.Time{},
+	}
+}
+
 // Fields of the TelegramChat.
 func (TelegramChat) Fields() []ent.Field {
 	return []ent.Field{
-		field.Time("created_at").
-			Default(time.Now).
-			Immutable(),
-		field.Time("updated_at").
-			Default(time.Now).
-			UpdateDefault(time.Now),
-		field.Int64("id").
-			Unique().
-			Immutable(),
+		field.Int64("id"). // TODO: create chat_id field
+					Unique().
+					Immutable(),
 		field.String("name"),
 		field.Bool("is_group").
 			Immutable(),

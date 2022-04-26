@@ -29,9 +29,9 @@ func (pu *ProposalUpdate) Where(ps ...predicate.Proposal) *ProposalUpdate {
 	return pu
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (pu *ProposalUpdate) SetUpdatedAt(t time.Time) *ProposalUpdate {
-	pu.mutation.SetUpdatedAt(t)
+// SetUpdateTime sets the "update_time" field.
+func (pu *ProposalUpdate) SetUpdateTime(t time.Time) *ProposalUpdate {
+	pu.mutation.SetUpdateTime(t)
 	return pu
 }
 
@@ -171,9 +171,9 @@ func (pu *ProposalUpdate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (pu *ProposalUpdate) defaults() {
-	if _, ok := pu.mutation.UpdatedAt(); !ok {
-		v := proposal.UpdateDefaultUpdatedAt()
-		pu.mutation.SetUpdatedAt(v)
+	if _, ok := pu.mutation.UpdateTime(); !ok {
+		v := proposal.UpdateDefaultUpdateTime()
+		pu.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -205,11 +205,11 @@ func (pu *ProposalUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := pu.mutation.UpdatedAt(); ok {
+	if value, ok := pu.mutation.UpdateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: proposal.FieldUpdatedAt,
+			Column: proposal.FieldUpdateTime,
 		})
 	}
 	if value, ok := pu.mutation.ProposalID(); ok {
@@ -315,9 +315,9 @@ type ProposalUpdateOne struct {
 	mutation *ProposalMutation
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (puo *ProposalUpdateOne) SetUpdatedAt(t time.Time) *ProposalUpdateOne {
-	puo.mutation.SetUpdatedAt(t)
+// SetUpdateTime sets the "update_time" field.
+func (puo *ProposalUpdateOne) SetUpdateTime(t time.Time) *ProposalUpdateOne {
+	puo.mutation.SetUpdateTime(t)
 	return puo
 }
 
@@ -464,9 +464,9 @@ func (puo *ProposalUpdateOne) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (puo *ProposalUpdateOne) defaults() {
-	if _, ok := puo.mutation.UpdatedAt(); !ok {
-		v := proposal.UpdateDefaultUpdatedAt()
-		puo.mutation.SetUpdatedAt(v)
+	if _, ok := puo.mutation.UpdateTime(); !ok {
+		v := proposal.UpdateDefaultUpdateTime()
+		puo.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -515,11 +515,11 @@ func (puo *ProposalUpdateOne) sqlSave(ctx context.Context) (_node *Proposal, err
 			}
 		}
 	}
-	if value, ok := puo.mutation.UpdatedAt(); ok {
+	if value, ok := puo.mutation.UpdateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: proposal.FieldUpdatedAt,
+			Column: proposal.FieldUpdateTime,
 		})
 	}
 	if value, ok := puo.mutation.ProposalID(); ok {

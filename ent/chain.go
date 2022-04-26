@@ -16,10 +16,10 @@ type Chain struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt time.Time `json:"created_at,omitempty"`
-	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// CreateTime holds the value of the "create_time" field.
+	CreateTime time.Time `json:"create_time,omitempty"`
+	// UpdateTime holds the value of the "update_time" field.
+	UpdateTime time.Time `json:"update_time,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// DisplayName holds the value of the "display_name" field.
@@ -28,8 +28,7 @@ type Chain struct {
 	IsEnabled bool `json:"is_enabled,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ChainQuery when eager-loading is set.
-	Edges         ChainEdges `json:"edges"`
-	wallet_chains *int
+	Edges ChainEdges `json:"edges"`
 }
 
 // ChainEdges holds the relations/edges for other nodes in the graph.
@@ -42,9 +41,11 @@ type ChainEdges struct {
 	DiscordChannels []*DiscordChannel `json:"discord_channels,omitempty"`
 	// RPCEndpoints holds the value of the rpc_endpoints edge.
 	RPCEndpoints []*RpcEndpoint `json:"rpc_endpoints,omitempty"`
+	// Wallets holds the value of the wallets edge.
+	Wallets []*Wallet `json:"wallets,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [5]bool
 }
 
 // ProposalsOrErr returns the Proposals value or an error if the edge
@@ -83,6 +84,15 @@ func (e ChainEdges) RPCEndpointsOrErr() ([]*RpcEndpoint, error) {
 	return nil, &NotLoadedError{edge: "rpc_endpoints"}
 }
 
+// WalletsOrErr returns the Wallets value or an error if the edge
+// was not loaded in eager-loading.
+func (e ChainEdges) WalletsOrErr() ([]*Wallet, error) {
+	if e.loadedTypes[4] {
+		return e.Wallets, nil
+	}
+	return nil, &NotLoadedError{edge: "wallets"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Chain) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
@@ -94,10 +104,8 @@ func (*Chain) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullInt64)
 		case chain.FieldName, chain.FieldDisplayName:
 			values[i] = new(sql.NullString)
-		case chain.FieldCreatedAt, chain.FieldUpdatedAt:
+		case chain.FieldCreateTime, chain.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
-		case chain.ForeignKeys[0]: // wallet_chains
-			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Chain", columns[i])
 		}
@@ -119,17 +127,17 @@ func (c *Chain) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			c.ID = int(value.Int64)
-		case chain.FieldCreatedAt:
+		case chain.FieldCreateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+				return fmt.Errorf("unexpected type %T for field create_time", values[i])
 			} else if value.Valid {
-				c.CreatedAt = value.Time
+				c.CreateTime = value.Time
 			}
-		case chain.FieldUpdatedAt:
+		case chain.FieldUpdateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+				return fmt.Errorf("unexpected type %T for field update_time", values[i])
 			} else if value.Valid {
-				c.UpdatedAt = value.Time
+				c.UpdateTime = value.Time
 			}
 		case chain.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -148,13 +156,6 @@ func (c *Chain) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field is_enabled", values[i])
 			} else if value.Valid {
 				c.IsEnabled = value.Bool
-			}
-		case chain.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field wallet_chains", value)
-			} else if value.Valid {
-				c.wallet_chains = new(int)
-				*c.wallet_chains = int(value.Int64)
 			}
 		}
 	}
@@ -181,6 +182,11 @@ func (c *Chain) QueryRPCEndpoints() *RpcEndpointQuery {
 	return (&ChainClient{config: c.config}).QueryRPCEndpoints(c)
 }
 
+// QueryWallets queries the "wallets" edge of the Chain entity.
+func (c *Chain) QueryWallets() *WalletQuery {
+	return (&ChainClient{config: c.config}).QueryWallets(c)
+}
+
 // Update returns a builder for updating this Chain.
 // Note that you need to call Chain.Unwrap() before calling this method if this Chain
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -204,10 +210,10 @@ func (c *Chain) String() string {
 	var builder strings.Builder
 	builder.WriteString("Chain(")
 	builder.WriteString(fmt.Sprintf("id=%v", c.ID))
-	builder.WriteString(", created_at=")
-	builder.WriteString(c.CreatedAt.Format(time.ANSIC))
-	builder.WriteString(", updated_at=")
-	builder.WriteString(c.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", create_time=")
+	builder.WriteString(c.CreateTime.Format(time.ANSIC))
+	builder.WriteString(", update_time=")
+	builder.WriteString(c.UpdateTime.Format(time.ANSIC))
 	builder.WriteString(", name=")
 	builder.WriteString(c.Name)
 	builder.WriteString(", display_name=")

@@ -15,6 +15,7 @@ import (
 	"github.com/shifty11/cosmos-gov/ent/proposal"
 	"github.com/shifty11/cosmos-gov/ent/rpcendpoint"
 	"github.com/shifty11/cosmos-gov/ent/telegramchat"
+	"github.com/shifty11/cosmos-gov/ent/wallet"
 )
 
 // ChainCreate is the builder for creating a Chain entity.
@@ -24,30 +25,30 @@ type ChainCreate struct {
 	hooks    []Hook
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (cc *ChainCreate) SetCreatedAt(t time.Time) *ChainCreate {
-	cc.mutation.SetCreatedAt(t)
+// SetCreateTime sets the "create_time" field.
+func (cc *ChainCreate) SetCreateTime(t time.Time) *ChainCreate {
+	cc.mutation.SetCreateTime(t)
 	return cc
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (cc *ChainCreate) SetNillableCreatedAt(t *time.Time) *ChainCreate {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (cc *ChainCreate) SetNillableCreateTime(t *time.Time) *ChainCreate {
 	if t != nil {
-		cc.SetCreatedAt(*t)
+		cc.SetCreateTime(*t)
 	}
 	return cc
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (cc *ChainCreate) SetUpdatedAt(t time.Time) *ChainCreate {
-	cc.mutation.SetUpdatedAt(t)
+// SetUpdateTime sets the "update_time" field.
+func (cc *ChainCreate) SetUpdateTime(t time.Time) *ChainCreate {
+	cc.mutation.SetUpdateTime(t)
 	return cc
 }
 
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (cc *ChainCreate) SetNillableUpdatedAt(t *time.Time) *ChainCreate {
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (cc *ChainCreate) SetNillableUpdateTime(t *time.Time) *ChainCreate {
 	if t != nil {
-		cc.SetUpdatedAt(*t)
+		cc.SetUpdateTime(*t)
 	}
 	return cc
 }
@@ -138,6 +139,21 @@ func (cc *ChainCreate) AddRPCEndpoints(r ...*RpcEndpoint) *ChainCreate {
 	return cc.AddRPCEndpointIDs(ids...)
 }
 
+// AddWalletIDs adds the "wallets" edge to the Wallet entity by IDs.
+func (cc *ChainCreate) AddWalletIDs(ids ...int) *ChainCreate {
+	cc.mutation.AddWalletIDs(ids...)
+	return cc
+}
+
+// AddWallets adds the "wallets" edges to the Wallet entity.
+func (cc *ChainCreate) AddWallets(w ...*Wallet) *ChainCreate {
+	ids := make([]int, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return cc.AddWalletIDs(ids...)
+}
+
 // Mutation returns the ChainMutation object of the builder.
 func (cc *ChainCreate) Mutation() *ChainMutation {
 	return cc.mutation
@@ -209,13 +225,13 @@ func (cc *ChainCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (cc *ChainCreate) defaults() {
-	if _, ok := cc.mutation.CreatedAt(); !ok {
-		v := chain.DefaultCreatedAt()
-		cc.mutation.SetCreatedAt(v)
+	if _, ok := cc.mutation.CreateTime(); !ok {
+		v := chain.DefaultCreateTime()
+		cc.mutation.SetCreateTime(v)
 	}
-	if _, ok := cc.mutation.UpdatedAt(); !ok {
-		v := chain.DefaultUpdatedAt()
-		cc.mutation.SetUpdatedAt(v)
+	if _, ok := cc.mutation.UpdateTime(); !ok {
+		v := chain.DefaultUpdateTime()
+		cc.mutation.SetUpdateTime(v)
 	}
 	if _, ok := cc.mutation.IsEnabled(); !ok {
 		v := chain.DefaultIsEnabled
@@ -225,11 +241,11 @@ func (cc *ChainCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (cc *ChainCreate) check() error {
-	if _, ok := cc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Chain.created_at"`)}
+	if _, ok := cc.mutation.CreateTime(); !ok {
+		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "Chain.create_time"`)}
 	}
-	if _, ok := cc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Chain.updated_at"`)}
+	if _, ok := cc.mutation.UpdateTime(); !ok {
+		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "Chain.update_time"`)}
 	}
 	if _, ok := cc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Chain.name"`)}
@@ -267,21 +283,21 @@ func (cc *ChainCreate) createSpec() (*Chain, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
-	if value, ok := cc.mutation.CreatedAt(); ok {
+	if value, ok := cc.mutation.CreateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: chain.FieldCreatedAt,
+			Column: chain.FieldCreateTime,
 		})
-		_node.CreatedAt = value
+		_node.CreateTime = value
 	}
-	if value, ok := cc.mutation.UpdatedAt(); ok {
+	if value, ok := cc.mutation.UpdateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: chain.FieldUpdatedAt,
+			Column: chain.FieldUpdateTime,
 		})
-		_node.UpdatedAt = value
+		_node.UpdateTime = value
 	}
 	if value, ok := cc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -375,6 +391,25 @@ func (cc *ChainCreate) createSpec() (*Chain, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: rpcendpoint.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := cc.mutation.WalletsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.WalletsTable,
+			Columns: []string{chain.WalletsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: wallet.FieldID,
 				},
 			},
 		}

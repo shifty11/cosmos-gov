@@ -5,7 +5,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
-	"time"
+	"entgo.io/ent/schema/mixin"
 )
 
 // Chain holds the schema definition for the Chain entity.
@@ -13,15 +13,15 @@ type Chain struct {
 	ent.Schema
 }
 
+func (Chain) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		mixin.Time{},
+	}
+}
+
 // Fields of the Chain.
 func (Chain) Fields() []ent.Field {
 	return []ent.Field{
-		field.Time("created_at").
-			Default(time.Now).
-			Immutable(),
-		field.Time("updated_at").
-			Default(time.Now).
-			UpdateDefault(time.Now),
 		field.String("name").
 			Unique(),
 		field.String("display_name").
@@ -42,6 +42,7 @@ func (Chain) Edges() []ent.Edge {
 		edge.From("discord_channels", DiscordChannel.Type).
 			Ref("chains"),
 		edge.To("rpc_endpoints", RpcEndpoint.Type),
+		edge.To("wallets", Wallet.Type),
 	}
 }
 

@@ -30,9 +30,9 @@ func (dcu *DiscordChannelUpdate) Where(ps ...predicate.DiscordChannel) *DiscordC
 	return dcu
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (dcu *DiscordChannelUpdate) SetUpdatedAt(t time.Time) *DiscordChannelUpdate {
-	dcu.mutation.SetUpdatedAt(t)
+// SetUpdateTime sets the "update_time" field.
+func (dcu *DiscordChannelUpdate) SetUpdateTime(t time.Time) *DiscordChannelUpdate {
+	dcu.mutation.SetUpdateTime(t)
 	return dcu
 }
 
@@ -179,9 +179,9 @@ func (dcu *DiscordChannelUpdate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (dcu *DiscordChannelUpdate) defaults() {
-	if _, ok := dcu.mutation.UpdatedAt(); !ok {
-		v := discordchannel.UpdateDefaultUpdatedAt()
-		dcu.mutation.SetUpdatedAt(v)
+	if _, ok := dcu.mutation.UpdateTime(); !ok {
+		v := discordchannel.UpdateDefaultUpdateTime()
+		dcu.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -203,11 +203,11 @@ func (dcu *DiscordChannelUpdate) sqlSave(ctx context.Context) (n int, err error)
 			}
 		}
 	}
-	if value, ok := dcu.mutation.UpdatedAt(); ok {
+	if value, ok := dcu.mutation.UpdateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: discordchannel.FieldUpdatedAt,
+			Column: discordchannel.FieldUpdateTime,
 		})
 	}
 	if value, ok := dcu.mutation.Name(); ok {
@@ -332,9 +332,9 @@ type DiscordChannelUpdateOne struct {
 	mutation *DiscordChannelMutation
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (dcuo *DiscordChannelUpdateOne) SetUpdatedAt(t time.Time) *DiscordChannelUpdateOne {
-	dcuo.mutation.SetUpdatedAt(t)
+// SetUpdateTime sets the "update_time" field.
+func (dcuo *DiscordChannelUpdateOne) SetUpdateTime(t time.Time) *DiscordChannelUpdateOne {
+	dcuo.mutation.SetUpdateTime(t)
 	return dcuo
 }
 
@@ -488,9 +488,9 @@ func (dcuo *DiscordChannelUpdateOne) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (dcuo *DiscordChannelUpdateOne) defaults() {
-	if _, ok := dcuo.mutation.UpdatedAt(); !ok {
-		v := discordchannel.UpdateDefaultUpdatedAt()
-		dcuo.mutation.SetUpdatedAt(v)
+	if _, ok := dcuo.mutation.UpdateTime(); !ok {
+		v := discordchannel.UpdateDefaultUpdateTime()
+		dcuo.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -529,11 +529,11 @@ func (dcuo *DiscordChannelUpdateOne) sqlSave(ctx context.Context) (_node *Discor
 			}
 		}
 	}
-	if value, ok := dcuo.mutation.UpdatedAt(); ok {
+	if value, ok := dcuo.mutation.UpdateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: discordchannel.FieldUpdatedAt,
+			Column: discordchannel.FieldUpdateTime,
 		})
 	}
 	if value, ok := dcuo.mutation.Name(); ok {

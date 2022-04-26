@@ -16,6 +16,8 @@ type Tx struct {
 	Chain *ChainClient
 	// DiscordChannel is the client for interacting with the DiscordChannel builders.
 	DiscordChannel *DiscordChannelClient
+	// Grant is the client for interacting with the Grant builders.
+	Grant *GrantClient
 	// LensChainInfo is the client for interacting with the LensChainInfo builders.
 	LensChainInfo *LensChainInfoClient
 	// MigrationInfo is the client for interacting with the MigrationInfo builders.
@@ -167,6 +169,7 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.Chain = NewChainClient(tx.config)
 	tx.DiscordChannel = NewDiscordChannelClient(tx.config)
+	tx.Grant = NewGrantClient(tx.config)
 	tx.LensChainInfo = NewLensChainInfoClient(tx.config)
 	tx.MigrationInfo = NewMigrationInfoClient(tx.config)
 	tx.Proposal = NewProposalClient(tx.config)

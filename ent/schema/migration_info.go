@@ -3,7 +3,7 @@ package schema
 import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
-	"time"
+	"entgo.io/ent/schema/mixin"
 )
 
 // MigrationInfo holds the schema definition for the MigrationInfo entity.
@@ -11,15 +11,15 @@ type MigrationInfo struct {
 	ent.Schema
 }
 
+func (MigrationInfo) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		mixin.Time{},
+	}
+}
+
 // Fields of the MigrationInfo.
 func (MigrationInfo) Fields() []ent.Field {
 	return []ent.Field{
-		field.Time("created_at").
-			Default(time.Now).
-			Immutable(),
-		field.Time("updated_at").
-			Default(time.Now).
-			UpdateDefault(time.Now),
 		field.Bool("is_migrated").
 			Default(false),
 	}

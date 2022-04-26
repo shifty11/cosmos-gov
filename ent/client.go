@@ -11,6 +11,7 @@ import (
 
 	"github.com/shifty11/cosmos-gov/ent/chain"
 	"github.com/shifty11/cosmos-gov/ent/discordchannel"
+	"github.com/shifty11/cosmos-gov/ent/grant"
 	"github.com/shifty11/cosmos-gov/ent/lenschaininfo"
 	"github.com/shifty11/cosmos-gov/ent/migrationinfo"
 	"github.com/shifty11/cosmos-gov/ent/proposal"
@@ -33,6 +34,8 @@ type Client struct {
 	Chain *ChainClient
 	// DiscordChannel is the client for interacting with the DiscordChannel builders.
 	DiscordChannel *DiscordChannelClient
+	// Grant is the client for interacting with the Grant builders.
+	Grant *GrantClient
 	// LensChainInfo is the client for interacting with the LensChainInfo builders.
 	LensChainInfo *LensChainInfoClient
 	// MigrationInfo is the client for interacting with the MigrationInfo builders.
@@ -62,6 +65,7 @@ func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Chain = NewChainClient(c.config)
 	c.DiscordChannel = NewDiscordChannelClient(c.config)
+	c.Grant = NewGrantClient(c.config)
 	c.LensChainInfo = NewLensChainInfoClient(c.config)
 	c.MigrationInfo = NewMigrationInfoClient(c.config)
 	c.Proposal = NewProposalClient(c.config)
@@ -104,6 +108,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		config:         cfg,
 		Chain:          NewChainClient(cfg),
 		DiscordChannel: NewDiscordChannelClient(cfg),
+		Grant:          NewGrantClient(cfg),
 		LensChainInfo:  NewLensChainInfoClient(cfg),
 		MigrationInfo:  NewMigrationInfoClient(cfg),
 		Proposal:       NewProposalClient(cfg),
@@ -132,6 +137,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		config:         cfg,
 		Chain:          NewChainClient(cfg),
 		DiscordChannel: NewDiscordChannelClient(cfg),
+		Grant:          NewGrantClient(cfg),
 		LensChainInfo:  NewLensChainInfoClient(cfg),
 		MigrationInfo:  NewMigrationInfoClient(cfg),
 		Proposal:       NewProposalClient(cfg),
@@ -170,6 +176,7 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	c.Chain.Use(hooks...)
 	c.DiscordChannel.Use(hooks...)
+	c.Grant.Use(hooks...)
 	c.LensChainInfo.Use(hooks...)
 	c.MigrationInfo.Use(hooks...)
 	c.Proposal.Use(hooks...)
@@ -328,6 +335,22 @@ func (c *ChainClient) QueryRPCEndpoints(ch *Chain) *RpcEndpointQuery {
 	return query
 }
 
+// QueryWallets queries the wallets edge of a Chain.
+func (c *ChainClient) QueryWallets(ch *Chain) *WalletQuery {
+	query := &WalletQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ch.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(chain.Table, chain.FieldID, id),
+			sqlgraph.To(wallet.Table, wallet.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, chain.WalletsTable, chain.WalletsColumn),
+		)
+		fromV = sqlgraph.Neighbors(ch.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *ChainClient) Hooks() []Hook {
 	return c.hooks.Chain
@@ -453,6 +476,112 @@ func (c *DiscordChannelClient) QueryChains(dc *DiscordChannel) *ChainQuery {
 // Hooks returns the client hooks.
 func (c *DiscordChannelClient) Hooks() []Hook {
 	return c.hooks.DiscordChannel
+}
+
+// GrantClient is a client for the Grant schema.
+type GrantClient struct {
+	config
+}
+
+// NewGrantClient returns a client for the Grant from the given config.
+func NewGrantClient(c config) *GrantClient {
+	return &GrantClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `grant.Hooks(f(g(h())))`.
+func (c *GrantClient) Use(hooks ...Hook) {
+	c.hooks.Grant = append(c.hooks.Grant, hooks...)
+}
+
+// Create returns a create builder for Grant.
+func (c *GrantClient) Create() *GrantCreate {
+	mutation := newGrantMutation(c.config, OpCreate)
+	return &GrantCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Grant entities.
+func (c *GrantClient) CreateBulk(builders ...*GrantCreate) *GrantCreateBulk {
+	return &GrantCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Grant.
+func (c *GrantClient) Update() *GrantUpdate {
+	mutation := newGrantMutation(c.config, OpUpdate)
+	return &GrantUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *GrantClient) UpdateOne(gr *Grant) *GrantUpdateOne {
+	mutation := newGrantMutation(c.config, OpUpdateOne, withGrant(gr))
+	return &GrantUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *GrantClient) UpdateOneID(id int) *GrantUpdateOne {
+	mutation := newGrantMutation(c.config, OpUpdateOne, withGrantID(id))
+	return &GrantUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Grant.
+func (c *GrantClient) Delete() *GrantDelete {
+	mutation := newGrantMutation(c.config, OpDelete)
+	return &GrantDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *GrantClient) DeleteOne(gr *Grant) *GrantDeleteOne {
+	return c.DeleteOneID(gr.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *GrantClient) DeleteOneID(id int) *GrantDeleteOne {
+	builder := c.Delete().Where(grant.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &GrantDeleteOne{builder}
+}
+
+// Query returns a query builder for Grant.
+func (c *GrantClient) Query() *GrantQuery {
+	return &GrantQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Grant entity by its id.
+func (c *GrantClient) Get(ctx context.Context, id int) (*Grant, error) {
+	return c.Query().Where(grant.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *GrantClient) GetX(ctx context.Context, id int) *Grant {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryGranter queries the granter edge of a Grant.
+func (c *GrantClient) QueryGranter(gr *Grant) *WalletQuery {
+	query := &WalletQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := gr.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(grant.Table, grant.FieldID, id),
+			sqlgraph.To(wallet.Table, wallet.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, grant.GranterTable, grant.GranterColumn),
+		)
+		fromV = sqlgraph.Neighbors(gr.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *GrantClient) Hooks() []Hook {
+	return c.hooks.Grant
 }
 
 // LensChainInfoClient is a client for the LensChainInfo schema.
@@ -1208,15 +1337,31 @@ func (c *WalletClient) QueryUsers(w *Wallet) *UserQuery {
 	return query
 }
 
-// QueryChains queries the chains edge of a Wallet.
-func (c *WalletClient) QueryChains(w *Wallet) *ChainQuery {
+// QueryChain queries the chain edge of a Wallet.
+func (c *WalletClient) QueryChain(w *Wallet) *ChainQuery {
 	query := &ChainQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := w.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(wallet.Table, wallet.FieldID, id),
 			sqlgraph.To(chain.Table, chain.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, wallet.ChainsTable, wallet.ChainsColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, wallet.ChainTable, wallet.ChainColumn),
+		)
+		fromV = sqlgraph.Neighbors(w.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryGrants queries the grants edge of a Wallet.
+func (c *WalletClient) QueryGrants(w *Wallet) *GrantQuery {
+	query := &GrantQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := w.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(wallet.Table, wallet.FieldID, id),
+			sqlgraph.To(grant.Table, grant.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, wallet.GrantsTable, wallet.GrantsColumn),
 		)
 		fromV = sqlgraph.Neighbors(w.driver.Dialect(), step)
 		return fromV, nil

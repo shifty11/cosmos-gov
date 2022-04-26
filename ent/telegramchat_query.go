@@ -329,12 +329,12 @@ func (tcq *TelegramChatQuery) WithChains(opts ...func(*ChainQuery)) *TelegramCha
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		CreateTime time.Time `json:"create_time,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.TelegramChat.Query().
-//		GroupBy(telegramchat.FieldCreatedAt).
+//		GroupBy(telegramchat.FieldCreateTime).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -356,11 +356,11 @@ func (tcq *TelegramChatQuery) GroupBy(field string, fields ...string) *TelegramC
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		CreateTime time.Time `json:"create_time,omitempty"`
 //	}
 //
 //	client.TelegramChat.Query().
-//		Select(telegramchat.FieldCreatedAt).
+//		Select(telegramchat.FieldCreateTime).
 //		Scan(ctx, &v)
 //
 func (tcq *TelegramChatQuery) Select(fields ...string) *TelegramChatSelect {

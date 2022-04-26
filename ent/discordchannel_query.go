@@ -329,12 +329,12 @@ func (dcq *DiscordChannelQuery) WithChains(opts ...func(*ChainQuery)) *DiscordCh
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		CreateTime time.Time `json:"create_time,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.DiscordChannel.Query().
-//		GroupBy(discordchannel.FieldCreatedAt).
+//		GroupBy(discordchannel.FieldCreateTime).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -356,11 +356,11 @@ func (dcq *DiscordChannelQuery) GroupBy(field string, fields ...string) *Discord
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		CreateTime time.Time `json:"create_time,omitempty"`
 //	}
 //
 //	client.DiscordChannel.Query().
-//		Select(discordchannel.FieldCreatedAt).
+//		Select(discordchannel.FieldCreateTime).
 //		Scan(ctx, &v)
 //
 func (dcq *DiscordChannelQuery) Select(fields ...string) *DiscordChannelSelect {

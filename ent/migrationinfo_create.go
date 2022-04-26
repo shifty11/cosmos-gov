@@ -20,30 +20,30 @@ type MigrationInfoCreate struct {
 	hooks    []Hook
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (mic *MigrationInfoCreate) SetCreatedAt(t time.Time) *MigrationInfoCreate {
-	mic.mutation.SetCreatedAt(t)
+// SetCreateTime sets the "create_time" field.
+func (mic *MigrationInfoCreate) SetCreateTime(t time.Time) *MigrationInfoCreate {
+	mic.mutation.SetCreateTime(t)
 	return mic
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (mic *MigrationInfoCreate) SetNillableCreatedAt(t *time.Time) *MigrationInfoCreate {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (mic *MigrationInfoCreate) SetNillableCreateTime(t *time.Time) *MigrationInfoCreate {
 	if t != nil {
-		mic.SetCreatedAt(*t)
+		mic.SetCreateTime(*t)
 	}
 	return mic
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (mic *MigrationInfoCreate) SetUpdatedAt(t time.Time) *MigrationInfoCreate {
-	mic.mutation.SetUpdatedAt(t)
+// SetUpdateTime sets the "update_time" field.
+func (mic *MigrationInfoCreate) SetUpdateTime(t time.Time) *MigrationInfoCreate {
+	mic.mutation.SetUpdateTime(t)
 	return mic
 }
 
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (mic *MigrationInfoCreate) SetNillableUpdatedAt(t *time.Time) *MigrationInfoCreate {
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (mic *MigrationInfoCreate) SetNillableUpdateTime(t *time.Time) *MigrationInfoCreate {
 	if t != nil {
-		mic.SetUpdatedAt(*t)
+		mic.SetUpdateTime(*t)
 	}
 	return mic
 }
@@ -133,13 +133,13 @@ func (mic *MigrationInfoCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (mic *MigrationInfoCreate) defaults() {
-	if _, ok := mic.mutation.CreatedAt(); !ok {
-		v := migrationinfo.DefaultCreatedAt()
-		mic.mutation.SetCreatedAt(v)
+	if _, ok := mic.mutation.CreateTime(); !ok {
+		v := migrationinfo.DefaultCreateTime()
+		mic.mutation.SetCreateTime(v)
 	}
-	if _, ok := mic.mutation.UpdatedAt(); !ok {
-		v := migrationinfo.DefaultUpdatedAt()
-		mic.mutation.SetUpdatedAt(v)
+	if _, ok := mic.mutation.UpdateTime(); !ok {
+		v := migrationinfo.DefaultUpdateTime()
+		mic.mutation.SetUpdateTime(v)
 	}
 	if _, ok := mic.mutation.IsMigrated(); !ok {
 		v := migrationinfo.DefaultIsMigrated
@@ -149,11 +149,11 @@ func (mic *MigrationInfoCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (mic *MigrationInfoCreate) check() error {
-	if _, ok := mic.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "MigrationInfo.created_at"`)}
+	if _, ok := mic.mutation.CreateTime(); !ok {
+		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "MigrationInfo.create_time"`)}
 	}
-	if _, ok := mic.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "MigrationInfo.updated_at"`)}
+	if _, ok := mic.mutation.UpdateTime(); !ok {
+		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "MigrationInfo.update_time"`)}
 	}
 	if _, ok := mic.mutation.IsMigrated(); !ok {
 		return &ValidationError{Name: "is_migrated", err: errors.New(`ent: missing required field "MigrationInfo.is_migrated"`)}
@@ -185,21 +185,21 @@ func (mic *MigrationInfoCreate) createSpec() (*MigrationInfo, *sqlgraph.CreateSp
 			},
 		}
 	)
-	if value, ok := mic.mutation.CreatedAt(); ok {
+	if value, ok := mic.mutation.CreateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: migrationinfo.FieldCreatedAt,
+			Column: migrationinfo.FieldCreateTime,
 		})
-		_node.CreatedAt = value
+		_node.CreateTime = value
 	}
-	if value, ok := mic.mutation.UpdatedAt(); ok {
+	if value, ok := mic.mutation.UpdateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: migrationinfo.FieldUpdatedAt,
+			Column: migrationinfo.FieldUpdateTime,
 		})
-		_node.UpdatedAt = value
+		_node.UpdateTime = value
 	}
 	if value, ok := mic.mutation.IsMigrated(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

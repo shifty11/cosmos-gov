@@ -292,12 +292,12 @@ func (req *RpcEndpointQuery) WithChain(opts ...func(*ChainQuery)) *RpcEndpointQu
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		CreateTime time.Time `json:"create_time,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.RpcEndpoint.Query().
-//		GroupBy(rpcendpoint.FieldCreatedAt).
+//		GroupBy(rpcendpoint.FieldCreateTime).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -319,11 +319,11 @@ func (req *RpcEndpointQuery) GroupBy(field string, fields ...string) *RpcEndpoin
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		CreateTime time.Time `json:"create_time,omitempty"`
 //	}
 //
 //	client.RpcEndpoint.Query().
-//		Select(rpcendpoint.FieldCreatedAt).
+//		Select(rpcendpoint.FieldCreateTime).
 //		Scan(ctx, &v)
 //
 func (req *RpcEndpointQuery) Select(fields ...string) *RpcEndpointSelect {

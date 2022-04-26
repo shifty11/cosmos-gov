@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/shifty11/cosmos-gov/ent/chain"
+	"github.com/shifty11/cosmos-gov/ent/grant"
 	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/ent/wallet"
 )
@@ -22,30 +23,30 @@ type WalletCreate struct {
 	hooks    []Hook
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (wc *WalletCreate) SetCreatedAt(t time.Time) *WalletCreate {
-	wc.mutation.SetCreatedAt(t)
+// SetCreateTime sets the "create_time" field.
+func (wc *WalletCreate) SetCreateTime(t time.Time) *WalletCreate {
+	wc.mutation.SetCreateTime(t)
 	return wc
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (wc *WalletCreate) SetNillableCreatedAt(t *time.Time) *WalletCreate {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (wc *WalletCreate) SetNillableCreateTime(t *time.Time) *WalletCreate {
 	if t != nil {
-		wc.SetCreatedAt(*t)
+		wc.SetCreateTime(*t)
 	}
 	return wc
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (wc *WalletCreate) SetUpdatedAt(t time.Time) *WalletCreate {
-	wc.mutation.SetUpdatedAt(t)
+// SetUpdateTime sets the "update_time" field.
+func (wc *WalletCreate) SetUpdateTime(t time.Time) *WalletCreate {
+	wc.mutation.SetUpdateTime(t)
 	return wc
 }
 
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (wc *WalletCreate) SetNillableUpdatedAt(t *time.Time) *WalletCreate {
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (wc *WalletCreate) SetNillableUpdateTime(t *time.Time) *WalletCreate {
 	if t != nil {
-		wc.SetUpdatedAt(*t)
+		wc.SetUpdateTime(*t)
 	}
 	return wc
 }
@@ -71,19 +72,38 @@ func (wc *WalletCreate) AddUsers(u ...*User) *WalletCreate {
 	return wc.AddUserIDs(ids...)
 }
 
-// AddChainIDs adds the "chains" edge to the Chain entity by IDs.
-func (wc *WalletCreate) AddChainIDs(ids ...int) *WalletCreate {
-	wc.mutation.AddChainIDs(ids...)
+// SetChainID sets the "chain" edge to the Chain entity by ID.
+func (wc *WalletCreate) SetChainID(id int) *WalletCreate {
+	wc.mutation.SetChainID(id)
 	return wc
 }
 
-// AddChains adds the "chains" edges to the Chain entity.
-func (wc *WalletCreate) AddChains(c ...*Chain) *WalletCreate {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+// SetNillableChainID sets the "chain" edge to the Chain entity by ID if the given value is not nil.
+func (wc *WalletCreate) SetNillableChainID(id *int) *WalletCreate {
+	if id != nil {
+		wc = wc.SetChainID(*id)
 	}
-	return wc.AddChainIDs(ids...)
+	return wc
+}
+
+// SetChain sets the "chain" edge to the Chain entity.
+func (wc *WalletCreate) SetChain(c *Chain) *WalletCreate {
+	return wc.SetChainID(c.ID)
+}
+
+// AddGrantIDs adds the "grants" edge to the Grant entity by IDs.
+func (wc *WalletCreate) AddGrantIDs(ids ...int) *WalletCreate {
+	wc.mutation.AddGrantIDs(ids...)
+	return wc
+}
+
+// AddGrants adds the "grants" edges to the Grant entity.
+func (wc *WalletCreate) AddGrants(g ...*Grant) *WalletCreate {
+	ids := make([]int, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
+	}
+	return wc.AddGrantIDs(ids...)
 }
 
 // Mutation returns the WalletMutation object of the builder.
@@ -157,23 +177,23 @@ func (wc *WalletCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (wc *WalletCreate) defaults() {
-	if _, ok := wc.mutation.CreatedAt(); !ok {
-		v := wallet.DefaultCreatedAt()
-		wc.mutation.SetCreatedAt(v)
+	if _, ok := wc.mutation.CreateTime(); !ok {
+		v := wallet.DefaultCreateTime()
+		wc.mutation.SetCreateTime(v)
 	}
-	if _, ok := wc.mutation.UpdatedAt(); !ok {
-		v := wallet.DefaultUpdatedAt()
-		wc.mutation.SetUpdatedAt(v)
+	if _, ok := wc.mutation.UpdateTime(); !ok {
+		v := wallet.DefaultUpdateTime()
+		wc.mutation.SetUpdateTime(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (wc *WalletCreate) check() error {
-	if _, ok := wc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Wallet.created_at"`)}
+	if _, ok := wc.mutation.CreateTime(); !ok {
+		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "Wallet.create_time"`)}
 	}
-	if _, ok := wc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Wallet.updated_at"`)}
+	if _, ok := wc.mutation.UpdateTime(); !ok {
+		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "Wallet.update_time"`)}
 	}
 	if _, ok := wc.mutation.Address(); !ok {
 		return &ValidationError{Name: "address", err: errors.New(`ent: missing required field "Wallet.address"`)}
@@ -205,21 +225,21 @@ func (wc *WalletCreate) createSpec() (*Wallet, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
-	if value, ok := wc.mutation.CreatedAt(); ok {
+	if value, ok := wc.mutation.CreateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: wallet.FieldCreatedAt,
+			Column: wallet.FieldCreateTime,
 		})
-		_node.CreatedAt = value
+		_node.CreateTime = value
 	}
-	if value, ok := wc.mutation.UpdatedAt(); ok {
+	if value, ok := wc.mutation.UpdateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: wallet.FieldUpdatedAt,
+			Column: wallet.FieldUpdateTime,
 		})
-		_node.UpdatedAt = value
+		_node.UpdateTime = value
 	}
 	if value, ok := wc.mutation.Address(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -248,17 +268,37 @@ func (wc *WalletCreate) createSpec() (*Wallet, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := wc.mutation.ChainsIDs(); len(nodes) > 0 {
+	if nodes := wc.mutation.ChainIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   wallet.ChainsTable,
-			Columns: []string{wallet.ChainsColumn},
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   wallet.ChainTable,
+			Columns: []string{wallet.ChainColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: chain.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.chain_wallets = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := wc.mutation.GrantsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   wallet.GrantsTable,
+			Columns: []string{wallet.GrantsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: grant.FieldID,
 				},
 			},
 		}

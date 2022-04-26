@@ -254,12 +254,12 @@ func (lciq *LensChainInfoQuery) Clone() *LensChainInfoQuery {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		CreateTime time.Time `json:"create_time,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.LensChainInfo.Query().
-//		GroupBy(lenschaininfo.FieldCreatedAt).
+//		GroupBy(lenschaininfo.FieldCreateTime).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -281,11 +281,11 @@ func (lciq *LensChainInfoQuery) GroupBy(field string, fields ...string) *LensCha
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		CreateTime time.Time `json:"create_time,omitempty"`
 //	}
 //
 //	client.LensChainInfo.Query().
-//		Select(lenschaininfo.FieldCreatedAt).
+//		Select(lenschaininfo.FieldCreateTime).
 //		Scan(ctx, &v)
 //
 func (lciq *LensChainInfoQuery) Select(fields ...string) *LensChainInfoSelect {

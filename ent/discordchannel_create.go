@@ -22,30 +22,30 @@ type DiscordChannelCreate struct {
 	hooks    []Hook
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (dcc *DiscordChannelCreate) SetCreatedAt(t time.Time) *DiscordChannelCreate {
-	dcc.mutation.SetCreatedAt(t)
+// SetCreateTime sets the "create_time" field.
+func (dcc *DiscordChannelCreate) SetCreateTime(t time.Time) *DiscordChannelCreate {
+	dcc.mutation.SetCreateTime(t)
 	return dcc
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (dcc *DiscordChannelCreate) SetNillableCreatedAt(t *time.Time) *DiscordChannelCreate {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (dcc *DiscordChannelCreate) SetNillableCreateTime(t *time.Time) *DiscordChannelCreate {
 	if t != nil {
-		dcc.SetCreatedAt(*t)
+		dcc.SetCreateTime(*t)
 	}
 	return dcc
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (dcc *DiscordChannelCreate) SetUpdatedAt(t time.Time) *DiscordChannelCreate {
-	dcc.mutation.SetUpdatedAt(t)
+// SetUpdateTime sets the "update_time" field.
+func (dcc *DiscordChannelCreate) SetUpdateTime(t time.Time) *DiscordChannelCreate {
+	dcc.mutation.SetUpdateTime(t)
 	return dcc
 }
 
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (dcc *DiscordChannelCreate) SetNillableUpdatedAt(t *time.Time) *DiscordChannelCreate {
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (dcc *DiscordChannelCreate) SetNillableUpdateTime(t *time.Time) *DiscordChannelCreate {
 	if t != nil {
-		dcc.SetUpdatedAt(*t)
+		dcc.SetUpdateTime(*t)
 	}
 	return dcc
 }
@@ -187,13 +187,13 @@ func (dcc *DiscordChannelCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (dcc *DiscordChannelCreate) defaults() {
-	if _, ok := dcc.mutation.CreatedAt(); !ok {
-		v := discordchannel.DefaultCreatedAt()
-		dcc.mutation.SetCreatedAt(v)
+	if _, ok := dcc.mutation.CreateTime(); !ok {
+		v := discordchannel.DefaultCreateTime()
+		dcc.mutation.SetCreateTime(v)
 	}
-	if _, ok := dcc.mutation.UpdatedAt(); !ok {
-		v := discordchannel.DefaultUpdatedAt()
-		dcc.mutation.SetUpdatedAt(v)
+	if _, ok := dcc.mutation.UpdateTime(); !ok {
+		v := discordchannel.DefaultUpdateTime()
+		dcc.mutation.SetUpdateTime(v)
 	}
 	if _, ok := dcc.mutation.Roles(); !ok {
 		v := discordchannel.DefaultRoles
@@ -203,11 +203,11 @@ func (dcc *DiscordChannelCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (dcc *DiscordChannelCreate) check() error {
-	if _, ok := dcc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "DiscordChannel.created_at"`)}
+	if _, ok := dcc.mutation.CreateTime(); !ok {
+		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "DiscordChannel.create_time"`)}
 	}
-	if _, ok := dcc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "DiscordChannel.updated_at"`)}
+	if _, ok := dcc.mutation.UpdateTime(); !ok {
+		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "DiscordChannel.update_time"`)}
 	}
 	if _, ok := dcc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "DiscordChannel.name"`)}
@@ -251,21 +251,21 @@ func (dcc *DiscordChannelCreate) createSpec() (*DiscordChannel, *sqlgraph.Create
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := dcc.mutation.CreatedAt(); ok {
+	if value, ok := dcc.mutation.CreateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: discordchannel.FieldCreatedAt,
+			Column: discordchannel.FieldCreateTime,
 		})
-		_node.CreatedAt = value
+		_node.CreateTime = value
 	}
-	if value, ok := dcc.mutation.UpdatedAt(); ok {
+	if value, ok := dcc.mutation.UpdateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: discordchannel.FieldUpdatedAt,
+			Column: discordchannel.FieldUpdateTime,
 		})
-		_node.UpdatedAt = value
+		_node.UpdateTime = value
 	}
 	if value, ok := dcc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

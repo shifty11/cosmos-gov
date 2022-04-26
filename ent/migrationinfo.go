@@ -16,10 +16,10 @@ type MigrationInfo struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt time.Time `json:"created_at,omitempty"`
-	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// CreateTime holds the value of the "create_time" field.
+	CreateTime time.Time `json:"create_time,omitempty"`
+	// UpdateTime holds the value of the "update_time" field.
+	UpdateTime time.Time `json:"update_time,omitempty"`
 	// IsMigrated holds the value of the "is_migrated" field.
 	IsMigrated bool `json:"is_migrated,omitempty"`
 }
@@ -33,7 +33,7 @@ func (*MigrationInfo) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullBool)
 		case migrationinfo.FieldID:
 			values[i] = new(sql.NullInt64)
-		case migrationinfo.FieldCreatedAt, migrationinfo.FieldUpdatedAt:
+		case migrationinfo.FieldCreateTime, migrationinfo.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type MigrationInfo", columns[i])
@@ -56,17 +56,17 @@ func (mi *MigrationInfo) assignValues(columns []string, values []interface{}) er
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			mi.ID = int(value.Int64)
-		case migrationinfo.FieldCreatedAt:
+		case migrationinfo.FieldCreateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+				return fmt.Errorf("unexpected type %T for field create_time", values[i])
 			} else if value.Valid {
-				mi.CreatedAt = value.Time
+				mi.CreateTime = value.Time
 			}
-		case migrationinfo.FieldUpdatedAt:
+		case migrationinfo.FieldUpdateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+				return fmt.Errorf("unexpected type %T for field update_time", values[i])
 			} else if value.Valid {
-				mi.UpdatedAt = value.Time
+				mi.UpdateTime = value.Time
 			}
 		case migrationinfo.FieldIsMigrated:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -102,10 +102,10 @@ func (mi *MigrationInfo) String() string {
 	var builder strings.Builder
 	builder.WriteString("MigrationInfo(")
 	builder.WriteString(fmt.Sprintf("id=%v", mi.ID))
-	builder.WriteString(", created_at=")
-	builder.WriteString(mi.CreatedAt.Format(time.ANSIC))
-	builder.WriteString(", updated_at=")
-	builder.WriteString(mi.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", create_time=")
+	builder.WriteString(mi.CreateTime.Format(time.ANSIC))
+	builder.WriteString(", update_time=")
+	builder.WriteString(mi.UpdateTime.Format(time.ANSIC))
 	builder.WriteString(", is_migrated=")
 	builder.WriteString(fmt.Sprintf("%v", mi.IsMigrated))
 	builder.WriteByte(')')

@@ -17,10 +17,10 @@ type DiscordChannel struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int64 `json:"id,omitempty"`
-	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt time.Time `json:"created_at,omitempty"`
-	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// CreateTime holds the value of the "create_time" field.
+	CreateTime time.Time `json:"create_time,omitempty"`
+	// UpdateTime holds the value of the "update_time" field.
+	UpdateTime time.Time `json:"update_time,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// IsGroup holds the value of the "is_group" field.
@@ -78,7 +78,7 @@ func (*DiscordChannel) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullInt64)
 		case discordchannel.FieldName, discordchannel.FieldRoles:
 			values[i] = new(sql.NullString)
-		case discordchannel.FieldCreatedAt, discordchannel.FieldUpdatedAt:
+		case discordchannel.FieldCreateTime, discordchannel.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
 		case discordchannel.ForeignKeys[0]: // discord_channel_user
 			values[i] = new(sql.NullInt64)
@@ -103,17 +103,17 @@ func (dc *DiscordChannel) assignValues(columns []string, values []interface{}) e
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			dc.ID = int64(value.Int64)
-		case discordchannel.FieldCreatedAt:
+		case discordchannel.FieldCreateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+				return fmt.Errorf("unexpected type %T for field create_time", values[i])
 			} else if value.Valid {
-				dc.CreatedAt = value.Time
+				dc.CreateTime = value.Time
 			}
-		case discordchannel.FieldUpdatedAt:
+		case discordchannel.FieldUpdateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+				return fmt.Errorf("unexpected type %T for field update_time", values[i])
 			} else if value.Valid {
-				dc.UpdatedAt = value.Time
+				dc.UpdateTime = value.Time
 			}
 		case discordchannel.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -178,10 +178,10 @@ func (dc *DiscordChannel) String() string {
 	var builder strings.Builder
 	builder.WriteString("DiscordChannel(")
 	builder.WriteString(fmt.Sprintf("id=%v", dc.ID))
-	builder.WriteString(", created_at=")
-	builder.WriteString(dc.CreatedAt.Format(time.ANSIC))
-	builder.WriteString(", updated_at=")
-	builder.WriteString(dc.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", create_time=")
+	builder.WriteString(dc.CreateTime.Format(time.ANSIC))
+	builder.WriteString(", update_time=")
+	builder.WriteString(dc.UpdateTime.Format(time.ANSIC))
 	builder.WriteString(", name=")
 	builder.WriteString(dc.Name)
 	builder.WriteString(", is_group=")

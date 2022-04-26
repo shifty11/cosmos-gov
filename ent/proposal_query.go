@@ -292,12 +292,12 @@ func (pq *ProposalQuery) WithChain(opts ...func(*ChainQuery)) *ProposalQuery {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		CreateTime time.Time `json:"create_time,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Proposal.Query().
-//		GroupBy(proposal.FieldCreatedAt).
+//		GroupBy(proposal.FieldCreateTime).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -319,11 +319,11 @@ func (pq *ProposalQuery) GroupBy(field string, fields ...string) *ProposalGroupB
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		CreateTime time.Time `json:"create_time,omitempty"`
 //	}
 //
 //	client.Proposal.Query().
-//		Select(proposal.FieldCreatedAt).
+//		Select(proposal.FieldCreateTime).
 //		Scan(ctx, &v)
 //
 func (pq *ProposalQuery) Select(fields ...string) *ProposalSelect {

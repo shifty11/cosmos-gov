@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/shifty11/cosmos-gov/ent/chain"
+	"github.com/shifty11/cosmos-gov/ent/grant"
 	"github.com/shifty11/cosmos-gov/ent/predicate"
 	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/ent/wallet"
@@ -30,9 +31,9 @@ func (wu *WalletUpdate) Where(ps ...predicate.Wallet) *WalletUpdate {
 	return wu
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (wu *WalletUpdate) SetUpdatedAt(t time.Time) *WalletUpdate {
-	wu.mutation.SetUpdatedAt(t)
+// SetUpdateTime sets the "update_time" field.
+func (wu *WalletUpdate) SetUpdateTime(t time.Time) *WalletUpdate {
+	wu.mutation.SetUpdateTime(t)
 	return wu
 }
 
@@ -57,19 +58,38 @@ func (wu *WalletUpdate) AddUsers(u ...*User) *WalletUpdate {
 	return wu.AddUserIDs(ids...)
 }
 
-// AddChainIDs adds the "chains" edge to the Chain entity by IDs.
-func (wu *WalletUpdate) AddChainIDs(ids ...int) *WalletUpdate {
-	wu.mutation.AddChainIDs(ids...)
+// SetChainID sets the "chain" edge to the Chain entity by ID.
+func (wu *WalletUpdate) SetChainID(id int) *WalletUpdate {
+	wu.mutation.SetChainID(id)
 	return wu
 }
 
-// AddChains adds the "chains" edges to the Chain entity.
-func (wu *WalletUpdate) AddChains(c ...*Chain) *WalletUpdate {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+// SetNillableChainID sets the "chain" edge to the Chain entity by ID if the given value is not nil.
+func (wu *WalletUpdate) SetNillableChainID(id *int) *WalletUpdate {
+	if id != nil {
+		wu = wu.SetChainID(*id)
 	}
-	return wu.AddChainIDs(ids...)
+	return wu
+}
+
+// SetChain sets the "chain" edge to the Chain entity.
+func (wu *WalletUpdate) SetChain(c *Chain) *WalletUpdate {
+	return wu.SetChainID(c.ID)
+}
+
+// AddGrantIDs adds the "grants" edge to the Grant entity by IDs.
+func (wu *WalletUpdate) AddGrantIDs(ids ...int) *WalletUpdate {
+	wu.mutation.AddGrantIDs(ids...)
+	return wu
+}
+
+// AddGrants adds the "grants" edges to the Grant entity.
+func (wu *WalletUpdate) AddGrants(g ...*Grant) *WalletUpdate {
+	ids := make([]int, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
+	}
+	return wu.AddGrantIDs(ids...)
 }
 
 // Mutation returns the WalletMutation object of the builder.
@@ -98,25 +118,31 @@ func (wu *WalletUpdate) RemoveUsers(u ...*User) *WalletUpdate {
 	return wu.RemoveUserIDs(ids...)
 }
 
-// ClearChains clears all "chains" edges to the Chain entity.
-func (wu *WalletUpdate) ClearChains() *WalletUpdate {
-	wu.mutation.ClearChains()
+// ClearChain clears the "chain" edge to the Chain entity.
+func (wu *WalletUpdate) ClearChain() *WalletUpdate {
+	wu.mutation.ClearChain()
 	return wu
 }
 
-// RemoveChainIDs removes the "chains" edge to Chain entities by IDs.
-func (wu *WalletUpdate) RemoveChainIDs(ids ...int) *WalletUpdate {
-	wu.mutation.RemoveChainIDs(ids...)
+// ClearGrants clears all "grants" edges to the Grant entity.
+func (wu *WalletUpdate) ClearGrants() *WalletUpdate {
+	wu.mutation.ClearGrants()
 	return wu
 }
 
-// RemoveChains removes "chains" edges to Chain entities.
-func (wu *WalletUpdate) RemoveChains(c ...*Chain) *WalletUpdate {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+// RemoveGrantIDs removes the "grants" edge to Grant entities by IDs.
+func (wu *WalletUpdate) RemoveGrantIDs(ids ...int) *WalletUpdate {
+	wu.mutation.RemoveGrantIDs(ids...)
+	return wu
+}
+
+// RemoveGrants removes "grants" edges to Grant entities.
+func (wu *WalletUpdate) RemoveGrants(g ...*Grant) *WalletUpdate {
+	ids := make([]int, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
 	}
-	return wu.RemoveChainIDs(ids...)
+	return wu.RemoveGrantIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -176,9 +202,9 @@ func (wu *WalletUpdate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (wu *WalletUpdate) defaults() {
-	if _, ok := wu.mutation.UpdatedAt(); !ok {
-		v := wallet.UpdateDefaultUpdatedAt()
-		wu.mutation.SetUpdatedAt(v)
+	if _, ok := wu.mutation.UpdateTime(); !ok {
+		v := wallet.UpdateDefaultUpdateTime()
+		wu.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -200,11 +226,11 @@ func (wu *WalletUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := wu.mutation.UpdatedAt(); ok {
+	if value, ok := wu.mutation.UpdateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: wallet.FieldUpdatedAt,
+			Column: wallet.FieldUpdateTime,
 		})
 	}
 	if value, ok := wu.mutation.Address(); ok {
@@ -268,12 +294,12 @@ func (wu *WalletUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if wu.mutation.ChainsCleared() {
+	if wu.mutation.ChainCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   wallet.ChainsTable,
-			Columns: []string{wallet.ChainsColumn},
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   wallet.ChainTable,
+			Columns: []string{wallet.ChainColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -284,12 +310,12 @@ func (wu *WalletUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := wu.mutation.RemovedChainsIDs(); len(nodes) > 0 && !wu.mutation.ChainsCleared() {
+	if nodes := wu.mutation.ChainIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   wallet.ChainsTable,
-			Columns: []string{wallet.ChainsColumn},
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   wallet.ChainTable,
+			Columns: []string{wallet.ChainColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -301,19 +327,54 @@ func (wu *WalletUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if nodes := wu.mutation.ChainsIDs(); len(nodes) > 0 {
+	if wu.mutation.GrantsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   wallet.ChainsTable,
-			Columns: []string{wallet.ChainsColumn},
+			Table:   wallet.GrantsTable,
+			Columns: []string{wallet.GrantsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: chain.FieldID,
+					Column: grant.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := wu.mutation.RemovedGrantsIDs(); len(nodes) > 0 && !wu.mutation.GrantsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   wallet.GrantsTable,
+			Columns: []string{wallet.GrantsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: grant.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := wu.mutation.GrantsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   wallet.GrantsTable,
+			Columns: []string{wallet.GrantsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: grant.FieldID,
 				},
 			},
 		}
@@ -341,9 +402,9 @@ type WalletUpdateOne struct {
 	mutation *WalletMutation
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (wuo *WalletUpdateOne) SetUpdatedAt(t time.Time) *WalletUpdateOne {
-	wuo.mutation.SetUpdatedAt(t)
+// SetUpdateTime sets the "update_time" field.
+func (wuo *WalletUpdateOne) SetUpdateTime(t time.Time) *WalletUpdateOne {
+	wuo.mutation.SetUpdateTime(t)
 	return wuo
 }
 
@@ -368,19 +429,38 @@ func (wuo *WalletUpdateOne) AddUsers(u ...*User) *WalletUpdateOne {
 	return wuo.AddUserIDs(ids...)
 }
 
-// AddChainIDs adds the "chains" edge to the Chain entity by IDs.
-func (wuo *WalletUpdateOne) AddChainIDs(ids ...int) *WalletUpdateOne {
-	wuo.mutation.AddChainIDs(ids...)
+// SetChainID sets the "chain" edge to the Chain entity by ID.
+func (wuo *WalletUpdateOne) SetChainID(id int) *WalletUpdateOne {
+	wuo.mutation.SetChainID(id)
 	return wuo
 }
 
-// AddChains adds the "chains" edges to the Chain entity.
-func (wuo *WalletUpdateOne) AddChains(c ...*Chain) *WalletUpdateOne {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+// SetNillableChainID sets the "chain" edge to the Chain entity by ID if the given value is not nil.
+func (wuo *WalletUpdateOne) SetNillableChainID(id *int) *WalletUpdateOne {
+	if id != nil {
+		wuo = wuo.SetChainID(*id)
 	}
-	return wuo.AddChainIDs(ids...)
+	return wuo
+}
+
+// SetChain sets the "chain" edge to the Chain entity.
+func (wuo *WalletUpdateOne) SetChain(c *Chain) *WalletUpdateOne {
+	return wuo.SetChainID(c.ID)
+}
+
+// AddGrantIDs adds the "grants" edge to the Grant entity by IDs.
+func (wuo *WalletUpdateOne) AddGrantIDs(ids ...int) *WalletUpdateOne {
+	wuo.mutation.AddGrantIDs(ids...)
+	return wuo
+}
+
+// AddGrants adds the "grants" edges to the Grant entity.
+func (wuo *WalletUpdateOne) AddGrants(g ...*Grant) *WalletUpdateOne {
+	ids := make([]int, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
+	}
+	return wuo.AddGrantIDs(ids...)
 }
 
 // Mutation returns the WalletMutation object of the builder.
@@ -409,25 +489,31 @@ func (wuo *WalletUpdateOne) RemoveUsers(u ...*User) *WalletUpdateOne {
 	return wuo.RemoveUserIDs(ids...)
 }
 
-// ClearChains clears all "chains" edges to the Chain entity.
-func (wuo *WalletUpdateOne) ClearChains() *WalletUpdateOne {
-	wuo.mutation.ClearChains()
+// ClearChain clears the "chain" edge to the Chain entity.
+func (wuo *WalletUpdateOne) ClearChain() *WalletUpdateOne {
+	wuo.mutation.ClearChain()
 	return wuo
 }
 
-// RemoveChainIDs removes the "chains" edge to Chain entities by IDs.
-func (wuo *WalletUpdateOne) RemoveChainIDs(ids ...int) *WalletUpdateOne {
-	wuo.mutation.RemoveChainIDs(ids...)
+// ClearGrants clears all "grants" edges to the Grant entity.
+func (wuo *WalletUpdateOne) ClearGrants() *WalletUpdateOne {
+	wuo.mutation.ClearGrants()
 	return wuo
 }
 
-// RemoveChains removes "chains" edges to Chain entities.
-func (wuo *WalletUpdateOne) RemoveChains(c ...*Chain) *WalletUpdateOne {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+// RemoveGrantIDs removes the "grants" edge to Grant entities by IDs.
+func (wuo *WalletUpdateOne) RemoveGrantIDs(ids ...int) *WalletUpdateOne {
+	wuo.mutation.RemoveGrantIDs(ids...)
+	return wuo
+}
+
+// RemoveGrants removes "grants" edges to Grant entities.
+func (wuo *WalletUpdateOne) RemoveGrants(g ...*Grant) *WalletUpdateOne {
+	ids := make([]int, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
 	}
-	return wuo.RemoveChainIDs(ids...)
+	return wuo.RemoveGrantIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -494,9 +580,9 @@ func (wuo *WalletUpdateOne) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (wuo *WalletUpdateOne) defaults() {
-	if _, ok := wuo.mutation.UpdatedAt(); !ok {
-		v := wallet.UpdateDefaultUpdatedAt()
-		wuo.mutation.SetUpdatedAt(v)
+	if _, ok := wuo.mutation.UpdateTime(); !ok {
+		v := wallet.UpdateDefaultUpdateTime()
+		wuo.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -535,11 +621,11 @@ func (wuo *WalletUpdateOne) sqlSave(ctx context.Context) (_node *Wallet, err err
 			}
 		}
 	}
-	if value, ok := wuo.mutation.UpdatedAt(); ok {
+	if value, ok := wuo.mutation.UpdateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: wallet.FieldUpdatedAt,
+			Column: wallet.FieldUpdateTime,
 		})
 	}
 	if value, ok := wuo.mutation.Address(); ok {
@@ -603,12 +689,12 @@ func (wuo *WalletUpdateOne) sqlSave(ctx context.Context) (_node *Wallet, err err
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if wuo.mutation.ChainsCleared() {
+	if wuo.mutation.ChainCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   wallet.ChainsTable,
-			Columns: []string{wallet.ChainsColumn},
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   wallet.ChainTable,
+			Columns: []string{wallet.ChainColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -619,12 +705,12 @@ func (wuo *WalletUpdateOne) sqlSave(ctx context.Context) (_node *Wallet, err err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := wuo.mutation.RemovedChainsIDs(); len(nodes) > 0 && !wuo.mutation.ChainsCleared() {
+	if nodes := wuo.mutation.ChainIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   wallet.ChainsTable,
-			Columns: []string{wallet.ChainsColumn},
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   wallet.ChainTable,
+			Columns: []string{wallet.ChainColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -636,19 +722,54 @@ func (wuo *WalletUpdateOne) sqlSave(ctx context.Context) (_node *Wallet, err err
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if nodes := wuo.mutation.ChainsIDs(); len(nodes) > 0 {
+	if wuo.mutation.GrantsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   wallet.ChainsTable,
-			Columns: []string{wallet.ChainsColumn},
+			Table:   wallet.GrantsTable,
+			Columns: []string{wallet.GrantsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: chain.FieldID,
+					Column: grant.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := wuo.mutation.RemovedGrantsIDs(); len(nodes) > 0 && !wuo.mutation.GrantsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   wallet.GrantsTable,
+			Columns: []string{wallet.GrantsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: grant.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := wuo.mutation.GrantsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   wallet.GrantsTable,
+			Columns: []string{wallet.GrantsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: grant.FieldID,
 				},
 			},
 		}

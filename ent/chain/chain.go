@@ -11,10 +11,10 @@ const (
 	Label = "chain"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldCreatedAt holds the string denoting the created_at field in the database.
-	FieldCreatedAt = "created_at"
-	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
-	FieldUpdatedAt = "updated_at"
+	// FieldCreateTime holds the string denoting the create_time field in the database.
+	FieldCreateTime = "create_time"
+	// FieldUpdateTime holds the string denoting the update_time field in the database.
+	FieldUpdateTime = "update_time"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
 	// FieldDisplayName holds the string denoting the display_name field in the database.
@@ -29,6 +29,8 @@ const (
 	EdgeDiscordChannels = "discord_channels"
 	// EdgeRPCEndpoints holds the string denoting the rpc_endpoints edge name in mutations.
 	EdgeRPCEndpoints = "rpc_endpoints"
+	// EdgeWallets holds the string denoting the wallets edge name in mutations.
+	EdgeWallets = "wallets"
 	// Table holds the table name of the chain in the database.
 	Table = "chains"
 	// ProposalsTable is the table that holds the proposals relation/edge.
@@ -55,22 +57,23 @@ const (
 	RPCEndpointsInverseTable = "rpc_endpoints"
 	// RPCEndpointsColumn is the table column denoting the rpc_endpoints relation/edge.
 	RPCEndpointsColumn = "chain_rpc_endpoints"
+	// WalletsTable is the table that holds the wallets relation/edge.
+	WalletsTable = "wallets"
+	// WalletsInverseTable is the table name for the Wallet entity.
+	// It exists in this package in order to avoid circular dependency with the "wallet" package.
+	WalletsInverseTable = "wallets"
+	// WalletsColumn is the table column denoting the wallets relation/edge.
+	WalletsColumn = "chain_wallets"
 )
 
 // Columns holds all SQL columns for chain fields.
 var Columns = []string{
 	FieldID,
-	FieldCreatedAt,
-	FieldUpdatedAt,
+	FieldCreateTime,
+	FieldUpdateTime,
 	FieldName,
 	FieldDisplayName,
 	FieldIsEnabled,
-}
-
-// ForeignKeys holds the SQL foreign-keys that are owned by the "chains"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"wallet_chains",
 }
 
 var (
@@ -89,21 +92,16 @@ func ValidColumn(column string) bool {
 			return true
 		}
 	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
-			return true
-		}
-	}
 	return false
 }
 
 var (
-	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
-	DefaultCreatedAt func() time.Time
-	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
-	DefaultUpdatedAt func() time.Time
-	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
-	UpdateDefaultUpdatedAt func() time.Time
+	// DefaultCreateTime holds the default value on creation for the "create_time" field.
+	DefaultCreateTime func() time.Time
+	// DefaultUpdateTime holds the default value on creation for the "update_time" field.
+	DefaultUpdateTime func() time.Time
+	// UpdateDefaultUpdateTime holds the default value on update for the "update_time" field.
+	UpdateDefaultUpdateTime func() time.Time
 	// DefaultIsEnabled holds the default value on creation for the "is_enabled" field.
 	DefaultIsEnabled bool
 )

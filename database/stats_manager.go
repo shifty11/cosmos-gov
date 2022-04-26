@@ -127,7 +127,7 @@ func (manager *StatsManager) GetUserStatistics(userType user.Type) (*UserStatist
 	cntSinceYesterday, err := client.User.
 		Query().
 		Where(user.And(
-			user.CreatedAtGTE(time.Now().AddDate(0, 0, -1)),
+			user.CreateTimeGTE(time.Now().AddDate(0, 0, -1)),
 			user.TypeEQ(userType),
 		)).
 		Count(ctx)
@@ -137,7 +137,7 @@ func (manager *StatsManager) GetUserStatistics(userType user.Type) (*UserStatist
 	cntSinceSevenDays, err := client.User.
 		Query().
 		Where(user.And(
-			user.CreatedAtGTE(time.Now().AddDate(0, 0, -7)),
+			user.CreateTimeGTE(time.Now().AddDate(0, 0, -7)),
 			user.TypeEQ(userType),
 		)).
 		Count(ctx)

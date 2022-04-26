@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/shifty11/cosmos-gov/ent/chain"
 	"github.com/shifty11/cosmos-gov/ent/wallet"
 )
 
@@ -16,26 +17,29 @@ type Wallet struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt time.Time `json:"created_at,omitempty"`
-	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// CreateTime holds the value of the "create_time" field.
+	CreateTime time.Time `json:"create_time,omitempty"`
+	// UpdateTime holds the value of the "update_time" field.
+	UpdateTime time.Time `json:"update_time,omitempty"`
 	// Address holds the value of the "address" field.
 	Address string `json:"address,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the WalletQuery when eager-loading is set.
-	Edges WalletEdges `json:"edges"`
+	Edges         WalletEdges `json:"edges"`
+	chain_wallets *int
 }
 
 // WalletEdges holds the relations/edges for other nodes in the graph.
 type WalletEdges struct {
 	// Users holds the value of the users edge.
 	Users []*User `json:"users,omitempty"`
-	// Chains holds the value of the chains edge.
-	Chains []*Chain `json:"chains,omitempty"`
+	// Chain holds the value of the chain edge.
+	Chain *Chain `json:"chain,omitempty"`
+	// Grants holds the value of the grants edge.
+	Grants []*Grant `json:"grants,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // UsersOrErr returns the Users value or an error if the edge
@@ -47,13 +51,27 @@ func (e WalletEdges) UsersOrErr() ([]*User, error) {
 	return nil, &NotLoadedError{edge: "users"}
 }
 
-// ChainsOrErr returns the Chains value or an error if the edge
-// was not loaded in eager-loading.
-func (e WalletEdges) ChainsOrErr() ([]*Chain, error) {
+// ChainOrErr returns the Chain value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e WalletEdges) ChainOrErr() (*Chain, error) {
 	if e.loadedTypes[1] {
-		return e.Chains, nil
+		if e.Chain == nil {
+			// The edge chain was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: chain.Label}
+		}
+		return e.Chain, nil
 	}
-	return nil, &NotLoadedError{edge: "chains"}
+	return nil, &NotLoadedError{edge: "chain"}
+}
+
+// GrantsOrErr returns the Grants value or an error if the edge
+// was not loaded in eager-loading.
+func (e WalletEdges) GrantsOrErr() ([]*Grant, error) {
+	if e.loadedTypes[2] {
+		return e.Grants, nil
+	}
+	return nil, &NotLoadedError{edge: "grants"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -65,8 +83,10 @@ func (*Wallet) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullInt64)
 		case wallet.FieldAddress:
 			values[i] = new(sql.NullString)
-		case wallet.FieldCreatedAt, wallet.FieldUpdatedAt:
+		case wallet.FieldCreateTime, wallet.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
+		case wallet.ForeignKeys[0]: // chain_wallets
+			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Wallet", columns[i])
 		}
@@ -88,23 +108,30 @@ func (w *Wallet) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			w.ID = int(value.Int64)
-		case wallet.FieldCreatedAt:
+		case wallet.FieldCreateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+				return fmt.Errorf("unexpected type %T for field create_time", values[i])
 			} else if value.Valid {
-				w.CreatedAt = value.Time
+				w.CreateTime = value.Time
 			}
-		case wallet.FieldUpdatedAt:
+		case wallet.FieldUpdateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+				return fmt.Errorf("unexpected type %T for field update_time", values[i])
 			} else if value.Valid {
-				w.UpdatedAt = value.Time
+				w.UpdateTime = value.Time
 			}
 		case wallet.FieldAddress:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field address", values[i])
 			} else if value.Valid {
 				w.Address = value.String
+			}
+		case wallet.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field chain_wallets", value)
+			} else if value.Valid {
+				w.chain_wallets = new(int)
+				*w.chain_wallets = int(value.Int64)
 			}
 		}
 	}
@@ -116,9 +143,14 @@ func (w *Wallet) QueryUsers() *UserQuery {
 	return (&WalletClient{config: w.config}).QueryUsers(w)
 }
 
-// QueryChains queries the "chains" edge of the Wallet entity.
-func (w *Wallet) QueryChains() *ChainQuery {
-	return (&WalletClient{config: w.config}).QueryChains(w)
+// QueryChain queries the "chain" edge of the Wallet entity.
+func (w *Wallet) QueryChain() *ChainQuery {
+	return (&WalletClient{config: w.config}).QueryChain(w)
+}
+
+// QueryGrants queries the "grants" edge of the Wallet entity.
+func (w *Wallet) QueryGrants() *GrantQuery {
+	return (&WalletClient{config: w.config}).QueryGrants(w)
 }
 
 // Update returns a builder for updating this Wallet.
@@ -144,10 +176,10 @@ func (w *Wallet) String() string {
 	var builder strings.Builder
 	builder.WriteString("Wallet(")
 	builder.WriteString(fmt.Sprintf("id=%v", w.ID))
-	builder.WriteString(", created_at=")
-	builder.WriteString(w.CreatedAt.Format(time.ANSIC))
-	builder.WriteString(", updated_at=")
-	builder.WriteString(w.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", create_time=")
+	builder.WriteString(w.CreateTime.Format(time.ANSIC))
+	builder.WriteString(", update_time=")
+	builder.WriteString(w.UpdateTime.Format(time.ANSIC))
 	builder.WriteString(", address=")
 	builder.WriteString(w.Address)
 	builder.WriteByte(')')

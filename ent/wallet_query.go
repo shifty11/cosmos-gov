@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/shifty11/cosmos-gov/ent/chain"
+	"github.com/shifty11/cosmos-gov/ent/grant"
 	"github.com/shifty11/cosmos-gov/ent/predicate"
 	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/ent/wallet"
@@ -29,7 +30,9 @@ type WalletQuery struct {
 	predicates []predicate.Wallet
 	// eager-loading edges.
 	withUsers  *UserQuery
-	withChains *ChainQuery
+	withChain  *ChainQuery
+	withGrants *GrantQuery
+	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -88,8 +91,8 @@ func (wq *WalletQuery) QueryUsers() *UserQuery {
 	return query
 }
 
-// QueryChains chains the current query on the "chains" edge.
-func (wq *WalletQuery) QueryChains() *ChainQuery {
+// QueryChain chains the current query on the "chain" edge.
+func (wq *WalletQuery) QueryChain() *ChainQuery {
 	query := &ChainQuery{config: wq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := wq.prepareQuery(ctx); err != nil {
@@ -102,7 +105,29 @@ func (wq *WalletQuery) QueryChains() *ChainQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(wallet.Table, wallet.FieldID, selector),
 			sqlgraph.To(chain.Table, chain.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, wallet.ChainsTable, wallet.ChainsColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, wallet.ChainTable, wallet.ChainColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(wq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryGrants chains the current query on the "grants" edge.
+func (wq *WalletQuery) QueryGrants() *GrantQuery {
+	query := &GrantQuery{config: wq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := wq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := wq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(wallet.Table, wallet.FieldID, selector),
+			sqlgraph.To(grant.Table, grant.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, wallet.GrantsTable, wallet.GrantsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(wq.driver.Dialect(), step)
 		return fromU, nil
@@ -292,7 +317,8 @@ func (wq *WalletQuery) Clone() *WalletQuery {
 		order:      append([]OrderFunc{}, wq.order...),
 		predicates: append([]predicate.Wallet{}, wq.predicates...),
 		withUsers:  wq.withUsers.Clone(),
-		withChains: wq.withChains.Clone(),
+		withChain:  wq.withChain.Clone(),
+		withGrants: wq.withGrants.Clone(),
 		// clone intermediate query.
 		sql:    wq.sql.Clone(),
 		path:   wq.path,
@@ -311,14 +337,25 @@ func (wq *WalletQuery) WithUsers(opts ...func(*UserQuery)) *WalletQuery {
 	return wq
 }
 
-// WithChains tells the query-builder to eager-load the nodes that are connected to
-// the "chains" edge. The optional arguments are used to configure the query builder of the edge.
-func (wq *WalletQuery) WithChains(opts ...func(*ChainQuery)) *WalletQuery {
+// WithChain tells the query-builder to eager-load the nodes that are connected to
+// the "chain" edge. The optional arguments are used to configure the query builder of the edge.
+func (wq *WalletQuery) WithChain(opts ...func(*ChainQuery)) *WalletQuery {
 	query := &ChainQuery{config: wq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	wq.withChains = query
+	wq.withChain = query
+	return wq
+}
+
+// WithGrants tells the query-builder to eager-load the nodes that are connected to
+// the "grants" edge. The optional arguments are used to configure the query builder of the edge.
+func (wq *WalletQuery) WithGrants(opts ...func(*GrantQuery)) *WalletQuery {
+	query := &GrantQuery{config: wq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	wq.withGrants = query
 	return wq
 }
 
@@ -328,12 +365,12 @@ func (wq *WalletQuery) WithChains(opts ...func(*ChainQuery)) *WalletQuery {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		CreateTime time.Time `json:"create_time,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Wallet.Query().
-//		GroupBy(wallet.FieldCreatedAt).
+//		GroupBy(wallet.FieldCreateTime).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -355,11 +392,11 @@ func (wq *WalletQuery) GroupBy(field string, fields ...string) *WalletGroupBy {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		CreateTime time.Time `json:"create_time,omitempty"`
 //	}
 //
 //	client.Wallet.Query().
-//		Select(wallet.FieldCreatedAt).
+//		Select(wallet.FieldCreateTime).
 //		Scan(ctx, &v)
 //
 func (wq *WalletQuery) Select(fields ...string) *WalletSelect {
@@ -386,12 +423,20 @@ func (wq *WalletQuery) prepareQuery(ctx context.Context) error {
 func (wq *WalletQuery) sqlAll(ctx context.Context) ([]*Wallet, error) {
 	var (
 		nodes       = []*Wallet{}
+		withFKs     = wq.withFKs
 		_spec       = wq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			wq.withUsers != nil,
-			wq.withChains != nil,
+			wq.withChain != nil,
+			wq.withGrants != nil,
 		}
 	)
+	if wq.withChain != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, wallet.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &Wallet{config: wq.config}
 		nodes = append(nodes, node)
@@ -477,32 +522,61 @@ func (wq *WalletQuery) sqlAll(ctx context.Context) ([]*Wallet, error) {
 		}
 	}
 
-	if query := wq.withChains; query != nil {
+	if query := wq.withChain; query != nil {
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*Wallet)
+		for i := range nodes {
+			if nodes[i].chain_wallets == nil {
+				continue
+			}
+			fk := *nodes[i].chain_wallets
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
+		}
+		query.Where(chain.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "chain_wallets" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Chain = n
+			}
+		}
+	}
+
+	if query := wq.withGrants; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
 		nodeids := make(map[int]*Wallet)
 		for i := range nodes {
 			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Chains = []*Chain{}
+			nodes[i].Edges.Grants = []*Grant{}
 		}
 		query.withFKs = true
-		query.Where(predicate.Chain(func(s *sql.Selector) {
-			s.Where(sql.InValues(wallet.ChainsColumn, fks...))
+		query.Where(predicate.Grant(func(s *sql.Selector) {
+			s.Where(sql.InValues(wallet.GrantsColumn, fks...))
 		}))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.wallet_chains
+			fk := n.wallet_grants
 			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "wallet_chains" is nil for node %v`, n.ID)
+				return nil, fmt.Errorf(`foreign-key "wallet_grants" is nil for node %v`, n.ID)
 			}
 			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "wallet_chains" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "wallet_grants" returned %v for node %v`, *fk, n.ID)
 			}
-			node.Edges.Chains = append(node.Edges.Chains, n)
+			node.Edges.Grants = append(node.Edges.Grants, n)
 		}
 	}
 

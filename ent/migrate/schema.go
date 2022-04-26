@@ -11,26 +11,17 @@ var (
 	// ChainsColumns holds the columns for the "chains" table.
 	ChainsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
 		{Name: "name", Type: field.TypeString, Unique: true},
 		{Name: "display_name", Type: field.TypeString, Unique: true},
 		{Name: "is_enabled", Type: field.TypeBool, Default: true},
-		{Name: "wallet_chains", Type: field.TypeInt, Nullable: true},
 	}
 	// ChainsTable holds the schema information for the "chains" table.
 	ChainsTable = &schema.Table{
 		Name:       "chains",
 		Columns:    ChainsColumns,
 		PrimaryKey: []*schema.Column{ChainsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "chains_wallets_chains",
-				Columns:    []*schema.Column{ChainsColumns[6]},
-				RefColumns: []*schema.Column{WalletsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
 		Indexes: []*schema.Index{
 			{
 				Name:    "chain_name",
@@ -42,8 +33,8 @@ var (
 	// DiscordChannelsColumns holds the columns for the "discord_channels" table.
 	DiscordChannelsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt64, Increment: true},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
 		{Name: "name", Type: field.TypeString},
 		{Name: "is_group", Type: field.TypeBool},
 		{Name: "roles", Type: field.TypeString, Default: ""},
@@ -70,11 +61,35 @@ var (
 			},
 		},
 	}
+	// GrantsColumns holds the columns for the "grants" table.
+	GrantsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+		{Name: "grantee", Type: field.TypeString},
+		{Name: "type", Type: field.TypeString},
+		{Name: "expires_at", Type: field.TypeTime},
+		{Name: "wallet_grants", Type: field.TypeInt, Nullable: true},
+	}
+	// GrantsTable holds the schema information for the "grants" table.
+	GrantsTable = &schema.Table{
+		Name:       "grants",
+		Columns:    GrantsColumns,
+		PrimaryKey: []*schema.Column{GrantsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "grants_wallets_grants",
+				Columns:    []*schema.Column{GrantsColumns[6]},
+				RefColumns: []*schema.Column{WalletsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// LensChainInfosColumns holds the columns for the "lens_chain_infos" table.
 	LensChainInfosColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
 		{Name: "name", Type: field.TypeString, Unique: true},
 		{Name: "cnt_errors", Type: field.TypeInt},
 	}
@@ -94,8 +109,8 @@ var (
 	// MigrationInfosColumns holds the columns for the "migration_infos" table.
 	MigrationInfosColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
 		{Name: "is_migrated", Type: field.TypeBool, Default: false},
 	}
 	// MigrationInfosTable holds the schema information for the "migration_infos" table.
@@ -107,14 +122,14 @@ var (
 	// ProposalsColumns holds the columns for the "proposals" table.
 	ProposalsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
 		{Name: "proposal_id", Type: field.TypeUint64},
 		{Name: "title", Type: field.TypeString},
 		{Name: "description", Type: field.TypeString},
 		{Name: "voting_start_time", Type: field.TypeTime},
 		{Name: "voting_end_time", Type: field.TypeTime},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"PROPOSAL_STATUS_UNSPECIFIED", "PROPOSAL_STATUS_DEPOSIT_PERIOD", "PROPOSAL_STATUS_VOTING_PERIOD", "PROPOSAL_STATUS_PASSED", "PROPOSAL_STATUS_REJECTED", "PROPOSAL_STATUS_FAILED"}},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"PROPOSAL_STATUS_REJECTED", "PROPOSAL_STATUS_FAILED", "PROPOSAL_STATUS_UNSPECIFIED", "PROPOSAL_STATUS_DEPOSIT_PERIOD", "PROPOSAL_STATUS_VOTING_PERIOD", "PROPOSAL_STATUS_PASSED"}},
 		{Name: "chain_proposals", Type: field.TypeInt, Nullable: true},
 	}
 	// ProposalsTable holds the schema information for the "proposals" table.
@@ -141,8 +156,8 @@ var (
 	// RPCEndpointsColumns holds the columns for the "rpc_endpoints" table.
 	RPCEndpointsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
 		{Name: "endpoint", Type: field.TypeString, Unique: true},
 		{Name: "chain_rpc_endpoints", Type: field.TypeInt, Nullable: true},
 	}
@@ -170,8 +185,8 @@ var (
 	// TelegramChatsColumns holds the columns for the "telegram_chats" table.
 	TelegramChatsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt64, Increment: true},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
 		{Name: "name", Type: field.TypeString},
 		{Name: "is_group", Type: field.TypeBool},
 		{Name: "telegram_chat_user", Type: field.TypeInt64, Nullable: true},
@@ -200,8 +215,8 @@ var (
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt64, Increment: true},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
 		{Name: "name", Type: field.TypeString, Default: "<not set>"},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"telegram", "discord"}},
 		{Name: "login_token", Type: field.TypeString, Default: ""},
@@ -215,15 +230,24 @@ var (
 	// WalletsColumns holds the columns for the "wallets" table.
 	WalletsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
 		{Name: "address", Type: field.TypeString, Unique: true},
+		{Name: "chain_wallets", Type: field.TypeInt, Nullable: true},
 	}
 	// WalletsTable holds the schema information for the "wallets" table.
 	WalletsTable = &schema.Table{
 		Name:       "wallets",
 		Columns:    WalletsColumns,
 		PrimaryKey: []*schema.Column{WalletsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "wallets_chains_wallets",
+				Columns:    []*schema.Column{WalletsColumns[4]},
+				RefColumns: []*schema.Column{ChainsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 		Indexes: []*schema.Index{
 			{
 				Name:    "wallet_address",
@@ -311,6 +335,7 @@ var (
 	Tables = []*schema.Table{
 		ChainsTable,
 		DiscordChannelsTable,
+		GrantsTable,
 		LensChainInfosTable,
 		MigrationInfosTable,
 		ProposalsTable,
@@ -325,11 +350,12 @@ var (
 )
 
 func init() {
-	ChainsTable.ForeignKeys[0].RefTable = WalletsTable
 	DiscordChannelsTable.ForeignKeys[0].RefTable = UsersTable
+	GrantsTable.ForeignKeys[0].RefTable = WalletsTable
 	ProposalsTable.ForeignKeys[0].RefTable = ChainsTable
 	RPCEndpointsTable.ForeignKeys[0].RefTable = ChainsTable
 	TelegramChatsTable.ForeignKeys[0].RefTable = UsersTable
+	WalletsTable.ForeignKeys[0].RefTable = ChainsTable
 	DiscordChannelChainsTable.ForeignKeys[0].RefTable = DiscordChannelsTable
 	DiscordChannelChainsTable.ForeignKeys[1].RefTable = ChainsTable
 	TelegramChatChainsTable.ForeignKeys[0].RefTable = TelegramChatsTable
