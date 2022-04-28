@@ -3,7 +3,6 @@ package telegram
 import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/log"
 	"golang.org/x/exp/slices"
@@ -27,7 +26,7 @@ func isBotAdmin(update *tgbotapi.Update) bool {
 
 func sendUserStatistics(update *tgbotapi.Update) {
 	chatId := getChatIdX(update)
-	statsManager := database.NewStatsManager()
+	statsManager := mHack.StatsManager
 	chainStatistics, err := statsManager.GetChainStats()
 	if err != nil {
 		log.Sugar.Error(err)
@@ -105,7 +104,7 @@ func sendBroadcastStart(update *tgbotapi.Update) {
 
 func sendConfirmBroadcastMessage(update *tgbotapi.Update, text string) {
 	chatId := getChatIdX(update)
-	cntUsers := database.NewTelegramChatManager().CountChats()
+	cntUsers := mHack.TelegramChatManager.CountChats()
 	broadcastMsg := tgbotapi.NewMessage(chatId, text)
 	broadcastMsg.DisableWebPagePreview = true
 	broadcastMsg.ParseMode = "html"
@@ -116,7 +115,7 @@ func sendConfirmBroadcastMessage(update *tgbotapi.Update, text string) {
 }
 
 func sendBroadcastMessage(text string) {
-	chatIds := database.NewTelegramChatManager().GetAllChatIds()
+	chatIds := mHack.TelegramChatManager.GetAllChatIds()
 	log.Sugar.Debugf("Broadcast message to %v users", len(chatIds))
 	for _, chatId := range chatIds {
 		broadcastMsg := tgbotapi.NewMessage(int64(chatId), text)
@@ -131,7 +130,7 @@ func sendBroadcastEndInfoMessage(update *tgbotapi.Update, success bool) {
 	chatId := getChatIdX(update)
 	text := abortBroadcastMsg
 	if success {
-		cntUsers := database.NewTelegramChatManager().CountChats()
+		cntUsers := mHack.TelegramChatManager.CountChats()
 		text = fmt.Sprintf(successBroadcastMsg, cntUsers)
 	}
 	msg := tgbotapi.NewMessage(chatId, text)
@@ -140,7 +139,7 @@ func sendBroadcastEndInfoMessage(update *tgbotapi.Update, success bool) {
 
 func sendChains(update *tgbotapi.Update) {
 	chatId := getChatIdX(update)
-	chains := database.NewChainManager().All()
+	chains := mHack.ChainManager.All()
 
 	var buttons [][]Button
 	var buttonRow []Button

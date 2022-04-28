@@ -67,7 +67,7 @@ func getSpecificChunk(chunks [][]*database.Subscription, name string) []*databas
 
 func getOngoingProposalsText(chatId int64) string {
 	text := messages.ProposalsMsg
-	chains := database.NewProposalManager().GetProposalsInVotingPeriod(chatId, user.TypeDiscord)
+	chains := mHack.ProposalManager.GetProposalsInVotingPeriod(chatId, user.TypeDiscord)
 	if len(chains) == 0 {
 		text = messages.NoSubscriptionsMsg
 	} else {
@@ -113,12 +113,7 @@ var (
 			channelName := getChannelName(i)
 			isGroup := isGroupChannel(i)
 
-			//TODO: fix this
-			userManager := database.NewTypedUserManager(user.TypeDiscord)
-			chainManager := database.NewChainManager()
-			discordChannelManager := database.NewDiscordChannelManager()
-			subsManager := database.NewDiscordSubscriptionManager(userManager, chainManager, discordChannelManager)
-			subs := subsManager.GetOrCreateSubscriptions(userId, userName, channelId, channelName, isGroup)
+			subs := mHack.DiscordSubscriptionManager.GetOrCreateSubscriptions(userId, userName, channelId, channelName, isGroup)
 
 			chains := chunks(subs, 25)
 			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -201,12 +196,7 @@ var (
 
 			performUpdateSubscription(channelId, action)
 
-			//TODO: fix this
-			userManager := database.NewTypedUserManager(user.TypeDiscord)
-			chainManager := database.NewChainManager()
-			discordChannelManager := database.NewDiscordChannelManager()
-			subsManager := database.NewDiscordSubscriptionManager(userManager, chainManager, discordChannelManager)
-			subs := subsManager.GetOrCreateSubscriptions(userId, userName, channelId, channelName, isGroup)
+			subs := mHack.DiscordSubscriptionManager.GetOrCreateSubscriptions(userId, userName, channelId, channelName, isGroup)
 
 			allChains := chunks(subs, 25)
 			chains := getSpecificChunk(allChains, action)

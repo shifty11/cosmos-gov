@@ -15,8 +15,7 @@ type WalletManager struct {
 	chainManager *ChainManager
 }
 
-func NewWalletManager(chainManager *ChainManager) *WalletManager {
-	client, ctx := connect()
+func NewWalletManager(client *ent.Client, ctx context.Context, chainManager *ChainManager) *WalletManager {
 	return &WalletManager{client: client, ctx: ctx, chainManager: chainManager}
 }
 
@@ -56,6 +55,7 @@ func (manager *WalletManager) SaveGrant(entUser *ent.User, chainName string, g *
 				Create().
 				SetAddress(g.Granter).
 				SetChain(entChain).
+				AddUsers(entUser).
 				Save(manager.ctx)
 			if err != nil {
 				return err

@@ -19,8 +19,7 @@ type ChainManager struct {
 	ctx    context.Context
 }
 
-func NewChainManager() *ChainManager {
-	client, ctx := connect()
+func NewChainManager(client *ent.Client, ctx context.Context) *ChainManager {
 	return &ChainManager{client: client, ctx: ctx}
 }
 

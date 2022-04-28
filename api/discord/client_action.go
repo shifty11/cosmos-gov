@@ -1,7 +1,6 @@
 package discord
 
 import (
-	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/log"
 )
 
@@ -11,7 +10,7 @@ func performUpdateSubscription(channelId int64, chainName string) {
 		return
 	}
 	log.Sugar.Debugf("Toggle subscription %v for Telegram chat #%v", chainName, channelId)
-	manager := database.NewDiscordChannelManager()
+	manager := mHack.DiscordChannelManager
 	_, err := manager.AddOrRemoveChain(channelId, chainName)
 	if err != nil {
 		log.Sugar.Errorf("Error while toggle subscription %v for Telegram chat #%v", chainName, channelId)

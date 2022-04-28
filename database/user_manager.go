@@ -13,8 +13,7 @@ type UserManager struct {
 	ctx    context.Context
 }
 
-func NewUserManager() *UserManager {
-	client, ctx := connect()
+func NewUserManager(client *ent.Client, ctx context.Context) *UserManager {
 	return &UserManager{client: client, ctx: ctx}
 }
 
@@ -61,8 +60,7 @@ type TypedUserManager struct {
 	userType user.Type
 }
 
-func NewTypedUserManager(userType user.Type) *TypedUserManager {
-	client, ctx := connect()
+func NewTypedUserManager(client *ent.Client, ctx context.Context, userType user.Type) *TypedUserManager {
 	return &TypedUserManager{client: client, ctx: ctx, userType: userType}
 }
 

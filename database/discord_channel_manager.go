@@ -9,13 +9,13 @@ import (
 )
 
 type DiscordChannelManager struct {
-	client *ent.Client
-	ctx    context.Context
+	client       *ent.Client
+	ctx          context.Context
+	chainManager *ChainManager
 }
 
-func NewDiscordChannelManager() *DiscordChannelManager {
-	client, ctx := connect()
-	return &DiscordChannelManager{client: client, ctx: ctx}
+func NewDiscordChannelManager(client *ent.Client, ctx context.Context, chainManager *ChainManager) *DiscordChannelManager {
+	return &DiscordChannelManager{client: client, ctx: ctx, chainManager: chainManager}
 }
 
 func (manager *DiscordChannelManager) AddOrRemoveChain(tgChatId int64, chainName string) (bool, error) {
@@ -27,8 +27,7 @@ func (manager *DiscordChannelManager) AddOrRemoveChain(tgChatId int64, chainName
 		return false, err
 	}
 
-	chainManager := NewChainManager()
-	chainEnt, err := chainManager.ByName(chainName)
+	chainEnt, err := manager.chainManager.ByName(chainName)
 	if err != nil {
 		return false, err
 	}

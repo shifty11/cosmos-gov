@@ -4,7 +4,6 @@ import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/shifty11/cosmos-gov/api"
-	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/log"
 )
@@ -39,12 +38,7 @@ func sendSubscriptions(update *tgbotapi.Update) {
 	}
 	userId := getUserIdX(update)
 
-	//TODO: fix this
-	userManager := database.NewTypedUserManager(user.TypeTelegram)
-	chainManager := database.NewChainManager()
-	tgChatManager := database.NewTelegramChatManager()
-	subsManager := database.NewTelegramSubscriptionManager(userManager, chainManager, tgChatManager)
-	chains := subsManager.GetOrCreateSubscriptions(userId, getUserName(update), chatId, getChatName(update), isGroupX(update))
+	chains := mHack.TelegramSubscriptionManager.GetOrCreateSubscriptions(userId, getUserName(update), chatId, getChatName(update), isGroupX(update))
 
 	var buttons [][]Button
 	var buttonRow []Button
@@ -93,7 +87,7 @@ func sendSubscriptions(update *tgbotapi.Update) {
 
 func getOngoingProposalsText(chatId int64) string {
 	text := messages.ProposalsMsg
-	chains := database.NewProposalManager().GetProposalsInVotingPeriod(chatId, user.TypeTelegram)
+	chains := mHack.ProposalManager.GetProposalsInVotingPeriod(chatId, user.TypeTelegram)
 	if len(chains) == 0 {
 		text = messages.NoSubscriptionsMsg
 	} else {

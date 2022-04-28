@@ -20,15 +20,30 @@ type ChatRoom struct {
 }
 
 type SubscriptionManager struct {
-	client       *ent.Client
-	ctx          context.Context
-	userManager  *UserManager
-	chainManager *ChainManager
+	client                *ent.Client
+	ctx                   context.Context
+	userManager           *UserManager
+	chainManager          *ChainManager
+	telegramChatManager   *TelegramChatManager
+	discordChannelManager *DiscordChannelManager
 }
 
-func NewSubscriptionManager(userManager *UserManager, chainManager *ChainManager) *SubscriptionManager {
-	client, ctx := connect()
-	return &SubscriptionManager{client: client, ctx: ctx, userManager: userManager, chainManager: chainManager}
+func NewSubscriptionManager(
+	client *ent.Client,
+	ctx context.Context,
+	userManager *UserManager,
+	chainManager *ChainManager,
+	telegramChatManager *TelegramChatManager,
+	discordChannelManager *DiscordChannelManager,
+) *SubscriptionManager {
+	return &SubscriptionManager{
+		client:                client,
+		ctx:                   ctx,
+		userManager:           userManager,
+		chainManager:          chainManager,
+		telegramChatManager:   telegramChatManager,
+		discordChannelManager: discordChannelManager,
+	}
 }
 
 func getSubscriptions(chainManager *ChainManager, chainsOfUser []*ent.Chain) []*Subscription {
@@ -48,9 +63,9 @@ func getSubscriptions(chainManager *ChainManager, chainsOfUser []*ent.Chain) []*
 
 func (manager *SubscriptionManager) ToggleSubscription(entUser *ent.User, chatRoomId int64, chainName string) (bool, error) {
 	if entUser.Type == user.TypeTelegram {
-		return NewTelegramChatManager().AddOrRemoveChain(chatRoomId, chainName)
+		return manager.telegramChatManager.AddOrRemoveChain(chatRoomId, chainName)
 	} else {
-		return NewDiscordChannelManager().AddOrRemoveChain(chatRoomId, chainName)
+		return manager.discordChannelManager.AddOrRemoveChain(chatRoomId, chainName)
 	}
 }
 

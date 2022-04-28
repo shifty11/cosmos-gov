@@ -9,13 +9,13 @@ import (
 )
 
 type TelegramChatManager struct {
-	client *ent.Client
-	ctx    context.Context
+	client       *ent.Client
+	ctx          context.Context
+	chainManager *ChainManager
 }
 
-func NewTelegramChatManager() *TelegramChatManager {
-	client, ctx := connect()
-	return &TelegramChatManager{client: client, ctx: ctx}
+func NewTelegramChatManager(client *ent.Client, ctx context.Context, chainManager *ChainManager) *TelegramChatManager {
+	return &TelegramChatManager{client: client, ctx: ctx, chainManager: chainManager}
 }
 
 func (manager *TelegramChatManager) AddOrRemoveChain(tgChatId int64, chainName string) (bool, error) {
@@ -27,8 +27,7 @@ func (manager *TelegramChatManager) AddOrRemoveChain(tgChatId int64, chainName s
 		return false, err
 	}
 
-	chainManager := NewChainManager()
-	chainEnt, err := chainManager.ByName(chainName)
+	chainEnt, err := manager.chainManager.ByName(chainName)
 	if err != nil {
 		return false, err
 	}

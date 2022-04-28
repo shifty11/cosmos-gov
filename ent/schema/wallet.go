@@ -22,8 +22,7 @@ func (Wallet) Mixin() []ent.Mixin {
 // Fields of the Wallet.
 func (Wallet) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("address").
-			Unique(),
+		field.String("address"),
 	}
 }
 
@@ -41,7 +40,7 @@ func (Wallet) Edges() []ent.Edge {
 
 func (Wallet) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("address").
-			Unique(),
+		index.Fields("address"),
+		index.Edges("chain"),
 	}
 }

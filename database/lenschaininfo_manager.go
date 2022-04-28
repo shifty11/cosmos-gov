@@ -12,8 +12,7 @@ type LensChainInfoManager struct {
 	ctx    context.Context
 }
 
-func NewLensChainInfoManager() *LensChainInfoManager {
-	client, ctx := connect()
+func NewLensChainInfoManager(client *ent.Client, ctx context.Context) *LensChainInfoManager {
 	return &LensChainInfoManager{client: client, ctx: ctx}
 }
 

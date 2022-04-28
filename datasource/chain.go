@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/shifty11/cosmos-gov/api/telegram"
-	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/log"
 	"golang.org/x/exp/slices"
 	"sort"
@@ -27,7 +26,7 @@ func (ds Datasource) getChainsFromRegistry() ([]string, error) {
 }
 
 func (ds Datasource) orderChainsByErrorCnt(chains []string) []string {
-	chainInfo := database.NewLensChainInfoManager().GetLensChainInfos()
+	chainInfo := ds.lensChainInfoManager.GetLensChainInfos()
 	var chainsWithErrors = make(map[int][]string)
 	chainsWithErrors[0] = []string{}
 	for _, chainName := range chains {
@@ -70,7 +69,7 @@ func (ds Datasource) getNewChains() []string {
 		return nil
 	}
 
-	chains := database.NewChainManager().All()
+	chains := ds.chainManager.All()
 	var chainNames []string
 	for _, chain := range chains {
 		chainNames = append(chainNames, chain.Name)
@@ -104,9 +103,9 @@ func (ds Datasource) AddNewChains() {
 	log.Sugar.Info("Add new chains")
 	chains := ds.getNewChains()
 	message := ""
-	chainManager := database.NewChainManager()
-	propManager := database.NewProposalManager()
-	lensChainManager := database.NewLensChainInfoManager()
+	chainManager := ds.chainManager
+	propManager := ds.proposalManager
+	lensChainManager := ds.lensChainInfoManager
 
 	for _, chainName := range chains {
 		client, rpcs, err := ds.getChainInfo(chainName)

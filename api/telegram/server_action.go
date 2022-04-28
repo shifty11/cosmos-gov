@@ -3,7 +3,6 @@ package telegram
 import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/ent"
 	"github.com/shifty11/cosmos-gov/log"
 	"golang.org/x/exp/slices"
@@ -23,7 +22,7 @@ func SendProposals(entProp *ent.Proposal, entChain *ent.Chain) []int64 {
 	}
 
 	var errIds []int64
-	chatIds := database.NewTelegramChatManager().GetChatIds(entChain)
+	chatIds := mHack.TelegramChatManager.GetChatIds(entChain)
 	for _, chatId := range chatIds {
 		msg := tgbotapi.NewMessage(int64(chatId), text)
 		msg.ParseMode = "html"

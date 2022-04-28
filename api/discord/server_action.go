@@ -3,7 +3,6 @@ package discord
 import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
-	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/ent"
 	"github.com/shifty11/cosmos-gov/log"
 	"os"
@@ -54,7 +53,7 @@ func SendProposals(entProp *ent.Proposal, entChain *ent.Chain) []int64 {
 	}
 
 	var errIds []int64
-	channelIds := database.NewDiscordChannelManager().GetChannelIds(entChain)
+	channelIds := mHack.DiscordChannelManager.GetChannelIds(entChain)
 	for _, channelId := range channelIds {
 		log.Sugar.Debugf("Send proposal #%v on %v to discord chat #%v", entProp.ProposalID, entChain.DisplayName, channelId)
 		var _, err = session.ChannelMessageSendComplex(strconv.Itoa(channelId), &discordgo.MessageSend{

@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/shifty11/cosmos-gov/ent/migrate"
+	"github.com/shifty11/cosmos-gov/ent/user"
 	"os"
 
 	"github.com/shifty11/cosmos-gov/ent"
@@ -155,29 +156,46 @@ func migrateUsers() {
 }
 
 type DbManagers struct {
-	ChainManager          *ChainManager
-	UserManager           *UserManager
-	TelegramChatManager   *TelegramChatManager
-	DiscordChannelManager *DiscordChannelManager
-	ProposalManager       *ProposalManager
-	SubscriptionManager   *SubscriptionManager
-	LensChainInfoManager  *LensChainInfoManager
-	StatsManager          *StatsManager
-	WalletManager         *WalletManager
+	ChainManager                *ChainManager
+	UserManager                 *UserManager
+	TelegramUserManager         *TypedUserManager
+	DiscordUserManager          *TypedUserManager
+	TelegramChatManager         *TelegramChatManager
+	DiscordChannelManager       *DiscordChannelManager
+	ProposalManager             *ProposalManager
+	SubscriptionManager         *SubscriptionManager
+	TelegramSubscriptionManager *TelegramSubscriptionManager
+	DiscordSubscriptionManager  *DiscordSubscriptionManager
+	LensChainInfoManager        *LensChainInfoManager
+	StatsManager                *StatsManager
+	WalletManager               *WalletManager
 }
 
 func NewDefaultDbManagers() DbManagers {
-	chainManager := NewChainManager()
-	userManager := NewUserManager()
+	client, ctx := connect()
+	return NewCustomDbManagers(client, ctx)
+}
+
+func NewCustomDbManagers(client *ent.Client, ctx context.Context) DbManagers {
+	chainManager := NewChainManager(client, ctx)
+	userManager := NewUserManager(client, ctx)
+	telegramChatManager := NewTelegramChatManager(client, ctx, chainManager)
+	discordChannelManager := NewDiscordChannelManager(client, ctx, chainManager)
+	telegramUserManager := NewTypedUserManager(client, ctx, user.TypeTelegram)
+	discordUserManager := NewTypedUserManager(client, ctx, user.TypeDiscord)
 	return DbManagers{
-		ChainManager:          chainManager,
-		UserManager:           userManager,
-		TelegramChatManager:   NewTelegramChatManager(),
-		DiscordChannelManager: NewDiscordChannelManager(),
-		ProposalManager:       NewProposalManager(),
-		SubscriptionManager:   NewSubscriptionManager(userManager, chainManager),
-		LensChainInfoManager:  NewLensChainInfoManager(),
-		StatsManager:          NewStatsManager(),
-		WalletManager:         NewWalletManager(chainManager),
+		ChainManager:                chainManager,
+		UserManager:                 userManager,
+		TelegramUserManager:         telegramUserManager,
+		DiscordUserManager:          discordUserManager,
+		TelegramChatManager:         telegramChatManager,
+		DiscordChannelManager:       discordChannelManager,
+		ProposalManager:             NewProposalManager(client, ctx),
+		SubscriptionManager:         NewSubscriptionManager(client, ctx, userManager, chainManager, telegramChatManager, discordChannelManager),
+		TelegramSubscriptionManager: NewTelegramSubscriptionManager(telegramUserManager, chainManager, telegramChatManager),
+		DiscordSubscriptionManager:  NewDiscordSubscriptionManager(discordUserManager, chainManager, discordChannelManager),
+		LensChainInfoManager:        NewLensChainInfoManager(client, ctx),
+		StatsManager:                NewStatsManager(client, ctx),
+		WalletManager:               NewWalletManager(client, ctx, chainManager),
 	}
 }

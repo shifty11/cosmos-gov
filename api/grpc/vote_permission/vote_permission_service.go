@@ -21,10 +21,6 @@ type VotePermissionServer struct {
 	walletManager *database.WalletManager
 }
 
-//func NewVotePermissionsServer(votePermissionManager *database.VotePermissionManager) pb.VotePermissionServiceServer {
-//	return &VotePermissionServer{votePermissionManager: votePermissionManager}
-//}
-
 func NewVotePermissionsServer(authzClient *authz.AuthzClient, walletManager *database.WalletManager) pb.VotePermissionServiceServer {
 	return &VotePermissionServer{authzClient: authzClient, walletManager: walletManager}
 }

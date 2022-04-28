@@ -28,7 +28,7 @@ func (server *AuthServer) TokenLogin(_ context.Context, req *pb.TokenLoginReques
 
 	entUser, err := server.userManager.ByToken(req.ChatId, userType, req.Token)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "cannot find user: %v", err)
+		return nil, status.Errorf(codes.NotFound, "cannot find user: %v", err)
 	}
 
 	err = server.userManager.GenerateNewLoginToken(req.ChatId, userType)

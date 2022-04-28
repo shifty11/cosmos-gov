@@ -232,7 +232,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
-		{Name: "address", Type: field.TypeString, Unique: true},
+		{Name: "address", Type: field.TypeString},
 		{Name: "chain_wallets", Type: field.TypeInt, Nullable: true},
 	}
 	// WalletsTable holds the schema information for the "wallets" table.
@@ -251,8 +251,13 @@ var (
 		Indexes: []*schema.Index{
 			{
 				Name:    "wallet_address",
-				Unique:  true,
+				Unique:  false,
 				Columns: []*schema.Column{WalletsColumns[3]},
+			},
+			{
+				Name:    "wallet_chain_wallets",
+				Unique:  false,
+				Columns: []*schema.Column{WalletsColumns[4]},
 			},
 		},
 	}

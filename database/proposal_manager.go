@@ -19,8 +19,7 @@ type ProposalManager struct {
 	ctx    context.Context
 }
 
-func NewProposalManager() *ProposalManager {
-	client, ctx := connect()
+func NewProposalManager(client *ent.Client, ctx context.Context) *ProposalManager {
 	return &ProposalManager{client: client, ctx: ctx}
 }
 

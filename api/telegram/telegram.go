@@ -2,10 +2,13 @@ package telegram
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/log"
 	"golang.org/x/exp/slices"
 	"strings"
 )
+
+var mHack database.DbManagers // TODO: get rid of this hack
 
 func isExpectingMessage(update *tgbotapi.Update) bool {
 	currentState := getState(update)
@@ -221,6 +224,8 @@ func manageUpdateChannels() {
 
 func Start() {
 	log.Sugar.Info("Start telegram bot")
+
+	mHack = database.NewDefaultDbManagers()
 	api := getApi()
 
 	updateConfig := tgbotapi.NewUpdate(0)

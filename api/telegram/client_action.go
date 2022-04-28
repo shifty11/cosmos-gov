@@ -2,7 +2,6 @@ package telegram
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/log"
 )
 
@@ -12,7 +11,7 @@ func performToggleChain(chainName string) {
 		return
 	}
 	log.Sugar.Debugf("Enable/disable chain %v", chainName)
-	err := database.NewChainManager().EnableOrDisableChain(chainName)
+	err := mHack.ChainManager.EnableOrDisableChain(chainName)
 	if err != nil {
 		log.Sugar.Error("Error while toggle chain %v", chainName)
 	}
@@ -27,9 +26,7 @@ func performUpdateSubscription(update *tgbotapi.Update, chainName string) {
 	chatName := getChatName(update)
 	log.Sugar.Debugf("Toggle subscription %v for Telegram chat %v (%v)", chainName, chatName, tgChatId)
 
-	//TODO: fix this
-	manager := database.NewTelegramChatManager()
-	_, err := manager.AddOrRemoveChain(tgChatId, chainName)
+	_, err := mHack.TelegramChatManager.AddOrRemoveChain(tgChatId, chainName)
 	if err != nil {
 		log.Sugar.Errorf("Error while toggle subscription %v for Telegram chat %v (%v)", chainName, chatName, tgChatId)
 	}

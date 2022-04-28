@@ -3,7 +3,6 @@ package telegram
 import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/log"
 	"golang.org/x/exp/slices"
 	"os"
@@ -204,7 +203,7 @@ func handleError(chatId int, err error) {
 	if err != nil {
 		if slices.Contains(forbiddenErrors, err.Error()) {
 			log.Sugar.Debugf("Delete user #%v", chatId)
-			database.NewTelegramChatManager().Delete(int64(chatId))
+			mHack.TelegramChatManager.Delete(int64(chatId))
 		} else {
 			log.Sugar.Errorf("Error while sending message to chat #%v: %v", chatId, err)
 		}

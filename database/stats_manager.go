@@ -18,8 +18,7 @@ type StatsManager struct {
 	ctx    context.Context
 }
 
-func NewStatsManager() *StatsManager {
-	client, ctx := connect()
+func NewStatsManager(client *ent.Client, ctx context.Context) *StatsManager {
 	return &StatsManager{client: client, ctx: ctx}
 }
 
