@@ -33,7 +33,7 @@ func Start() {
 	jwtManager := auth.NewJWTManager([]byte(jwtSecretKey), accessTokenDuration, refreshTokenDuration)
 	interceptor := auth.NewAuthInterceptor(jwtManager, managers.UserManager, auth.AccessibleRoles())
 
-	authzClient := authz.NewAuthzClient(managers.ChainManager)
+	authzClient := authz.NewAuthzClient(managers.ChainManager, managers.WalletManager)
 
 	authServer := auth.NewAuthServer(managers.UserManager, jwtManager)
 	subscriptionServer := subscription.NewSubscriptionsServer(managers.SubscriptionManager)

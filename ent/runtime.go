@@ -38,7 +38,7 @@ func init() {
 	// chain.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
 	chain.UpdateDefaultUpdateTime = chainDescUpdateTime.UpdateDefault.(func() time.Time)
 	// chainDescIsEnabled is the schema descriptor for is_enabled field.
-	chainDescIsEnabled := chainFields[2].Descriptor()
+	chainDescIsEnabled := chainFields[4].Descriptor()
 	// chain.DefaultIsEnabled holds the default value on creation for the is_enabled field.
 	chain.DefaultIsEnabled = chainDescIsEnabled.Default.(bool)
 	discordchannelMixin := schema.DiscordChannel{}.Mixin()

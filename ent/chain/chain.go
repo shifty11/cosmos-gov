@@ -15,6 +15,10 @@ const (
 	FieldCreateTime = "create_time"
 	// FieldUpdateTime holds the string denoting the update_time field in the database.
 	FieldUpdateTime = "update_time"
+	// FieldChainID holds the string denoting the chain_id field in the database.
+	FieldChainID = "chain_id"
+	// FieldAccountPrefix holds the string denoting the account_prefix field in the database.
+	FieldAccountPrefix = "account_prefix"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
 	// FieldDisplayName holds the string denoting the display_name field in the database.
@@ -71,6 +75,8 @@ var Columns = []string{
 	FieldID,
 	FieldCreateTime,
 	FieldUpdateTime,
+	FieldChainID,
+	FieldAccountPrefix,
 	FieldName,
 	FieldDisplayName,
 	FieldIsEnabled,

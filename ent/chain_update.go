@@ -39,6 +39,18 @@ func (cu *ChainUpdate) SetUpdateTime(t time.Time) *ChainUpdate {
 	return cu
 }
 
+// SetChainID sets the "chain_id" field.
+func (cu *ChainUpdate) SetChainID(s string) *ChainUpdate {
+	cu.mutation.SetChainID(s)
+	return cu
+}
+
+// SetAccountPrefix sets the "account_prefix" field.
+func (cu *ChainUpdate) SetAccountPrefix(s string) *ChainUpdate {
+	cu.mutation.SetAccountPrefix(s)
+	return cu
+}
+
 // SetName sets the "name" field.
 func (cu *ChainUpdate) SetName(s string) *ChainUpdate {
 	cu.mutation.SetName(s)
@@ -336,6 +348,20 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeTime,
 			Value:  value,
 			Column: chain.FieldUpdateTime,
+		})
+	}
+	if value, ok := cu.mutation.ChainID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: chain.FieldChainID,
+		})
+	}
+	if value, ok := cu.mutation.AccountPrefix(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: chain.FieldAccountPrefix,
 		})
 	}
 	if value, ok := cu.mutation.Name(); ok {
@@ -651,6 +677,18 @@ type ChainUpdateOne struct {
 // SetUpdateTime sets the "update_time" field.
 func (cuo *ChainUpdateOne) SetUpdateTime(t time.Time) *ChainUpdateOne {
 	cuo.mutation.SetUpdateTime(t)
+	return cuo
+}
+
+// SetChainID sets the "chain_id" field.
+func (cuo *ChainUpdateOne) SetChainID(s string) *ChainUpdateOne {
+	cuo.mutation.SetChainID(s)
+	return cuo
+}
+
+// SetAccountPrefix sets the "account_prefix" field.
+func (cuo *ChainUpdateOne) SetAccountPrefix(s string) *ChainUpdateOne {
+	cuo.mutation.SetAccountPrefix(s)
 	return cuo
 }
 
@@ -975,6 +1013,20 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 			Type:   field.TypeTime,
 			Value:  value,
 			Column: chain.FieldUpdateTime,
+		})
+	}
+	if value, ok := cuo.mutation.ChainID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: chain.FieldChainID,
+		})
+	}
+	if value, ok := cuo.mutation.AccountPrefix(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: chain.FieldAccountPrefix,
 		})
 	}
 	if value, ok := cuo.mutation.Name(); ok {

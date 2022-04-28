@@ -15,7 +15,7 @@ func Test_SaveGrant_New(t *testing.T) {
 	//goland:noinspection GoUnhandledErrorResult
 	defer client.Close()
 
-	entChain := m.ChainManager.Create("testchain", []string{"test-rpc"})
+	entChain := m.ChainManager.Create("testchain-1", "testchain", "test", []string{"test-rpc"})
 	entUser := m.TelegramUserManager.GetOrCreateUser(100, "Roland")
 
 	grantData := &database.GrantData{
@@ -58,7 +58,7 @@ func Test_SaveGrant_ExistingWallet(t *testing.T) {
 	//goland:noinspection GoUnhandledErrorResult
 	defer client.Close()
 
-	entChain := m.ChainManager.Create("testchain", []string{"test-rpc"})
+	entChain := m.ChainManager.Create("testchain-1", "testchain", "test", []string{"test-rpc"})
 	entUser := m.TelegramUserManager.GetOrCreateUser(100, "Roland")
 
 	grantData := &database.GrantData{
@@ -108,7 +108,7 @@ func Test_SaveGrant_ExistingGrant_Update(t *testing.T) {
 	//goland:noinspection GoUnhandledErrorResult
 	defer client.Close()
 
-	entChain := m.ChainManager.Create("testchain", []string{"test-rpc"})
+	entChain := m.ChainManager.Create("testchain-1", "testchain", "test", []string{"test-rpc"})
 	entUser := m.TelegramUserManager.GetOrCreateUser(100, "Roland")
 
 	grantData := &database.GrantData{
@@ -168,7 +168,7 @@ func Test_SaveGrant_ExistingGrant_Create(t *testing.T) {
 	//goland:noinspection GoUnhandledErrorResult
 	defer client.Close()
 
-	entChain := m.ChainManager.Create("testchain", []string{"test-rpc"})
+	entChain := m.ChainManager.Create("testchain-1", "testchain", "test", []string{"test-rpc"})
 	entUser := m.TelegramUserManager.GetOrCreateUser(100, "Roland")
 
 	grantData := &database.GrantData{

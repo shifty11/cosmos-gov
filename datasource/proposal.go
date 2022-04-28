@@ -15,6 +15,7 @@ import (
 	"github.com/shifty11/cosmos-gov/ent/chain"
 	"github.com/shifty11/cosmos-gov/log"
 	lens "github.com/strangelove-ventures/lens/client"
+	registry "github.com/strangelove-ventures/lens/client/chain_registry"
 	"os"
 	"regexp"
 	"strings"
@@ -97,22 +98,22 @@ func fetchProposals(chainId string, proposalStatus types.ProposalStatus, pageReq
 	return &proposals, nil
 }
 
-func (ds Datasource) getChainInfo(chainName string) (*lens.ChainClient, []string, error) {
+func (ds Datasource) getChainInfo(chainName string) (*lens.ChainClient, *registry.ChainInfo, []string, error) {
 	chainInfo, err := ds.chainRegistry.GetChain(context.Background(), chainName)
 	if err != nil {
 		log.Sugar.Errorf("Failed to get chain client on %v: %v \n", chainName, err)
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	rpcs, err := chainInfo.GetRPCEndpoints(context.Background())
 	if err != nil {
 		log.Sugar.Errorf("Failed to get RPC endpoints on chain %s: %v \n", chainInfo.ChainID, err)
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	if len(rpcs) <= 0 {
 		log.Sugar.Errorf("Found no working RPC endpoints on chain %s: %v \n", chainInfo.ChainID, err)
-		return nil, nil, errors.New("found no working RPC endpoints")
+		return nil, nil, nil, errors.New("found no working RPC endpoints")
 	}
 
 	pwd, _ := os.Getwd()
@@ -122,6 +123,7 @@ func (ds Datasource) getChainInfo(chainName string) (*lens.ChainClient, []string
 		Key:            "default",
 		ChainID:        chainInfo.ChainID,
 		RPCAddr:        rpcs[0],
+		AccountPrefix:  chainInfo.Bech32Prefix,
 		KeyringBackend: "test",
 		Debug:          true,
 		Timeout:        "20s",
@@ -133,7 +135,7 @@ func (ds Datasource) getChainInfo(chainName string) (*lens.ChainClient, []string
 	if err != nil {
 		log.Sugar.Fatalf("Failed to build new chain client for %s. Err: %v \n", chainInfo.ChainID, err)
 	}
-	return chainClient, rpcs, nil
+	return chainClient, &chainInfo, rpcs, nil
 }
 
 func (ds Datasource) saveAndSendProposals(props *database.Proposals, entChain *ent.Chain) {

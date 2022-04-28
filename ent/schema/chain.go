@@ -22,6 +22,10 @@ func (Chain) Mixin() []ent.Mixin {
 // Fields of the Chain.
 func (Chain) Fields() []ent.Field {
 	return []ent.Field{
+		field.String("chain_id").
+			Unique(),
+		field.String("account_prefix").
+			Unique(),
 		field.String("name").
 			Unique(),
 		field.String("display_name").

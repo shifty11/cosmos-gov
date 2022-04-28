@@ -107,6 +107,20 @@ func UpdateTime(v time.Time) predicate.Chain {
 	})
 }
 
+// ChainID applies equality check predicate on the "chain_id" field. It's identical to ChainIDEQ.
+func ChainID(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldChainID), v))
+	})
+}
+
+// AccountPrefix applies equality check predicate on the "account_prefix" field. It's identical to AccountPrefixEQ.
+func AccountPrefix(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldAccountPrefix), v))
+	})
+}
+
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
 func Name(v string) predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {
@@ -277,6 +291,228 @@ func UpdateTimeLT(v time.Time) predicate.Chain {
 func UpdateTimeLTE(v time.Time) predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldUpdateTime), v))
+	})
+}
+
+// ChainIDEQ applies the EQ predicate on the "chain_id" field.
+func ChainIDEQ(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldChainID), v))
+	})
+}
+
+// ChainIDNEQ applies the NEQ predicate on the "chain_id" field.
+func ChainIDNEQ(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldChainID), v))
+	})
+}
+
+// ChainIDIn applies the In predicate on the "chain_id" field.
+func ChainIDIn(vs ...string) predicate.Chain {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Chain(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldChainID), v...))
+	})
+}
+
+// ChainIDNotIn applies the NotIn predicate on the "chain_id" field.
+func ChainIDNotIn(vs ...string) predicate.Chain {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Chain(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldChainID), v...))
+	})
+}
+
+// ChainIDGT applies the GT predicate on the "chain_id" field.
+func ChainIDGT(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldChainID), v))
+	})
+}
+
+// ChainIDGTE applies the GTE predicate on the "chain_id" field.
+func ChainIDGTE(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldChainID), v))
+	})
+}
+
+// ChainIDLT applies the LT predicate on the "chain_id" field.
+func ChainIDLT(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldChainID), v))
+	})
+}
+
+// ChainIDLTE applies the LTE predicate on the "chain_id" field.
+func ChainIDLTE(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldChainID), v))
+	})
+}
+
+// ChainIDContains applies the Contains predicate on the "chain_id" field.
+func ChainIDContains(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldChainID), v))
+	})
+}
+
+// ChainIDHasPrefix applies the HasPrefix predicate on the "chain_id" field.
+func ChainIDHasPrefix(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldChainID), v))
+	})
+}
+
+// ChainIDHasSuffix applies the HasSuffix predicate on the "chain_id" field.
+func ChainIDHasSuffix(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldChainID), v))
+	})
+}
+
+// ChainIDEqualFold applies the EqualFold predicate on the "chain_id" field.
+func ChainIDEqualFold(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldChainID), v))
+	})
+}
+
+// ChainIDContainsFold applies the ContainsFold predicate on the "chain_id" field.
+func ChainIDContainsFold(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldChainID), v))
+	})
+}
+
+// AccountPrefixEQ applies the EQ predicate on the "account_prefix" field.
+func AccountPrefixEQ(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldAccountPrefix), v))
+	})
+}
+
+// AccountPrefixNEQ applies the NEQ predicate on the "account_prefix" field.
+func AccountPrefixNEQ(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldAccountPrefix), v))
+	})
+}
+
+// AccountPrefixIn applies the In predicate on the "account_prefix" field.
+func AccountPrefixIn(vs ...string) predicate.Chain {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Chain(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldAccountPrefix), v...))
+	})
+}
+
+// AccountPrefixNotIn applies the NotIn predicate on the "account_prefix" field.
+func AccountPrefixNotIn(vs ...string) predicate.Chain {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Chain(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldAccountPrefix), v...))
+	})
+}
+
+// AccountPrefixGT applies the GT predicate on the "account_prefix" field.
+func AccountPrefixGT(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldAccountPrefix), v))
+	})
+}
+
+// AccountPrefixGTE applies the GTE predicate on the "account_prefix" field.
+func AccountPrefixGTE(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldAccountPrefix), v))
+	})
+}
+
+// AccountPrefixLT applies the LT predicate on the "account_prefix" field.
+func AccountPrefixLT(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldAccountPrefix), v))
+	})
+}
+
+// AccountPrefixLTE applies the LTE predicate on the "account_prefix" field.
+func AccountPrefixLTE(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldAccountPrefix), v))
+	})
+}
+
+// AccountPrefixContains applies the Contains predicate on the "account_prefix" field.
+func AccountPrefixContains(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldAccountPrefix), v))
+	})
+}
+
+// AccountPrefixHasPrefix applies the HasPrefix predicate on the "account_prefix" field.
+func AccountPrefixHasPrefix(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldAccountPrefix), v))
+	})
+}
+
+// AccountPrefixHasSuffix applies the HasSuffix predicate on the "account_prefix" field.
+func AccountPrefixHasSuffix(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldAccountPrefix), v))
+	})
+}
+
+// AccountPrefixEqualFold applies the EqualFold predicate on the "account_prefix" field.
+func AccountPrefixEqualFold(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldAccountPrefix), v))
+	})
+}
+
+// AccountPrefixContainsFold applies the ContainsFold predicate on the "account_prefix" field.
+func AccountPrefixContainsFold(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldAccountPrefix), v))
 	})
 }
 

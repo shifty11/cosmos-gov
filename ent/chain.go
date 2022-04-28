@@ -20,6 +20,10 @@ type Chain struct {
 	CreateTime time.Time `json:"create_time,omitempty"`
 	// UpdateTime holds the value of the "update_time" field.
 	UpdateTime time.Time `json:"update_time,omitempty"`
+	// ChainID holds the value of the "chain_id" field.
+	ChainID string `json:"chain_id,omitempty"`
+	// AccountPrefix holds the value of the "account_prefix" field.
+	AccountPrefix string `json:"account_prefix,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// DisplayName holds the value of the "display_name" field.
@@ -102,7 +106,7 @@ func (*Chain) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullBool)
 		case chain.FieldID:
 			values[i] = new(sql.NullInt64)
-		case chain.FieldName, chain.FieldDisplayName:
+		case chain.FieldChainID, chain.FieldAccountPrefix, chain.FieldName, chain.FieldDisplayName:
 			values[i] = new(sql.NullString)
 		case chain.FieldCreateTime, chain.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
@@ -138,6 +142,18 @@ func (c *Chain) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field update_time", values[i])
 			} else if value.Valid {
 				c.UpdateTime = value.Time
+			}
+		case chain.FieldChainID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field chain_id", values[i])
+			} else if value.Valid {
+				c.ChainID = value.String
+			}
+		case chain.FieldAccountPrefix:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field account_prefix", values[i])
+			} else if value.Valid {
+				c.AccountPrefix = value.String
 			}
 		case chain.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -214,6 +230,10 @@ func (c *Chain) String() string {
 	builder.WriteString(c.CreateTime.Format(time.ANSIC))
 	builder.WriteString(", update_time=")
 	builder.WriteString(c.UpdateTime.Format(time.ANSIC))
+	builder.WriteString(", chain_id=")
+	builder.WriteString(c.ChainID)
+	builder.WriteString(", account_prefix=")
+	builder.WriteString(c.AccountPrefix)
 	builder.WriteString(", name=")
 	builder.WriteString(c.Name)
 	builder.WriteString(", display_name=")

@@ -53,6 +53,8 @@ type ChainMutation struct {
 	id                      *int
 	create_time             *time.Time
 	update_time             *time.Time
+	chain_id                *string
+	account_prefix          *string
 	name                    *string
 	display_name            *string
 	is_enabled              *bool
@@ -245,6 +247,78 @@ func (m *ChainMutation) OldUpdateTime(ctx context.Context) (v time.Time, err err
 // ResetUpdateTime resets all changes to the "update_time" field.
 func (m *ChainMutation) ResetUpdateTime() {
 	m.update_time = nil
+}
+
+// SetChainID sets the "chain_id" field.
+func (m *ChainMutation) SetChainID(s string) {
+	m.chain_id = &s
+}
+
+// ChainID returns the value of the "chain_id" field in the mutation.
+func (m *ChainMutation) ChainID() (r string, exists bool) {
+	v := m.chain_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldChainID returns the old "chain_id" field's value of the Chain entity.
+// If the Chain object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ChainMutation) OldChainID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldChainID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldChainID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldChainID: %w", err)
+	}
+	return oldValue.ChainID, nil
+}
+
+// ResetChainID resets all changes to the "chain_id" field.
+func (m *ChainMutation) ResetChainID() {
+	m.chain_id = nil
+}
+
+// SetAccountPrefix sets the "account_prefix" field.
+func (m *ChainMutation) SetAccountPrefix(s string) {
+	m.account_prefix = &s
+}
+
+// AccountPrefix returns the value of the "account_prefix" field in the mutation.
+func (m *ChainMutation) AccountPrefix() (r string, exists bool) {
+	v := m.account_prefix
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAccountPrefix returns the old "account_prefix" field's value of the Chain entity.
+// If the Chain object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ChainMutation) OldAccountPrefix(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAccountPrefix is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAccountPrefix requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAccountPrefix: %w", err)
+	}
+	return oldValue.AccountPrefix, nil
+}
+
+// ResetAccountPrefix resets all changes to the "account_prefix" field.
+func (m *ChainMutation) ResetAccountPrefix() {
+	m.account_prefix = nil
 }
 
 // SetName sets the "name" field.
@@ -644,12 +718,18 @@ func (m *ChainMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ChainMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 7)
 	if m.create_time != nil {
 		fields = append(fields, chain.FieldCreateTime)
 	}
 	if m.update_time != nil {
 		fields = append(fields, chain.FieldUpdateTime)
+	}
+	if m.chain_id != nil {
+		fields = append(fields, chain.FieldChainID)
+	}
+	if m.account_prefix != nil {
+		fields = append(fields, chain.FieldAccountPrefix)
 	}
 	if m.name != nil {
 		fields = append(fields, chain.FieldName)
@@ -672,6 +752,10 @@ func (m *ChainMutation) Field(name string) (ent.Value, bool) {
 		return m.CreateTime()
 	case chain.FieldUpdateTime:
 		return m.UpdateTime()
+	case chain.FieldChainID:
+		return m.ChainID()
+	case chain.FieldAccountPrefix:
+		return m.AccountPrefix()
 	case chain.FieldName:
 		return m.Name()
 	case chain.FieldDisplayName:
@@ -691,6 +775,10 @@ func (m *ChainMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldCreateTime(ctx)
 	case chain.FieldUpdateTime:
 		return m.OldUpdateTime(ctx)
+	case chain.FieldChainID:
+		return m.OldChainID(ctx)
+	case chain.FieldAccountPrefix:
+		return m.OldAccountPrefix(ctx)
 	case chain.FieldName:
 		return m.OldName(ctx)
 	case chain.FieldDisplayName:
@@ -719,6 +807,20 @@ func (m *ChainMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUpdateTime(v)
+		return nil
+	case chain.FieldChainID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetChainID(v)
+		return nil
+	case chain.FieldAccountPrefix:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAccountPrefix(v)
 		return nil
 	case chain.FieldName:
 		v, ok := value.(string)
@@ -795,6 +897,12 @@ func (m *ChainMutation) ResetField(name string) error {
 		return nil
 	case chain.FieldUpdateTime:
 		m.ResetUpdateTime()
+		return nil
+	case chain.FieldChainID:
+		m.ResetChainID()
+		return nil
+	case chain.FieldAccountPrefix:
+		m.ResetAccountPrefix()
 		return nil
 	case chain.FieldName:
 		m.ResetName()

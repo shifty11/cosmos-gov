@@ -53,6 +53,18 @@ func (cc *ChainCreate) SetNillableUpdateTime(t *time.Time) *ChainCreate {
 	return cc
 }
 
+// SetChainID sets the "chain_id" field.
+func (cc *ChainCreate) SetChainID(s string) *ChainCreate {
+	cc.mutation.SetChainID(s)
+	return cc
+}
+
+// SetAccountPrefix sets the "account_prefix" field.
+func (cc *ChainCreate) SetAccountPrefix(s string) *ChainCreate {
+	cc.mutation.SetAccountPrefix(s)
+	return cc
+}
+
 // SetName sets the "name" field.
 func (cc *ChainCreate) SetName(s string) *ChainCreate {
 	cc.mutation.SetName(s)
@@ -247,6 +259,12 @@ func (cc *ChainCreate) check() error {
 	if _, ok := cc.mutation.UpdateTime(); !ok {
 		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "Chain.update_time"`)}
 	}
+	if _, ok := cc.mutation.ChainID(); !ok {
+		return &ValidationError{Name: "chain_id", err: errors.New(`ent: missing required field "Chain.chain_id"`)}
+	}
+	if _, ok := cc.mutation.AccountPrefix(); !ok {
+		return &ValidationError{Name: "account_prefix", err: errors.New(`ent: missing required field "Chain.account_prefix"`)}
+	}
 	if _, ok := cc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Chain.name"`)}
 	}
@@ -298,6 +316,22 @@ func (cc *ChainCreate) createSpec() (*Chain, *sqlgraph.CreateSpec) {
 			Column: chain.FieldUpdateTime,
 		})
 		_node.UpdateTime = value
+	}
+	if value, ok := cc.mutation.ChainID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: chain.FieldChainID,
+		})
+		_node.ChainID = value
+	}
+	if value, ok := cc.mutation.AccountPrefix(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: chain.FieldAccountPrefix,
+		})
+		_node.AccountPrefix = value
 	}
 	if value, ok := cc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

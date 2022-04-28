@@ -85,7 +85,7 @@ func (ds Datasource) getNewChains() []string {
 }
 
 func (ds Datasource) updateRpcs(chainName string) {
-	_, rpcs, err := ds.getChainInfo(chainName)
+	_, _, rpcs, err := ds.getChainInfo(chainName)
 	if err != nil {
 		log.Sugar.Errorf("Error getting RPC's for chain %v: %v", chainName, err)
 	}
@@ -108,7 +108,7 @@ func (ds Datasource) AddNewChains() {
 	lensChainManager := ds.lensChainInfoManager
 
 	for _, chainName := range chains {
-		client, rpcs, err := ds.getChainInfo(chainName)
+		client, chainInfo, rpcs, err := ds.getChainInfo(chainName)
 		if err != nil {
 			log.Sugar.Debugf("Chain '%v' has %v errors", chainName, err)
 			lensChainManager.AddErrorToLensChainInfo(chainName)
@@ -119,7 +119,7 @@ func (ds Datasource) AddNewChains() {
 				lensChainManager.AddErrorToLensChainInfo(chainName)
 			} else {
 				if len(proposals.Proposals) >= 1 {
-					chainEnt := chainManager.Create(chainName, rpcs)
+					chainEnt := chainManager.Create(chainInfo.ChainID, chainName, chainInfo.Bech32Prefix, rpcs)
 					for _, prop := range proposals.Proposals {
 						propManager.CreateOrUpdateProposal(&prop, chainEnt)
 					}

@@ -13,6 +13,8 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
+		{Name: "chain_id", Type: field.TypeString, Unique: true},
+		{Name: "account_prefix", Type: field.TypeString, Unique: true},
 		{Name: "name", Type: field.TypeString, Unique: true},
 		{Name: "display_name", Type: field.TypeString, Unique: true},
 		{Name: "is_enabled", Type: field.TypeBool, Default: true},
@@ -26,7 +28,7 @@ var (
 			{
 				Name:    "chain_name",
 				Unique:  true,
-				Columns: []*schema.Column{ChainsColumns[3]},
+				Columns: []*schema.Column{ChainsColumns[5]},
 			},
 		},
 	}
