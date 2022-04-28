@@ -39,7 +39,7 @@ func (server *VotePermissionServer) CreateVotePermission(ctx context.Context, re
 	grant, err := server.authzClient.GetGrant(req.VotePermission.Granter, req.VotePermission.Grantee)
 	if err != nil {
 		log.Sugar.Errorf("Error while getting grants for user %v (%v): %v", entUser.Name, entUser.ID, err)
-		return nil, status.Errorf(codes.Internal, "bag request")
+		return nil, status.Errorf(codes.Internal, "bad request")
 	}
 	if grant == nil {
 		log.Sugar.Errorf("Grant for user %v (%v) was not found", entUser.Name, entUser.ID)
@@ -95,18 +95,30 @@ func (server *VotePermissionServer) GetVotePermissions(ctx context.Context, _ *e
 }
 
 func (server *VotePermissionServer) RefreshVotePermission(ctx context.Context, req *pb.RefreshVotePermissionRequest) (*pb.RefreshVotePermissionResponse, error) {
-	//entUser, ok := ctx.Value("user").(*ent.User)
-	//if !ok {
-	//	log.Sugar.Error("invalid user")
-	//	return nil, status.Errorf(codes.Internal, "invalid user")
-	//}
-	//
-	//isSubscribed, err := server.votePermissionManager.RefreshVotePermission(entUser.ChatID, entUser.Type, req.Name)
-	//if err != nil {
-	//	log.Sugar.Error("error while toggling votePermission: %v", err)
-	//	return nil, status.Errorf(codes.Internal, "Unknown error occured")
-	//}
+	entUser, ok := ctx.Value("user").(*ent.User)
+	if !ok {
+		log.Sugar.Error("invalid user")
+		return nil, status.Errorf(codes.Internal, "invalid user")
+	}
 
-	var res = &pb.RefreshVotePermissionResponse{Success: true}
-	return res, nil
+	grant, err := server.authzClient.GetGrant(req.VotePermission.Granter, req.VotePermission.Grantee)
+	if err != nil {
+		log.Sugar.Errorf("Error while getting grants for user %v (%v): %v", entUser.Name, entUser.ID, err)
+		return nil, status.Errorf(codes.Internal, "bad request")
+	}
+
+	if grant == nil {
+		_, err = server.walletManager.DeleteGrant(req.VotePermission.ChainName, req.VotePermission.Granter, req.VotePermission.Grantee)
+		if err != nil {
+			log.Sugar.Errorf("Error while deleting grants for user %v (%v): %v", entUser.Name, entUser.ID, err)
+			return nil, status.Errorf(codes.Internal, "bad request")
+		}
+		return &pb.RefreshVotePermissionResponse{}, nil
+	}
+	return &pb.RefreshVotePermissionResponse{VotePermission: &pb.VotePermission{
+		ChainName: req.VotePermission.ChainName,
+		Granter:   grant.Granter,
+		Grantee:   grant.Grantee,
+		ExpiresAt: &timestamppb.Timestamp{Seconds: grant.ExpiresAt.Unix()},
+	}}, nil
 }

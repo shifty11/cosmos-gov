@@ -107,6 +107,18 @@ func (manager *WalletManager) SaveGrant(entUser *ent.User, chainName string, g *
 	}
 }
 
+func (manager *WalletManager) DeleteGrant(chainName string, granter string, grantee string) (int, error) {
+	return manager.client.Grant.
+		Delete().
+		Where(grant.And(
+			grant.GranteeEQ(grantee),
+			grant.HasGranterWith(
+				wallet.AddressEQ(granter),
+				wallet.HasChainWith(chain.NameEQ(chainName)),
+			))).
+		Exec(manager.ctx)
+}
+
 func (manager *WalletManager) OfUser(entUser *ent.User) ([]*ent.Wallet, error) {
 	return entUser.
 		QueryWallets().
