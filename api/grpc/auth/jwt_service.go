@@ -29,13 +29,13 @@ func AccessibleRoles() map[string][]Role {
 	const votePermissionService = path + ".VotePermissionService/"
 
 	return map[string][]Role{
-		authService + "TokenLogin":                     {Unauthenticated, User},
-		authService + "RefreshAccessToken":             {Unauthenticated, User},
-		subsService + "GetSubscriptions":               {User},
-		subsService + "ToggleSubscription":             {User},
-		votePermissionService + "CreateVotePermission": {User},
-		votePermissionService + "GetVotePermissions":   {User},
-		votePermissionService + "RefreshPermission":    {User},
+		authService + "TokenLogin":                      {Unauthenticated, User},
+		authService + "RefreshAccessToken":              {Unauthenticated, User},
+		subsService + "GetSubscriptions":                {User},
+		subsService + "ToggleSubscription":              {User},
+		votePermissionService + "CreateVotePermission":  {User},
+		votePermissionService + "GetVotePermissions":    {User},
+		votePermissionService + "RefreshVotePermission": {User},
 	}
 }
 

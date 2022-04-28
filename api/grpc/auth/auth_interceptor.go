@@ -30,12 +30,14 @@ func (interceptor *AuthInterceptor) Unary() grpc.UnaryServerInterceptor {
 		info *grpc.UnaryServerInfo,
 		handler grpc.UnaryHandler,
 	) (interface{}, error) {
-		log.Sugar.Debug("--> unary interceptor: ", info.FullMethod)
+		debugInfo := "--> unary interceptor: " + info.FullMethod
 
 		ctx, err := interceptor.authorize(ctx, info.FullMethod)
 		if err != nil {
+			log.Sugar.Debug(debugInfo + " access denied!")
 			return nil, err
 		}
+		log.Sugar.Debug(debugInfo)
 
 		return handler(ctx, req)
 	}
@@ -48,12 +50,14 @@ func (interceptor *AuthInterceptor) Stream() grpc.StreamServerInterceptor {
 		info *grpc.StreamServerInfo,
 		handler grpc.StreamHandler,
 	) error {
-		log.Sugar.Debug("--> stream interceptor: ", info.FullMethod)
+		debugInfo := "--> stream interceptor: " + info.FullMethod
 
 		_, err := interceptor.authorize(stream.Context(), info.FullMethod)
 		if err != nil {
+			log.Sugar.Debug(debugInfo + " access denied!")
 			return err
 		}
+		log.Sugar.Debug(debugInfo)
 
 		return handler(srv, stream)
 	}

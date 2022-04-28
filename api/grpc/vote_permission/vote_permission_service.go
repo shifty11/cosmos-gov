@@ -102,12 +102,7 @@ func (server *VotePermissionServer) RefreshVotePermission(ctx context.Context, r
 	}
 
 	grant, err := server.authzClient.GetGrant(req.VotePermission.Granter, req.VotePermission.Grantee)
-	if err != nil {
-		log.Sugar.Errorf("Error while getting grants for user %v (%v): %v", entUser.Name, entUser.ID, err)
-		return nil, status.Errorf(codes.Internal, "bad request")
-	}
-
-	if grant == nil {
+	if grant == nil && err != nil {
 		_, err = server.walletManager.DeleteGrant(req.VotePermission.ChainName, req.VotePermission.Granter, req.VotePermission.Grantee)
 		if err != nil {
 			log.Sugar.Errorf("Error while deleting grants for user %v (%v): %v", entUser.Name, entUser.ID, err)
