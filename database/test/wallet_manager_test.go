@@ -3,7 +3,7 @@ package db_testing_base_test
 import (
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/shifty11/cosmos-gov/database"
-	db_testing_base "github.com/shifty11/cosmos-gov/database/_test"
+	"github.com/shifty11/cosmos-gov/database/test"
 	"github.com/shifty11/cosmos-gov/ent/grant"
 	"github.com/shifty11/cosmos-gov/ent/wallet"
 	"testing"

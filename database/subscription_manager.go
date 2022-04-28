@@ -118,11 +118,12 @@ type TelegramSubscriptionManager struct {
 }
 
 func NewTelegramSubscriptionManager(
+	client *ent.Client,
+	ctx context.Context,
 	userManager *TypedUserManager,
 	chainManager *ChainManager,
 	tgChatManager *TelegramChatManager,
 ) *TelegramSubscriptionManager {
-	client, ctx := connect()
 	return &TelegramSubscriptionManager{
 		client:        client,
 		ctx:           ctx,
@@ -141,11 +142,12 @@ type DiscordSubscriptionManager struct {
 }
 
 func NewDiscordSubscriptionManager(
+	client *ent.Client,
+	ctx context.Context,
 	userManager *TypedUserManager,
 	chainManager *ChainManager,
 	discordChannelManager *DiscordChannelManager,
 ) *DiscordSubscriptionManager {
-	client, ctx := connect()
 	return &DiscordSubscriptionManager{
 		client:                client,
 		ctx:                   ctx,
