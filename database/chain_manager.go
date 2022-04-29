@@ -68,31 +68,27 @@ func (manager *ChainManager) EnableOrDisableChain(chainName string) error {
 	return nil
 }
 
-func (manager *ChainManager) Create(chainName string, rpcs []string) *ent.Chain {
+func (manager *ChainManager) Create(chainId string, chainName string, accountPrefix string, rpcs []string) *ent.Chain {
+	log.Sugar.Infof("Create new chain: %v", chainName)
 	c, err := manager.client.Chain.
-		Query().
-		Where(chain.NameEQ(chainName)).
-		Only(manager.ctx)
+		Create().
+		SetChainID(chainId).
+		SetAccountPrefix(accountPrefix).
+		SetName(chainName).
+		SetDisplayName(caser.String(chainName)).
+		SetIsEnabled(false).
+		Save(manager.ctx)
 	if err != nil {
-		log.Sugar.Infof("Create new chain: %v", chainName)
-		c, err = manager.client.Chain.
+		log.Sugar.Panicf("Error while creating chain: %v", err)
+	}
+	for _, rpc := range rpcs {
+		_, err := manager.client.RpcEndpoint.
 			Create().
-			SetName(chainName).
-			SetDisplayName(caser.String(chainName)).
-			SetIsEnabled(false).
+			SetEndpoint(rpc).
+			SetChain(c).
 			Save(manager.ctx)
 		if err != nil {
-			log.Sugar.Panicf("Error while creating chain: %v", err)
-		}
-		for _, rpc := range rpcs {
-			_, err := manager.client.RpcEndpoint.
-				Create().
-				SetEndpoint(rpc).
-				SetChain(c).
-				Save(manager.ctx)
-			if err != nil {
-				log.Sugar.Panicf("Error while creating rpc endpoint: %v", err)
-			}
+			log.Sugar.Panicf("Error while creating rpc endpoint: %v", err)
 		}
 	}
 	return c
@@ -141,13 +137,16 @@ func (manager *ChainManager) GetFirstRpc(entChain *ent.Chain) *ent.RpcEndpoint {
 func (manager *ChainManager) BuildLensClient(entChain *ent.Chain) (*lens.ChainClient, error) {
 	rpc := manager.GetFirstRpc(entChain)
 
-	pwd, _ := os.Getwd()
-	key_dir := pwd + "/keys"
+	key_dir := os.Getenv("LENS_PATH")
+	if key_dir == "" {
+		log.Sugar.Fatalf("LENS_PATH env var must be set")
+	}
 
 	chainConfig := lens.ChainClientConfig{
 		Key:            "default",
-		ChainID:        entChain.Name,
+		ChainID:        entChain.ChainID,
 		RPCAddr:        rpc.Endpoint,
+		AccountPrefix:  entChain.AccountPrefix,
 		KeyringBackend: "test",
 		Debug:          true,
 		Timeout:        "20s",

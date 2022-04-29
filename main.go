@@ -16,8 +16,12 @@ import (
 	"time"
 )
 
-func initDatabase() {
+func initDatabase(ds *datasource.Datasource, chainManager *database.ChainManager) {
 	database.MigrateDatabase()
+
+	if len(chainManager.All()) == 0 { // Add chains after DB has been newly created
+		ds.AddNewChains()
+	}
 }
 
 func startProposalFetching(ds *datasource.Datasource) {
@@ -76,7 +80,7 @@ func main() {
 
 	args := os.Args[1:]
 	if len(args) > 0 && args[0] == "fetching" {
-		initDatabase()
+		initDatabase(ds, managers.ChainManager)
 		startProposalFetching(ds)
 		startNewChainFetching(ds)
 		startProposalUpdating(ds)
@@ -89,7 +93,7 @@ func main() {
 	} else if len(args) > 0 && args[0] == "authz" {
 		authz.ExecAuthz()
 	} else {
-		initDatabase()
+		initDatabase(nil, nil)
 		startProposalFetching(ds)
 		startNewChainFetching(ds)
 		startProposalUpdating(ds)
