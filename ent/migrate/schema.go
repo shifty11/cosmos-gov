@@ -14,7 +14,7 @@ var (
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
 		{Name: "chain_id", Type: field.TypeString, Unique: true},
-		{Name: "account_prefix", Type: field.TypeString, Unique: true},
+		{Name: "account_prefix", Type: field.TypeString},
 		{Name: "name", Type: field.TypeString, Unique: true},
 		{Name: "display_name", Type: field.TypeString, Unique: true},
 		{Name: "is_enabled", Type: field.TypeBool, Default: true},
