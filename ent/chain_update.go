@@ -93,14 +93,14 @@ func (cu *ChainUpdate) AddProposals(p ...*Proposal) *ChainUpdate {
 }
 
 // AddTelegramChatIDs adds the "telegram_chats" edge to the TelegramChat entity by IDs.
-func (cu *ChainUpdate) AddTelegramChatIDs(ids ...int64) *ChainUpdate {
+func (cu *ChainUpdate) AddTelegramChatIDs(ids ...int) *ChainUpdate {
 	cu.mutation.AddTelegramChatIDs(ids...)
 	return cu
 }
 
 // AddTelegramChats adds the "telegram_chats" edges to the TelegramChat entity.
 func (cu *ChainUpdate) AddTelegramChats(t ...*TelegramChat) *ChainUpdate {
-	ids := make([]int64, len(t))
+	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -108,14 +108,14 @@ func (cu *ChainUpdate) AddTelegramChats(t ...*TelegramChat) *ChainUpdate {
 }
 
 // AddDiscordChannelIDs adds the "discord_channels" edge to the DiscordChannel entity by IDs.
-func (cu *ChainUpdate) AddDiscordChannelIDs(ids ...int64) *ChainUpdate {
+func (cu *ChainUpdate) AddDiscordChannelIDs(ids ...int) *ChainUpdate {
 	cu.mutation.AddDiscordChannelIDs(ids...)
 	return cu
 }
 
 // AddDiscordChannels adds the "discord_channels" edges to the DiscordChannel entity.
 func (cu *ChainUpdate) AddDiscordChannels(d ...*DiscordChannel) *ChainUpdate {
-	ids := make([]int64, len(d))
+	ids := make([]int, len(d))
 	for i := range d {
 		ids[i] = d[i].ID
 	}
@@ -185,14 +185,14 @@ func (cu *ChainUpdate) ClearTelegramChats() *ChainUpdate {
 }
 
 // RemoveTelegramChatIDs removes the "telegram_chats" edge to TelegramChat entities by IDs.
-func (cu *ChainUpdate) RemoveTelegramChatIDs(ids ...int64) *ChainUpdate {
+func (cu *ChainUpdate) RemoveTelegramChatIDs(ids ...int) *ChainUpdate {
 	cu.mutation.RemoveTelegramChatIDs(ids...)
 	return cu
 }
 
 // RemoveTelegramChats removes "telegram_chats" edges to TelegramChat entities.
 func (cu *ChainUpdate) RemoveTelegramChats(t ...*TelegramChat) *ChainUpdate {
-	ids := make([]int64, len(t))
+	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -206,14 +206,14 @@ func (cu *ChainUpdate) ClearDiscordChannels() *ChainUpdate {
 }
 
 // RemoveDiscordChannelIDs removes the "discord_channels" edge to DiscordChannel entities by IDs.
-func (cu *ChainUpdate) RemoveDiscordChannelIDs(ids ...int64) *ChainUpdate {
+func (cu *ChainUpdate) RemoveDiscordChannelIDs(ids ...int) *ChainUpdate {
 	cu.mutation.RemoveDiscordChannelIDs(ids...)
 	return cu
 }
 
 // RemoveDiscordChannels removes "discord_channels" edges to DiscordChannel entities.
 func (cu *ChainUpdate) RemoveDiscordChannels(d ...*DiscordChannel) *ChainUpdate {
-	ids := make([]int64, len(d))
+	ids := make([]int, len(d))
 	for i := range d {
 		ids[i] = d[i].ID
 	}
@@ -448,7 +448,7 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: telegramchat.FieldID,
 				},
 			},
@@ -464,7 +464,7 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: telegramchat.FieldID,
 				},
 			},
@@ -483,7 +483,7 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: telegramchat.FieldID,
 				},
 			},
@@ -502,7 +502,7 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: discordchannel.FieldID,
 				},
 			},
@@ -518,7 +518,7 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: discordchannel.FieldID,
 				},
 			},
@@ -537,7 +537,7 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: discordchannel.FieldID,
 				},
 			},
@@ -734,14 +734,14 @@ func (cuo *ChainUpdateOne) AddProposals(p ...*Proposal) *ChainUpdateOne {
 }
 
 // AddTelegramChatIDs adds the "telegram_chats" edge to the TelegramChat entity by IDs.
-func (cuo *ChainUpdateOne) AddTelegramChatIDs(ids ...int64) *ChainUpdateOne {
+func (cuo *ChainUpdateOne) AddTelegramChatIDs(ids ...int) *ChainUpdateOne {
 	cuo.mutation.AddTelegramChatIDs(ids...)
 	return cuo
 }
 
 // AddTelegramChats adds the "telegram_chats" edges to the TelegramChat entity.
 func (cuo *ChainUpdateOne) AddTelegramChats(t ...*TelegramChat) *ChainUpdateOne {
-	ids := make([]int64, len(t))
+	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -749,14 +749,14 @@ func (cuo *ChainUpdateOne) AddTelegramChats(t ...*TelegramChat) *ChainUpdateOne 
 }
 
 // AddDiscordChannelIDs adds the "discord_channels" edge to the DiscordChannel entity by IDs.
-func (cuo *ChainUpdateOne) AddDiscordChannelIDs(ids ...int64) *ChainUpdateOne {
+func (cuo *ChainUpdateOne) AddDiscordChannelIDs(ids ...int) *ChainUpdateOne {
 	cuo.mutation.AddDiscordChannelIDs(ids...)
 	return cuo
 }
 
 // AddDiscordChannels adds the "discord_channels" edges to the DiscordChannel entity.
 func (cuo *ChainUpdateOne) AddDiscordChannels(d ...*DiscordChannel) *ChainUpdateOne {
-	ids := make([]int64, len(d))
+	ids := make([]int, len(d))
 	for i := range d {
 		ids[i] = d[i].ID
 	}
@@ -826,14 +826,14 @@ func (cuo *ChainUpdateOne) ClearTelegramChats() *ChainUpdateOne {
 }
 
 // RemoveTelegramChatIDs removes the "telegram_chats" edge to TelegramChat entities by IDs.
-func (cuo *ChainUpdateOne) RemoveTelegramChatIDs(ids ...int64) *ChainUpdateOne {
+func (cuo *ChainUpdateOne) RemoveTelegramChatIDs(ids ...int) *ChainUpdateOne {
 	cuo.mutation.RemoveTelegramChatIDs(ids...)
 	return cuo
 }
 
 // RemoveTelegramChats removes "telegram_chats" edges to TelegramChat entities.
 func (cuo *ChainUpdateOne) RemoveTelegramChats(t ...*TelegramChat) *ChainUpdateOne {
-	ids := make([]int64, len(t))
+	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -847,14 +847,14 @@ func (cuo *ChainUpdateOne) ClearDiscordChannels() *ChainUpdateOne {
 }
 
 // RemoveDiscordChannelIDs removes the "discord_channels" edge to DiscordChannel entities by IDs.
-func (cuo *ChainUpdateOne) RemoveDiscordChannelIDs(ids ...int64) *ChainUpdateOne {
+func (cuo *ChainUpdateOne) RemoveDiscordChannelIDs(ids ...int) *ChainUpdateOne {
 	cuo.mutation.RemoveDiscordChannelIDs(ids...)
 	return cuo
 }
 
 // RemoveDiscordChannels removes "discord_channels" edges to DiscordChannel entities.
 func (cuo *ChainUpdateOne) RemoveDiscordChannels(d ...*DiscordChannel) *ChainUpdateOne {
-	ids := make([]int64, len(d))
+	ids := make([]int, len(d))
 	for i := range d {
 		ids[i] = d[i].ID
 	}
@@ -1113,7 +1113,7 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: telegramchat.FieldID,
 				},
 			},
@@ -1129,7 +1129,7 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: telegramchat.FieldID,
 				},
 			},
@@ -1148,7 +1148,7 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: telegramchat.FieldID,
 				},
 			},
@@ -1167,7 +1167,7 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: discordchannel.FieldID,
 				},
 			},
@@ -1183,7 +1183,7 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: discordchannel.FieldID,
 				},
 			},
@@ -1202,7 +1202,7 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: discordchannel.FieldID,
 				},
 			},

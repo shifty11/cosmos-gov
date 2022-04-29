@@ -37,6 +37,19 @@ func (uu *UserUpdate) SetUpdateTime(t time.Time) *UserUpdate {
 	return uu
 }
 
+// SetUserID sets the "user_id" field.
+func (uu *UserUpdate) SetUserID(i int64) *UserUpdate {
+	uu.mutation.ResetUserID()
+	uu.mutation.SetUserID(i)
+	return uu
+}
+
+// AddUserID adds i to the "user_id" field.
+func (uu *UserUpdate) AddUserID(i int64) *UserUpdate {
+	uu.mutation.AddUserID(i)
+	return uu
+}
+
 // SetName sets the "name" field.
 func (uu *UserUpdate) SetName(s string) *UserUpdate {
 	uu.mutation.SetName(s)
@@ -66,14 +79,14 @@ func (uu *UserUpdate) SetNillableLoginToken(s *string) *UserUpdate {
 }
 
 // AddTelegramChatIDs adds the "telegram_chats" edge to the TelegramChat entity by IDs.
-func (uu *UserUpdate) AddTelegramChatIDs(ids ...int64) *UserUpdate {
+func (uu *UserUpdate) AddTelegramChatIDs(ids ...int) *UserUpdate {
 	uu.mutation.AddTelegramChatIDs(ids...)
 	return uu
 }
 
 // AddTelegramChats adds the "telegram_chats" edges to the TelegramChat entity.
 func (uu *UserUpdate) AddTelegramChats(t ...*TelegramChat) *UserUpdate {
-	ids := make([]int64, len(t))
+	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -81,14 +94,14 @@ func (uu *UserUpdate) AddTelegramChats(t ...*TelegramChat) *UserUpdate {
 }
 
 // AddDiscordChannelIDs adds the "discord_channels" edge to the DiscordChannel entity by IDs.
-func (uu *UserUpdate) AddDiscordChannelIDs(ids ...int64) *UserUpdate {
+func (uu *UserUpdate) AddDiscordChannelIDs(ids ...int) *UserUpdate {
 	uu.mutation.AddDiscordChannelIDs(ids...)
 	return uu
 }
 
 // AddDiscordChannels adds the "discord_channels" edges to the DiscordChannel entity.
 func (uu *UserUpdate) AddDiscordChannels(d ...*DiscordChannel) *UserUpdate {
-	ids := make([]int64, len(d))
+	ids := make([]int, len(d))
 	for i := range d {
 		ids[i] = d[i].ID
 	}
@@ -122,14 +135,14 @@ func (uu *UserUpdate) ClearTelegramChats() *UserUpdate {
 }
 
 // RemoveTelegramChatIDs removes the "telegram_chats" edge to TelegramChat entities by IDs.
-func (uu *UserUpdate) RemoveTelegramChatIDs(ids ...int64) *UserUpdate {
+func (uu *UserUpdate) RemoveTelegramChatIDs(ids ...int) *UserUpdate {
 	uu.mutation.RemoveTelegramChatIDs(ids...)
 	return uu
 }
 
 // RemoveTelegramChats removes "telegram_chats" edges to TelegramChat entities.
 func (uu *UserUpdate) RemoveTelegramChats(t ...*TelegramChat) *UserUpdate {
-	ids := make([]int64, len(t))
+	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -143,14 +156,14 @@ func (uu *UserUpdate) ClearDiscordChannels() *UserUpdate {
 }
 
 // RemoveDiscordChannelIDs removes the "discord_channels" edge to DiscordChannel entities by IDs.
-func (uu *UserUpdate) RemoveDiscordChannelIDs(ids ...int64) *UserUpdate {
+func (uu *UserUpdate) RemoveDiscordChannelIDs(ids ...int) *UserUpdate {
 	uu.mutation.RemoveDiscordChannelIDs(ids...)
 	return uu
 }
 
 // RemoveDiscordChannels removes "discord_channels" edges to DiscordChannel entities.
 func (uu *UserUpdate) RemoveDiscordChannels(d ...*DiscordChannel) *UserUpdate {
-	ids := make([]int64, len(d))
+	ids := make([]int, len(d))
 	for i := range d {
 		ids[i] = d[i].ID
 	}
@@ -247,7 +260,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   user.Table,
 			Columns: user.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt64,
+				Type:   field.TypeInt,
 				Column: user.FieldID,
 			},
 		},
@@ -264,6 +277,20 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeTime,
 			Value:  value,
 			Column: user.FieldUpdateTime,
+		})
+	}
+	if value, ok := uu.mutation.UserID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: user.FieldUserID,
+		})
+	}
+	if value, ok := uu.mutation.AddedUserID(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: user.FieldUserID,
 		})
 	}
 	if value, ok := uu.mutation.Name(); ok {
@@ -289,7 +316,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: telegramchat.FieldID,
 				},
 			},
@@ -305,7 +332,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: telegramchat.FieldID,
 				},
 			},
@@ -324,7 +351,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: telegramchat.FieldID,
 				},
 			},
@@ -343,7 +370,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: discordchannel.FieldID,
 				},
 			},
@@ -359,7 +386,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: discordchannel.FieldID,
 				},
 			},
@@ -378,7 +405,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: discordchannel.FieldID,
 				},
 			},
@@ -467,6 +494,19 @@ func (uuo *UserUpdateOne) SetUpdateTime(t time.Time) *UserUpdateOne {
 	return uuo
 }
 
+// SetUserID sets the "user_id" field.
+func (uuo *UserUpdateOne) SetUserID(i int64) *UserUpdateOne {
+	uuo.mutation.ResetUserID()
+	uuo.mutation.SetUserID(i)
+	return uuo
+}
+
+// AddUserID adds i to the "user_id" field.
+func (uuo *UserUpdateOne) AddUserID(i int64) *UserUpdateOne {
+	uuo.mutation.AddUserID(i)
+	return uuo
+}
+
 // SetName sets the "name" field.
 func (uuo *UserUpdateOne) SetName(s string) *UserUpdateOne {
 	uuo.mutation.SetName(s)
@@ -496,14 +536,14 @@ func (uuo *UserUpdateOne) SetNillableLoginToken(s *string) *UserUpdateOne {
 }
 
 // AddTelegramChatIDs adds the "telegram_chats" edge to the TelegramChat entity by IDs.
-func (uuo *UserUpdateOne) AddTelegramChatIDs(ids ...int64) *UserUpdateOne {
+func (uuo *UserUpdateOne) AddTelegramChatIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.AddTelegramChatIDs(ids...)
 	return uuo
 }
 
 // AddTelegramChats adds the "telegram_chats" edges to the TelegramChat entity.
 func (uuo *UserUpdateOne) AddTelegramChats(t ...*TelegramChat) *UserUpdateOne {
-	ids := make([]int64, len(t))
+	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -511,14 +551,14 @@ func (uuo *UserUpdateOne) AddTelegramChats(t ...*TelegramChat) *UserUpdateOne {
 }
 
 // AddDiscordChannelIDs adds the "discord_channels" edge to the DiscordChannel entity by IDs.
-func (uuo *UserUpdateOne) AddDiscordChannelIDs(ids ...int64) *UserUpdateOne {
+func (uuo *UserUpdateOne) AddDiscordChannelIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.AddDiscordChannelIDs(ids...)
 	return uuo
 }
 
 // AddDiscordChannels adds the "discord_channels" edges to the DiscordChannel entity.
 func (uuo *UserUpdateOne) AddDiscordChannels(d ...*DiscordChannel) *UserUpdateOne {
-	ids := make([]int64, len(d))
+	ids := make([]int, len(d))
 	for i := range d {
 		ids[i] = d[i].ID
 	}
@@ -552,14 +592,14 @@ func (uuo *UserUpdateOne) ClearTelegramChats() *UserUpdateOne {
 }
 
 // RemoveTelegramChatIDs removes the "telegram_chats" edge to TelegramChat entities by IDs.
-func (uuo *UserUpdateOne) RemoveTelegramChatIDs(ids ...int64) *UserUpdateOne {
+func (uuo *UserUpdateOne) RemoveTelegramChatIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.RemoveTelegramChatIDs(ids...)
 	return uuo
 }
 
 // RemoveTelegramChats removes "telegram_chats" edges to TelegramChat entities.
 func (uuo *UserUpdateOne) RemoveTelegramChats(t ...*TelegramChat) *UserUpdateOne {
-	ids := make([]int64, len(t))
+	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -573,14 +613,14 @@ func (uuo *UserUpdateOne) ClearDiscordChannels() *UserUpdateOne {
 }
 
 // RemoveDiscordChannelIDs removes the "discord_channels" edge to DiscordChannel entities by IDs.
-func (uuo *UserUpdateOne) RemoveDiscordChannelIDs(ids ...int64) *UserUpdateOne {
+func (uuo *UserUpdateOne) RemoveDiscordChannelIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.RemoveDiscordChannelIDs(ids...)
 	return uuo
 }
 
 // RemoveDiscordChannels removes "discord_channels" edges to DiscordChannel entities.
 func (uuo *UserUpdateOne) RemoveDiscordChannels(d ...*DiscordChannel) *UserUpdateOne {
-	ids := make([]int64, len(d))
+	ids := make([]int, len(d))
 	for i := range d {
 		ids[i] = d[i].ID
 	}
@@ -684,7 +724,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Table:   user.Table,
 			Columns: user.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt64,
+				Type:   field.TypeInt,
 				Column: user.FieldID,
 			},
 		},
@@ -720,6 +760,20 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Column: user.FieldUpdateTime,
 		})
 	}
+	if value, ok := uuo.mutation.UserID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: user.FieldUserID,
+		})
+	}
+	if value, ok := uuo.mutation.AddedUserID(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: user.FieldUserID,
+		})
+	}
 	if value, ok := uuo.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -743,7 +797,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: telegramchat.FieldID,
 				},
 			},
@@ -759,7 +813,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: telegramchat.FieldID,
 				},
 			},
@@ -778,7 +832,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: telegramchat.FieldID,
 				},
 			},
@@ -797,7 +851,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: discordchannel.FieldID,
 				},
 			},
@@ -813,7 +867,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: discordchannel.FieldID,
 				},
 			},
@@ -832,7 +886,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: discordchannel.FieldID,
 				},
 			},

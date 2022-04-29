@@ -11,28 +11,28 @@ import (
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int64) predicate.TelegramChat {
+func ID(id int) predicate.TelegramChat {
 	return predicate.TelegramChat(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int64) predicate.TelegramChat {
+func IDEQ(id int) predicate.TelegramChat {
 	return predicate.TelegramChat(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int64) predicate.TelegramChat {
+func IDNEQ(id int) predicate.TelegramChat {
 	return predicate.TelegramChat(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldID), id))
 	})
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int64) predicate.TelegramChat {
+func IDIn(ids ...int) predicate.TelegramChat {
 	return predicate.TelegramChat(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -49,7 +49,7 @@ func IDIn(ids ...int64) predicate.TelegramChat {
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int64) predicate.TelegramChat {
+func IDNotIn(ids ...int) predicate.TelegramChat {
 	return predicate.TelegramChat(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -66,28 +66,28 @@ func IDNotIn(ids ...int64) predicate.TelegramChat {
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int64) predicate.TelegramChat {
+func IDGT(id int) predicate.TelegramChat {
 	return predicate.TelegramChat(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldID), id))
 	})
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int64) predicate.TelegramChat {
+func IDGTE(id int) predicate.TelegramChat {
 	return predicate.TelegramChat(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldID), id))
 	})
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int64) predicate.TelegramChat {
+func IDLT(id int) predicate.TelegramChat {
 	return predicate.TelegramChat(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldID), id))
 	})
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int64) predicate.TelegramChat {
+func IDLTE(id int) predicate.TelegramChat {
 	return predicate.TelegramChat(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldID), id))
 	})
@@ -104,6 +104,13 @@ func CreateTime(v time.Time) predicate.TelegramChat {
 func UpdateTime(v time.Time) predicate.TelegramChat {
 	return predicate.TelegramChat(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldUpdateTime), v))
+	})
+}
+
+// ChatID applies equality check predicate on the "chat_id" field. It's identical to ChatIDEQ.
+func ChatID(v int64) predicate.TelegramChat {
+	return predicate.TelegramChat(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldChatID), v))
 	})
 }
 
@@ -270,6 +277,82 @@ func UpdateTimeLT(v time.Time) predicate.TelegramChat {
 func UpdateTimeLTE(v time.Time) predicate.TelegramChat {
 	return predicate.TelegramChat(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldUpdateTime), v))
+	})
+}
+
+// ChatIDEQ applies the EQ predicate on the "chat_id" field.
+func ChatIDEQ(v int64) predicate.TelegramChat {
+	return predicate.TelegramChat(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldChatID), v))
+	})
+}
+
+// ChatIDNEQ applies the NEQ predicate on the "chat_id" field.
+func ChatIDNEQ(v int64) predicate.TelegramChat {
+	return predicate.TelegramChat(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldChatID), v))
+	})
+}
+
+// ChatIDIn applies the In predicate on the "chat_id" field.
+func ChatIDIn(vs ...int64) predicate.TelegramChat {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.TelegramChat(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldChatID), v...))
+	})
+}
+
+// ChatIDNotIn applies the NotIn predicate on the "chat_id" field.
+func ChatIDNotIn(vs ...int64) predicate.TelegramChat {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.TelegramChat(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldChatID), v...))
+	})
+}
+
+// ChatIDGT applies the GT predicate on the "chat_id" field.
+func ChatIDGT(v int64) predicate.TelegramChat {
+	return predicate.TelegramChat(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldChatID), v))
+	})
+}
+
+// ChatIDGTE applies the GTE predicate on the "chat_id" field.
+func ChatIDGTE(v int64) predicate.TelegramChat {
+	return predicate.TelegramChat(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldChatID), v))
+	})
+}
+
+// ChatIDLT applies the LT predicate on the "chat_id" field.
+func ChatIDLT(v int64) predicate.TelegramChat {
+	return predicate.TelegramChat(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldChatID), v))
+	})
+}
+
+// ChatIDLTE applies the LTE predicate on the "chat_id" field.
+func ChatIDLTE(v int64) predicate.TelegramChat {
+	return predicate.TelegramChat(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldChatID), v))
 	})
 }
 

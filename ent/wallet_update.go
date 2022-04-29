@@ -44,14 +44,14 @@ func (wu *WalletUpdate) SetAddress(s string) *WalletUpdate {
 }
 
 // AddUserIDs adds the "users" edge to the User entity by IDs.
-func (wu *WalletUpdate) AddUserIDs(ids ...int64) *WalletUpdate {
+func (wu *WalletUpdate) AddUserIDs(ids ...int) *WalletUpdate {
 	wu.mutation.AddUserIDs(ids...)
 	return wu
 }
 
 // AddUsers adds the "users" edges to the User entity.
 func (wu *WalletUpdate) AddUsers(u ...*User) *WalletUpdate {
-	ids := make([]int64, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -104,14 +104,14 @@ func (wu *WalletUpdate) ClearUsers() *WalletUpdate {
 }
 
 // RemoveUserIDs removes the "users" edge to User entities by IDs.
-func (wu *WalletUpdate) RemoveUserIDs(ids ...int64) *WalletUpdate {
+func (wu *WalletUpdate) RemoveUserIDs(ids ...int) *WalletUpdate {
 	wu.mutation.RemoveUserIDs(ids...)
 	return wu
 }
 
 // RemoveUsers removes "users" edges to User entities.
 func (wu *WalletUpdate) RemoveUsers(u ...*User) *WalletUpdate {
-	ids := make([]int64, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -249,7 +249,7 @@ func (wu *WalletUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
@@ -265,7 +265,7 @@ func (wu *WalletUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
@@ -284,7 +284,7 @@ func (wu *WalletUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
@@ -415,14 +415,14 @@ func (wuo *WalletUpdateOne) SetAddress(s string) *WalletUpdateOne {
 }
 
 // AddUserIDs adds the "users" edge to the User entity by IDs.
-func (wuo *WalletUpdateOne) AddUserIDs(ids ...int64) *WalletUpdateOne {
+func (wuo *WalletUpdateOne) AddUserIDs(ids ...int) *WalletUpdateOne {
 	wuo.mutation.AddUserIDs(ids...)
 	return wuo
 }
 
 // AddUsers adds the "users" edges to the User entity.
 func (wuo *WalletUpdateOne) AddUsers(u ...*User) *WalletUpdateOne {
-	ids := make([]int64, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -475,14 +475,14 @@ func (wuo *WalletUpdateOne) ClearUsers() *WalletUpdateOne {
 }
 
 // RemoveUserIDs removes the "users" edge to User entities by IDs.
-func (wuo *WalletUpdateOne) RemoveUserIDs(ids ...int64) *WalletUpdateOne {
+func (wuo *WalletUpdateOne) RemoveUserIDs(ids ...int) *WalletUpdateOne {
 	wuo.mutation.RemoveUserIDs(ids...)
 	return wuo
 }
 
 // RemoveUsers removes "users" edges to User entities.
 func (wuo *WalletUpdateOne) RemoveUsers(u ...*User) *WalletUpdateOne {
-	ids := make([]int64, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -644,7 +644,7 @@ func (wuo *WalletUpdateOne) sqlSave(ctx context.Context) (_node *Wallet, err err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
@@ -660,7 +660,7 @@ func (wuo *WalletUpdateOne) sqlSave(ctx context.Context) (_node *Wallet, err err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
@@ -679,7 +679,7 @@ func (wuo *WalletUpdateOne) sqlSave(ctx context.Context) (_node *Wallet, err err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},

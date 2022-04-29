@@ -466,8 +466,8 @@ func (wq *WalletQuery) sqlAll(ctx context.Context) ([]*Wallet, error) {
 			node.Edges.Users = []*User{}
 		}
 		var (
-			edgeids []int64
-			edges   = make(map[int64][]*Wallet)
+			edgeids []int
+			edges   = make(map[int][]*Wallet)
 		)
 		_spec := &sqlgraph.EdgeQuerySpec{
 			Edge: &sqlgraph.EdgeSpec{
@@ -491,7 +491,7 @@ func (wq *WalletQuery) sqlAll(ctx context.Context) ([]*Wallet, error) {
 					return fmt.Errorf("unexpected id value for edge-in")
 				}
 				outValue := int(eout.Int64)
-				inValue := ein.Int64
+				inValue := int(ein.Int64)
 				node, ok := ids[outValue]
 				if !ok {
 					return fmt.Errorf("unexpected node id in edges: %v", outValue)

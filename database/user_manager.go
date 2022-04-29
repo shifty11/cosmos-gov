@@ -21,7 +21,7 @@ func (manager *UserManager) Get(userId int64, userType user.Type) (*ent.User, er
 	return manager.client.User.
 		Query().
 		Where(user.And(
-			user.IDEQ(userId),
+			user.UserIDEQ(userId),
 			user.TypeEQ(userType),
 		)).
 		Only(manager.ctx)
@@ -31,7 +31,7 @@ func (manager *UserManager) ByToken(userId int64, userType user.Type, token stri
 	return manager.client.User.
 		Query().
 		Where(user.And(
-			user.IDEQ(userId),
+			user.UserIDEQ(userId),
 			user.TypeEQ(userType),
 			//user.LogingTokenEQ(token),	//TODO: add this line
 		)).
@@ -46,7 +46,7 @@ func (manager *UserManager) GenerateNewLoginToken(userId int64, userType user.Ty
 	_, err = manager.client.User.
 		Update().
 		Where(user.And(
-			user.IDEQ(userId),
+			user.UserIDEQ(userId),
 			user.TypeEQ(userType),
 		)).
 		SetLoginToken(token).
@@ -68,7 +68,7 @@ func (manager *TypedUserManager) Exists(id int64, userType user.Type) bool {
 	exists, err := manager.client.User.
 		Query().
 		Where(user.And(
-			user.IDEQ(id),
+			user.UserIDEQ(id),
 			user.TypeEQ(userType),
 		)).
 		Exist(manager.ctx)
@@ -83,14 +83,14 @@ func (manager *TypedUserManager) GetOrCreateUser(id int64, name string) *ent.Use
 		Query().
 		Where(
 			user.And(
-				user.IDEQ(id),
+				user.UserIDEQ(id),
 				user.TypeEQ(manager.userType),
 			)).
 		Only(manager.ctx)
 	if err != nil {
 		userEnt, err = manager.client.User.
 			Create().
-			SetID(id).
+			SetUserID(id).
 			SetName(name).
 			SetType(manager.userType).
 			Save(manager.ctx)

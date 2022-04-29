@@ -50,6 +50,12 @@ func (tcc *TelegramChatCreate) SetNillableUpdateTime(t *time.Time) *TelegramChat
 	return tcc
 }
 
+// SetChatID sets the "chat_id" field.
+func (tcc *TelegramChatCreate) SetChatID(i int64) *TelegramChatCreate {
+	tcc.mutation.SetChatID(i)
+	return tcc
+}
+
 // SetName sets the "name" field.
 func (tcc *TelegramChatCreate) SetName(s string) *TelegramChatCreate {
 	tcc.mutation.SetName(s)
@@ -62,20 +68,14 @@ func (tcc *TelegramChatCreate) SetIsGroup(b bool) *TelegramChatCreate {
 	return tcc
 }
 
-// SetID sets the "id" field.
-func (tcc *TelegramChatCreate) SetID(i int64) *TelegramChatCreate {
-	tcc.mutation.SetID(i)
-	return tcc
-}
-
 // SetUserID sets the "user" edge to the User entity by ID.
-func (tcc *TelegramChatCreate) SetUserID(id int64) *TelegramChatCreate {
+func (tcc *TelegramChatCreate) SetUserID(id int) *TelegramChatCreate {
 	tcc.mutation.SetUserID(id)
 	return tcc
 }
 
 // SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (tcc *TelegramChatCreate) SetNillableUserID(id *int64) *TelegramChatCreate {
+func (tcc *TelegramChatCreate) SetNillableUserID(id *int) *TelegramChatCreate {
 	if id != nil {
 		tcc = tcc.SetUserID(*id)
 	}
@@ -191,6 +191,9 @@ func (tcc *TelegramChatCreate) check() error {
 	if _, ok := tcc.mutation.UpdateTime(); !ok {
 		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "TelegramChat.update_time"`)}
 	}
+	if _, ok := tcc.mutation.ChatID(); !ok {
+		return &ValidationError{Name: "chat_id", err: errors.New(`ent: missing required field "TelegramChat.chat_id"`)}
+	}
 	if _, ok := tcc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "TelegramChat.name"`)}
 	}
@@ -208,10 +211,8 @@ func (tcc *TelegramChatCreate) sqlSave(ctx context.Context) (*TelegramChat, erro
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != _node.ID {
-		id := _spec.ID.Value.(int64)
-		_node.ID = int64(id)
-	}
+	id := _spec.ID.Value.(int64)
+	_node.ID = int(id)
 	return _node, nil
 }
 
@@ -221,15 +222,11 @@ func (tcc *TelegramChatCreate) createSpec() (*TelegramChat, *sqlgraph.CreateSpec
 		_spec = &sqlgraph.CreateSpec{
 			Table: telegramchat.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt64,
+				Type:   field.TypeInt,
 				Column: telegramchat.FieldID,
 			},
 		}
 	)
-	if id, ok := tcc.mutation.ID(); ok {
-		_node.ID = id
-		_spec.ID.Value = id
-	}
 	if value, ok := tcc.mutation.CreateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -245,6 +242,14 @@ func (tcc *TelegramChatCreate) createSpec() (*TelegramChat, *sqlgraph.CreateSpec
 			Column: telegramchat.FieldUpdateTime,
 		})
 		_node.UpdateTime = value
+	}
+	if value, ok := tcc.mutation.ChatID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: telegramchat.FieldChatID,
+		})
+		_node.ChatID = value
 	}
 	if value, ok := tcc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -271,7 +276,7 @@ func (tcc *TelegramChatCreate) createSpec() (*TelegramChat, *sqlgraph.CreateSpec
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
@@ -346,9 +351,9 @@ func (tccb *TelegramChatCreateBulk) Save(ctx context.Context) ([]*TelegramChat, 
 				}
 				mutation.id = &nodes[i].ID
 				mutation.done = true
-				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
+				if specs[i].ID.Value != nil {
 					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int64(id)
+					nodes[i].ID = int(id)
 				}
 				return nodes[i], nil
 			})

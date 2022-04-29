@@ -36,6 +36,19 @@ func (dcu *DiscordChannelUpdate) SetUpdateTime(t time.Time) *DiscordChannelUpdat
 	return dcu
 }
 
+// SetChannelID sets the "channel_id" field.
+func (dcu *DiscordChannelUpdate) SetChannelID(i int64) *DiscordChannelUpdate {
+	dcu.mutation.ResetChannelID()
+	dcu.mutation.SetChannelID(i)
+	return dcu
+}
+
+// AddChannelID adds i to the "channel_id" field.
+func (dcu *DiscordChannelUpdate) AddChannelID(i int64) *DiscordChannelUpdate {
+	dcu.mutation.AddChannelID(i)
+	return dcu
+}
+
 // SetName sets the "name" field.
 func (dcu *DiscordChannelUpdate) SetName(s string) *DiscordChannelUpdate {
 	dcu.mutation.SetName(s)
@@ -57,13 +70,13 @@ func (dcu *DiscordChannelUpdate) SetNillableRoles(s *string) *DiscordChannelUpda
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
-func (dcu *DiscordChannelUpdate) SetUserID(id int64) *DiscordChannelUpdate {
+func (dcu *DiscordChannelUpdate) SetUserID(id int) *DiscordChannelUpdate {
 	dcu.mutation.SetUserID(id)
 	return dcu
 }
 
 // SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (dcu *DiscordChannelUpdate) SetNillableUserID(id *int64) *DiscordChannelUpdate {
+func (dcu *DiscordChannelUpdate) SetNillableUserID(id *int) *DiscordChannelUpdate {
 	if id != nil {
 		dcu = dcu.SetUserID(*id)
 	}
@@ -191,7 +204,7 @@ func (dcu *DiscordChannelUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Table:   discordchannel.Table,
 			Columns: discordchannel.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt64,
+				Type:   field.TypeInt,
 				Column: discordchannel.FieldID,
 			},
 		},
@@ -208,6 +221,20 @@ func (dcu *DiscordChannelUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Type:   field.TypeTime,
 			Value:  value,
 			Column: discordchannel.FieldUpdateTime,
+		})
+	}
+	if value, ok := dcu.mutation.ChannelID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: discordchannel.FieldChannelID,
+		})
+	}
+	if value, ok := dcu.mutation.AddedChannelID(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: discordchannel.FieldChannelID,
 		})
 	}
 	if value, ok := dcu.mutation.Name(); ok {
@@ -233,7 +260,7 @@ func (dcu *DiscordChannelUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
@@ -249,7 +276,7 @@ func (dcu *DiscordChannelUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
@@ -338,6 +365,19 @@ func (dcuo *DiscordChannelUpdateOne) SetUpdateTime(t time.Time) *DiscordChannelU
 	return dcuo
 }
 
+// SetChannelID sets the "channel_id" field.
+func (dcuo *DiscordChannelUpdateOne) SetChannelID(i int64) *DiscordChannelUpdateOne {
+	dcuo.mutation.ResetChannelID()
+	dcuo.mutation.SetChannelID(i)
+	return dcuo
+}
+
+// AddChannelID adds i to the "channel_id" field.
+func (dcuo *DiscordChannelUpdateOne) AddChannelID(i int64) *DiscordChannelUpdateOne {
+	dcuo.mutation.AddChannelID(i)
+	return dcuo
+}
+
 // SetName sets the "name" field.
 func (dcuo *DiscordChannelUpdateOne) SetName(s string) *DiscordChannelUpdateOne {
 	dcuo.mutation.SetName(s)
@@ -359,13 +399,13 @@ func (dcuo *DiscordChannelUpdateOne) SetNillableRoles(s *string) *DiscordChannel
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
-func (dcuo *DiscordChannelUpdateOne) SetUserID(id int64) *DiscordChannelUpdateOne {
+func (dcuo *DiscordChannelUpdateOne) SetUserID(id int) *DiscordChannelUpdateOne {
 	dcuo.mutation.SetUserID(id)
 	return dcuo
 }
 
 // SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (dcuo *DiscordChannelUpdateOne) SetNillableUserID(id *int64) *DiscordChannelUpdateOne {
+func (dcuo *DiscordChannelUpdateOne) SetNillableUserID(id *int) *DiscordChannelUpdateOne {
 	if id != nil {
 		dcuo = dcuo.SetUserID(*id)
 	}
@@ -500,7 +540,7 @@ func (dcuo *DiscordChannelUpdateOne) sqlSave(ctx context.Context) (_node *Discor
 			Table:   discordchannel.Table,
 			Columns: discordchannel.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt64,
+				Type:   field.TypeInt,
 				Column: discordchannel.FieldID,
 			},
 		},
@@ -536,6 +576,20 @@ func (dcuo *DiscordChannelUpdateOne) sqlSave(ctx context.Context) (_node *Discor
 			Column: discordchannel.FieldUpdateTime,
 		})
 	}
+	if value, ok := dcuo.mutation.ChannelID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: discordchannel.FieldChannelID,
+		})
+	}
+	if value, ok := dcuo.mutation.AddedChannelID(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: discordchannel.FieldChannelID,
+		})
+	}
 	if value, ok := dcuo.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -559,7 +613,7 @@ func (dcuo *DiscordChannelUpdateOne) sqlSave(ctx context.Context) (_node *Discor
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
@@ -575,7 +629,7 @@ func (dcuo *DiscordChannelUpdateOne) sqlSave(ctx context.Context) (_node *Discor
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},

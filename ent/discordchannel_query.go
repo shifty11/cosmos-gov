@@ -135,8 +135,8 @@ func (dcq *DiscordChannelQuery) FirstX(ctx context.Context) *DiscordChannel {
 
 // FirstID returns the first DiscordChannel ID from the query.
 // Returns a *NotFoundError when no DiscordChannel ID was found.
-func (dcq *DiscordChannelQuery) FirstID(ctx context.Context) (id int64, err error) {
-	var ids []int64
+func (dcq *DiscordChannelQuery) FirstID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = dcq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -148,7 +148,7 @@ func (dcq *DiscordChannelQuery) FirstID(ctx context.Context) (id int64, err erro
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (dcq *DiscordChannelQuery) FirstIDX(ctx context.Context) int64 {
+func (dcq *DiscordChannelQuery) FirstIDX(ctx context.Context) int {
 	id, err := dcq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -186,8 +186,8 @@ func (dcq *DiscordChannelQuery) OnlyX(ctx context.Context) *DiscordChannel {
 // OnlyID is like Only, but returns the only DiscordChannel ID in the query.
 // Returns a *NotSingularError when more than one DiscordChannel ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (dcq *DiscordChannelQuery) OnlyID(ctx context.Context) (id int64, err error) {
-	var ids []int64
+func (dcq *DiscordChannelQuery) OnlyID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = dcq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -203,7 +203,7 @@ func (dcq *DiscordChannelQuery) OnlyID(ctx context.Context) (id int64, err error
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (dcq *DiscordChannelQuery) OnlyIDX(ctx context.Context) int64 {
+func (dcq *DiscordChannelQuery) OnlyIDX(ctx context.Context) int {
 	id, err := dcq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -229,8 +229,8 @@ func (dcq *DiscordChannelQuery) AllX(ctx context.Context) []*DiscordChannel {
 }
 
 // IDs executes the query and returns a list of DiscordChannel IDs.
-func (dcq *DiscordChannelQuery) IDs(ctx context.Context) ([]int64, error) {
-	var ids []int64
+func (dcq *DiscordChannelQuery) IDs(ctx context.Context) ([]int, error) {
+	var ids []int
 	if err := dcq.Select(discordchannel.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -238,7 +238,7 @@ func (dcq *DiscordChannelQuery) IDs(ctx context.Context) ([]int64, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (dcq *DiscordChannelQuery) IDsX(ctx context.Context) []int64 {
+func (dcq *DiscordChannelQuery) IDsX(ctx context.Context) []int {
 	ids, err := dcq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -421,8 +421,8 @@ func (dcq *DiscordChannelQuery) sqlAll(ctx context.Context) ([]*DiscordChannel, 
 	}
 
 	if query := dcq.withUser; query != nil {
-		ids := make([]int64, 0, len(nodes))
-		nodeids := make(map[int64][]*DiscordChannel)
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*DiscordChannel)
 		for i := range nodes {
 			if nodes[i].discord_channel_user == nil {
 				continue
@@ -451,7 +451,7 @@ func (dcq *DiscordChannelQuery) sqlAll(ctx context.Context) ([]*DiscordChannel, 
 
 	if query := dcq.withChains; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[int64]*DiscordChannel, len(nodes))
+		ids := make(map[int]*DiscordChannel, len(nodes))
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
@@ -482,7 +482,7 @@ func (dcq *DiscordChannelQuery) sqlAll(ctx context.Context) ([]*DiscordChannel, 
 				if !ok || ein == nil {
 					return fmt.Errorf("unexpected id value for edge-in")
 				}
-				outValue := eout.Int64
+				outValue := int(eout.Int64)
 				inValue := int(ein.Int64)
 				node, ok := ids[outValue]
 				if !ok {
@@ -540,7 +540,7 @@ func (dcq *DiscordChannelQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   discordchannel.Table,
 			Columns: discordchannel.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt64,
+				Type:   field.TypeInt,
 				Column: discordchannel.FieldID,
 			},
 		},

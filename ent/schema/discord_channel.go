@@ -22,9 +22,8 @@ func (DiscordChannel) Mixin() []ent.Mixin {
 // Fields of the DiscordChannel.
 func (DiscordChannel) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int64("id"). // TODO: create channel_id field
-					Unique().
-					Immutable(),
+		field.Int64("channel_id").
+			Unique(),
 		field.String("name"),
 		field.Bool("is_group").
 			Immutable(),

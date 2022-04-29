@@ -72,7 +72,7 @@ func (dcd *DiscordChannelDelete) sqlExec(ctx context.Context) (int, error) {
 		Node: &sqlgraph.NodeSpec{
 			Table: discordchannel.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt64,
+				Type:   field.TypeInt,
 				Column: discordchannel.FieldID,
 			},
 		},

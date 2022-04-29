@@ -82,7 +82,7 @@ func (manager *SubscriptionManager) GetSubscriptions(entUser *ent.User) []*ChatR
 		var chats []*ChatRoom
 		for _, tgChat := range tgChats {
 			chats = append(chats, &ChatRoom{
-				Id:            tgChat.ID,
+				Id:            tgChat.ChatID,
 				Name:          tgChat.Name,
 				Subscriptions: getSubscriptions(manager.chainManager, tgChat.Edges.Chains),
 			})
@@ -100,7 +100,7 @@ func (manager *SubscriptionManager) GetSubscriptions(entUser *ent.User) []*ChatR
 		var chats []*ChatRoom
 		for _, dChannel := range dChannels {
 			chats = append(chats, &ChatRoom{
-				Id:            dChannel.ID,
+				Id:            dChannel.ChannelID,
 				Name:          dChannel.Name,
 				Subscriptions: getSubscriptions(manager.chainManager, dChannel.Edges.Chains),
 			})

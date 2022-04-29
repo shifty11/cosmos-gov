@@ -396,7 +396,7 @@ func (c *DiscordChannelClient) UpdateOne(dc *DiscordChannel) *DiscordChannelUpda
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *DiscordChannelClient) UpdateOneID(id int64) *DiscordChannelUpdateOne {
+func (c *DiscordChannelClient) UpdateOneID(id int) *DiscordChannelUpdateOne {
 	mutation := newDiscordChannelMutation(c.config, OpUpdateOne, withDiscordChannelID(id))
 	return &DiscordChannelUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -413,7 +413,7 @@ func (c *DiscordChannelClient) DeleteOne(dc *DiscordChannel) *DiscordChannelDele
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *DiscordChannelClient) DeleteOneID(id int64) *DiscordChannelDeleteOne {
+func (c *DiscordChannelClient) DeleteOneID(id int) *DiscordChannelDeleteOne {
 	builder := c.Delete().Where(discordchannel.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -428,12 +428,12 @@ func (c *DiscordChannelClient) Query() *DiscordChannelQuery {
 }
 
 // Get returns a DiscordChannel entity by its id.
-func (c *DiscordChannelClient) Get(ctx context.Context, id int64) (*DiscordChannel, error) {
+func (c *DiscordChannelClient) Get(ctx context.Context, id int) (*DiscordChannel, error) {
 	return c.Query().Where(discordchannel.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *DiscordChannelClient) GetX(ctx context.Context, id int64) *DiscordChannel {
+func (c *DiscordChannelClient) GetX(ctx context.Context, id int) *DiscordChannel {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1016,7 +1016,7 @@ func (c *TelegramChatClient) UpdateOne(tc *TelegramChat) *TelegramChatUpdateOne 
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *TelegramChatClient) UpdateOneID(id int64) *TelegramChatUpdateOne {
+func (c *TelegramChatClient) UpdateOneID(id int) *TelegramChatUpdateOne {
 	mutation := newTelegramChatMutation(c.config, OpUpdateOne, withTelegramChatID(id))
 	return &TelegramChatUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -1033,7 +1033,7 @@ func (c *TelegramChatClient) DeleteOne(tc *TelegramChat) *TelegramChatDeleteOne 
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *TelegramChatClient) DeleteOneID(id int64) *TelegramChatDeleteOne {
+func (c *TelegramChatClient) DeleteOneID(id int) *TelegramChatDeleteOne {
 	builder := c.Delete().Where(telegramchat.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -1048,12 +1048,12 @@ func (c *TelegramChatClient) Query() *TelegramChatQuery {
 }
 
 // Get returns a TelegramChat entity by its id.
-func (c *TelegramChatClient) Get(ctx context.Context, id int64) (*TelegramChat, error) {
+func (c *TelegramChatClient) Get(ctx context.Context, id int) (*TelegramChat, error) {
 	return c.Query().Where(telegramchat.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *TelegramChatClient) GetX(ctx context.Context, id int64) *TelegramChat {
+func (c *TelegramChatClient) GetX(ctx context.Context, id int) *TelegramChat {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1138,7 +1138,7 @@ func (c *UserClient) UpdateOne(u *User) *UserUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *UserClient) UpdateOneID(id int64) *UserUpdateOne {
+func (c *UserClient) UpdateOneID(id int) *UserUpdateOne {
 	mutation := newUserMutation(c.config, OpUpdateOne, withUserID(id))
 	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -1155,7 +1155,7 @@ func (c *UserClient) DeleteOne(u *User) *UserDeleteOne {
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *UserClient) DeleteOneID(id int64) *UserDeleteOne {
+func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 	builder := c.Delete().Where(user.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -1170,12 +1170,12 @@ func (c *UserClient) Query() *UserQuery {
 }
 
 // Get returns a User entity by its id.
-func (c *UserClient) Get(ctx context.Context, id int64) (*User, error) {
+func (c *UserClient) Get(ctx context.Context, id int) (*User, error) {
 	return c.Query().Where(user.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *UserClient) GetX(ctx context.Context, id int64) *User {
+func (c *UserClient) GetX(ctx context.Context, id int) *User {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)

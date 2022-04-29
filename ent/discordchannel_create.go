@@ -50,6 +50,12 @@ func (dcc *DiscordChannelCreate) SetNillableUpdateTime(t *time.Time) *DiscordCha
 	return dcc
 }
 
+// SetChannelID sets the "channel_id" field.
+func (dcc *DiscordChannelCreate) SetChannelID(i int64) *DiscordChannelCreate {
+	dcc.mutation.SetChannelID(i)
+	return dcc
+}
+
 // SetName sets the "name" field.
 func (dcc *DiscordChannelCreate) SetName(s string) *DiscordChannelCreate {
 	dcc.mutation.SetName(s)
@@ -76,20 +82,14 @@ func (dcc *DiscordChannelCreate) SetNillableRoles(s *string) *DiscordChannelCrea
 	return dcc
 }
 
-// SetID sets the "id" field.
-func (dcc *DiscordChannelCreate) SetID(i int64) *DiscordChannelCreate {
-	dcc.mutation.SetID(i)
-	return dcc
-}
-
 // SetUserID sets the "user" edge to the User entity by ID.
-func (dcc *DiscordChannelCreate) SetUserID(id int64) *DiscordChannelCreate {
+func (dcc *DiscordChannelCreate) SetUserID(id int) *DiscordChannelCreate {
 	dcc.mutation.SetUserID(id)
 	return dcc
 }
 
 // SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (dcc *DiscordChannelCreate) SetNillableUserID(id *int64) *DiscordChannelCreate {
+func (dcc *DiscordChannelCreate) SetNillableUserID(id *int) *DiscordChannelCreate {
 	if id != nil {
 		dcc = dcc.SetUserID(*id)
 	}
@@ -209,6 +209,9 @@ func (dcc *DiscordChannelCreate) check() error {
 	if _, ok := dcc.mutation.UpdateTime(); !ok {
 		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "DiscordChannel.update_time"`)}
 	}
+	if _, ok := dcc.mutation.ChannelID(); !ok {
+		return &ValidationError{Name: "channel_id", err: errors.New(`ent: missing required field "DiscordChannel.channel_id"`)}
+	}
 	if _, ok := dcc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "DiscordChannel.name"`)}
 	}
@@ -229,10 +232,8 @@ func (dcc *DiscordChannelCreate) sqlSave(ctx context.Context) (*DiscordChannel, 
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != _node.ID {
-		id := _spec.ID.Value.(int64)
-		_node.ID = int64(id)
-	}
+	id := _spec.ID.Value.(int64)
+	_node.ID = int(id)
 	return _node, nil
 }
 
@@ -242,15 +243,11 @@ func (dcc *DiscordChannelCreate) createSpec() (*DiscordChannel, *sqlgraph.Create
 		_spec = &sqlgraph.CreateSpec{
 			Table: discordchannel.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt64,
+				Type:   field.TypeInt,
 				Column: discordchannel.FieldID,
 			},
 		}
 	)
-	if id, ok := dcc.mutation.ID(); ok {
-		_node.ID = id
-		_spec.ID.Value = id
-	}
 	if value, ok := dcc.mutation.CreateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -266,6 +263,14 @@ func (dcc *DiscordChannelCreate) createSpec() (*DiscordChannel, *sqlgraph.Create
 			Column: discordchannel.FieldUpdateTime,
 		})
 		_node.UpdateTime = value
+	}
+	if value, ok := dcc.mutation.ChannelID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: discordchannel.FieldChannelID,
+		})
+		_node.ChannelID = value
 	}
 	if value, ok := dcc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -300,7 +305,7 @@ func (dcc *DiscordChannelCreate) createSpec() (*DiscordChannel, *sqlgraph.Create
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
@@ -375,9 +380,9 @@ func (dccb *DiscordChannelCreateBulk) Save(ctx context.Context) ([]*DiscordChann
 				}
 				mutation.id = &nodes[i].ID
 				mutation.done = true
-				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
+				if specs[i].ID.Value != nil {
 					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int64(id)
+					nodes[i].ID = int(id)
 				}
 				return nodes[i], nil
 			})

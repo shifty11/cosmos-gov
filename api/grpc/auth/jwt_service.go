@@ -67,7 +67,7 @@ func (manager *JWTManager) GenerateToken(entUser *ent.User, tokenType TokenType)
 	}
 
 	claims := &Claims{
-		UserId: entUser.ID,
+		UserId: entUser.UserID,
 		Type:   entUser.Type,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),

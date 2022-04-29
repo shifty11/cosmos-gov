@@ -561,8 +561,8 @@ func (cq *ChainQuery) sqlAll(ctx context.Context) ([]*Chain, error) {
 			node.Edges.TelegramChats = []*TelegramChat{}
 		}
 		var (
-			edgeids []int64
-			edges   = make(map[int64][]*Chain)
+			edgeids []int
+			edges   = make(map[int][]*Chain)
 		)
 		_spec := &sqlgraph.EdgeQuerySpec{
 			Edge: &sqlgraph.EdgeSpec{
@@ -586,7 +586,7 @@ func (cq *ChainQuery) sqlAll(ctx context.Context) ([]*Chain, error) {
 					return fmt.Errorf("unexpected id value for edge-in")
 				}
 				outValue := int(eout.Int64)
-				inValue := ein.Int64
+				inValue := int(ein.Int64)
 				node, ok := ids[outValue]
 				if !ok {
 					return fmt.Errorf("unexpected node id in edges: %v", outValue)
@@ -626,8 +626,8 @@ func (cq *ChainQuery) sqlAll(ctx context.Context) ([]*Chain, error) {
 			node.Edges.DiscordChannels = []*DiscordChannel{}
 		}
 		var (
-			edgeids []int64
-			edges   = make(map[int64][]*Chain)
+			edgeids []int
+			edges   = make(map[int][]*Chain)
 		)
 		_spec := &sqlgraph.EdgeQuerySpec{
 			Edge: &sqlgraph.EdgeSpec{
@@ -651,7 +651,7 @@ func (cq *ChainQuery) sqlAll(ctx context.Context) ([]*Chain, error) {
 					return fmt.Errorf("unexpected id value for edge-in")
 				}
 				outValue := int(eout.Int64)
-				inValue := ein.Int64
+				inValue := int(ein.Int64)
 				node, ok := ids[outValue]
 				if !ok {
 					return fmt.Errorf("unexpected node id in edges: %v", outValue)

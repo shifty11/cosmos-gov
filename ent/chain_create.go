@@ -107,14 +107,14 @@ func (cc *ChainCreate) AddProposals(p ...*Proposal) *ChainCreate {
 }
 
 // AddTelegramChatIDs adds the "telegram_chats" edge to the TelegramChat entity by IDs.
-func (cc *ChainCreate) AddTelegramChatIDs(ids ...int64) *ChainCreate {
+func (cc *ChainCreate) AddTelegramChatIDs(ids ...int) *ChainCreate {
 	cc.mutation.AddTelegramChatIDs(ids...)
 	return cc
 }
 
 // AddTelegramChats adds the "telegram_chats" edges to the TelegramChat entity.
 func (cc *ChainCreate) AddTelegramChats(t ...*TelegramChat) *ChainCreate {
-	ids := make([]int64, len(t))
+	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -122,14 +122,14 @@ func (cc *ChainCreate) AddTelegramChats(t ...*TelegramChat) *ChainCreate {
 }
 
 // AddDiscordChannelIDs adds the "discord_channels" edge to the DiscordChannel entity by IDs.
-func (cc *ChainCreate) AddDiscordChannelIDs(ids ...int64) *ChainCreate {
+func (cc *ChainCreate) AddDiscordChannelIDs(ids ...int) *ChainCreate {
 	cc.mutation.AddDiscordChannelIDs(ids...)
 	return cc
 }
 
 // AddDiscordChannels adds the "discord_channels" edges to the DiscordChannel entity.
 func (cc *ChainCreate) AddDiscordChannels(d ...*DiscordChannel) *ChainCreate {
-	ids := make([]int64, len(d))
+	ids := make([]int, len(d))
 	for i := range d {
 		ids[i] = d[i].ID
 	}
@@ -385,7 +385,7 @@ func (cc *ChainCreate) createSpec() (*Chain, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: telegramchat.FieldID,
 				},
 			},
@@ -404,7 +404,7 @@ func (cc *ChainCreate) createSpec() (*Chain, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: discordchannel.FieldID,
 				},
 			},

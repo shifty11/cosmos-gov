@@ -72,7 +72,7 @@ func (tcd *TelegramChatDelete) sqlExec(ctx context.Context) (int, error) {
 		Node: &sqlgraph.NodeSpec{
 			Table: telegramchat.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt64,
+				Type:   field.TypeInt,
 				Column: telegramchat.FieldID,
 			},
 		},

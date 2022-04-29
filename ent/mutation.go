@@ -62,11 +62,11 @@ type ChainMutation struct {
 	proposals               map[int]struct{}
 	removedproposals        map[int]struct{}
 	clearedproposals        bool
-	telegram_chats          map[int64]struct{}
-	removedtelegram_chats   map[int64]struct{}
+	telegram_chats          map[int]struct{}
+	removedtelegram_chats   map[int]struct{}
 	clearedtelegram_chats   bool
-	discord_channels        map[int64]struct{}
-	removeddiscord_channels map[int64]struct{}
+	discord_channels        map[int]struct{}
+	removeddiscord_channels map[int]struct{}
 	cleareddiscord_channels bool
 	rpc_endpoints           map[int]struct{}
 	removedrpc_endpoints    map[int]struct{}
@@ -484,9 +484,9 @@ func (m *ChainMutation) ResetProposals() {
 }
 
 // AddTelegramChatIDs adds the "telegram_chats" edge to the TelegramChat entity by ids.
-func (m *ChainMutation) AddTelegramChatIDs(ids ...int64) {
+func (m *ChainMutation) AddTelegramChatIDs(ids ...int) {
 	if m.telegram_chats == nil {
-		m.telegram_chats = make(map[int64]struct{})
+		m.telegram_chats = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.telegram_chats[ids[i]] = struct{}{}
@@ -504,9 +504,9 @@ func (m *ChainMutation) TelegramChatsCleared() bool {
 }
 
 // RemoveTelegramChatIDs removes the "telegram_chats" edge to the TelegramChat entity by IDs.
-func (m *ChainMutation) RemoveTelegramChatIDs(ids ...int64) {
+func (m *ChainMutation) RemoveTelegramChatIDs(ids ...int) {
 	if m.removedtelegram_chats == nil {
-		m.removedtelegram_chats = make(map[int64]struct{})
+		m.removedtelegram_chats = make(map[int]struct{})
 	}
 	for i := range ids {
 		delete(m.telegram_chats, ids[i])
@@ -515,7 +515,7 @@ func (m *ChainMutation) RemoveTelegramChatIDs(ids ...int64) {
 }
 
 // RemovedTelegramChats returns the removed IDs of the "telegram_chats" edge to the TelegramChat entity.
-func (m *ChainMutation) RemovedTelegramChatsIDs() (ids []int64) {
+func (m *ChainMutation) RemovedTelegramChatsIDs() (ids []int) {
 	for id := range m.removedtelegram_chats {
 		ids = append(ids, id)
 	}
@@ -523,7 +523,7 @@ func (m *ChainMutation) RemovedTelegramChatsIDs() (ids []int64) {
 }
 
 // TelegramChatsIDs returns the "telegram_chats" edge IDs in the mutation.
-func (m *ChainMutation) TelegramChatsIDs() (ids []int64) {
+func (m *ChainMutation) TelegramChatsIDs() (ids []int) {
 	for id := range m.telegram_chats {
 		ids = append(ids, id)
 	}
@@ -538,9 +538,9 @@ func (m *ChainMutation) ResetTelegramChats() {
 }
 
 // AddDiscordChannelIDs adds the "discord_channels" edge to the DiscordChannel entity by ids.
-func (m *ChainMutation) AddDiscordChannelIDs(ids ...int64) {
+func (m *ChainMutation) AddDiscordChannelIDs(ids ...int) {
 	if m.discord_channels == nil {
-		m.discord_channels = make(map[int64]struct{})
+		m.discord_channels = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.discord_channels[ids[i]] = struct{}{}
@@ -558,9 +558,9 @@ func (m *ChainMutation) DiscordChannelsCleared() bool {
 }
 
 // RemoveDiscordChannelIDs removes the "discord_channels" edge to the DiscordChannel entity by IDs.
-func (m *ChainMutation) RemoveDiscordChannelIDs(ids ...int64) {
+func (m *ChainMutation) RemoveDiscordChannelIDs(ids ...int) {
 	if m.removeddiscord_channels == nil {
-		m.removeddiscord_channels = make(map[int64]struct{})
+		m.removeddiscord_channels = make(map[int]struct{})
 	}
 	for i := range ids {
 		delete(m.discord_channels, ids[i])
@@ -569,7 +569,7 @@ func (m *ChainMutation) RemoveDiscordChannelIDs(ids ...int64) {
 }
 
 // RemovedDiscordChannels returns the removed IDs of the "discord_channels" edge to the DiscordChannel entity.
-func (m *ChainMutation) RemovedDiscordChannelsIDs() (ids []int64) {
+func (m *ChainMutation) RemovedDiscordChannelsIDs() (ids []int) {
 	for id := range m.removeddiscord_channels {
 		ids = append(ids, id)
 	}
@@ -577,7 +577,7 @@ func (m *ChainMutation) RemovedDiscordChannelsIDs() (ids []int64) {
 }
 
 // DiscordChannelsIDs returns the "discord_channels" edge IDs in the mutation.
-func (m *ChainMutation) DiscordChannelsIDs() (ids []int64) {
+func (m *ChainMutation) DiscordChannelsIDs() (ids []int) {
 	for id := range m.discord_channels {
 		ids = append(ids, id)
 	}
@@ -1110,14 +1110,16 @@ type DiscordChannelMutation struct {
 	config
 	op            Op
 	typ           string
-	id            *int64
+	id            *int
 	create_time   *time.Time
 	update_time   *time.Time
+	channel_id    *int64
+	addchannel_id *int64
 	name          *string
 	is_group      *bool
 	roles         *string
 	clearedFields map[string]struct{}
-	user          *int64
+	user          *int
 	cleareduser   bool
 	chains        map[int]struct{}
 	removedchains map[int]struct{}
@@ -1147,7 +1149,7 @@ func newDiscordChannelMutation(c config, op Op, opts ...discordchannelOption) *D
 }
 
 // withDiscordChannelID sets the ID field of the mutation.
-func withDiscordChannelID(id int64) discordchannelOption {
+func withDiscordChannelID(id int) discordchannelOption {
 	return func(m *DiscordChannelMutation) {
 		var (
 			err   error
@@ -1197,15 +1199,9 @@ func (m DiscordChannelMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of DiscordChannel entities.
-func (m *DiscordChannelMutation) SetID(id int64) {
-	m.id = &id
-}
-
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *DiscordChannelMutation) ID() (id int64, exists bool) {
+func (m *DiscordChannelMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -1216,12 +1212,12 @@ func (m *DiscordChannelMutation) ID() (id int64, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *DiscordChannelMutation) IDs(ctx context.Context) ([]int64, error) {
+func (m *DiscordChannelMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int64{id}, nil
+			return []int{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -1301,6 +1297,62 @@ func (m *DiscordChannelMutation) OldUpdateTime(ctx context.Context) (v time.Time
 // ResetUpdateTime resets all changes to the "update_time" field.
 func (m *DiscordChannelMutation) ResetUpdateTime() {
 	m.update_time = nil
+}
+
+// SetChannelID sets the "channel_id" field.
+func (m *DiscordChannelMutation) SetChannelID(i int64) {
+	m.channel_id = &i
+	m.addchannel_id = nil
+}
+
+// ChannelID returns the value of the "channel_id" field in the mutation.
+func (m *DiscordChannelMutation) ChannelID() (r int64, exists bool) {
+	v := m.channel_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldChannelID returns the old "channel_id" field's value of the DiscordChannel entity.
+// If the DiscordChannel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DiscordChannelMutation) OldChannelID(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldChannelID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldChannelID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldChannelID: %w", err)
+	}
+	return oldValue.ChannelID, nil
+}
+
+// AddChannelID adds i to the "channel_id" field.
+func (m *DiscordChannelMutation) AddChannelID(i int64) {
+	if m.addchannel_id != nil {
+		*m.addchannel_id += i
+	} else {
+		m.addchannel_id = &i
+	}
+}
+
+// AddedChannelID returns the value that was added to the "channel_id" field in this mutation.
+func (m *DiscordChannelMutation) AddedChannelID() (r int64, exists bool) {
+	v := m.addchannel_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetChannelID resets all changes to the "channel_id" field.
+func (m *DiscordChannelMutation) ResetChannelID() {
+	m.channel_id = nil
+	m.addchannel_id = nil
 }
 
 // SetName sets the "name" field.
@@ -1412,7 +1464,7 @@ func (m *DiscordChannelMutation) ResetRoles() {
 }
 
 // SetUserID sets the "user" edge to the User entity by id.
-func (m *DiscordChannelMutation) SetUserID(id int64) {
+func (m *DiscordChannelMutation) SetUserID(id int) {
 	m.user = &id
 }
 
@@ -1427,7 +1479,7 @@ func (m *DiscordChannelMutation) UserCleared() bool {
 }
 
 // UserID returns the "user" edge ID in the mutation.
-func (m *DiscordChannelMutation) UserID() (id int64, exists bool) {
+func (m *DiscordChannelMutation) UserID() (id int, exists bool) {
 	if m.user != nil {
 		return *m.user, true
 	}
@@ -1437,7 +1489,7 @@ func (m *DiscordChannelMutation) UserID() (id int64, exists bool) {
 // UserIDs returns the "user" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // UserID instead. It exists only for internal usage by the builders.
-func (m *DiscordChannelMutation) UserIDs() (ids []int64) {
+func (m *DiscordChannelMutation) UserIDs() (ids []int) {
 	if id := m.user; id != nil {
 		ids = append(ids, *id)
 	}
@@ -1523,12 +1575,15 @@ func (m *DiscordChannelMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *DiscordChannelMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.create_time != nil {
 		fields = append(fields, discordchannel.FieldCreateTime)
 	}
 	if m.update_time != nil {
 		fields = append(fields, discordchannel.FieldUpdateTime)
+	}
+	if m.channel_id != nil {
+		fields = append(fields, discordchannel.FieldChannelID)
 	}
 	if m.name != nil {
 		fields = append(fields, discordchannel.FieldName)
@@ -1551,6 +1606,8 @@ func (m *DiscordChannelMutation) Field(name string) (ent.Value, bool) {
 		return m.CreateTime()
 	case discordchannel.FieldUpdateTime:
 		return m.UpdateTime()
+	case discordchannel.FieldChannelID:
+		return m.ChannelID()
 	case discordchannel.FieldName:
 		return m.Name()
 	case discordchannel.FieldIsGroup:
@@ -1570,6 +1627,8 @@ func (m *DiscordChannelMutation) OldField(ctx context.Context, name string) (ent
 		return m.OldCreateTime(ctx)
 	case discordchannel.FieldUpdateTime:
 		return m.OldUpdateTime(ctx)
+	case discordchannel.FieldChannelID:
+		return m.OldChannelID(ctx)
 	case discordchannel.FieldName:
 		return m.OldName(ctx)
 	case discordchannel.FieldIsGroup:
@@ -1599,6 +1658,13 @@ func (m *DiscordChannelMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetUpdateTime(v)
 		return nil
+	case discordchannel.FieldChannelID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetChannelID(v)
+		return nil
 	case discordchannel.FieldName:
 		v, ok := value.(string)
 		if !ok {
@@ -1627,13 +1693,21 @@ func (m *DiscordChannelMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *DiscordChannelMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addchannel_id != nil {
+		fields = append(fields, discordchannel.FieldChannelID)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *DiscordChannelMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case discordchannel.FieldChannelID:
+		return m.AddedChannelID()
+	}
 	return nil, false
 }
 
@@ -1642,6 +1716,13 @@ func (m *DiscordChannelMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *DiscordChannelMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case discordchannel.FieldChannelID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddChannelID(v)
+		return nil
 	}
 	return fmt.Errorf("unknown DiscordChannel numeric field %s", name)
 }
@@ -1674,6 +1755,9 @@ func (m *DiscordChannelMutation) ResetField(name string) error {
 		return nil
 	case discordchannel.FieldUpdateTime:
 		m.ResetUpdateTime()
+		return nil
+	case discordchannel.FieldChannelID:
+		m.ResetChannelID()
 		return nil
 	case discordchannel.FieldName:
 		m.ResetName()
@@ -4601,13 +4685,15 @@ type TelegramChatMutation struct {
 	config
 	op            Op
 	typ           string
-	id            *int64
+	id            *int
 	create_time   *time.Time
 	update_time   *time.Time
+	chat_id       *int64
+	addchat_id    *int64
 	name          *string
 	is_group      *bool
 	clearedFields map[string]struct{}
-	user          *int64
+	user          *int
 	cleareduser   bool
 	chains        map[int]struct{}
 	removedchains map[int]struct{}
@@ -4637,7 +4723,7 @@ func newTelegramChatMutation(c config, op Op, opts ...telegramchatOption) *Teleg
 }
 
 // withTelegramChatID sets the ID field of the mutation.
-func withTelegramChatID(id int64) telegramchatOption {
+func withTelegramChatID(id int) telegramchatOption {
 	return func(m *TelegramChatMutation) {
 		var (
 			err   error
@@ -4687,15 +4773,9 @@ func (m TelegramChatMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of TelegramChat entities.
-func (m *TelegramChatMutation) SetID(id int64) {
-	m.id = &id
-}
-
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *TelegramChatMutation) ID() (id int64, exists bool) {
+func (m *TelegramChatMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -4706,12 +4786,12 @@ func (m *TelegramChatMutation) ID() (id int64, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *TelegramChatMutation) IDs(ctx context.Context) ([]int64, error) {
+func (m *TelegramChatMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int64{id}, nil
+			return []int{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -4793,6 +4873,62 @@ func (m *TelegramChatMutation) ResetUpdateTime() {
 	m.update_time = nil
 }
 
+// SetChatID sets the "chat_id" field.
+func (m *TelegramChatMutation) SetChatID(i int64) {
+	m.chat_id = &i
+	m.addchat_id = nil
+}
+
+// ChatID returns the value of the "chat_id" field in the mutation.
+func (m *TelegramChatMutation) ChatID() (r int64, exists bool) {
+	v := m.chat_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldChatID returns the old "chat_id" field's value of the TelegramChat entity.
+// If the TelegramChat object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TelegramChatMutation) OldChatID(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldChatID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldChatID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldChatID: %w", err)
+	}
+	return oldValue.ChatID, nil
+}
+
+// AddChatID adds i to the "chat_id" field.
+func (m *TelegramChatMutation) AddChatID(i int64) {
+	if m.addchat_id != nil {
+		*m.addchat_id += i
+	} else {
+		m.addchat_id = &i
+	}
+}
+
+// AddedChatID returns the value that was added to the "chat_id" field in this mutation.
+func (m *TelegramChatMutation) AddedChatID() (r int64, exists bool) {
+	v := m.addchat_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetChatID resets all changes to the "chat_id" field.
+func (m *TelegramChatMutation) ResetChatID() {
+	m.chat_id = nil
+	m.addchat_id = nil
+}
+
 // SetName sets the "name" field.
 func (m *TelegramChatMutation) SetName(s string) {
 	m.name = &s
@@ -4866,7 +5002,7 @@ func (m *TelegramChatMutation) ResetIsGroup() {
 }
 
 // SetUserID sets the "user" edge to the User entity by id.
-func (m *TelegramChatMutation) SetUserID(id int64) {
+func (m *TelegramChatMutation) SetUserID(id int) {
 	m.user = &id
 }
 
@@ -4881,7 +5017,7 @@ func (m *TelegramChatMutation) UserCleared() bool {
 }
 
 // UserID returns the "user" edge ID in the mutation.
-func (m *TelegramChatMutation) UserID() (id int64, exists bool) {
+func (m *TelegramChatMutation) UserID() (id int, exists bool) {
 	if m.user != nil {
 		return *m.user, true
 	}
@@ -4891,7 +5027,7 @@ func (m *TelegramChatMutation) UserID() (id int64, exists bool) {
 // UserIDs returns the "user" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // UserID instead. It exists only for internal usage by the builders.
-func (m *TelegramChatMutation) UserIDs() (ids []int64) {
+func (m *TelegramChatMutation) UserIDs() (ids []int) {
 	if id := m.user; id != nil {
 		ids = append(ids, *id)
 	}
@@ -4977,12 +5113,15 @@ func (m *TelegramChatMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TelegramChatMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 5)
 	if m.create_time != nil {
 		fields = append(fields, telegramchat.FieldCreateTime)
 	}
 	if m.update_time != nil {
 		fields = append(fields, telegramchat.FieldUpdateTime)
+	}
+	if m.chat_id != nil {
+		fields = append(fields, telegramchat.FieldChatID)
 	}
 	if m.name != nil {
 		fields = append(fields, telegramchat.FieldName)
@@ -5002,6 +5141,8 @@ func (m *TelegramChatMutation) Field(name string) (ent.Value, bool) {
 		return m.CreateTime()
 	case telegramchat.FieldUpdateTime:
 		return m.UpdateTime()
+	case telegramchat.FieldChatID:
+		return m.ChatID()
 	case telegramchat.FieldName:
 		return m.Name()
 	case telegramchat.FieldIsGroup:
@@ -5019,6 +5160,8 @@ func (m *TelegramChatMutation) OldField(ctx context.Context, name string) (ent.V
 		return m.OldCreateTime(ctx)
 	case telegramchat.FieldUpdateTime:
 		return m.OldUpdateTime(ctx)
+	case telegramchat.FieldChatID:
+		return m.OldChatID(ctx)
 	case telegramchat.FieldName:
 		return m.OldName(ctx)
 	case telegramchat.FieldIsGroup:
@@ -5046,6 +5189,13 @@ func (m *TelegramChatMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetUpdateTime(v)
 		return nil
+	case telegramchat.FieldChatID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetChatID(v)
+		return nil
 	case telegramchat.FieldName:
 		v, ok := value.(string)
 		if !ok {
@@ -5067,13 +5217,21 @@ func (m *TelegramChatMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *TelegramChatMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addchat_id != nil {
+		fields = append(fields, telegramchat.FieldChatID)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *TelegramChatMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case telegramchat.FieldChatID:
+		return m.AddedChatID()
+	}
 	return nil, false
 }
 
@@ -5082,6 +5240,13 @@ func (m *TelegramChatMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *TelegramChatMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case telegramchat.FieldChatID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddChatID(v)
+		return nil
 	}
 	return fmt.Errorf("unknown TelegramChat numeric field %s", name)
 }
@@ -5114,6 +5279,9 @@ func (m *TelegramChatMutation) ResetField(name string) error {
 		return nil
 	case telegramchat.FieldUpdateTime:
 		m.ResetUpdateTime()
+		return nil
+	case telegramchat.FieldChatID:
+		m.ResetChatID()
 		return nil
 	case telegramchat.FieldName:
 		m.ResetName()
@@ -5232,18 +5400,20 @@ type UserMutation struct {
 	config
 	op                      Op
 	typ                     string
-	id                      *int64
+	id                      *int
 	create_time             *time.Time
 	update_time             *time.Time
+	user_id                 *int64
+	adduser_id              *int64
 	name                    *string
 	_type                   *user.Type
 	login_token             *string
 	clearedFields           map[string]struct{}
-	telegram_chats          map[int64]struct{}
-	removedtelegram_chats   map[int64]struct{}
+	telegram_chats          map[int]struct{}
+	removedtelegram_chats   map[int]struct{}
 	clearedtelegram_chats   bool
-	discord_channels        map[int64]struct{}
-	removeddiscord_channels map[int64]struct{}
+	discord_channels        map[int]struct{}
+	removeddiscord_channels map[int]struct{}
 	cleareddiscord_channels bool
 	wallets                 map[int]struct{}
 	removedwallets          map[int]struct{}
@@ -5273,7 +5443,7 @@ func newUserMutation(c config, op Op, opts ...userOption) *UserMutation {
 }
 
 // withUserID sets the ID field of the mutation.
-func withUserID(id int64) userOption {
+func withUserID(id int) userOption {
 	return func(m *UserMutation) {
 		var (
 			err   error
@@ -5323,15 +5493,9 @@ func (m UserMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of User entities.
-func (m *UserMutation) SetID(id int64) {
-	m.id = &id
-}
-
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *UserMutation) ID() (id int64, exists bool) {
+func (m *UserMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -5342,12 +5506,12 @@ func (m *UserMutation) ID() (id int64, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *UserMutation) IDs(ctx context.Context) ([]int64, error) {
+func (m *UserMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int64{id}, nil
+			return []int{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -5427,6 +5591,62 @@ func (m *UserMutation) OldUpdateTime(ctx context.Context) (v time.Time, err erro
 // ResetUpdateTime resets all changes to the "update_time" field.
 func (m *UserMutation) ResetUpdateTime() {
 	m.update_time = nil
+}
+
+// SetUserID sets the "user_id" field.
+func (m *UserMutation) SetUserID(i int64) {
+	m.user_id = &i
+	m.adduser_id = nil
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *UserMutation) UserID() (r int64, exists bool) {
+	v := m.user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldUserID(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// AddUserID adds i to the "user_id" field.
+func (m *UserMutation) AddUserID(i int64) {
+	if m.adduser_id != nil {
+		*m.adduser_id += i
+	} else {
+		m.adduser_id = &i
+	}
+}
+
+// AddedUserID returns the value that was added to the "user_id" field in this mutation.
+func (m *UserMutation) AddedUserID() (r int64, exists bool) {
+	v := m.adduser_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *UserMutation) ResetUserID() {
+	m.user_id = nil
+	m.adduser_id = nil
 }
 
 // SetName sets the "name" field.
@@ -5538,9 +5758,9 @@ func (m *UserMutation) ResetLoginToken() {
 }
 
 // AddTelegramChatIDs adds the "telegram_chats" edge to the TelegramChat entity by ids.
-func (m *UserMutation) AddTelegramChatIDs(ids ...int64) {
+func (m *UserMutation) AddTelegramChatIDs(ids ...int) {
 	if m.telegram_chats == nil {
-		m.telegram_chats = make(map[int64]struct{})
+		m.telegram_chats = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.telegram_chats[ids[i]] = struct{}{}
@@ -5558,9 +5778,9 @@ func (m *UserMutation) TelegramChatsCleared() bool {
 }
 
 // RemoveTelegramChatIDs removes the "telegram_chats" edge to the TelegramChat entity by IDs.
-func (m *UserMutation) RemoveTelegramChatIDs(ids ...int64) {
+func (m *UserMutation) RemoveTelegramChatIDs(ids ...int) {
 	if m.removedtelegram_chats == nil {
-		m.removedtelegram_chats = make(map[int64]struct{})
+		m.removedtelegram_chats = make(map[int]struct{})
 	}
 	for i := range ids {
 		delete(m.telegram_chats, ids[i])
@@ -5569,7 +5789,7 @@ func (m *UserMutation) RemoveTelegramChatIDs(ids ...int64) {
 }
 
 // RemovedTelegramChats returns the removed IDs of the "telegram_chats" edge to the TelegramChat entity.
-func (m *UserMutation) RemovedTelegramChatsIDs() (ids []int64) {
+func (m *UserMutation) RemovedTelegramChatsIDs() (ids []int) {
 	for id := range m.removedtelegram_chats {
 		ids = append(ids, id)
 	}
@@ -5577,7 +5797,7 @@ func (m *UserMutation) RemovedTelegramChatsIDs() (ids []int64) {
 }
 
 // TelegramChatsIDs returns the "telegram_chats" edge IDs in the mutation.
-func (m *UserMutation) TelegramChatsIDs() (ids []int64) {
+func (m *UserMutation) TelegramChatsIDs() (ids []int) {
 	for id := range m.telegram_chats {
 		ids = append(ids, id)
 	}
@@ -5592,9 +5812,9 @@ func (m *UserMutation) ResetTelegramChats() {
 }
 
 // AddDiscordChannelIDs adds the "discord_channels" edge to the DiscordChannel entity by ids.
-func (m *UserMutation) AddDiscordChannelIDs(ids ...int64) {
+func (m *UserMutation) AddDiscordChannelIDs(ids ...int) {
 	if m.discord_channels == nil {
-		m.discord_channels = make(map[int64]struct{})
+		m.discord_channels = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.discord_channels[ids[i]] = struct{}{}
@@ -5612,9 +5832,9 @@ func (m *UserMutation) DiscordChannelsCleared() bool {
 }
 
 // RemoveDiscordChannelIDs removes the "discord_channels" edge to the DiscordChannel entity by IDs.
-func (m *UserMutation) RemoveDiscordChannelIDs(ids ...int64) {
+func (m *UserMutation) RemoveDiscordChannelIDs(ids ...int) {
 	if m.removeddiscord_channels == nil {
-		m.removeddiscord_channels = make(map[int64]struct{})
+		m.removeddiscord_channels = make(map[int]struct{})
 	}
 	for i := range ids {
 		delete(m.discord_channels, ids[i])
@@ -5623,7 +5843,7 @@ func (m *UserMutation) RemoveDiscordChannelIDs(ids ...int64) {
 }
 
 // RemovedDiscordChannels returns the removed IDs of the "discord_channels" edge to the DiscordChannel entity.
-func (m *UserMutation) RemovedDiscordChannelsIDs() (ids []int64) {
+func (m *UserMutation) RemovedDiscordChannelsIDs() (ids []int) {
 	for id := range m.removeddiscord_channels {
 		ids = append(ids, id)
 	}
@@ -5631,7 +5851,7 @@ func (m *UserMutation) RemovedDiscordChannelsIDs() (ids []int64) {
 }
 
 // DiscordChannelsIDs returns the "discord_channels" edge IDs in the mutation.
-func (m *UserMutation) DiscordChannelsIDs() (ids []int64) {
+func (m *UserMutation) DiscordChannelsIDs() (ids []int) {
 	for id := range m.discord_channels {
 		ids = append(ids, id)
 	}
@@ -5718,12 +5938,15 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.create_time != nil {
 		fields = append(fields, user.FieldCreateTime)
 	}
 	if m.update_time != nil {
 		fields = append(fields, user.FieldUpdateTime)
+	}
+	if m.user_id != nil {
+		fields = append(fields, user.FieldUserID)
 	}
 	if m.name != nil {
 		fields = append(fields, user.FieldName)
@@ -5746,6 +5969,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.CreateTime()
 	case user.FieldUpdateTime:
 		return m.UpdateTime()
+	case user.FieldUserID:
+		return m.UserID()
 	case user.FieldName:
 		return m.Name()
 	case user.FieldType:
@@ -5765,6 +5990,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldCreateTime(ctx)
 	case user.FieldUpdateTime:
 		return m.OldUpdateTime(ctx)
+	case user.FieldUserID:
+		return m.OldUserID(ctx)
 	case user.FieldName:
 		return m.OldName(ctx)
 	case user.FieldType:
@@ -5794,6 +6021,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetUpdateTime(v)
 		return nil
+	case user.FieldUserID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
 	case user.FieldName:
 		v, ok := value.(string)
 		if !ok {
@@ -5822,13 +6056,21 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *UserMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.adduser_id != nil {
+		fields = append(fields, user.FieldUserID)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case user.FieldUserID:
+		return m.AddedUserID()
+	}
 	return nil, false
 }
 
@@ -5837,6 +6079,13 @@ func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *UserMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case user.FieldUserID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddUserID(v)
+		return nil
 	}
 	return fmt.Errorf("unknown User numeric field %s", name)
 }
@@ -5869,6 +6118,9 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldUpdateTime:
 		m.ResetUpdateTime()
+		return nil
+	case user.FieldUserID:
+		m.ResetUserID()
 		return nil
 	case user.FieldName:
 		m.ResetName()
@@ -6029,8 +6281,8 @@ type WalletMutation struct {
 	update_time   *time.Time
 	address       *string
 	clearedFields map[string]struct{}
-	users         map[int64]struct{}
-	removedusers  map[int64]struct{}
+	users         map[int]struct{}
+	removedusers  map[int]struct{}
 	clearedusers  bool
 	chain         *int
 	clearedchain  bool
@@ -6249,9 +6501,9 @@ func (m *WalletMutation) ResetAddress() {
 }
 
 // AddUserIDs adds the "users" edge to the User entity by ids.
-func (m *WalletMutation) AddUserIDs(ids ...int64) {
+func (m *WalletMutation) AddUserIDs(ids ...int) {
 	if m.users == nil {
-		m.users = make(map[int64]struct{})
+		m.users = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.users[ids[i]] = struct{}{}
@@ -6269,9 +6521,9 @@ func (m *WalletMutation) UsersCleared() bool {
 }
 
 // RemoveUserIDs removes the "users" edge to the User entity by IDs.
-func (m *WalletMutation) RemoveUserIDs(ids ...int64) {
+func (m *WalletMutation) RemoveUserIDs(ids ...int) {
 	if m.removedusers == nil {
-		m.removedusers = make(map[int64]struct{})
+		m.removedusers = make(map[int]struct{})
 	}
 	for i := range ids {
 		delete(m.users, ids[i])
@@ -6280,7 +6532,7 @@ func (m *WalletMutation) RemoveUserIDs(ids ...int64) {
 }
 
 // RemovedUsers returns the removed IDs of the "users" edge to the User entity.
-func (m *WalletMutation) RemovedUsersIDs() (ids []int64) {
+func (m *WalletMutation) RemovedUsersIDs() (ids []int) {
 	for id := range m.removedusers {
 		ids = append(ids, id)
 	}
@@ -6288,7 +6540,7 @@ func (m *WalletMutation) RemovedUsersIDs() (ids []int64) {
 }
 
 // UsersIDs returns the "users" edge IDs in the mutation.
-func (m *WalletMutation) UsersIDs() (ids []int64) {
+func (m *WalletMutation) UsersIDs() (ids []int) {
 	for id := range m.users {
 		ids = append(ids, id)
 	}

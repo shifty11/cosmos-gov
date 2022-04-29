@@ -51,6 +51,12 @@ func (uc *UserCreate) SetNillableUpdateTime(t *time.Time) *UserCreate {
 	return uc
 }
 
+// SetUserID sets the "user_id" field.
+func (uc *UserCreate) SetUserID(i int64) *UserCreate {
+	uc.mutation.SetUserID(i)
+	return uc
+}
+
 // SetName sets the "name" field.
 func (uc *UserCreate) SetName(s string) *UserCreate {
 	uc.mutation.SetName(s)
@@ -85,21 +91,15 @@ func (uc *UserCreate) SetNillableLoginToken(s *string) *UserCreate {
 	return uc
 }
 
-// SetID sets the "id" field.
-func (uc *UserCreate) SetID(i int64) *UserCreate {
-	uc.mutation.SetID(i)
-	return uc
-}
-
 // AddTelegramChatIDs adds the "telegram_chats" edge to the TelegramChat entity by IDs.
-func (uc *UserCreate) AddTelegramChatIDs(ids ...int64) *UserCreate {
+func (uc *UserCreate) AddTelegramChatIDs(ids ...int) *UserCreate {
 	uc.mutation.AddTelegramChatIDs(ids...)
 	return uc
 }
 
 // AddTelegramChats adds the "telegram_chats" edges to the TelegramChat entity.
 func (uc *UserCreate) AddTelegramChats(t ...*TelegramChat) *UserCreate {
-	ids := make([]int64, len(t))
+	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -107,14 +107,14 @@ func (uc *UserCreate) AddTelegramChats(t ...*TelegramChat) *UserCreate {
 }
 
 // AddDiscordChannelIDs adds the "discord_channels" edge to the DiscordChannel entity by IDs.
-func (uc *UserCreate) AddDiscordChannelIDs(ids ...int64) *UserCreate {
+func (uc *UserCreate) AddDiscordChannelIDs(ids ...int) *UserCreate {
 	uc.mutation.AddDiscordChannelIDs(ids...)
 	return uc
 }
 
 // AddDiscordChannels adds the "discord_channels" edges to the DiscordChannel entity.
 func (uc *UserCreate) AddDiscordChannels(d ...*DiscordChannel) *UserCreate {
-	ids := make([]int64, len(d))
+	ids := make([]int, len(d))
 	for i := range d {
 		ids[i] = d[i].ID
 	}
@@ -233,6 +233,9 @@ func (uc *UserCreate) check() error {
 	if _, ok := uc.mutation.UpdateTime(); !ok {
 		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "User.update_time"`)}
 	}
+	if _, ok := uc.mutation.UserID(); !ok {
+		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "User.user_id"`)}
+	}
 	if _, ok := uc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "User.name"`)}
 	}
@@ -258,10 +261,8 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != _node.ID {
-		id := _spec.ID.Value.(int64)
-		_node.ID = int64(id)
-	}
+	id := _spec.ID.Value.(int64)
+	_node.ID = int(id)
 	return _node, nil
 }
 
@@ -271,15 +272,11 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: user.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt64,
+				Type:   field.TypeInt,
 				Column: user.FieldID,
 			},
 		}
 	)
-	if id, ok := uc.mutation.ID(); ok {
-		_node.ID = id
-		_spec.ID.Value = id
-	}
 	if value, ok := uc.mutation.CreateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -295,6 +292,14 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Column: user.FieldUpdateTime,
 		})
 		_node.UpdateTime = value
+	}
+	if value, ok := uc.mutation.UserID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: user.FieldUserID,
+		})
+		_node.UserID = value
 	}
 	if value, ok := uc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -329,7 +334,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: telegramchat.FieldID,
 				},
 			},
@@ -348,7 +353,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: discordchannel.FieldID,
 				},
 			},
@@ -422,9 +427,9 @@ func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 				}
 				mutation.id = &nodes[i].ID
 				mutation.done = true
-				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
+				if specs[i].ID.Value != nil {
 					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int64(id)
+					nodes[i].ID = int(id)
 				}
 				return nodes[i], nil
 			})

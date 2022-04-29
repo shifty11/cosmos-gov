@@ -18,10 +18,10 @@ func NewDiscordChannelManager(client *ent.Client, ctx context.Context, chainMana
 	return &DiscordChannelManager{client: client, ctx: ctx, chainManager: chainManager}
 }
 
-func (manager *DiscordChannelManager) AddOrRemoveChain(tgChatId int64, chainName string) (bool, error) {
+func (manager *DiscordChannelManager) AddOrRemoveChain(dChannelId int64, chainName string) (bool, error) {
 	dChannel, err := manager.client.DiscordChannel.
 		Query().
-		Where(discordchannel.IDEQ(tgChatId)).
+		Where(discordchannel.ChannelID(dChannelId)).
 		First(manager.ctx)
 	if err != nil {
 		return false, err
@@ -60,9 +60,12 @@ func (manager *DiscordChannelManager) AddOrRemoveChain(tgChatId int64, chainName
 }
 
 // TODO: remove after full migration
-func setUserIfNotPresentD(channel *ent.DiscordChannel, manager *DiscordChannelManager, oldErr error, id int64, entUser *ent.User) (*ent.DiscordChannel, error) {
+func setUserIfNotPresentD(channel *ent.DiscordChannel, manager *DiscordChannelManager, oldErr error, channelId int64, entUser *ent.User) (*ent.DiscordChannel, error) {
 	if oldErr != nil {
-		channel, err := manager.client.DiscordChannel.Get(manager.ctx, id)
+		channel, err := manager.client.DiscordChannel.
+			Query().
+			Where(discordchannel.ChannelIDEQ(channelId)).
+			First(manager.ctx)
 		if err != nil {
 			return nil, oldErr
 		}
@@ -78,18 +81,18 @@ func setUserIfNotPresentD(channel *ent.DiscordChannel, manager *DiscordChannelMa
 	return channel, oldErr
 }
 
-func (manager *DiscordChannelManager) GetOrCreateDiscordChannel(entUser *ent.User, id int64, name string, isGroup bool) *ent.DiscordChannel {
+func (manager *DiscordChannelManager) GetOrCreateDiscordChannel(entUser *ent.User, channelId int64, name string, isGroup bool) *ent.DiscordChannel {
 	dChannel, err := entUser.
 		QueryDiscordChannels().
-		Where(discordchannel.IDEQ(id)).
+		Where(discordchannel.ChannelIDEQ(channelId)).
 		Only(manager.ctx)
 
-	dChannel, err = setUserIfNotPresentD(dChannel, manager, err, id, entUser)
+	dChannel, err = setUserIfNotPresentD(dChannel, manager, err, channelId, entUser)
 
 	if err != nil {
 		dChannel, err = manager.client.DiscordChannel.
 			Create().
-			SetID(id).
+			SetChannelID(channelId).
 			SetName(name).
 			SetIsGroup(isGroup).
 			SetUser(entUser).
@@ -105,7 +108,7 @@ func (manager *DiscordChannelManager) DeleteMultiple(channelIds []int64) {
 	log.Sugar.Debugf("Delete %v Discord channel's", len(channelIds))
 	_, err := manager.client.DiscordChannel.
 		Delete().
-		Where(discordchannel.IDIn(channelIds...)).
+		Where(discordchannel.ChannelIDIn(channelIds...)).
 		Exec(manager.ctx)
 	if err != nil {
 		log.Sugar.Errorf("Error while deleting Discord channels: %v", err)

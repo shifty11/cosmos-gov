@@ -21,7 +21,7 @@ func NewTelegramChatManager(client *ent.Client, ctx context.Context, chainManage
 func (manager *TelegramChatManager) AddOrRemoveChain(tgChatId int64, chainName string) (bool, error) {
 	tgChat, err := manager.client.TelegramChat.
 		Query().
-		Where(telegramchat.IDEQ(tgChatId)).
+		Where(telegramchat.ChatIDEQ(tgChatId)).
 		First(manager.ctx)
 	if err != nil {
 		return false, err
@@ -60,9 +60,12 @@ func (manager *TelegramChatManager) AddOrRemoveChain(tgChatId int64, chainName s
 }
 
 // TODO: remove after full migration
-func setUserIfNotPresent(tgChat *ent.TelegramChat, manager *TelegramChatManager, oldErr error, id int64, entUser *ent.User) (*ent.TelegramChat, error) {
+func setUserIfNotPresent(tgChat *ent.TelegramChat, manager *TelegramChatManager, oldErr error, tgChatId int64, entUser *ent.User) (*ent.TelegramChat, error) {
 	if oldErr != nil {
-		tgChat, err := manager.client.TelegramChat.Get(manager.ctx, id)
+		tgChat, err := manager.client.TelegramChat.
+			Query().
+			Where(telegramchat.ChatIDEQ(tgChatId)).
+			First(manager.ctx)
 		if err != nil {
 			return nil, oldErr
 		}
@@ -78,18 +81,18 @@ func setUserIfNotPresent(tgChat *ent.TelegramChat, manager *TelegramChatManager,
 	return tgChat, oldErr
 }
 
-func (manager *TelegramChatManager) GetOrCreateTelegramChat(entUser *ent.User, id int64, name string, isGroup bool) *ent.TelegramChat {
+func (manager *TelegramChatManager) GetOrCreateTelegramChat(entUser *ent.User, tgChatId int64, name string, isGroup bool) *ent.TelegramChat {
 	tgChat, err := entUser.
 		QueryTelegramChats().
-		Where(telegramchat.IDEQ(id)).
+		Where(telegramchat.ChatIDEQ(tgChatId)).
 		Only(manager.ctx)
 
-	tgChat, err = setUserIfNotPresent(tgChat, manager, err, id, entUser)
+	tgChat, err = setUserIfNotPresent(tgChat, manager, err, tgChatId, entUser)
 
 	if err != nil {
 		tgChat, err = manager.client.TelegramChat.
 			Create().
-			SetID(id).
+			SetChatID(tgChatId).
 			SetName(name).
 			SetIsGroup(isGroup).
 			SetUser(entUser).
@@ -105,7 +108,7 @@ func (manager *TelegramChatManager) Delete(chatId int64) {
 	log.Sugar.Debugf("Delete Telegram chat %v", chatId)
 	_, err := manager.client.TelegramChat.
 		Delete().
-		Where(telegramchat.IDEQ(chatId)).
+		Where(telegramchat.ChatIDEQ(chatId)).
 		Exec(manager.ctx)
 	if err != nil {
 		log.Sugar.Errorf("Error while deleting telegram chat: %v", err)
@@ -116,7 +119,7 @@ func (manager *TelegramChatManager) DeleteMultiple(chatIds []int64) {
 	log.Sugar.Debugf("Delete %v Telegram chat's", len(chatIds))
 	_, err := manager.client.TelegramChat.
 		Delete().
-		Where(telegramchat.IDIn(chatIds...)).
+		Where(telegramchat.ChatIDIn(chatIds...)).
 		Exec(manager.ctx)
 	if err != nil {
 		log.Sugar.Errorf("Error while deleting Telegram channels: %v", err)

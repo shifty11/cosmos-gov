@@ -16,11 +16,13 @@ import (
 type TelegramChat struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int64 `json:"id,omitempty"`
+	ID int `json:"id,omitempty"`
 	// CreateTime holds the value of the "create_time" field.
 	CreateTime time.Time `json:"create_time,omitempty"`
 	// UpdateTime holds the value of the "update_time" field.
 	UpdateTime time.Time `json:"update_time,omitempty"`
+	// ChatID holds the value of the "chat_id" field.
+	ChatID int64 `json:"chat_id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// IsGroup holds the value of the "is_group" field.
@@ -28,7 +30,7 @@ type TelegramChat struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TelegramChatQuery when eager-loading is set.
 	Edges              TelegramChatEdges `json:"edges"`
-	telegram_chat_user *int64
+	telegram_chat_user *int
 }
 
 // TelegramChatEdges holds the relations/edges for other nodes in the graph.
@@ -72,7 +74,7 @@ func (*TelegramChat) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case telegramchat.FieldIsGroup:
 			values[i] = new(sql.NullBool)
-		case telegramchat.FieldID:
+		case telegramchat.FieldID, telegramchat.FieldChatID:
 			values[i] = new(sql.NullInt64)
 		case telegramchat.FieldName:
 			values[i] = new(sql.NullString)
@@ -100,7 +102,7 @@ func (tc *TelegramChat) assignValues(columns []string, values []interface{}) err
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			tc.ID = int64(value.Int64)
+			tc.ID = int(value.Int64)
 		case telegramchat.FieldCreateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field create_time", values[i])
@@ -112,6 +114,12 @@ func (tc *TelegramChat) assignValues(columns []string, values []interface{}) err
 				return fmt.Errorf("unexpected type %T for field update_time", values[i])
 			} else if value.Valid {
 				tc.UpdateTime = value.Time
+			}
+		case telegramchat.FieldChatID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field chat_id", values[i])
+			} else if value.Valid {
+				tc.ChatID = value.Int64
 			}
 		case telegramchat.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -129,8 +137,8 @@ func (tc *TelegramChat) assignValues(columns []string, values []interface{}) err
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field telegram_chat_user", value)
 			} else if value.Valid {
-				tc.telegram_chat_user = new(int64)
-				*tc.telegram_chat_user = int64(value.Int64)
+				tc.telegram_chat_user = new(int)
+				*tc.telegram_chat_user = int(value.Int64)
 			}
 		}
 	}
@@ -174,6 +182,8 @@ func (tc *TelegramChat) String() string {
 	builder.WriteString(tc.CreateTime.Format(time.ANSIC))
 	builder.WriteString(", update_time=")
 	builder.WriteString(tc.UpdateTime.Format(time.ANSIC))
+	builder.WriteString(", chat_id=")
+	builder.WriteString(fmt.Sprintf("%v", tc.ChatID))
 	builder.WriteString(", name=")
 	builder.WriteString(tc.Name)
 	builder.WriteString(", is_group=")

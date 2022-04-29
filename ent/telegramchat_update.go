@@ -36,6 +36,19 @@ func (tcu *TelegramChatUpdate) SetUpdateTime(t time.Time) *TelegramChatUpdate {
 	return tcu
 }
 
+// SetChatID sets the "chat_id" field.
+func (tcu *TelegramChatUpdate) SetChatID(i int64) *TelegramChatUpdate {
+	tcu.mutation.ResetChatID()
+	tcu.mutation.SetChatID(i)
+	return tcu
+}
+
+// AddChatID adds i to the "chat_id" field.
+func (tcu *TelegramChatUpdate) AddChatID(i int64) *TelegramChatUpdate {
+	tcu.mutation.AddChatID(i)
+	return tcu
+}
+
 // SetName sets the "name" field.
 func (tcu *TelegramChatUpdate) SetName(s string) *TelegramChatUpdate {
 	tcu.mutation.SetName(s)
@@ -43,13 +56,13 @@ func (tcu *TelegramChatUpdate) SetName(s string) *TelegramChatUpdate {
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
-func (tcu *TelegramChatUpdate) SetUserID(id int64) *TelegramChatUpdate {
+func (tcu *TelegramChatUpdate) SetUserID(id int) *TelegramChatUpdate {
 	tcu.mutation.SetUserID(id)
 	return tcu
 }
 
 // SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (tcu *TelegramChatUpdate) SetNillableUserID(id *int64) *TelegramChatUpdate {
+func (tcu *TelegramChatUpdate) SetNillableUserID(id *int) *TelegramChatUpdate {
 	if id != nil {
 		tcu = tcu.SetUserID(*id)
 	}
@@ -177,7 +190,7 @@ func (tcu *TelegramChatUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   telegramchat.Table,
 			Columns: telegramchat.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt64,
+				Type:   field.TypeInt,
 				Column: telegramchat.FieldID,
 			},
 		},
@@ -196,6 +209,20 @@ func (tcu *TelegramChatUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: telegramchat.FieldUpdateTime,
 		})
 	}
+	if value, ok := tcu.mutation.ChatID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: telegramchat.FieldChatID,
+		})
+	}
+	if value, ok := tcu.mutation.AddedChatID(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: telegramchat.FieldChatID,
+		})
+	}
 	if value, ok := tcu.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -212,7 +239,7 @@ func (tcu *TelegramChatUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
@@ -228,7 +255,7 @@ func (tcu *TelegramChatUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
@@ -317,6 +344,19 @@ func (tcuo *TelegramChatUpdateOne) SetUpdateTime(t time.Time) *TelegramChatUpdat
 	return tcuo
 }
 
+// SetChatID sets the "chat_id" field.
+func (tcuo *TelegramChatUpdateOne) SetChatID(i int64) *TelegramChatUpdateOne {
+	tcuo.mutation.ResetChatID()
+	tcuo.mutation.SetChatID(i)
+	return tcuo
+}
+
+// AddChatID adds i to the "chat_id" field.
+func (tcuo *TelegramChatUpdateOne) AddChatID(i int64) *TelegramChatUpdateOne {
+	tcuo.mutation.AddChatID(i)
+	return tcuo
+}
+
 // SetName sets the "name" field.
 func (tcuo *TelegramChatUpdateOne) SetName(s string) *TelegramChatUpdateOne {
 	tcuo.mutation.SetName(s)
@@ -324,13 +364,13 @@ func (tcuo *TelegramChatUpdateOne) SetName(s string) *TelegramChatUpdateOne {
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
-func (tcuo *TelegramChatUpdateOne) SetUserID(id int64) *TelegramChatUpdateOne {
+func (tcuo *TelegramChatUpdateOne) SetUserID(id int) *TelegramChatUpdateOne {
 	tcuo.mutation.SetUserID(id)
 	return tcuo
 }
 
 // SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (tcuo *TelegramChatUpdateOne) SetNillableUserID(id *int64) *TelegramChatUpdateOne {
+func (tcuo *TelegramChatUpdateOne) SetNillableUserID(id *int) *TelegramChatUpdateOne {
 	if id != nil {
 		tcuo = tcuo.SetUserID(*id)
 	}
@@ -465,7 +505,7 @@ func (tcuo *TelegramChatUpdateOne) sqlSave(ctx context.Context) (_node *Telegram
 			Table:   telegramchat.Table,
 			Columns: telegramchat.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt64,
+				Type:   field.TypeInt,
 				Column: telegramchat.FieldID,
 			},
 		},
@@ -501,6 +541,20 @@ func (tcuo *TelegramChatUpdateOne) sqlSave(ctx context.Context) (_node *Telegram
 			Column: telegramchat.FieldUpdateTime,
 		})
 	}
+	if value, ok := tcuo.mutation.ChatID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: telegramchat.FieldChatID,
+		})
+	}
+	if value, ok := tcuo.mutation.AddedChatID(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: telegramchat.FieldChatID,
+		})
+	}
 	if value, ok := tcuo.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -517,7 +571,7 @@ func (tcuo *TelegramChatUpdateOne) sqlSave(ctx context.Context) (_node *Telegram
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
@@ -533,7 +587,7 @@ func (tcuo *TelegramChatUpdateOne) sqlSave(ctx context.Context) (_node *Telegram
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},

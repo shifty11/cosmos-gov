@@ -16,11 +16,13 @@ import (
 type DiscordChannel struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int64 `json:"id,omitempty"`
+	ID int `json:"id,omitempty"`
 	// CreateTime holds the value of the "create_time" field.
 	CreateTime time.Time `json:"create_time,omitempty"`
 	// UpdateTime holds the value of the "update_time" field.
 	UpdateTime time.Time `json:"update_time,omitempty"`
+	// ChannelID holds the value of the "channel_id" field.
+	ChannelID int64 `json:"channel_id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// IsGroup holds the value of the "is_group" field.
@@ -30,7 +32,7 @@ type DiscordChannel struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the DiscordChannelQuery when eager-loading is set.
 	Edges                DiscordChannelEdges `json:"edges"`
-	discord_channel_user *int64
+	discord_channel_user *int
 }
 
 // DiscordChannelEdges holds the relations/edges for other nodes in the graph.
@@ -74,7 +76,7 @@ func (*DiscordChannel) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case discordchannel.FieldIsGroup:
 			values[i] = new(sql.NullBool)
-		case discordchannel.FieldID:
+		case discordchannel.FieldID, discordchannel.FieldChannelID:
 			values[i] = new(sql.NullInt64)
 		case discordchannel.FieldName, discordchannel.FieldRoles:
 			values[i] = new(sql.NullString)
@@ -102,7 +104,7 @@ func (dc *DiscordChannel) assignValues(columns []string, values []interface{}) e
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			dc.ID = int64(value.Int64)
+			dc.ID = int(value.Int64)
 		case discordchannel.FieldCreateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field create_time", values[i])
@@ -114,6 +116,12 @@ func (dc *DiscordChannel) assignValues(columns []string, values []interface{}) e
 				return fmt.Errorf("unexpected type %T for field update_time", values[i])
 			} else if value.Valid {
 				dc.UpdateTime = value.Time
+			}
+		case discordchannel.FieldChannelID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field channel_id", values[i])
+			} else if value.Valid {
+				dc.ChannelID = value.Int64
 			}
 		case discordchannel.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -137,8 +145,8 @@ func (dc *DiscordChannel) assignValues(columns []string, values []interface{}) e
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field discord_channel_user", value)
 			} else if value.Valid {
-				dc.discord_channel_user = new(int64)
-				*dc.discord_channel_user = int64(value.Int64)
+				dc.discord_channel_user = new(int)
+				*dc.discord_channel_user = int(value.Int64)
 			}
 		}
 	}
@@ -182,6 +190,8 @@ func (dc *DiscordChannel) String() string {
 	builder.WriteString(dc.CreateTime.Format(time.ANSIC))
 	builder.WriteString(", update_time=")
 	builder.WriteString(dc.UpdateTime.Format(time.ANSIC))
+	builder.WriteString(", channel_id=")
+	builder.WriteString(fmt.Sprintf("%v", dc.ChannelID))
 	builder.WriteString(", name=")
 	builder.WriteString(dc.Name)
 	builder.WriteString(", is_group=")

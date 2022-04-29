@@ -140,7 +140,7 @@ func (manager *ProposalManager) GetProposalsInVotingPeriod(chatOrChannelId int64
 	if userType == user.TypeTelegram {
 		props, err := manager.client.Chain.
 			Query().
-			Where(chain.HasTelegramChatsWith(telegramchat.IDEQ(chatOrChannelId))).
+			Where(chain.HasTelegramChatsWith(telegramchat.ChatIDEQ(chatOrChannelId))).
 			Order(ent.Asc(chain.FieldName)).
 			WithProposals(func(q *ent.ProposalQuery) {
 				q.Where(proposal.StatusEQ(proposal.StatusPROPOSAL_STATUS_VOTING_PERIOD))
@@ -153,7 +153,7 @@ func (manager *ProposalManager) GetProposalsInVotingPeriod(chatOrChannelId int64
 	} else {
 		props, err := manager.client.Chain.
 			Query().
-			Where(chain.HasDiscordChannelsWith(discordchannel.IDEQ(chatOrChannelId))).
+			Where(chain.HasDiscordChannelsWith(discordchannel.ChannelIDEQ(chatOrChannelId))).
 			Order(ent.Asc(chain.FieldName)).
 			WithProposals(func(q *ent.ProposalQuery) {
 				q.Where(proposal.StatusEQ(proposal.StatusPROPOSAL_STATUS_VOTING_PERIOD))

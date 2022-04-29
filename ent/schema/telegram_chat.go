@@ -22,9 +22,8 @@ func (TelegramChat) Mixin() []ent.Mixin {
 // Fields of the TelegramChat.
 func (TelegramChat) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int64("id"). // TODO: create chat_id field
-					Unique().
-					Immutable(),
+		field.Int64("chat_id").
+			Unique(),
 		field.String("name"),
 		field.Bool("is_group").
 			Immutable(),

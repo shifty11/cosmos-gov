@@ -4,6 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 	"entgo.io/ent/schema/mixin"
 )
 
@@ -21,8 +22,7 @@ func (User) Mixin() []ent.Mixin {
 // Fields of the User.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int64("id"). // TODO: create user_id field
-					Immutable(),
+		field.Int64("user_id"),
 		field.String("name").
 			Default("<not set>"), // TODO: remove Default
 		//field.Int64("chat_id"). // TODO: has to be removed
@@ -51,5 +51,7 @@ func (User) Indexes() []ent.Index {
 	return []ent.Index{
 		//index.Fields("chat_id", "type"). // TODO: has to be removed
 		//					Unique(),
+		index.Fields("user_id", "type"). // TODO: disable for migration
+							Unique(),
 	}
 }

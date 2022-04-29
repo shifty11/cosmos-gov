@@ -15,6 +15,8 @@ const (
 	FieldCreateTime = "create_time"
 	// FieldUpdateTime holds the string denoting the update_time field in the database.
 	FieldUpdateTime = "update_time"
+	// FieldChannelID holds the string denoting the channel_id field in the database.
+	FieldChannelID = "channel_id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
 	// FieldIsGroup holds the string denoting the is_group field in the database.
@@ -46,6 +48,7 @@ var Columns = []string{
 	FieldID,
 	FieldCreateTime,
 	FieldUpdateTime,
+	FieldChannelID,
 	FieldName,
 	FieldIsGroup,
 	FieldRoles,

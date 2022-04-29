@@ -34,13 +34,14 @@ var (
 	}
 	// DiscordChannelsColumns holds the columns for the "discord_channels" table.
 	DiscordChannelsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt64, Increment: true},
+		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
+		{Name: "channel_id", Type: field.TypeInt64, Unique: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "is_group", Type: field.TypeBool},
 		{Name: "roles", Type: field.TypeString, Default: ""},
-		{Name: "discord_channel_user", Type: field.TypeInt64, Nullable: true},
+		{Name: "discord_channel_user", Type: field.TypeInt, Nullable: true},
 	}
 	// DiscordChannelsTable holds the schema information for the "discord_channels" table.
 	DiscordChannelsTable = &schema.Table{
@@ -50,7 +51,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "discord_channels_users_user",
-				Columns:    []*schema.Column{DiscordChannelsColumns[6]},
+				Columns:    []*schema.Column{DiscordChannelsColumns[7]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -131,7 +132,7 @@ var (
 		{Name: "description", Type: field.TypeString},
 		{Name: "voting_start_time", Type: field.TypeTime},
 		{Name: "voting_end_time", Type: field.TypeTime},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"PROPOSAL_STATUS_REJECTED", "PROPOSAL_STATUS_FAILED", "PROPOSAL_STATUS_UNSPECIFIED", "PROPOSAL_STATUS_DEPOSIT_PERIOD", "PROPOSAL_STATUS_VOTING_PERIOD", "PROPOSAL_STATUS_PASSED"}},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"PROPOSAL_STATUS_UNSPECIFIED", "PROPOSAL_STATUS_DEPOSIT_PERIOD", "PROPOSAL_STATUS_VOTING_PERIOD", "PROPOSAL_STATUS_PASSED", "PROPOSAL_STATUS_REJECTED", "PROPOSAL_STATUS_FAILED"}},
 		{Name: "chain_proposals", Type: field.TypeInt, Nullable: true},
 	}
 	// ProposalsTable holds the schema information for the "proposals" table.
@@ -186,12 +187,13 @@ var (
 	}
 	// TelegramChatsColumns holds the columns for the "telegram_chats" table.
 	TelegramChatsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt64, Increment: true},
+		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
+		{Name: "chat_id", Type: field.TypeInt64, Unique: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "is_group", Type: field.TypeBool},
-		{Name: "telegram_chat_user", Type: field.TypeInt64, Nullable: true},
+		{Name: "telegram_chat_user", Type: field.TypeInt, Nullable: true},
 	}
 	// TelegramChatsTable holds the schema information for the "telegram_chats" table.
 	TelegramChatsTable = &schema.Table{
@@ -201,7 +203,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "telegram_chats_users_user",
-				Columns:    []*schema.Column{TelegramChatsColumns[5]},
+				Columns:    []*schema.Column{TelegramChatsColumns[6]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -216,9 +218,10 @@ var (
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt64, Increment: true},
+		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeInt64},
 		{Name: "name", Type: field.TypeString, Default: "<not set>"},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"telegram", "discord"}},
 		{Name: "login_token", Type: field.TypeString, Default: ""},
@@ -228,6 +231,13 @@ var (
 		Name:       "users",
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "user_user_id_type",
+				Unique:  true,
+				Columns: []*schema.Column{UsersColumns[3], UsersColumns[5]},
+			},
+		},
 	}
 	// WalletsColumns holds the columns for the "wallets" table.
 	WalletsColumns = []*schema.Column{
@@ -265,7 +275,7 @@ var (
 	}
 	// DiscordChannelChainsColumns holds the columns for the "discord_channel_chains" table.
 	DiscordChannelChainsColumns = []*schema.Column{
-		{Name: "discord_channel_id", Type: field.TypeInt64},
+		{Name: "discord_channel_id", Type: field.TypeInt},
 		{Name: "chain_id", Type: field.TypeInt},
 	}
 	// DiscordChannelChainsTable holds the schema information for the "discord_channel_chains" table.
@@ -290,7 +300,7 @@ var (
 	}
 	// TelegramChatChainsColumns holds the columns for the "telegram_chat_chains" table.
 	TelegramChatChainsColumns = []*schema.Column{
-		{Name: "telegram_chat_id", Type: field.TypeInt64},
+		{Name: "telegram_chat_id", Type: field.TypeInt},
 		{Name: "chain_id", Type: field.TypeInt},
 	}
 	// TelegramChatChainsTable holds the schema information for the "telegram_chat_chains" table.
@@ -315,7 +325,7 @@ var (
 	}
 	// UserWalletsColumns holds the columns for the "user_wallets" table.
 	UserWalletsColumns = []*schema.Column{
-		{Name: "user_id", Type: field.TypeInt64},
+		{Name: "user_id", Type: field.TypeInt},
 		{Name: "wallet_id", Type: field.TypeInt},
 	}
 	// UserWalletsTable holds the schema information for the "user_wallets" table.

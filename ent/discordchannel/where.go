@@ -11,28 +11,28 @@ import (
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int64) predicate.DiscordChannel {
+func ID(id int) predicate.DiscordChannel {
 	return predicate.DiscordChannel(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int64) predicate.DiscordChannel {
+func IDEQ(id int) predicate.DiscordChannel {
 	return predicate.DiscordChannel(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int64) predicate.DiscordChannel {
+func IDNEQ(id int) predicate.DiscordChannel {
 	return predicate.DiscordChannel(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldID), id))
 	})
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int64) predicate.DiscordChannel {
+func IDIn(ids ...int) predicate.DiscordChannel {
 	return predicate.DiscordChannel(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -49,7 +49,7 @@ func IDIn(ids ...int64) predicate.DiscordChannel {
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int64) predicate.DiscordChannel {
+func IDNotIn(ids ...int) predicate.DiscordChannel {
 	return predicate.DiscordChannel(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -66,28 +66,28 @@ func IDNotIn(ids ...int64) predicate.DiscordChannel {
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int64) predicate.DiscordChannel {
+func IDGT(id int) predicate.DiscordChannel {
 	return predicate.DiscordChannel(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldID), id))
 	})
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int64) predicate.DiscordChannel {
+func IDGTE(id int) predicate.DiscordChannel {
 	return predicate.DiscordChannel(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldID), id))
 	})
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int64) predicate.DiscordChannel {
+func IDLT(id int) predicate.DiscordChannel {
 	return predicate.DiscordChannel(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldID), id))
 	})
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int64) predicate.DiscordChannel {
+func IDLTE(id int) predicate.DiscordChannel {
 	return predicate.DiscordChannel(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldID), id))
 	})
@@ -104,6 +104,13 @@ func CreateTime(v time.Time) predicate.DiscordChannel {
 func UpdateTime(v time.Time) predicate.DiscordChannel {
 	return predicate.DiscordChannel(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldUpdateTime), v))
+	})
+}
+
+// ChannelID applies equality check predicate on the "channel_id" field. It's identical to ChannelIDEQ.
+func ChannelID(v int64) predicate.DiscordChannel {
+	return predicate.DiscordChannel(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldChannelID), v))
 	})
 }
 
@@ -277,6 +284,82 @@ func UpdateTimeLT(v time.Time) predicate.DiscordChannel {
 func UpdateTimeLTE(v time.Time) predicate.DiscordChannel {
 	return predicate.DiscordChannel(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldUpdateTime), v))
+	})
+}
+
+// ChannelIDEQ applies the EQ predicate on the "channel_id" field.
+func ChannelIDEQ(v int64) predicate.DiscordChannel {
+	return predicate.DiscordChannel(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldChannelID), v))
+	})
+}
+
+// ChannelIDNEQ applies the NEQ predicate on the "channel_id" field.
+func ChannelIDNEQ(v int64) predicate.DiscordChannel {
+	return predicate.DiscordChannel(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldChannelID), v))
+	})
+}
+
+// ChannelIDIn applies the In predicate on the "channel_id" field.
+func ChannelIDIn(vs ...int64) predicate.DiscordChannel {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.DiscordChannel(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldChannelID), v...))
+	})
+}
+
+// ChannelIDNotIn applies the NotIn predicate on the "channel_id" field.
+func ChannelIDNotIn(vs ...int64) predicate.DiscordChannel {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.DiscordChannel(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldChannelID), v...))
+	})
+}
+
+// ChannelIDGT applies the GT predicate on the "channel_id" field.
+func ChannelIDGT(v int64) predicate.DiscordChannel {
+	return predicate.DiscordChannel(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldChannelID), v))
+	})
+}
+
+// ChannelIDGTE applies the GTE predicate on the "channel_id" field.
+func ChannelIDGTE(v int64) predicate.DiscordChannel {
+	return predicate.DiscordChannel(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldChannelID), v))
+	})
+}
+
+// ChannelIDLT applies the LT predicate on the "channel_id" field.
+func ChannelIDLT(v int64) predicate.DiscordChannel {
+	return predicate.DiscordChannel(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldChannelID), v))
+	})
+}
+
+// ChannelIDLTE applies the LTE predicate on the "channel_id" field.
+func ChannelIDLTE(v int64) predicate.DiscordChannel {
+	return predicate.DiscordChannel(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldChannelID), v))
 	})
 }
 

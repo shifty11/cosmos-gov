@@ -58,14 +58,14 @@ func (wc *WalletCreate) SetAddress(s string) *WalletCreate {
 }
 
 // AddUserIDs adds the "users" edge to the User entity by IDs.
-func (wc *WalletCreate) AddUserIDs(ids ...int64) *WalletCreate {
+func (wc *WalletCreate) AddUserIDs(ids ...int) *WalletCreate {
 	wc.mutation.AddUserIDs(ids...)
 	return wc
 }
 
 // AddUsers adds the "users" edges to the User entity.
 func (wc *WalletCreate) AddUsers(u ...*User) *WalletCreate {
-	ids := make([]int64, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -258,7 +258,7 @@ func (wc *WalletCreate) createSpec() (*Wallet, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
