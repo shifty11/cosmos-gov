@@ -27,7 +27,20 @@ func (manager *WalletManager) ByAddress(address string) (*ent.Wallet, error) {
 }
 
 func (manager *WalletManager) ByUser(entUser *ent.User) ([]*ent.Wallet, error) {
-	return entUser.QueryWallets().All(manager.ctx)
+	return entUser.
+		QueryWallets().
+		WithGrants().
+		WithChain().
+		All(manager.ctx)
+}
+
+func (manager *WalletManager) ByUserAndChain(entUser *ent.User, entChain *ent.Chain) ([]*ent.Wallet, error) {
+	return entUser.
+		QueryWallets().
+		WithGrants().
+		WithChain().
+		Where(wallet.HasChainWith(chain.ChainID(entChain.ChainID))).
+		All(manager.ctx)
 }
 
 type GrantData struct {
@@ -117,12 +130,4 @@ func (manager *WalletManager) DeleteGrant(chainName string, granter string, gran
 				wallet.HasChainWith(chain.NameEQ(chainName)),
 			))).
 		Exec(manager.ctx)
-}
-
-func (manager *WalletManager) OfUser(entUser *ent.User) ([]*ent.Wallet, error) {
-	return entUser.
-		QueryWallets().
-		WithGrants().
-		WithChain().
-		All(manager.ctx)
 }

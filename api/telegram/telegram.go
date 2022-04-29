@@ -121,6 +121,8 @@ func handleCallbackQuery(update *tgbotapi.Update) {
 		sendHelp(update)
 	case CallbackCmdShowSupport:
 		sendSupport(update)
+	case CallbackCmdVote:
+		performVote(update, callbackData.Data)
 	default:
 		if isBotAdmin(update) { // Check for admin callbacks
 			switch callbackData.Command {

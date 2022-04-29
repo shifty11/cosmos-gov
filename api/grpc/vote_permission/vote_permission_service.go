@@ -71,7 +71,7 @@ func (server *VotePermissionServer) GetVotePermissions(ctx context.Context, _ *e
 		return nil, status.Errorf(codes.Internal, "invalid user")
 	}
 
-	wallets, err := server.walletManager.OfUser(entUser)
+	wallets, err := server.walletManager.ByUser(entUser)
 	if err != nil {
 		log.Sugar.Errorf("Error while querying grants of user %v (%v): %v", entUser.Name, entUser.ID, err)
 		return nil, status.Errorf(codes.Internal, "unknown error")

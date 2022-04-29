@@ -2,7 +2,9 @@ package telegram
 
 import (
 	"fmt"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/shifty11/cosmos-gov/authz"
 	"github.com/shifty11/cosmos-gov/log"
 	"golang.org/x/exp/slices"
 	"os"
@@ -50,6 +52,7 @@ const (
 
 	CallbackCmdStats        CallbackCommand = "STATS"         // admin command
 	CallbackCmdEnableChains CallbackCommand = "ENABLE_CHAINS" // admin command
+	CallbackCmdVote         CallbackCommand = "VOTE"
 	//CallbackCmdBroadcast    CallbackCommand = "BROADCAST"     // admin command
 )
 
@@ -66,8 +69,8 @@ func ToCallbackData(str string) CallbackData {
 	split := strings.Split(str, ":")
 	if len(split) == 1 {
 		return CallbackData{Command: CallbackCommand(split[0])}
-	} else if len(split) == 2 {
-		return CallbackData{Command: CallbackCommand(split[0]), Data: split[1]}
+	} else if len(split) >= 2 {
+		return CallbackData{Command: CallbackCommand(split[0]), Data: strings.Join(split[1:], ":")}
 	}
 	log.Sugar.Errorf("Can not convert string to CallbackData: '%v'", str)
 	return CallbackData{}
@@ -82,7 +85,7 @@ func NewButton(text string, callbackData CallbackData) Button {
 	return Button{Text: text, CallbackData: callbackData}
 }
 
-func createKeyboard(buttons [][]Button) tgbotapi.InlineKeyboardMarkup {
+func createKeyboard(buttons [][]Button) *tgbotapi.InlineKeyboardMarkup {
 	var keyboard [][]tgbotapi.InlineKeyboardButton
 	for _, row := range buttons {
 		var keyboardRow []tgbotapi.InlineKeyboardButton
@@ -93,7 +96,7 @@ func createKeyboard(buttons [][]Button) tgbotapi.InlineKeyboardMarkup {
 		}
 		keyboard = append(keyboard, keyboardRow)
 	}
-	return tgbotapi.InlineKeyboardMarkup{InlineKeyboard: keyboard}
+	return &tgbotapi.InlineKeyboardMarkup{InlineKeyboard: keyboard}
 }
 
 func hasChatId(update *tgbotapi.Update) bool {
@@ -283,4 +286,24 @@ func getBotAdminMenuButtonRow(config BotAdminMenuButtonConfig) []Button {
 	//	buttonRow = append(buttonRow, NewButton("🔊 Broadcast", CallbackData{Command: CallbackCmdBroadcast}))
 	//}
 	return buttonRow
+}
+
+func getVoteButtons(vd *authz.VoteData) [][]Button {
+	var buttons [][]Button
+	var buttonRow []Button
+	var options = []govtypes.VoteOption{govtypes.OptionYes, govtypes.OptionNo, govtypes.OptionAbstain, govtypes.OptionNoWithVeto}
+	for i, option := range options {
+		s := authz.NotVoted
+		if option == vd.Vote {
+			s = vd.State
+		}
+		voteData := authz.ToVoteData(vd.ChainName, vd.ProposalId, option, s)
+		callbackData := CallbackData{Command: CallbackCmdVote, Data: voteData.ToString()}
+		buttonRow = append(buttonRow, NewButton(voteData.ButtonText(), callbackData))
+		if (i+1)%2 == 0 {
+			buttons = append(buttons, buttonRow)
+			buttonRow = []Button{}
+		}
+	}
+	return buttons
 }

@@ -165,3 +165,14 @@ func (manager *ProposalManager) GetProposalsInVotingPeriod(chatOrChannelId int64
 		return props
 	}
 }
+
+func (manager *ProposalManager) Get(chainName string, proposalId uint64) (*ent.Proposal, error) {
+	return manager.client.Proposal.
+		Query().
+		Where(proposal.And(
+			proposal.HasChainWith(chain.NameEQ(chainName)),
+			proposal.ProposalIDEQ(proposalId),
+		)).
+		WithChain().
+		First(manager.ctx)
+}

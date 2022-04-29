@@ -4,6 +4,7 @@ import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/shifty11/cosmos-gov/api"
+	"github.com/shifty11/cosmos-gov/authz"
 	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/log"
 )
@@ -74,7 +75,7 @@ func sendSubscriptions(update *tgbotapi.Update) {
 		}
 	} else {
 		msg := tgbotapi.NewEditMessageText(chatId, update.CallbackQuery.Message.MessageID, messages.SubscriptionsMsg)
-		msg.ReplyMarkup = &replyMarkup
+		msg.ReplyMarkup = replyMarkup
 		msg.ParseMode = "markdown"
 		msg.DisableWebPagePreview = true
 		answerCallbackQuery(update)
@@ -121,15 +122,15 @@ func sendCurrentProposals(update *tgbotapi.Update) {
 	if update.CallbackQuery == nil {
 		msg := tgbotapi.NewMessage(chatId, text)
 		msg.ReplyMarkup = replyMarkup
-		msg.ParseMode = "markdown"
+		msg.ParseMode = "html"
 		err := sendMessage(msg)
 		if err != nil {
 			log.Sugar.Errorf("Error while sendCurrentProposals for user #%v: %v", chatId, err)
 		}
 	} else {
 		msg := tgbotapi.NewEditMessageText(chatId, update.CallbackQuery.Message.MessageID, text)
-		msg.ReplyMarkup = &replyMarkup
-		msg.ParseMode = "markdown"
+		msg.ReplyMarkup = replyMarkup
+		msg.ParseMode = "html"
 		answerCallbackQuery(update)
 		err := sendMessage(msg)
 		if err != nil {
@@ -165,7 +166,7 @@ func sendHelp(update *tgbotapi.Update) {
 		}
 	} else {
 		msg := tgbotapi.NewEditMessageText(chatId, update.CallbackQuery.Message.MessageID, text)
-		msg.ReplyMarkup = &replyMarkup
+		msg.ReplyMarkup = replyMarkup
 		msg.ParseMode = "html"
 		answerCallbackQuery(update)
 		err := sendMessage(msg)
@@ -200,7 +201,7 @@ func sendSupport(update *tgbotapi.Update) {
 		}
 	} else {
 		msg := tgbotapi.NewEditMessageText(chatId, update.CallbackQuery.Message.MessageID, text)
-		msg.ReplyMarkup = &replyMarkup
+		msg.ReplyMarkup = replyMarkup
 		msg.ParseMode = "markdown"
 		msg.DisableWebPagePreview = true
 		answerCallbackQuery(update)
@@ -222,5 +223,26 @@ func sendError(update *tgbotapi.Update) {
 	err := sendMessage(msg)
 	if err != nil {
 		log.Sugar.Errorf("Error while sendError for user #%v: %v", chatId, err)
+	}
+}
+
+func editSentProposal(update *tgbotapi.Update, voteData *authz.VoteData) {
+	chatId := getChatIdX(update)
+	prop, err := mHack.ProposalManager.Get(voteData.ChainName, voteData.ProposalId)
+
+	text := fmt.Sprintf("🎉  <b>%v - Proposal %v\n\n%v</b>\n\n<i>%v</i>", prop.Edges.Chain.DisplayName, prop.ProposalID, prop.Title, prop.Description)
+	if len(text) > 4096 {
+		text = text[:4088] + "</i> ..."
+	}
+	msg := tgbotapi.NewEditMessageText(chatId, update.CallbackQuery.Message.MessageID, text)
+	msg.ParseMode = "html"
+	msg.DisableWebPagePreview = true
+	if isBotAdmin(update) {
+		msg.ReplyMarkup = createKeyboard(getVoteButtons(voteData))
+	}
+
+	err = sendMessage(msg)
+	if err != nil {
+		log.Sugar.Errorf("Error while sending message to telegram chat #%v: %v", chatId, err)
 	}
 }

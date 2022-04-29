@@ -23,6 +23,25 @@ func NewChainManager(client *ent.Client, ctx context.Context) *ChainManager {
 	return &ChainManager{client: client, ctx: ctx}
 }
 
+//type ChainQueryOptions struct {
+//	WithWallets bool
+//	WithGrants  bool
+//}
+//
+//func (manager *ChainManager) ByName(name string, options *ChainQueryOptions) (*ent.Chain, error) {
+//	q := manager.client.Chain.
+//		Query().
+//		Where(chain.NameEQ(name))
+//	if options != nil && options.WithWallets {
+//		q.WithWallets(func(q *ent.WalletQuery) {
+//			if options.WithGrants {
+//				q.WithGrants()
+//			}
+//		})
+//	}
+//	return q.Only(manager.ctx)
+//}
+
 func (manager *ChainManager) ByName(name string) (*ent.Chain, error) {
 	return manager.client.Chain.
 		Query().

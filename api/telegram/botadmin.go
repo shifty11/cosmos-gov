@@ -85,7 +85,7 @@ func sendUserStatistics(update *tgbotapi.Update) {
 		}
 	} else {
 		msg := tgbotapi.NewEditMessageText(chatId, update.CallbackQuery.Message.MessageID, text)
-		msg.ReplyMarkup = &replyMarkup
+		msg.ReplyMarkup = replyMarkup
 		msg.ParseMode = "markdown"
 		answerCallbackQuery(update)
 		err := sendMessage(msg)
@@ -174,7 +174,7 @@ func sendChains(update *tgbotapi.Update) {
 		}
 	} else {
 		msg := tgbotapi.NewEditMessageText(chatId, update.CallbackQuery.Message.MessageID, newChainsMsg)
-		msg.ReplyMarkup = &replyMarkup
+		msg.ReplyMarkup = replyMarkup
 		answerCallbackQuery(update)
 		err := sendMessage(msg)
 		if err != nil {

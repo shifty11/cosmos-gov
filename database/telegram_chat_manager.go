@@ -5,6 +5,8 @@ import (
 	"github.com/shifty11/cosmos-gov/ent"
 	"github.com/shifty11/cosmos-gov/ent/chain"
 	"github.com/shifty11/cosmos-gov/ent/telegramchat"
+	"github.com/shifty11/cosmos-gov/ent/user"
+	"github.com/shifty11/cosmos-gov/ent/wallet"
 	"github.com/shifty11/cosmos-gov/log"
 )
 
@@ -81,6 +83,13 @@ func setUserIfNotPresent(tgChat *ent.TelegramChat, manager *TelegramChatManager,
 	return tgChat, oldErr
 }
 
+func (manager *TelegramChatManager) ByChatId(tgChatId int64) *ent.TelegramChat {
+	return manager.client.TelegramChat.
+		Query().
+		Where(telegramchat.ChatIDEQ(tgChatId)).
+		OnlyX(manager.ctx)
+}
+
 func (manager *TelegramChatManager) GetOrCreateTelegramChat(entUser *ent.User, tgChatId int64, name string, isGroup bool) *ent.TelegramChat {
 	tgChat, err := entUser.
 		QueryTelegramChats().
@@ -126,15 +135,40 @@ func (manager *TelegramChatManager) DeleteMultiple(chatIds []int64) {
 	}
 }
 
-func (manager *TelegramChatManager) GetChatIds(entChain *ent.Chain) []int {
-	chatIds, err := entChain.
+type TgChatQueryResult struct {
+	ChatId int64  `json:"chat_id,omitempty"`
+	Name   string `json:"name,omitempty"`
+}
+
+func (manager *TelegramChatManager) GetChatIds(entChain *ent.Chain) []TgChatQueryResult {
+	var v []TgChatQueryResult
+	err := entChain.
 		QueryTelegramChats().
-		Select(telegramchat.FieldID).
-		Ints(manager.ctx)
+		Select(telegramchat.FieldChatID, telegramchat.FieldName).
+		Scan(manager.ctx, &v)
 	if err != nil {
 		log.Sugar.Panicf("Error while querying Telegram chatIds for chain %v: %v", entChain.Name, err)
 	}
-	return chatIds
+	return v
+}
+
+func (manager *TelegramChatManager) GetChatIdsWithGrants(entChain *ent.Chain) []TgChatQueryResult {
+	var v []TgChatQueryResult
+	err := entChain.
+		QueryTelegramChats().
+		Where(
+			telegramchat.HasUserWith(
+				user.HasWalletsWith(
+					wallet.And(
+						wallet.HasChainWith(chain.IDEQ(entChain.ID)),
+						wallet.HasGrants(),
+					)))).
+		Select(telegramchat.FieldChatID, telegramchat.FieldName).
+		Scan(manager.ctx, &v)
+	if err != nil {
+		log.Sugar.Panicf("Error while querying Telegram chatIds for chain %v: %v", entChain.Name, err)
+	}
+	return v
 }
 
 func (manager *TelegramChatManager) GetAllChatIds() []int {
