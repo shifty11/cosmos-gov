@@ -112,7 +112,12 @@ func handleCallbackQuery(update *tgbotapi.Update) {
 	callbackData := ToCallbackData(update.CallbackQuery.Data)
 	switch callbackData.Command {
 	case CallbackCmdShowSubscriptions:
-		database.PerformUpdateSubscription(getChatIdX(update), user.TypeTelegram, callbackData.Data)
+		userId := getUserIdX(update)
+		userName := getUserName(update)
+		chatName := getChatName(update)
+		isGroup := isGroupX(update)
+
+		database.PerformUpdateSubscription(getChatIdX(update), user.TypeTelegram, callbackData.Data, userId, userName, chatName, isGroup)
 		sendSubscriptions(update)
 	case CallbackCmdShowProposals:
 		sendCurrentProposals(update)

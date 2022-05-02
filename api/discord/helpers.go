@@ -11,9 +11,47 @@ import (
 func getChannelId(i *discordgo.InteractionCreate) int64 {
 	channelId, err := strconv.ParseInt(i.ChannelID, 10, 64)
 	if err != nil {
-		log.Sugar.Panicf("Error while converting user ID to int: %v", err)
+		log.Sugar.Panicf("Error while converting channel ID to int: %v", err)
 	}
 	return channelId
+}
+
+func getUserIdX(i *discordgo.InteractionCreate) int64 {
+	if isGroup(i) {
+		userId, err := strconv.ParseInt(i.Member.User.ID, 10, 64)
+		if err != nil {
+			log.Sugar.Panicf("Error while converting user ID to int: %v", err)
+		}
+		return userId
+	} else {
+		userId, err := strconv.ParseInt(i.User.ID, 10, 64)
+		if err != nil {
+			log.Sugar.Panicf("Error while converting user ID to int: %v", err)
+		}
+		return userId
+	}
+}
+
+func getUserName(i *discordgo.InteractionCreate) string {
+	if isGroup(i) {
+		return i.Member.User.Username
+	}
+	return i.User.Username
+}
+
+func getChatName(i *discordgo.InteractionCreate) string {
+	if isGroup(i) {
+		channel, err := s.Channel(i.ChannelID)
+		if err != nil {
+			log.Sugar.Errorf("Error while getting channel: %v", err)
+		}
+		return channel.Name
+	}
+	return i.User.Username
+}
+
+func isGroup(i *discordgo.InteractionCreate) bool {
+	return i.Member != nil
 }
 
 type Action struct {

@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func getOrCreateUser(chatId int64, userType user.Type) *ent.User {
+func getOrCreateUser(chatId int64, userType user.Type, userId int64, userName string, chatName string, isGroup bool) *ent.User {
 	client, ctx := connect()
 	var userDto *ent.User
 	var err error
@@ -20,14 +20,30 @@ func getOrCreateUser(chatId int64, userType user.Type) *ent.User {
 				user.ChatIDEQ(chatId), user.TypeEQ(userType),
 			)).
 		Only(ctx)
+	if err == nil && userDto.UserID == 0 {
+		userDto, err = userDto.
+			Update().
+			SetUserID(userId).
+			SetUserName(userName).
+			SetChatName(chatName).
+			SetIsGroup(isGroup).
+			Save(ctx)
+		if err != nil {
+			log.Sugar.Panicf("Error while updating user: %v", err)
+		}
+	}
 	if err != nil {
 		userDto, err = client.User.
 			Create().
 			SetChatID(chatId).
 			SetType(userType).
+			SetUserID(userId).
+			SetUserName(userName).
+			SetChatName(chatName).
+			SetIsGroup(isGroup).
 			Save(ctx)
 		if err != nil {
-			log.Sugar.Panic("Error while creating user: %v", err)
+			log.Sugar.Panicf("Error while creating user: %v", err)
 		}
 	}
 	return userDto

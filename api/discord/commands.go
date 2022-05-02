@@ -90,7 +90,12 @@ var (
 
 			channelId := getChannelId(i)
 
-			chains := chunks(database.GetChainsForUser(channelId, user.TypeDiscord), 25)
+			userId := getUserIdX(i)
+			userName := getUserName(i)
+			chatName := getChatName(i)
+			isGroup := isGroup(i)
+
+			chains := chunks(database.GetChainsForUser(channelId, user.TypeDiscord, userId, userName, chatName, isGroup), 25)
 			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
@@ -163,10 +168,15 @@ var (
 				return
 			}
 
-			userId := getChannelId(i)
+			channelId := getChannelId(i)
 
-			database.PerformUpdateSubscription(userId, user.TypeDiscord, action)
-			allChains := chunks(database.GetChainsForUser(userId, user.TypeDiscord), 25)
+			userId := getUserIdX(i)
+			userName := getUserName(i)
+			chatName := getChatName(i)
+			isGroup := isGroup(i)
+
+			database.PerformUpdateSubscription(channelId, user.TypeDiscord, action, userId, userName, chatName, isGroup)
+			allChains := chunks(database.GetChainsForUser(channelId, user.TypeDiscord, userId, userName, chatName, isGroup), 25)
 			chains := getSpecificChunk(&allChains, action)
 
 			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{

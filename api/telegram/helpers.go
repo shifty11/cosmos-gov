@@ -120,15 +120,52 @@ func getChatIdX(update *tgbotapi.Update) int64 {
 	return 0
 }
 
-func getUserIdX(update *tgbotapi.Update) int {
+func getChatName(update *tgbotapi.Update) string {
 	if update.CallbackQuery != nil {
-		return update.CallbackQuery.From.ID
+		if isGroupX(update) {
+			return update.CallbackQuery.Message.Chat.Title
+		}
+		return update.CallbackQuery.Message.Chat.UserName
 	}
 	if update.Message != nil {
-		return update.Message.From.ID
+		if isGroupX(update) {
+			return update.Message.Chat.Title
+		}
+		return update.Message.Chat.UserName
+	}
+	return ""
+}
+
+func isGroupX(update *tgbotapi.Update) bool {
+	if update.CallbackQuery != nil {
+		return !update.CallbackQuery.Message.Chat.IsPrivate()
+	}
+	if update.Message != nil {
+		return !update.Message.Chat.IsPrivate()
+	}
+	log.Sugar.Panic("isGroupX: unreachable code reached!!!")
+	return false
+}
+
+func getUserIdX(update *tgbotapi.Update) int64 {
+	if update.CallbackQuery != nil {
+		return int64(update.CallbackQuery.From.ID)
+	}
+	if update.Message != nil {
+		return int64(update.Message.From.ID)
 	}
 	log.Sugar.Panic("getUserIdX: unreachable code reached!!!")
 	return 0
+}
+
+func getUserName(update *tgbotapi.Update) string {
+	if update.CallbackQuery != nil {
+		return update.CallbackQuery.From.UserName
+	}
+	if update.Message != nil {
+		return update.Message.From.UserName
+	}
+	return "<not found>"
 }
 
 func sendMessageX(message tgbotapi.Chattable) {
@@ -189,7 +226,7 @@ func isUpdateFromCreatorOrAdministrator(update *tgbotapi.Update) bool {
 	memberConfig := tgbotapi.ChatConfigWithUser{
 		ChatID:             chatId,
 		SuperGroupUsername: "",
-		UserID:             userId,
+		UserID:             int(userId),
 	}
 	member, err := api.GetChatMember(memberConfig)
 	if err != nil {

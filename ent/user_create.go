@@ -61,6 +61,62 @@ func (uc *UserCreate) SetType(u user.Type) *UserCreate {
 	return uc
 }
 
+// SetUserID sets the "user_id" field.
+func (uc *UserCreate) SetUserID(i int64) *UserCreate {
+	uc.mutation.SetUserID(i)
+	return uc
+}
+
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (uc *UserCreate) SetNillableUserID(i *int64) *UserCreate {
+	if i != nil {
+		uc.SetUserID(*i)
+	}
+	return uc
+}
+
+// SetUserName sets the "user_name" field.
+func (uc *UserCreate) SetUserName(s string) *UserCreate {
+	uc.mutation.SetUserName(s)
+	return uc
+}
+
+// SetNillableUserName sets the "user_name" field if the given value is not nil.
+func (uc *UserCreate) SetNillableUserName(s *string) *UserCreate {
+	if s != nil {
+		uc.SetUserName(*s)
+	}
+	return uc
+}
+
+// SetChatName sets the "chat_name" field.
+func (uc *UserCreate) SetChatName(s string) *UserCreate {
+	uc.mutation.SetChatName(s)
+	return uc
+}
+
+// SetNillableChatName sets the "chat_name" field if the given value is not nil.
+func (uc *UserCreate) SetNillableChatName(s *string) *UserCreate {
+	if s != nil {
+		uc.SetChatName(*s)
+	}
+	return uc
+}
+
+// SetIsGroup sets the "is_group" field.
+func (uc *UserCreate) SetIsGroup(b bool) *UserCreate {
+	uc.mutation.SetIsGroup(b)
+	return uc
+}
+
+// SetNillableIsGroup sets the "is_group" field if the given value is not nil.
+func (uc *UserCreate) SetNillableIsGroup(b *bool) *UserCreate {
+	if b != nil {
+		uc.SetIsGroup(*b)
+	}
+	return uc
+}
+
 // AddChainIDs adds the "chains" edge to the Chain entity by IDs.
 func (uc *UserCreate) AddChainIDs(ids ...int) *UserCreate {
 	uc.mutation.AddChainIDs(ids...)
@@ -155,6 +211,22 @@ func (uc *UserCreate) defaults() {
 		v := user.DefaultUpdatedAt()
 		uc.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := uc.mutation.UserID(); !ok {
+		v := user.DefaultUserID
+		uc.mutation.SetUserID(v)
+	}
+	if _, ok := uc.mutation.UserName(); !ok {
+		v := user.DefaultUserName
+		uc.mutation.SetUserName(v)
+	}
+	if _, ok := uc.mutation.ChatName(); !ok {
+		v := user.DefaultChatName
+		uc.mutation.SetChatName(v)
+	}
+	if _, ok := uc.mutation.IsGroup(); !ok {
+		v := user.DefaultIsGroup
+		uc.mutation.SetIsGroup(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -175,6 +247,18 @@ func (uc *UserCreate) check() error {
 		if err := user.TypeValidator(v); err != nil {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "User.type": %w`, err)}
 		}
+	}
+	if _, ok := uc.mutation.UserID(); !ok {
+		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "User.user_id"`)}
+	}
+	if _, ok := uc.mutation.UserName(); !ok {
+		return &ValidationError{Name: "user_name", err: errors.New(`ent: missing required field "User.user_name"`)}
+	}
+	if _, ok := uc.mutation.ChatName(); !ok {
+		return &ValidationError{Name: "chat_name", err: errors.New(`ent: missing required field "User.chat_name"`)}
+	}
+	if _, ok := uc.mutation.IsGroup(); !ok {
+		return &ValidationError{Name: "is_group", err: errors.New(`ent: missing required field "User.is_group"`)}
 	}
 	return nil
 }
@@ -234,6 +318,38 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Column: user.FieldType,
 		})
 		_node.Type = value
+	}
+	if value, ok := uc.mutation.UserID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: user.FieldUserID,
+		})
+		_node.UserID = value
+	}
+	if value, ok := uc.mutation.UserName(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldUserName,
+		})
+		_node.UserName = value
+	}
+	if value, ok := uc.mutation.ChatName(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldChatName,
+		})
+		_node.ChatName = value
+	}
+	if value, ok := uc.mutation.IsGroup(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: user.FieldIsGroup,
+		})
+		_node.IsGroup = value
 	}
 	if nodes := uc.mutation.ChainsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

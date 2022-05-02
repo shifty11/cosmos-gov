@@ -20,6 +20,14 @@ const (
 	FieldChatID = "chat_id"
 	// FieldType holds the string denoting the type field in the database.
 	FieldType = "type"
+	// FieldUserID holds the string denoting the user_id field in the database.
+	FieldUserID = "user_id"
+	// FieldUserName holds the string denoting the user_name field in the database.
+	FieldUserName = "user_name"
+	// FieldChatName holds the string denoting the chat_name field in the database.
+	FieldChatName = "chat_name"
+	// FieldIsGroup holds the string denoting the is_group field in the database.
+	FieldIsGroup = "is_group"
 	// EdgeChains holds the string denoting the chains edge name in mutations.
 	EdgeChains = "chains"
 	// Table holds the table name of the user in the database.
@@ -38,6 +46,10 @@ var Columns = []string{
 	FieldUpdatedAt,
 	FieldChatID,
 	FieldType,
+	FieldUserID,
+	FieldUserName,
+	FieldChatName,
+	FieldIsGroup,
 }
 
 var (
@@ -63,6 +75,14 @@ var (
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
+	// DefaultUserID holds the default value on creation for the "user_id" field.
+	DefaultUserID int64
+	// DefaultUserName holds the default value on creation for the "user_name" field.
+	DefaultUserName string
+	// DefaultChatName holds the default value on creation for the "chat_name" field.
+	DefaultChatName string
+	// DefaultIsGroup holds the default value on creation for the "is_group" field.
+	DefaultIsGroup bool
 )
 
 // Type defines the type for the "type" enum field.

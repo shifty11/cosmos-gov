@@ -6,12 +6,12 @@ import (
 )
 
 // PerformUpdateSubscription toggles the subscription for a chain
-func PerformUpdateSubscription(userId int64, userType user.Type, chainName string) {
+func PerformUpdateSubscription(chatId int64, userType user.Type, chainName string, userId int64, userName string, chatName string, isGroup bool) {
 	if chainName == "" {
 		return
 	}
 	log.Sugar.Debugf("Toggle subscription %v for %v #%v", chainName, userType, userId)
-	err := AddOrRemoveChainForUser(userId, userType, chainName)
+	err := AddOrRemoveChainForUser(chatId, userType, chainName, userId, userName, chatName, isGroup)
 	if err != nil {
 		log.Sugar.Errorf("Error while toggle subscription %v for %v %v", chainName, userType, userId)
 	}

@@ -121,6 +121,10 @@ var (
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "chat_id", Type: field.TypeInt64},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"telegram", "discord"}},
+		{Name: "user_id", Type: field.TypeInt64, Default: 0},
+		{Name: "user_name", Type: field.TypeString, Default: "<not set>"},
+		{Name: "chat_name", Type: field.TypeString, Default: "<not set>"},
+		{Name: "is_group", Type: field.TypeBool, Default: false},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{

@@ -81,4 +81,20 @@ func init() {
 	user.DefaultUpdatedAt = userDescUpdatedAt.Default.(func() time.Time)
 	// user.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	user.UpdateDefaultUpdatedAt = userDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// userDescUserID is the schema descriptor for user_id field.
+	userDescUserID := userFields[4].Descriptor()
+	// user.DefaultUserID holds the default value on creation for the user_id field.
+	user.DefaultUserID = userDescUserID.Default.(int64)
+	// userDescUserName is the schema descriptor for user_name field.
+	userDescUserName := userFields[5].Descriptor()
+	// user.DefaultUserName holds the default value on creation for the user_name field.
+	user.DefaultUserName = userDescUserName.Default.(string)
+	// userDescChatName is the schema descriptor for chat_name field.
+	userDescChatName := userFields[6].Descriptor()
+	// user.DefaultChatName holds the default value on creation for the chat_name field.
+	user.DefaultChatName = userDescChatName.Default.(string)
+	// userDescIsGroup is the schema descriptor for is_group field.
+	userDescIsGroup := userFields[7].Descriptor()
+	// user.DefaultIsGroup holds the default value on creation for the is_group field.
+	user.DefaultIsGroup = userDescIsGroup.Default.(bool)
 }

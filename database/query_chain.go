@@ -20,9 +20,9 @@ func getChainByName(name string) (*ent.Chain, error) {
 		Only(ctx)
 }
 
-func AddOrRemoveChainForUser(chatId int64, userType user.Type, chainName string) error {
+func AddOrRemoveChainForUser(chatId int64, userType user.Type, chainName string, userId int64, userName string, chatName string, isGroup bool) error {
 	_, ctx := connect()
-	var userDto = getOrCreateUser(chatId, userType)
+	var userDto = getOrCreateUser(chatId, userType, userId, userName, chatName, isGroup)
 	chainDto, err := getChainByName(chainName)
 	if err != nil {
 		return err
@@ -54,9 +54,9 @@ func AddOrRemoveChainForUser(chatId int64, userType user.Type, chainName string)
 	return nil
 }
 
-func GetChainsForUser(chatId int64, userType user.Type) []common.Chain {
+func GetChainsForUser(chatId int64, userType user.Type, userId int64, userName string, chatName string, isGroup bool) []common.Chain {
 	client, ctx := connect()
-	var userDto = getOrCreateUser(chatId, userType)
+	var userDto = getOrCreateUser(chatId, userType, userId, userName, chatName, isGroup)
 	chainsOfUser, err := client.Chain.
 		Query().
 		Where(chain.HasUsersWith(user.ID(userDto.ID))).

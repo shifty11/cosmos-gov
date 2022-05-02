@@ -2623,6 +2623,11 @@ type UserMutation struct {
 	chat_id       *int64
 	addchat_id    *int64
 	_type         *user.Type
+	user_id       *int64
+	adduser_id    *int64
+	user_name     *string
+	chat_name     *string
+	is_group      *bool
 	clearedFields map[string]struct{}
 	chains        map[int]struct{}
 	removedchains map[int]struct{}
@@ -2894,6 +2899,170 @@ func (m *UserMutation) ResetType() {
 	m._type = nil
 }
 
+// SetUserID sets the "user_id" field.
+func (m *UserMutation) SetUserID(i int64) {
+	m.user_id = &i
+	m.adduser_id = nil
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *UserMutation) UserID() (r int64, exists bool) {
+	v := m.user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldUserID(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// AddUserID adds i to the "user_id" field.
+func (m *UserMutation) AddUserID(i int64) {
+	if m.adduser_id != nil {
+		*m.adduser_id += i
+	} else {
+		m.adduser_id = &i
+	}
+}
+
+// AddedUserID returns the value that was added to the "user_id" field in this mutation.
+func (m *UserMutation) AddedUserID() (r int64, exists bool) {
+	v := m.adduser_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *UserMutation) ResetUserID() {
+	m.user_id = nil
+	m.adduser_id = nil
+}
+
+// SetUserName sets the "user_name" field.
+func (m *UserMutation) SetUserName(s string) {
+	m.user_name = &s
+}
+
+// UserName returns the value of the "user_name" field in the mutation.
+func (m *UserMutation) UserName() (r string, exists bool) {
+	v := m.user_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserName returns the old "user_name" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldUserName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserName: %w", err)
+	}
+	return oldValue.UserName, nil
+}
+
+// ResetUserName resets all changes to the "user_name" field.
+func (m *UserMutation) ResetUserName() {
+	m.user_name = nil
+}
+
+// SetChatName sets the "chat_name" field.
+func (m *UserMutation) SetChatName(s string) {
+	m.chat_name = &s
+}
+
+// ChatName returns the value of the "chat_name" field in the mutation.
+func (m *UserMutation) ChatName() (r string, exists bool) {
+	v := m.chat_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldChatName returns the old "chat_name" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldChatName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldChatName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldChatName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldChatName: %w", err)
+	}
+	return oldValue.ChatName, nil
+}
+
+// ResetChatName resets all changes to the "chat_name" field.
+func (m *UserMutation) ResetChatName() {
+	m.chat_name = nil
+}
+
+// SetIsGroup sets the "is_group" field.
+func (m *UserMutation) SetIsGroup(b bool) {
+	m.is_group = &b
+}
+
+// IsGroup returns the value of the "is_group" field in the mutation.
+func (m *UserMutation) IsGroup() (r bool, exists bool) {
+	v := m.is_group
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsGroup returns the old "is_group" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldIsGroup(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsGroup is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsGroup requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsGroup: %w", err)
+	}
+	return oldValue.IsGroup, nil
+}
+
+// ResetIsGroup resets all changes to the "is_group" field.
+func (m *UserMutation) ResetIsGroup() {
+	m.is_group = nil
+}
+
 // AddChainIDs adds the "chains" edge to the Chain entity by ids.
 func (m *UserMutation) AddChainIDs(ids ...int) {
 	if m.chains == nil {
@@ -2967,7 +3136,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 8)
 	if m.created_at != nil {
 		fields = append(fields, user.FieldCreatedAt)
 	}
@@ -2979,6 +3148,18 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m._type != nil {
 		fields = append(fields, user.FieldType)
+	}
+	if m.user_id != nil {
+		fields = append(fields, user.FieldUserID)
+	}
+	if m.user_name != nil {
+		fields = append(fields, user.FieldUserName)
+	}
+	if m.chat_name != nil {
+		fields = append(fields, user.FieldChatName)
+	}
+	if m.is_group != nil {
+		fields = append(fields, user.FieldIsGroup)
 	}
 	return fields
 }
@@ -2996,6 +3177,14 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.ChatID()
 	case user.FieldType:
 		return m.GetType()
+	case user.FieldUserID:
+		return m.UserID()
+	case user.FieldUserName:
+		return m.UserName()
+	case user.FieldChatName:
+		return m.ChatName()
+	case user.FieldIsGroup:
+		return m.IsGroup()
 	}
 	return nil, false
 }
@@ -3013,6 +3202,14 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldChatID(ctx)
 	case user.FieldType:
 		return m.OldType(ctx)
+	case user.FieldUserID:
+		return m.OldUserID(ctx)
+	case user.FieldUserName:
+		return m.OldUserName(ctx)
+	case user.FieldChatName:
+		return m.OldChatName(ctx)
+	case user.FieldIsGroup:
+		return m.OldIsGroup(ctx)
 	}
 	return nil, fmt.Errorf("unknown User field %s", name)
 }
@@ -3050,6 +3247,34 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetType(v)
 		return nil
+	case user.FieldUserID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case user.FieldUserName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserName(v)
+		return nil
+	case user.FieldChatName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetChatName(v)
+		return nil
+	case user.FieldIsGroup:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsGroup(v)
+		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
 }
@@ -3061,6 +3286,9 @@ func (m *UserMutation) AddedFields() []string {
 	if m.addchat_id != nil {
 		fields = append(fields, user.FieldChatID)
 	}
+	if m.adduser_id != nil {
+		fields = append(fields, user.FieldUserID)
+	}
 	return fields
 }
 
@@ -3071,6 +3299,8 @@ func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case user.FieldChatID:
 		return m.AddedChatID()
+	case user.FieldUserID:
+		return m.AddedUserID()
 	}
 	return nil, false
 }
@@ -3086,6 +3316,13 @@ func (m *UserMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddChatID(v)
+		return nil
+	case user.FieldUserID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddUserID(v)
 		return nil
 	}
 	return fmt.Errorf("unknown User numeric field %s", name)
@@ -3125,6 +3362,18 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldType:
 		m.ResetType()
+		return nil
+	case user.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case user.FieldUserName:
+		m.ResetUserName()
+		return nil
+	case user.FieldChatName:
+		m.ResetChatName()
+		return nil
+	case user.FieldIsGroup:
+		m.ResetIsGroup()
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)

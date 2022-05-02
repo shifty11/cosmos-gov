@@ -54,6 +54,69 @@ func (uu *UserUpdate) SetType(u user.Type) *UserUpdate {
 	return uu
 }
 
+// SetUserID sets the "user_id" field.
+func (uu *UserUpdate) SetUserID(i int64) *UserUpdate {
+	uu.mutation.ResetUserID()
+	uu.mutation.SetUserID(i)
+	return uu
+}
+
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableUserID(i *int64) *UserUpdate {
+	if i != nil {
+		uu.SetUserID(*i)
+	}
+	return uu
+}
+
+// AddUserID adds i to the "user_id" field.
+func (uu *UserUpdate) AddUserID(i int64) *UserUpdate {
+	uu.mutation.AddUserID(i)
+	return uu
+}
+
+// SetUserName sets the "user_name" field.
+func (uu *UserUpdate) SetUserName(s string) *UserUpdate {
+	uu.mutation.SetUserName(s)
+	return uu
+}
+
+// SetNillableUserName sets the "user_name" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableUserName(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetUserName(*s)
+	}
+	return uu
+}
+
+// SetChatName sets the "chat_name" field.
+func (uu *UserUpdate) SetChatName(s string) *UserUpdate {
+	uu.mutation.SetChatName(s)
+	return uu
+}
+
+// SetNillableChatName sets the "chat_name" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableChatName(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetChatName(*s)
+	}
+	return uu
+}
+
+// SetIsGroup sets the "is_group" field.
+func (uu *UserUpdate) SetIsGroup(b bool) *UserUpdate {
+	uu.mutation.SetIsGroup(b)
+	return uu
+}
+
+// SetNillableIsGroup sets the "is_group" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableIsGroup(b *bool) *UserUpdate {
+	if b != nil {
+		uu.SetIsGroup(*b)
+	}
+	return uu
+}
+
 // AddChainIDs adds the "chains" edge to the Chain entity by IDs.
 func (uu *UserUpdate) AddChainIDs(ids ...int) *UserUpdate {
 	uu.mutation.AddChainIDs(ids...)
@@ -220,6 +283,41 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: user.FieldType,
 		})
 	}
+	if value, ok := uu.mutation.UserID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: user.FieldUserID,
+		})
+	}
+	if value, ok := uu.mutation.AddedUserID(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: user.FieldUserID,
+		})
+	}
+	if value, ok := uu.mutation.UserName(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldUserName,
+		})
+	}
+	if value, ok := uu.mutation.ChatName(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldChatName,
+		})
+	}
+	if value, ok := uu.mutation.IsGroup(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: user.FieldIsGroup,
+		})
+	}
 	if uu.mutation.ChainsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
@@ -315,6 +413,69 @@ func (uuo *UserUpdateOne) AddChatID(i int64) *UserUpdateOne {
 // SetType sets the "type" field.
 func (uuo *UserUpdateOne) SetType(u user.Type) *UserUpdateOne {
 	uuo.mutation.SetType(u)
+	return uuo
+}
+
+// SetUserID sets the "user_id" field.
+func (uuo *UserUpdateOne) SetUserID(i int64) *UserUpdateOne {
+	uuo.mutation.ResetUserID()
+	uuo.mutation.SetUserID(i)
+	return uuo
+}
+
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableUserID(i *int64) *UserUpdateOne {
+	if i != nil {
+		uuo.SetUserID(*i)
+	}
+	return uuo
+}
+
+// AddUserID adds i to the "user_id" field.
+func (uuo *UserUpdateOne) AddUserID(i int64) *UserUpdateOne {
+	uuo.mutation.AddUserID(i)
+	return uuo
+}
+
+// SetUserName sets the "user_name" field.
+func (uuo *UserUpdateOne) SetUserName(s string) *UserUpdateOne {
+	uuo.mutation.SetUserName(s)
+	return uuo
+}
+
+// SetNillableUserName sets the "user_name" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableUserName(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetUserName(*s)
+	}
+	return uuo
+}
+
+// SetChatName sets the "chat_name" field.
+func (uuo *UserUpdateOne) SetChatName(s string) *UserUpdateOne {
+	uuo.mutation.SetChatName(s)
+	return uuo
+}
+
+// SetNillableChatName sets the "chat_name" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableChatName(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetChatName(*s)
+	}
+	return uuo
+}
+
+// SetIsGroup sets the "is_group" field.
+func (uuo *UserUpdateOne) SetIsGroup(b bool) *UserUpdateOne {
+	uuo.mutation.SetIsGroup(b)
+	return uuo
+}
+
+// SetNillableIsGroup sets the "is_group" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableIsGroup(b *bool) *UserUpdateOne {
+	if b != nil {
+		uuo.SetIsGroup(*b)
+	}
 	return uuo
 }
 
@@ -506,6 +667,41 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Type:   field.TypeEnum,
 			Value:  value,
 			Column: user.FieldType,
+		})
+	}
+	if value, ok := uuo.mutation.UserID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: user.FieldUserID,
+		})
+	}
+	if value, ok := uuo.mutation.AddedUserID(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: user.FieldUserID,
+		})
+	}
+	if value, ok := uuo.mutation.UserName(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldUserName,
+		})
+	}
+	if value, ok := uuo.mutation.ChatName(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldChatName,
+		})
+	}
+	if value, ok := uuo.mutation.IsGroup(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: user.FieldIsGroup,
 		})
 	}
 	if uuo.mutation.ChainsCleared() {

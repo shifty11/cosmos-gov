@@ -24,6 +24,14 @@ type User struct {
 	ChatID int64 `json:"chat_id,omitempty"`
 	// Type holds the value of the "type" field.
 	Type user.Type `json:"type,omitempty"`
+	// UserID holds the value of the "user_id" field.
+	UserID int64 `json:"user_id,omitempty"`
+	// UserName holds the value of the "user_name" field.
+	UserName string `json:"user_name,omitempty"`
+	// ChatName holds the value of the "chat_name" field.
+	ChatName string `json:"chat_name,omitempty"`
+	// IsGroup holds the value of the "is_group" field.
+	IsGroup bool `json:"is_group,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges UserEdges `json:"edges"`
@@ -52,9 +60,11 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldID, user.FieldChatID:
+		case user.FieldIsGroup:
+			values[i] = new(sql.NullBool)
+		case user.FieldID, user.FieldChatID, user.FieldUserID:
 			values[i] = new(sql.NullInt64)
-		case user.FieldType:
+		case user.FieldType, user.FieldUserName, user.FieldChatName:
 			values[i] = new(sql.NullString)
 		case user.FieldCreatedAt, user.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -103,6 +113,30 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				u.Type = user.Type(value.String)
 			}
+		case user.FieldUserID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field user_id", values[i])
+			} else if value.Valid {
+				u.UserID = value.Int64
+			}
+		case user.FieldUserName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field user_name", values[i])
+			} else if value.Valid {
+				u.UserName = value.String
+			}
+		case user.FieldChatName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field chat_name", values[i])
+			} else if value.Valid {
+				u.ChatName = value.String
+			}
+		case user.FieldIsGroup:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field is_group", values[i])
+			} else if value.Valid {
+				u.IsGroup = value.Bool
+			}
 		}
 	}
 	return nil
@@ -144,6 +178,14 @@ func (u *User) String() string {
 	builder.WriteString(fmt.Sprintf("%v", u.ChatID))
 	builder.WriteString(", type=")
 	builder.WriteString(fmt.Sprintf("%v", u.Type))
+	builder.WriteString(", user_id=")
+	builder.WriteString(fmt.Sprintf("%v", u.UserID))
+	builder.WriteString(", user_name=")
+	builder.WriteString(u.UserName)
+	builder.WriteString(", chat_name=")
+	builder.WriteString(u.ChatName)
+	builder.WriteString(", is_group=")
+	builder.WriteString(fmt.Sprintf("%v", u.IsGroup))
 	builder.WriteByte(')')
 	return builder.String()
 }

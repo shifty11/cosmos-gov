@@ -25,6 +25,15 @@ func (User) Fields() []ent.Field {
 		field.Int64("chat_id"),
 		field.Enum("type").
 			Values("telegram", "discord"),
+
+		field.Int64("user_id").
+			Default(0),
+		field.String("user_name").
+			Default("<not set>"),
+		field.String("chat_name").
+			Default("<not set>"),
+		field.Bool("is_group").
+			Default(false),
 	}
 }
 

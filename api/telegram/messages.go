@@ -38,7 +38,13 @@ func sendSubscriptions(update *tgbotapi.Update) {
 	} else {
 		log.Sugar.Debugf("Send subscriptions to user #%v", chatId)
 	}
-	chains := database.GetChainsForUser(chatId, user.TypeTelegram)
+
+	userId := getUserIdX(update)
+	userName := getUserName(update)
+	chatName := getChatName(update)
+	isGroup := isGroupX(update)
+
+	chains := database.GetChainsForUser(chatId, user.TypeTelegram, userId, userName, chatName, isGroup)
 
 	var buttons [][]Button
 	var buttonRow []Button
