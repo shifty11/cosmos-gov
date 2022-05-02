@@ -38,9 +38,8 @@ type ChainStatistic struct {
 }
 
 func (manager *StatsManager) getChainStats(userType user.Type) ([]*ChainStatistic, error) {
-	client, ctx := connect()
 	var chainsWithNotifications []ChainStatistic
-	err := client.Chain.Query().
+	err := manager.client.Chain.Query().
 		Order(ent.Desc(chain.FieldIsEnabled), ent.Asc(chain.FieldDisplayName)).
 		GroupBy(chain.FieldIsEnabled, chain.FieldDisplayName).
 		Aggregate(
@@ -55,12 +54,12 @@ func (manager *StatsManager) getChainStats(userType user.Type) ([]*ChainStatisti
 				return sql.As(sql.Count(t.C(discordchannel.ChainsPrimaryKey[1])), "subscriptions")
 			},
 		).
-		Scan(ctx, &chainsWithNotifications)
+		Scan(manager.ctx, &chainsWithNotifications)
 	if err != nil {
 		return nil, err
 	}
 	var chainsWithProposals []ChainStatistic
-	err = client.Chain.Query().
+	err = manager.client.Chain.Query().
 		Order(ent.Desc(chain.FieldIsEnabled), ent.Asc(chain.FieldDisplayName)).
 		GroupBy(chain.FieldIsEnabled, chain.FieldDisplayName).
 		Aggregate(
@@ -70,7 +69,7 @@ func (manager *StatsManager) getChainStats(userType user.Type) ([]*ChainStatisti
 				return sql.As(sql.Count(t.C(proposal.FieldID)), "proposals")
 			},
 		).
-		Scan(ctx, &chainsWithProposals)
+		Scan(manager.ctx, &chainsWithProposals)
 	if err != nil {
 		return nil, err
 	}
@@ -115,31 +114,30 @@ func (manager *StatsManager) GetChainStats() ([]*ChainStatistic, error) {
 }
 
 func (manager *StatsManager) GetUserStatistics(userType user.Type) (*UserStatistic, error) {
-	client, ctx := connect()
-	cntAll, err := client.User.
+	cntAll, err := manager.client.User.
 		Query().
 		Where(user.TypeEQ(userType)).
-		Count(ctx)
+		Count(manager.ctx)
 	if err != nil {
 		return nil, err
 	}
-	cntSinceYesterday, err := client.User.
+	cntSinceYesterday, err := manager.client.User.
 		Query().
 		Where(user.And(
 			user.CreateTimeGTE(time.Now().AddDate(0, 0, -1)),
 			user.TypeEQ(userType),
 		)).
-		Count(ctx)
+		Count(manager.ctx)
 	if err != nil {
 		return nil, err
 	}
-	cntSinceSevenDays, err := client.User.
+	cntSinceSevenDays, err := manager.client.User.
 		Query().
 		Where(user.And(
 			user.CreateTimeGTE(time.Now().AddDate(0, 0, -7)),
 			user.TypeEQ(userType),
 		)).
-		Count(ctx)
+		Count(manager.ctx)
 	if err != nil {
 		return nil, err
 	}

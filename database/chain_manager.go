@@ -114,28 +114,27 @@ func (manager *ChainManager) Create(chainId string, chainName string, accountPre
 }
 
 func (manager *ChainManager) UpdateRpcs(chainName string, rpcs []string) error {
-	client, ctx := connect()
-	c, err := client.Chain.
+	c, err := manager.client.Chain.
 		Query().
 		Where(chain.NameEQ(chainName)).
 		WithRPCEndpoints().
-		Only(ctx)
+		Only(manager.ctx)
 	if err != nil {
 		return err
 	}
-	_, err = client.RpcEndpoint.
+	_, err = manager.client.RpcEndpoint.
 		Delete().
 		Where(rpcendpoint.HasChainWith(chain.IDEQ(c.ID))).
-		Exec(ctx)
+		Exec(manager.ctx)
 	if err != nil {
 		return err
 	}
 	for _, rpc := range rpcs {
-		_, err := client.RpcEndpoint.
+		_, err := manager.client.RpcEndpoint.
 			Create().
 			SetEndpoint(rpc).
 			SetChain(c).
-			Save(ctx)
+			Save(manager.ctx)
 		if err != nil {
 			return err
 		}
