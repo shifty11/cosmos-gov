@@ -23,7 +23,7 @@ func (User) Mixin() []ent.Mixin {
 func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int64("user_id"),
-		field.String("name"), // TODO: remove Default
+		field.String("name"),
 		//field.Int64("chat_id"). // TODO: has to be removed
 		//			Immutable(),
 		field.Enum("type").
