@@ -194,6 +194,8 @@ var (
 			channelName := getChannelName(i)
 			isGroup := isGroup(i)
 
+			performUpdateSubscription(channelId, action)
+
 			subs := mHack.DiscordSubscriptionManager.GetOrCreateSubscriptions(userId, userName, channelId, channelName, isGroup)
 
 			allChains := chunks(subs, 25)
