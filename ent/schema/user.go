@@ -2,6 +2,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
@@ -49,10 +50,19 @@ func (User) Edges() []ent.Edge {
 	return []ent.Edge{
 		//edge.To("chains", Chain.Type), // TODO: has to be removed
 		edge.From("telegram_chats", TelegramChat.Type).
-			Ref("user"),
+			Ref("user").
+			Annotations(entsql.Annotation{
+				OnDelete: entsql.Cascade,
+			}),
 		edge.From("discord_channels", DiscordChannel.Type).
-			Ref("user"),
-		edge.To("wallets", Wallet.Type),
+			Ref("user").
+			Annotations(entsql.Annotation{
+				OnDelete: entsql.Cascade,
+			}),
+		edge.To("wallets", Wallet.Type).
+			Annotations(entsql.Annotation{
+				OnDelete: entsql.Cascade,
+			}),
 	}
 }
 

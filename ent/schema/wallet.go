@@ -2,6 +2,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
@@ -34,7 +35,10 @@ func (Wallet) Edges() []ent.Edge {
 		edge.From("chain", Chain.Type).
 			Ref("wallets").
 			Unique(),
-		edge.To("grants", Grant.Type),
+		edge.To("grants", Grant.Type).
+			Annotations(entsql.Annotation{
+				OnDelete: entsql.Cascade,
+			}),
 	}
 }
 

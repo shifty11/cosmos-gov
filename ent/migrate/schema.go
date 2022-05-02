@@ -84,7 +84,7 @@ var (
 				Symbol:     "grants_wallets_grants",
 				Columns:    []*schema.Column{GrantsColumns[6]},
 				RefColumns: []*schema.Column{WalletsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}
@@ -145,7 +145,7 @@ var (
 				Symbol:     "proposals_chains_proposals",
 				Columns:    []*schema.Column{ProposalsColumns[9]},
 				RefColumns: []*schema.Column{ChainsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 		},
 		Indexes: []*schema.Index{
@@ -174,7 +174,7 @@ var (
 				Symbol:     "rpc_endpoints_chains_rpc_endpoints",
 				Columns:    []*schema.Column{RPCEndpointsColumns[4]},
 				RefColumns: []*schema.Column{ChainsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 		},
 		Indexes: []*schema.Index{
@@ -257,7 +257,7 @@ var (
 				Symbol:     "wallets_chains_wallets",
 				Columns:    []*schema.Column{WalletsColumns[4]},
 				RefColumns: []*schema.Column{ChainsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 		},
 		Indexes: []*schema.Index{

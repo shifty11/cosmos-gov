@@ -27,7 +27,7 @@ func Test_SaveGrant_New(t *testing.T) {
 
 	g, err := m.WalletManager.SaveGrant(entUser, entChain.Name, grantData)
 	if err != nil {
-		t.Errorf("could not create g")
+		t.Errorf("could not create grant")
 	}
 	if g.Grantee != grantData.Grantee {
 		t.Errorf("value error")
@@ -228,5 +228,32 @@ func Test_SaveGrant_ExistingGrant_Create(t *testing.T) {
 	}
 	if len(grants) != 2 {
 		t.Errorf("wrong number of wallets: %v", len(grants))
+	}
+}
+
+func Test_WalletDelete_Cascade(t *testing.T) {
+	client, ctx, m := db_testing_base.GetBase(t)
+	//goland:noinspection GoUnhandledErrorResult
+	defer client.Close()
+
+	entChain := m.ChainManager.Create("testchain-1", "testchain", "test", []string{"test-rpc"})
+	entUser := m.TelegramUserManager.GetOrCreateUser(100, "Roland")
+
+	grantData := &database.GrantData{
+		Granter:   "testchainadsfasdf",
+		Grantee:   "testchainkljsadflkasjdf",
+		Type:      "/cosmos.gov.v1beta1.MsgVote",
+		ExpiresAt: time.Now(),
+	}
+
+	_, err := m.WalletManager.SaveGrant(entUser, entChain.Name, grantData)
+	if err != nil {
+		t.Errorf("could not create grant")
+	}
+
+	client.Wallet.Delete().ExecX(ctx)
+	cnt := client.Wallet.Query().CountX(ctx)
+	if cnt != 0 {
+		t.Errorf("grant should be deleted")
 	}
 }

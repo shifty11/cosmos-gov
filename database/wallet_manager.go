@@ -58,7 +58,7 @@ func (manager *WalletManager) SaveGrant(entUser *ent.User, chainName string, g *
 			wallet.HasChainWith(chain.NameEQ(chainName)),
 		)).
 		First(manager.ctx)
-	if err != nil { // if wallet doesn't exist -> create wallet and grant inside a transaction
+	if err != nil { // if wallet doesn't exist -> create wallet and grant (inside a transaction)
 		entChain, err := manager.chainManager.ByName(chainName)
 		if err != nil {
 			return nil, err
