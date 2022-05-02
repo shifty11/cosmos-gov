@@ -23,8 +23,7 @@ func (User) Mixin() []ent.Mixin {
 func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int64("user_id"),
-		field.String("name").
-			Default("<not set>"), // TODO: remove Default
+		field.String("name"), // TODO: remove Default
 		//field.Int64("chat_id"). // TODO: has to be removed
 		//			Immutable(),
 		field.Enum("type").
@@ -32,6 +31,16 @@ func (User) Fields() []ent.Field {
 			Immutable(),
 		field.String("login_token").
 			Default(""),
+
+		//TODO: remove this fields (or rename)
+		//field.Int64("user_id").
+		//	Default(0),
+		//field.String("user_name").
+		//	Default("<not set>"),
+		//field.String("chat_name").
+		//	Default("<not set>"),
+		//field.Bool("is_group").
+		//	Default(false),
 	}
 }
 

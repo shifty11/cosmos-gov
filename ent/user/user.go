@@ -87,8 +87,6 @@ var (
 	DefaultUpdateTime func() time.Time
 	// UpdateDefaultUpdateTime holds the default value on update for the "update_time" field.
 	UpdateDefaultUpdateTime func() time.Time
-	// DefaultName holds the default value on creation for the "name" field.
-	DefaultName string
 	// DefaultLoginToken holds the default value on creation for the "login_token" field.
 	DefaultLoginToken string
 )

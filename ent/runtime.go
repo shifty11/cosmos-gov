@@ -169,10 +169,6 @@ func init() {
 	user.DefaultUpdateTime = userDescUpdateTime.Default.(func() time.Time)
 	// user.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
 	user.UpdateDefaultUpdateTime = userDescUpdateTime.UpdateDefault.(func() time.Time)
-	// userDescName is the schema descriptor for name field.
-	userDescName := userFields[1].Descriptor()
-	// user.DefaultName holds the default value on creation for the name field.
-	user.DefaultName = userDescName.Default.(string)
 	// userDescLoginToken is the schema descriptor for login_token field.
 	userDescLoginToken := userFields[3].Descriptor()
 	// user.DefaultLoginToken holds the default value on creation for the login_token field.

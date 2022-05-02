@@ -107,11 +107,11 @@ var (
 				return
 			}
 
-			userId := getUserId(i)
+			userId := getUserIdX(i)
 			userName := getUserName(i)
 			channelId := getChannelId(i)
 			channelName := getChannelName(i)
-			isGroup := isGroupChannel(i)
+			isGroup := isGroup(i)
 
 			subs := mHack.DiscordSubscriptionManager.GetOrCreateSubscriptions(userId, userName, channelId, channelName, isGroup)
 
@@ -188,13 +188,11 @@ var (
 				return
 			}
 
-			userId := getUserId(i)
+			userId := getUserIdX(i)
 			userName := getUserName(i)
 			channelId := getChannelId(i)
 			channelName := getChannelName(i)
-			isGroup := isGroupChannel(i)
-
-			performUpdateSubscription(channelId, action)
+			isGroup := isGroup(i)
 
 			subs := mHack.DiscordSubscriptionManager.GetOrCreateSubscriptions(userId, userName, channelId, channelName, isGroup)
 

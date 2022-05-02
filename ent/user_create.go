@@ -63,14 +63,6 @@ func (uc *UserCreate) SetName(s string) *UserCreate {
 	return uc
 }
 
-// SetNillableName sets the "name" field if the given value is not nil.
-func (uc *UserCreate) SetNillableName(s *string) *UserCreate {
-	if s != nil {
-		uc.SetName(*s)
-	}
-	return uc
-}
-
 // SetType sets the "type" field.
 func (uc *UserCreate) SetType(u user.Type) *UserCreate {
 	uc.mutation.SetType(u)
@@ -214,10 +206,6 @@ func (uc *UserCreate) defaults() {
 	if _, ok := uc.mutation.UpdateTime(); !ok {
 		v := user.DefaultUpdateTime()
 		uc.mutation.SetUpdateTime(v)
-	}
-	if _, ok := uc.mutation.Name(); !ok {
-		v := user.DefaultName
-		uc.mutation.SetName(v)
 	}
 	if _, ok := uc.mutation.LoginToken(); !ok {
 		v := user.DefaultLoginToken

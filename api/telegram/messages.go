@@ -31,15 +31,19 @@ type StateData struct {
 }
 
 func sendSubscriptions(update *tgbotapi.Update) {
+	userId := getUserIdX(update)
+	userName := getUserName(update)
 	chatId := getChatIdX(update)
+	chatName := getChatName(update)
+	isGroup := isGroupX(update)
+
 	if update.Message != nil && update.Message.Chat != nil && update.Message.Chat.Type == "group" {
 		log.Sugar.Debugf("Send subscriptions to group '%v' #%v", update.Message.Chat.Title, chatId)
 	} else {
 		log.Sugar.Debugf("Send subscriptions to user #%v", chatId)
 	}
-	userId := getUserIdX(update)
 
-	chains := mHack.TelegramSubscriptionManager.GetOrCreateSubscriptions(userId, getUserName(update), chatId, getChatName(update), isGroupX(update))
+	chains := mHack.TelegramSubscriptionManager.GetOrCreateSubscriptions(userId, userName, chatId, chatName, isGroup)
 
 	var buttons [][]Button
 	var buttonRow []Button
