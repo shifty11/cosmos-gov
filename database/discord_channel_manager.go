@@ -118,7 +118,7 @@ func (manager *DiscordChannelManager) DeleteMultiple(channelIds []int64) {
 func (manager *DiscordChannelManager) GetChannelIds(entChain *ent.Chain) []int {
 	channelIds, err := entChain.
 		QueryDiscordChannels().
-		Select(discordchannel.FieldID).
+		Select(discordchannel.FieldChannelID).
 		Ints(manager.ctx)
 	if err != nil {
 		log.Sugar.Panicf("Error while querying Discord channelIds for chain %v: %v", entChain.Name, err)
