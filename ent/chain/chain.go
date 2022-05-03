@@ -13,12 +13,8 @@ const (
 	FieldID = "id"
 	// FieldCreateTime holds the string denoting the create_time field in the database.
 	FieldCreateTime = "create_time"
-	// FieldUpdatedTime holds the string denoting the updated_time field in the database.
-	FieldUpdatedTime = "updated_time"
-	// FieldCreatedAt holds the string denoting the created_at field in the database.
-	FieldCreatedAt = "created_at"
-	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
-	FieldUpdatedAt = "updated_at"
+	// FieldUpdateTime holds the string denoting the update_time field in the database.
+	FieldUpdateTime = "update_time"
 	// FieldChainID holds the string denoting the chain_id field in the database.
 	FieldChainID = "chain_id"
 	// FieldAccountPrefix holds the string denoting the account_prefix field in the database.
@@ -29,8 +25,6 @@ const (
 	FieldDisplayName = "display_name"
 	// FieldIsEnabled holds the string denoting the is_enabled field in the database.
 	FieldIsEnabled = "is_enabled"
-	// EdgeUsers holds the string denoting the users edge name in mutations.
-	EdgeUsers = "users"
 	// EdgeProposals holds the string denoting the proposals edge name in mutations.
 	EdgeProposals = "proposals"
 	// EdgeTelegramChats holds the string denoting the telegram_chats edge name in mutations.
@@ -43,11 +37,6 @@ const (
 	EdgeWallets = "wallets"
 	// Table holds the table name of the chain in the database.
 	Table = "chains"
-	// UsersTable is the table that holds the users relation/edge. The primary key declared below.
-	UsersTable = "user_chains"
-	// UsersInverseTable is the table name for the User entity.
-	// It exists in this package in order to avoid circular dependency with the "user" package.
-	UsersInverseTable = "users"
 	// ProposalsTable is the table that holds the proposals relation/edge.
 	ProposalsTable = "proposals"
 	// ProposalsInverseTable is the table name for the Proposal entity.
@@ -85,9 +74,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldCreateTime,
-	FieldUpdatedTime,
-	FieldCreatedAt,
-	FieldUpdatedAt,
+	FieldUpdateTime,
 	FieldChainID,
 	FieldAccountPrefix,
 	FieldName,
@@ -96,9 +83,6 @@ var Columns = []string{
 }
 
 var (
-	// UsersPrimaryKey and UsersColumn2 are the table columns denoting the
-	// primary key for the users relation (M2M).
-	UsersPrimaryKey = []string{"user_id", "chain_id"}
 	// TelegramChatsPrimaryKey and TelegramChatsColumn2 are the table columns denoting the
 	// primary key for the telegram_chats relation (M2M).
 	TelegramChatsPrimaryKey = []string{"telegram_chat_id", "chain_id"}
@@ -118,12 +102,12 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
-	DefaultCreatedAt func() time.Time
-	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
-	DefaultUpdatedAt func() time.Time
-	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
-	UpdateDefaultUpdatedAt func() time.Time
+	// DefaultCreateTime holds the default value on creation for the "create_time" field.
+	DefaultCreateTime func() time.Time
+	// DefaultUpdateTime holds the default value on creation for the "update_time" field.
+	DefaultUpdateTime func() time.Time
+	// UpdateDefaultUpdateTime holds the default value on update for the "update_time" field.
+	UpdateDefaultUpdateTime func() time.Time
 	// DefaultIsEnabled holds the default value on creation for the "is_enabled" field.
 	DefaultIsEnabled bool
 )

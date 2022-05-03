@@ -29,49 +29,9 @@ func (pu *ProposalUpdate) Where(ps ...predicate.Proposal) *ProposalUpdate {
 	return pu
 }
 
-// SetCreateTime sets the "create_time" field.
-func (pu *ProposalUpdate) SetCreateTime(t time.Time) *ProposalUpdate {
-	pu.mutation.SetCreateTime(t)
-	return pu
-}
-
-// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
-func (pu *ProposalUpdate) SetNillableCreateTime(t *time.Time) *ProposalUpdate {
-	if t != nil {
-		pu.SetCreateTime(*t)
-	}
-	return pu
-}
-
-// ClearCreateTime clears the value of the "create_time" field.
-func (pu *ProposalUpdate) ClearCreateTime() *ProposalUpdate {
-	pu.mutation.ClearCreateTime()
-	return pu
-}
-
-// SetUpdatedTime sets the "updated_time" field.
-func (pu *ProposalUpdate) SetUpdatedTime(t time.Time) *ProposalUpdate {
-	pu.mutation.SetUpdatedTime(t)
-	return pu
-}
-
-// SetNillableUpdatedTime sets the "updated_time" field if the given value is not nil.
-func (pu *ProposalUpdate) SetNillableUpdatedTime(t *time.Time) *ProposalUpdate {
-	if t != nil {
-		pu.SetUpdatedTime(*t)
-	}
-	return pu
-}
-
-// ClearUpdatedTime clears the value of the "updated_time" field.
-func (pu *ProposalUpdate) ClearUpdatedTime() *ProposalUpdate {
-	pu.mutation.ClearUpdatedTime()
-	return pu
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (pu *ProposalUpdate) SetUpdatedAt(t time.Time) *ProposalUpdate {
-	pu.mutation.SetUpdatedAt(t)
+// SetUpdateTime sets the "update_time" field.
+func (pu *ProposalUpdate) SetUpdateTime(t time.Time) *ProposalUpdate {
+	pu.mutation.SetUpdateTime(t)
 	return pu
 }
 
@@ -211,9 +171,9 @@ func (pu *ProposalUpdate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (pu *ProposalUpdate) defaults() {
-	if _, ok := pu.mutation.UpdatedAt(); !ok {
-		v := proposal.UpdateDefaultUpdatedAt()
-		pu.mutation.SetUpdatedAt(v)
+	if _, ok := pu.mutation.UpdateTime(); !ok {
+		v := proposal.UpdateDefaultUpdateTime()
+		pu.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -245,37 +205,11 @@ func (pu *ProposalUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := pu.mutation.CreateTime(); ok {
+	if value, ok := pu.mutation.UpdateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: proposal.FieldCreateTime,
-		})
-	}
-	if pu.mutation.CreateTimeCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Column: proposal.FieldCreateTime,
-		})
-	}
-	if value, ok := pu.mutation.UpdatedTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: proposal.FieldUpdatedTime,
-		})
-	}
-	if pu.mutation.UpdatedTimeCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Column: proposal.FieldUpdatedTime,
-		})
-	}
-	if value, ok := pu.mutation.UpdatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: proposal.FieldUpdatedAt,
+			Column: proposal.FieldUpdateTime,
 		})
 	}
 	if value, ok := pu.mutation.ProposalID(); ok {
@@ -381,49 +315,9 @@ type ProposalUpdateOne struct {
 	mutation *ProposalMutation
 }
 
-// SetCreateTime sets the "create_time" field.
-func (puo *ProposalUpdateOne) SetCreateTime(t time.Time) *ProposalUpdateOne {
-	puo.mutation.SetCreateTime(t)
-	return puo
-}
-
-// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
-func (puo *ProposalUpdateOne) SetNillableCreateTime(t *time.Time) *ProposalUpdateOne {
-	if t != nil {
-		puo.SetCreateTime(*t)
-	}
-	return puo
-}
-
-// ClearCreateTime clears the value of the "create_time" field.
-func (puo *ProposalUpdateOne) ClearCreateTime() *ProposalUpdateOne {
-	puo.mutation.ClearCreateTime()
-	return puo
-}
-
-// SetUpdatedTime sets the "updated_time" field.
-func (puo *ProposalUpdateOne) SetUpdatedTime(t time.Time) *ProposalUpdateOne {
-	puo.mutation.SetUpdatedTime(t)
-	return puo
-}
-
-// SetNillableUpdatedTime sets the "updated_time" field if the given value is not nil.
-func (puo *ProposalUpdateOne) SetNillableUpdatedTime(t *time.Time) *ProposalUpdateOne {
-	if t != nil {
-		puo.SetUpdatedTime(*t)
-	}
-	return puo
-}
-
-// ClearUpdatedTime clears the value of the "updated_time" field.
-func (puo *ProposalUpdateOne) ClearUpdatedTime() *ProposalUpdateOne {
-	puo.mutation.ClearUpdatedTime()
-	return puo
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (puo *ProposalUpdateOne) SetUpdatedAt(t time.Time) *ProposalUpdateOne {
-	puo.mutation.SetUpdatedAt(t)
+// SetUpdateTime sets the "update_time" field.
+func (puo *ProposalUpdateOne) SetUpdateTime(t time.Time) *ProposalUpdateOne {
+	puo.mutation.SetUpdateTime(t)
 	return puo
 }
 
@@ -570,9 +464,9 @@ func (puo *ProposalUpdateOne) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (puo *ProposalUpdateOne) defaults() {
-	if _, ok := puo.mutation.UpdatedAt(); !ok {
-		v := proposal.UpdateDefaultUpdatedAt()
-		puo.mutation.SetUpdatedAt(v)
+	if _, ok := puo.mutation.UpdateTime(); !ok {
+		v := proposal.UpdateDefaultUpdateTime()
+		puo.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -621,37 +515,11 @@ func (puo *ProposalUpdateOne) sqlSave(ctx context.Context) (_node *Proposal, err
 			}
 		}
 	}
-	if value, ok := puo.mutation.CreateTime(); ok {
+	if value, ok := puo.mutation.UpdateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: proposal.FieldCreateTime,
-		})
-	}
-	if puo.mutation.CreateTimeCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Column: proposal.FieldCreateTime,
-		})
-	}
-	if value, ok := puo.mutation.UpdatedTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: proposal.FieldUpdatedTime,
-		})
-	}
-	if puo.mutation.UpdatedTimeCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Column: proposal.FieldUpdatedTime,
-		})
-	}
-	if value, ok := puo.mutation.UpdatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: proposal.FieldUpdatedAt,
+			Column: proposal.FieldUpdateTime,
 		})
 	}
 	if value, ok := puo.mutation.ProposalID(); ok {

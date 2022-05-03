@@ -34,44 +34,16 @@ func (lcic *LensChainInfoCreate) SetNillableCreateTime(t *time.Time) *LensChainI
 	return lcic
 }
 
-// SetUpdatedTime sets the "updated_time" field.
-func (lcic *LensChainInfoCreate) SetUpdatedTime(t time.Time) *LensChainInfoCreate {
-	lcic.mutation.SetUpdatedTime(t)
+// SetUpdateTime sets the "update_time" field.
+func (lcic *LensChainInfoCreate) SetUpdateTime(t time.Time) *LensChainInfoCreate {
+	lcic.mutation.SetUpdateTime(t)
 	return lcic
 }
 
-// SetNillableUpdatedTime sets the "updated_time" field if the given value is not nil.
-func (lcic *LensChainInfoCreate) SetNillableUpdatedTime(t *time.Time) *LensChainInfoCreate {
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (lcic *LensChainInfoCreate) SetNillableUpdateTime(t *time.Time) *LensChainInfoCreate {
 	if t != nil {
-		lcic.SetUpdatedTime(*t)
-	}
-	return lcic
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (lcic *LensChainInfoCreate) SetCreatedAt(t time.Time) *LensChainInfoCreate {
-	lcic.mutation.SetCreatedAt(t)
-	return lcic
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (lcic *LensChainInfoCreate) SetNillableCreatedAt(t *time.Time) *LensChainInfoCreate {
-	if t != nil {
-		lcic.SetCreatedAt(*t)
-	}
-	return lcic
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (lcic *LensChainInfoCreate) SetUpdatedAt(t time.Time) *LensChainInfoCreate {
-	lcic.mutation.SetUpdatedAt(t)
-	return lcic
-}
-
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (lcic *LensChainInfoCreate) SetNillableUpdatedAt(t *time.Time) *LensChainInfoCreate {
-	if t != nil {
-		lcic.SetUpdatedAt(*t)
+		lcic.SetUpdateTime(*t)
 	}
 	return lcic
 }
@@ -159,23 +131,23 @@ func (lcic *LensChainInfoCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (lcic *LensChainInfoCreate) defaults() {
-	if _, ok := lcic.mutation.CreatedAt(); !ok {
-		v := lenschaininfo.DefaultCreatedAt()
-		lcic.mutation.SetCreatedAt(v)
+	if _, ok := lcic.mutation.CreateTime(); !ok {
+		v := lenschaininfo.DefaultCreateTime()
+		lcic.mutation.SetCreateTime(v)
 	}
-	if _, ok := lcic.mutation.UpdatedAt(); !ok {
-		v := lenschaininfo.DefaultUpdatedAt()
-		lcic.mutation.SetUpdatedAt(v)
+	if _, ok := lcic.mutation.UpdateTime(); !ok {
+		v := lenschaininfo.DefaultUpdateTime()
+		lcic.mutation.SetUpdateTime(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (lcic *LensChainInfoCreate) check() error {
-	if _, ok := lcic.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "LensChainInfo.created_at"`)}
+	if _, ok := lcic.mutation.CreateTime(); !ok {
+		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "LensChainInfo.create_time"`)}
 	}
-	if _, ok := lcic.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "LensChainInfo.updated_at"`)}
+	if _, ok := lcic.mutation.UpdateTime(); !ok {
+		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "LensChainInfo.update_time"`)}
 	}
 	if _, ok := lcic.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "LensChainInfo.name"`)}
@@ -218,29 +190,13 @@ func (lcic *LensChainInfoCreate) createSpec() (*LensChainInfo, *sqlgraph.CreateS
 		})
 		_node.CreateTime = value
 	}
-	if value, ok := lcic.mutation.UpdatedTime(); ok {
+	if value, ok := lcic.mutation.UpdateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: lenschaininfo.FieldUpdatedTime,
+			Column: lenschaininfo.FieldUpdateTime,
 		})
-		_node.UpdatedTime = value
-	}
-	if value, ok := lcic.mutation.CreatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: lenschaininfo.FieldCreatedAt,
-		})
-		_node.CreatedAt = value
-	}
-	if value, ok := lcic.mutation.UpdatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: lenschaininfo.FieldUpdatedAt,
-		})
-		_node.UpdatedAt = value
+		_node.UpdateTime = value
 	}
 	if value, ok := lcic.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

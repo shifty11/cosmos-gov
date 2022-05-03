@@ -14,30 +14,16 @@ const (
 	FieldID = "id"
 	// FieldCreateTime holds the string denoting the create_time field in the database.
 	FieldCreateTime = "create_time"
-	// FieldUpdatedTime holds the string denoting the updated_time field in the database.
-	FieldUpdatedTime = "updated_time"
-	// FieldCreatedAt holds the string denoting the created_at field in the database.
-	FieldCreatedAt = "created_at"
-	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
-	FieldUpdatedAt = "updated_at"
+	// FieldUpdateTime holds the string denoting the update_time field in the database.
+	FieldUpdateTime = "update_time"
 	// FieldUserID holds the string denoting the user_id field in the database.
 	FieldUserID = "user_id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// FieldChatID holds the string denoting the chat_id field in the database.
-	FieldChatID = "chat_id"
 	// FieldType holds the string denoting the type field in the database.
 	FieldType = "type"
 	// FieldLoginToken holds the string denoting the login_token field in the database.
 	FieldLoginToken = "login_token"
-	// FieldUserName holds the string denoting the user_name field in the database.
-	FieldUserName = "user_name"
-	// FieldChatName holds the string denoting the chat_name field in the database.
-	FieldChatName = "chat_name"
-	// FieldIsGroup holds the string denoting the is_group field in the database.
-	FieldIsGroup = "is_group"
-	// EdgeChains holds the string denoting the chains edge name in mutations.
-	EdgeChains = "chains"
 	// EdgeTelegramChats holds the string denoting the telegram_chats edge name in mutations.
 	EdgeTelegramChats = "telegram_chats"
 	// EdgeDiscordChannels holds the string denoting the discord_channels edge name in mutations.
@@ -46,11 +32,6 @@ const (
 	EdgeWallets = "wallets"
 	// Table holds the table name of the user in the database.
 	Table = "users"
-	// ChainsTable is the table that holds the chains relation/edge. The primary key declared below.
-	ChainsTable = "user_chains"
-	// ChainsInverseTable is the table name for the Chain entity.
-	// It exists in this package in order to avoid circular dependency with the "chain" package.
-	ChainsInverseTable = "chains"
 	// TelegramChatsTable is the table that holds the telegram_chats relation/edge.
 	TelegramChatsTable = "telegram_chats"
 	// TelegramChatsInverseTable is the table name for the TelegramChat entity.
@@ -76,23 +57,14 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldCreateTime,
-	FieldUpdatedTime,
-	FieldCreatedAt,
-	FieldUpdatedAt,
+	FieldUpdateTime,
 	FieldUserID,
 	FieldName,
-	FieldChatID,
 	FieldType,
 	FieldLoginToken,
-	FieldUserName,
-	FieldChatName,
-	FieldIsGroup,
 }
 
 var (
-	// ChainsPrimaryKey and ChainsColumn2 are the table columns denoting the
-	// primary key for the chains relation (M2M).
-	ChainsPrimaryKey = []string{"user_id", "chain_id"}
 	// WalletsPrimaryKey and WalletsColumn2 are the table columns denoting the
 	// primary key for the wallets relation (M2M).
 	WalletsPrimaryKey = []string{"user_id", "wallet_id"}
@@ -109,22 +81,12 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
-	DefaultCreatedAt func() time.Time
-	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
-	DefaultUpdatedAt func() time.Time
-	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
-	UpdateDefaultUpdatedAt func() time.Time
-	// DefaultName holds the default value on creation for the "name" field.
-	DefaultName string
-	// DefaultLoginToken holds the default value on creation for the "login_token" field.
-	DefaultLoginToken string
-	// DefaultUserName holds the default value on creation for the "user_name" field.
-	DefaultUserName string
-	// DefaultChatName holds the default value on creation for the "chat_name" field.
-	DefaultChatName string
-	// DefaultIsGroup holds the default value on creation for the "is_group" field.
-	DefaultIsGroup bool
+	// DefaultCreateTime holds the default value on creation for the "create_time" field.
+	DefaultCreateTime func() time.Time
+	// DefaultUpdateTime holds the default value on creation for the "update_time" field.
+	DefaultUpdateTime func() time.Time
+	// UpdateDefaultUpdateTime holds the default value on update for the "update_time" field.
+	UpdateDefaultUpdateTime func() time.Time
 )
 
 // Type defines the type for the "type" enum field.

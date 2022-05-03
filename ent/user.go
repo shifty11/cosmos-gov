@@ -18,28 +18,16 @@ type User struct {
 	ID int `json:"id,omitempty"`
 	// CreateTime holds the value of the "create_time" field.
 	CreateTime time.Time `json:"create_time,omitempty"`
-	// UpdatedTime holds the value of the "updated_time" field.
-	UpdatedTime time.Time `json:"updated_time,omitempty"`
-	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt time.Time `json:"created_at,omitempty"`
-	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// UpdateTime holds the value of the "update_time" field.
+	UpdateTime time.Time `json:"update_time,omitempty"`
 	// UserID holds the value of the "user_id" field.
 	UserID int64 `json:"user_id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
-	// ChatID holds the value of the "chat_id" field.
-	ChatID int64 `json:"chat_id,omitempty"`
 	// Type holds the value of the "type" field.
 	Type user.Type `json:"type,omitempty"`
 	// LoginToken holds the value of the "login_token" field.
 	LoginToken string `json:"login_token,omitempty"`
-	// UserName holds the value of the "user_name" field.
-	UserName string `json:"user_name,omitempty"`
-	// ChatName holds the value of the "chat_name" field.
-	ChatName string `json:"chat_name,omitempty"`
-	// IsGroup holds the value of the "is_group" field.
-	IsGroup bool `json:"is_group,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges UserEdges `json:"edges"`
@@ -47,8 +35,6 @@ type User struct {
 
 // UserEdges holds the relations/edges for other nodes in the graph.
 type UserEdges struct {
-	// Chains holds the value of the chains edge.
-	Chains []*Chain `json:"chains,omitempty"`
 	// TelegramChats holds the value of the telegram_chats edge.
 	TelegramChats []*TelegramChat `json:"telegram_chats,omitempty"`
 	// DiscordChannels holds the value of the discord_channels edge.
@@ -57,22 +43,13 @@ type UserEdges struct {
 	Wallets []*Wallet `json:"wallets,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
-}
-
-// ChainsOrErr returns the Chains value or an error if the edge
-// was not loaded in eager-loading.
-func (e UserEdges) ChainsOrErr() ([]*Chain, error) {
-	if e.loadedTypes[0] {
-		return e.Chains, nil
-	}
-	return nil, &NotLoadedError{edge: "chains"}
+	loadedTypes [3]bool
 }
 
 // TelegramChatsOrErr returns the TelegramChats value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) TelegramChatsOrErr() ([]*TelegramChat, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[0] {
 		return e.TelegramChats, nil
 	}
 	return nil, &NotLoadedError{edge: "telegram_chats"}
@@ -81,7 +58,7 @@ func (e UserEdges) TelegramChatsOrErr() ([]*TelegramChat, error) {
 // DiscordChannelsOrErr returns the DiscordChannels value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) DiscordChannelsOrErr() ([]*DiscordChannel, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[1] {
 		return e.DiscordChannels, nil
 	}
 	return nil, &NotLoadedError{edge: "discord_channels"}
@@ -90,7 +67,7 @@ func (e UserEdges) DiscordChannelsOrErr() ([]*DiscordChannel, error) {
 // WalletsOrErr returns the Wallets value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) WalletsOrErr() ([]*Wallet, error) {
-	if e.loadedTypes[3] {
+	if e.loadedTypes[2] {
 		return e.Wallets, nil
 	}
 	return nil, &NotLoadedError{edge: "wallets"}
@@ -101,13 +78,11 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldIsGroup:
-			values[i] = new(sql.NullBool)
-		case user.FieldID, user.FieldUserID, user.FieldChatID:
+		case user.FieldID, user.FieldUserID:
 			values[i] = new(sql.NullInt64)
-		case user.FieldName, user.FieldType, user.FieldLoginToken, user.FieldUserName, user.FieldChatName:
+		case user.FieldName, user.FieldType, user.FieldLoginToken:
 			values[i] = new(sql.NullString)
-		case user.FieldCreateTime, user.FieldUpdatedTime, user.FieldCreatedAt, user.FieldUpdatedAt:
+		case user.FieldCreateTime, user.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type User", columns[i])
@@ -136,23 +111,11 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				u.CreateTime = value.Time
 			}
-		case user.FieldUpdatedTime:
+		case user.FieldUpdateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field updated_time", values[i])
+				return fmt.Errorf("unexpected type %T for field update_time", values[i])
 			} else if value.Valid {
-				u.UpdatedTime = value.Time
-			}
-		case user.FieldCreatedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field created_at", values[i])
-			} else if value.Valid {
-				u.CreatedAt = value.Time
-			}
-		case user.FieldUpdatedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
-			} else if value.Valid {
-				u.UpdatedAt = value.Time
+				u.UpdateTime = value.Time
 			}
 		case user.FieldUserID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -166,12 +129,6 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				u.Name = value.String
 			}
-		case user.FieldChatID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field chat_id", values[i])
-			} else if value.Valid {
-				u.ChatID = value.Int64
-			}
 		case user.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field type", values[i])
@@ -184,32 +141,9 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				u.LoginToken = value.String
 			}
-		case user.FieldUserName:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field user_name", values[i])
-			} else if value.Valid {
-				u.UserName = value.String
-			}
-		case user.FieldChatName:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field chat_name", values[i])
-			} else if value.Valid {
-				u.ChatName = value.String
-			}
-		case user.FieldIsGroup:
-			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field is_group", values[i])
-			} else if value.Valid {
-				u.IsGroup = value.Bool
-			}
 		}
 	}
 	return nil
-}
-
-// QueryChains queries the "chains" edge of the User entity.
-func (u *User) QueryChains() *ChainQuery {
-	return (&UserClient{config: u.config}).QueryChains(u)
 }
 
 // QueryTelegramChats queries the "telegram_chats" edge of the User entity.
@@ -252,28 +186,16 @@ func (u *User) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", u.ID))
 	builder.WriteString(", create_time=")
 	builder.WriteString(u.CreateTime.Format(time.ANSIC))
-	builder.WriteString(", updated_time=")
-	builder.WriteString(u.UpdatedTime.Format(time.ANSIC))
-	builder.WriteString(", created_at=")
-	builder.WriteString(u.CreatedAt.Format(time.ANSIC))
-	builder.WriteString(", updated_at=")
-	builder.WriteString(u.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", update_time=")
+	builder.WriteString(u.UpdateTime.Format(time.ANSIC))
 	builder.WriteString(", user_id=")
 	builder.WriteString(fmt.Sprintf("%v", u.UserID))
 	builder.WriteString(", name=")
 	builder.WriteString(u.Name)
-	builder.WriteString(", chat_id=")
-	builder.WriteString(fmt.Sprintf("%v", u.ChatID))
 	builder.WriteString(", type=")
 	builder.WriteString(fmt.Sprintf("%v", u.Type))
 	builder.WriteString(", login_token=")
 	builder.WriteString(u.LoginToken)
-	builder.WriteString(", user_name=")
-	builder.WriteString(u.UserName)
-	builder.WriteString(", chat_name=")
-	builder.WriteString(u.ChatName)
-	builder.WriteString(", is_group=")
-	builder.WriteString(fmt.Sprintf("%v", u.IsGroup))
 	builder.WriteByte(')')
 	return builder.String()
 }

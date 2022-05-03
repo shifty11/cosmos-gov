@@ -17,7 +17,6 @@ import (
 	"github.com/shifty11/cosmos-gov/ent/proposal"
 	"github.com/shifty11/cosmos-gov/ent/rpcendpoint"
 	"github.com/shifty11/cosmos-gov/ent/telegramchat"
-	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/ent/wallet"
 )
 
@@ -34,49 +33,9 @@ func (cu *ChainUpdate) Where(ps ...predicate.Chain) *ChainUpdate {
 	return cu
 }
 
-// SetCreateTime sets the "create_time" field.
-func (cu *ChainUpdate) SetCreateTime(t time.Time) *ChainUpdate {
-	cu.mutation.SetCreateTime(t)
-	return cu
-}
-
-// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
-func (cu *ChainUpdate) SetNillableCreateTime(t *time.Time) *ChainUpdate {
-	if t != nil {
-		cu.SetCreateTime(*t)
-	}
-	return cu
-}
-
-// ClearCreateTime clears the value of the "create_time" field.
-func (cu *ChainUpdate) ClearCreateTime() *ChainUpdate {
-	cu.mutation.ClearCreateTime()
-	return cu
-}
-
-// SetUpdatedTime sets the "updated_time" field.
-func (cu *ChainUpdate) SetUpdatedTime(t time.Time) *ChainUpdate {
-	cu.mutation.SetUpdatedTime(t)
-	return cu
-}
-
-// SetNillableUpdatedTime sets the "updated_time" field if the given value is not nil.
-func (cu *ChainUpdate) SetNillableUpdatedTime(t *time.Time) *ChainUpdate {
-	if t != nil {
-		cu.SetUpdatedTime(*t)
-	}
-	return cu
-}
-
-// ClearUpdatedTime clears the value of the "updated_time" field.
-func (cu *ChainUpdate) ClearUpdatedTime() *ChainUpdate {
-	cu.mutation.ClearUpdatedTime()
-	return cu
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (cu *ChainUpdate) SetUpdatedAt(t time.Time) *ChainUpdate {
-	cu.mutation.SetUpdatedAt(t)
+// SetUpdateTime sets the "update_time" field.
+func (cu *ChainUpdate) SetUpdateTime(t time.Time) *ChainUpdate {
+	cu.mutation.SetUpdateTime(t)
 	return cu
 }
 
@@ -144,21 +103,6 @@ func (cu *ChainUpdate) SetNillableIsEnabled(b *bool) *ChainUpdate {
 		cu.SetIsEnabled(*b)
 	}
 	return cu
-}
-
-// AddUserIDs adds the "users" edge to the User entity by IDs.
-func (cu *ChainUpdate) AddUserIDs(ids ...int) *ChainUpdate {
-	cu.mutation.AddUserIDs(ids...)
-	return cu
-}
-
-// AddUsers adds the "users" edges to the User entity.
-func (cu *ChainUpdate) AddUsers(u ...*User) *ChainUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
-	}
-	return cu.AddUserIDs(ids...)
 }
 
 // AddProposalIDs adds the "proposals" edge to the Proposal entity by IDs.
@@ -239,27 +183,6 @@ func (cu *ChainUpdate) AddWallets(w ...*Wallet) *ChainUpdate {
 // Mutation returns the ChainMutation object of the builder.
 func (cu *ChainUpdate) Mutation() *ChainMutation {
 	return cu.mutation
-}
-
-// ClearUsers clears all "users" edges to the User entity.
-func (cu *ChainUpdate) ClearUsers() *ChainUpdate {
-	cu.mutation.ClearUsers()
-	return cu
-}
-
-// RemoveUserIDs removes the "users" edge to User entities by IDs.
-func (cu *ChainUpdate) RemoveUserIDs(ids ...int) *ChainUpdate {
-	cu.mutation.RemoveUserIDs(ids...)
-	return cu
-}
-
-// RemoveUsers removes "users" edges to User entities.
-func (cu *ChainUpdate) RemoveUsers(u ...*User) *ChainUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
-	}
-	return cu.RemoveUserIDs(ids...)
 }
 
 // ClearProposals clears all "proposals" edges to the Proposal entity.
@@ -424,9 +347,9 @@ func (cu *ChainUpdate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (cu *ChainUpdate) defaults() {
-	if _, ok := cu.mutation.UpdatedAt(); !ok {
-		v := chain.UpdateDefaultUpdatedAt()
-		cu.mutation.SetUpdatedAt(v)
+	if _, ok := cu.mutation.UpdateTime(); !ok {
+		v := chain.UpdateDefaultUpdateTime()
+		cu.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -448,37 +371,11 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := cu.mutation.CreateTime(); ok {
+	if value, ok := cu.mutation.UpdateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: chain.FieldCreateTime,
-		})
-	}
-	if cu.mutation.CreateTimeCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Column: chain.FieldCreateTime,
-		})
-	}
-	if value, ok := cu.mutation.UpdatedTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: chain.FieldUpdatedTime,
-		})
-	}
-	if cu.mutation.UpdatedTimeCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Column: chain.FieldUpdatedTime,
-		})
-	}
-	if value, ok := cu.mutation.UpdatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: chain.FieldUpdatedAt,
+			Column: chain.FieldUpdateTime,
 		})
 	}
 	if value, ok := cu.mutation.ChainID(); ok {
@@ -527,60 +424,6 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Value:  value,
 			Column: chain.FieldIsEnabled,
 		})
-	}
-	if cu.mutation.UsersCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   chain.UsersTable,
-			Columns: chain.UsersPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := cu.mutation.RemovedUsersIDs(); len(nodes) > 0 && !cu.mutation.UsersCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   chain.UsersTable,
-			Columns: chain.UsersPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := cu.mutation.UsersIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   chain.UsersTable,
-			Columns: chain.UsersPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if cu.mutation.ProposalsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -871,49 +714,9 @@ type ChainUpdateOne struct {
 	mutation *ChainMutation
 }
 
-// SetCreateTime sets the "create_time" field.
-func (cuo *ChainUpdateOne) SetCreateTime(t time.Time) *ChainUpdateOne {
-	cuo.mutation.SetCreateTime(t)
-	return cuo
-}
-
-// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
-func (cuo *ChainUpdateOne) SetNillableCreateTime(t *time.Time) *ChainUpdateOne {
-	if t != nil {
-		cuo.SetCreateTime(*t)
-	}
-	return cuo
-}
-
-// ClearCreateTime clears the value of the "create_time" field.
-func (cuo *ChainUpdateOne) ClearCreateTime() *ChainUpdateOne {
-	cuo.mutation.ClearCreateTime()
-	return cuo
-}
-
-// SetUpdatedTime sets the "updated_time" field.
-func (cuo *ChainUpdateOne) SetUpdatedTime(t time.Time) *ChainUpdateOne {
-	cuo.mutation.SetUpdatedTime(t)
-	return cuo
-}
-
-// SetNillableUpdatedTime sets the "updated_time" field if the given value is not nil.
-func (cuo *ChainUpdateOne) SetNillableUpdatedTime(t *time.Time) *ChainUpdateOne {
-	if t != nil {
-		cuo.SetUpdatedTime(*t)
-	}
-	return cuo
-}
-
-// ClearUpdatedTime clears the value of the "updated_time" field.
-func (cuo *ChainUpdateOne) ClearUpdatedTime() *ChainUpdateOne {
-	cuo.mutation.ClearUpdatedTime()
-	return cuo
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (cuo *ChainUpdateOne) SetUpdatedAt(t time.Time) *ChainUpdateOne {
-	cuo.mutation.SetUpdatedAt(t)
+// SetUpdateTime sets the "update_time" field.
+func (cuo *ChainUpdateOne) SetUpdateTime(t time.Time) *ChainUpdateOne {
+	cuo.mutation.SetUpdateTime(t)
 	return cuo
 }
 
@@ -981,21 +784,6 @@ func (cuo *ChainUpdateOne) SetNillableIsEnabled(b *bool) *ChainUpdateOne {
 		cuo.SetIsEnabled(*b)
 	}
 	return cuo
-}
-
-// AddUserIDs adds the "users" edge to the User entity by IDs.
-func (cuo *ChainUpdateOne) AddUserIDs(ids ...int) *ChainUpdateOne {
-	cuo.mutation.AddUserIDs(ids...)
-	return cuo
-}
-
-// AddUsers adds the "users" edges to the User entity.
-func (cuo *ChainUpdateOne) AddUsers(u ...*User) *ChainUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
-	}
-	return cuo.AddUserIDs(ids...)
 }
 
 // AddProposalIDs adds the "proposals" edge to the Proposal entity by IDs.
@@ -1076,27 +864,6 @@ func (cuo *ChainUpdateOne) AddWallets(w ...*Wallet) *ChainUpdateOne {
 // Mutation returns the ChainMutation object of the builder.
 func (cuo *ChainUpdateOne) Mutation() *ChainMutation {
 	return cuo.mutation
-}
-
-// ClearUsers clears all "users" edges to the User entity.
-func (cuo *ChainUpdateOne) ClearUsers() *ChainUpdateOne {
-	cuo.mutation.ClearUsers()
-	return cuo
-}
-
-// RemoveUserIDs removes the "users" edge to User entities by IDs.
-func (cuo *ChainUpdateOne) RemoveUserIDs(ids ...int) *ChainUpdateOne {
-	cuo.mutation.RemoveUserIDs(ids...)
-	return cuo
-}
-
-// RemoveUsers removes "users" edges to User entities.
-func (cuo *ChainUpdateOne) RemoveUsers(u ...*User) *ChainUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
-	}
-	return cuo.RemoveUserIDs(ids...)
 }
 
 // ClearProposals clears all "proposals" edges to the Proposal entity.
@@ -1268,9 +1035,9 @@ func (cuo *ChainUpdateOne) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (cuo *ChainUpdateOne) defaults() {
-	if _, ok := cuo.mutation.UpdatedAt(); !ok {
-		v := chain.UpdateDefaultUpdatedAt()
-		cuo.mutation.SetUpdatedAt(v)
+	if _, ok := cuo.mutation.UpdateTime(); !ok {
+		v := chain.UpdateDefaultUpdateTime()
+		cuo.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -1309,37 +1076,11 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 			}
 		}
 	}
-	if value, ok := cuo.mutation.CreateTime(); ok {
+	if value, ok := cuo.mutation.UpdateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: chain.FieldCreateTime,
-		})
-	}
-	if cuo.mutation.CreateTimeCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Column: chain.FieldCreateTime,
-		})
-	}
-	if value, ok := cuo.mutation.UpdatedTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: chain.FieldUpdatedTime,
-		})
-	}
-	if cuo.mutation.UpdatedTimeCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Column: chain.FieldUpdatedTime,
-		})
-	}
-	if value, ok := cuo.mutation.UpdatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: chain.FieldUpdatedAt,
+			Column: chain.FieldUpdateTime,
 		})
 	}
 	if value, ok := cuo.mutation.ChainID(); ok {
@@ -1388,60 +1129,6 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 			Value:  value,
 			Column: chain.FieldIsEnabled,
 		})
-	}
-	if cuo.mutation.UsersCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   chain.UsersTable,
-			Columns: chain.UsersPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := cuo.mutation.RemovedUsersIDs(); len(nodes) > 0 && !cuo.mutation.UsersCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   chain.UsersTable,
-			Columns: chain.UsersPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := cuo.mutation.UsersIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   chain.UsersTable,
-			Columns: chain.UsersPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if cuo.mutation.ProposalsCleared() {
 		edge := &sqlgraph.EdgeSpec{

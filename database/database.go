@@ -3,14 +3,11 @@ package database
 import (
 	"context"
 	"github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/shifty11/cosmos-gov/ent/migrate"
-	"github.com/shifty11/cosmos-gov/ent/migrationinfo"
-	"github.com/shifty11/cosmos-gov/ent/user"
-	regen "github.com/zach-klippenstein/goregen"
-	"os"
-
 	"github.com/shifty11/cosmos-gov/ent"
+	"github.com/shifty11/cosmos-gov/ent/migrate"
+	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/log"
+	"os"
 )
 
 var dbClient *ent.Client
@@ -75,121 +72,6 @@ func MigrateDatabase() {
 	if err != nil {
 		log.Sugar.Panicf("Failed creating schema resources: %v", err)
 	}
-	migrateUsers()
-}
-
-// TODO: remove after migration
-// TODO: I don't have the user ids of telegram/discord... needs an additional migration step or empty user
-func migrateUsers() {
-	client, ctx := connect()
-	doesExist, err := client.MigrationInfo.
-		Query().
-		Where(migrationinfo.IsMigratedEQ(true)).
-		Exist(ctx)
-	if err != nil {
-		log.Sugar.Panicf("Failed migrating %v", err)
-	}
-	if doesExist {
-		return
-	}
-
-	users, err := client.User.
-		Query().
-		WithChains().
-		All(ctx)
-	if err != nil {
-		log.Sugar.Panicf("Failed migrating %v", err)
-	}
-
-	_, err = client.TelegramChat.
-		Delete().
-		Exec(ctx)
-	if err != nil {
-		log.Sugar.Panicf("Failed migrating %v", err)
-	}
-	_, err = client.DiscordChannel.
-		Delete().
-		Exec(ctx)
-	if err != nil {
-		log.Sugar.Panicf("Failed migrating %v", err)
-	}
-
-	for _, u := range users {
-		chains, err := u.QueryChains().All(ctx)
-		if err != nil {
-			log.Sugar.Panicf("Failed migrating %v", err)
-		}
-		token, err := regen.Generate("[A-Za-z0-9]{32}")
-		if err != nil {
-			log.Sugar.Panicf("Failed migrating %v", err)
-		}
-		u.Update().SetName(u.UserName).SetLoginToken(token).SaveX(ctx)
-		if u.Type == user.TypeTelegram {
-			err = client.TelegramChat.
-				Create().
-				SetChatID(u.ChatID).
-				SetName(u.ChatName).
-				SetIsGroup(u.ChatID < 0).
-				SetUser(u).
-				AddChains(chains...).
-				Exec(ctx)
-			if err != nil {
-				log.Sugar.Panicf("Failed migrating %v", err)
-			}
-		} else {
-			err = client.DiscordChannel.
-				Create().
-				SetChannelID(u.ChatID).
-				SetName(u.ChatName).
-				SetIsGroup(true). // TODO: set this field properly
-				SetUser(u).
-				AddChains(chains...).
-				Exec(ctx)
-			if err != nil {
-				log.Sugar.Panicf("Failed migrating %v", err)
-			}
-		}
-	}
-
-	for _, c := range client.Chain.Query().AllX(ctx) {
-		c.Update().
-			SetCreateTime(c.CreatedAt).
-			SetUpdatedTime(c.UpdatedAt).
-			SaveX(ctx)
-	}
-	for _, c := range client.LensChainInfo.Query().AllX(ctx) {
-		c.Update().
-			SetCreateTime(c.CreatedAt).
-			SetUpdatedTime(c.UpdatedAt).
-			SaveX(ctx)
-	}
-	for _, c := range client.Proposal.Query().AllX(ctx) {
-		c.Update().
-			SetCreateTime(c.CreatedAt).
-			SetUpdatedTime(c.UpdatedAt).
-			SaveX(ctx)
-	}
-	for _, c := range client.RpcEndpoint.Query().AllX(ctx) {
-		c.Update().
-			SetCreateTime(c.CreatedAt).
-			SetUpdatedTime(c.UpdatedAt).
-			SaveX(ctx)
-	}
-	for _, c := range client.User.Query().AllX(ctx) {
-		c.Update().
-			SetCreateTime(c.CreatedAt).
-			SetUpdatedTime(c.UpdatedAt).
-			SaveX(ctx)
-	}
-
-	err = client.MigrationInfo.
-		Create().
-		SetIsMigrated(true).
-		Exec(ctx)
-	if err != nil {
-		log.Sugar.Panicf("Failed migrating %v", err)
-	}
-	log.Sugar.Info("User migration successful")
 }
 
 type DbManagers struct {

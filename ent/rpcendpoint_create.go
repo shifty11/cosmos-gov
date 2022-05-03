@@ -35,44 +35,16 @@ func (rec *RpcEndpointCreate) SetNillableCreateTime(t *time.Time) *RpcEndpointCr
 	return rec
 }
 
-// SetUpdatedTime sets the "updated_time" field.
-func (rec *RpcEndpointCreate) SetUpdatedTime(t time.Time) *RpcEndpointCreate {
-	rec.mutation.SetUpdatedTime(t)
+// SetUpdateTime sets the "update_time" field.
+func (rec *RpcEndpointCreate) SetUpdateTime(t time.Time) *RpcEndpointCreate {
+	rec.mutation.SetUpdateTime(t)
 	return rec
 }
 
-// SetNillableUpdatedTime sets the "updated_time" field if the given value is not nil.
-func (rec *RpcEndpointCreate) SetNillableUpdatedTime(t *time.Time) *RpcEndpointCreate {
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (rec *RpcEndpointCreate) SetNillableUpdateTime(t *time.Time) *RpcEndpointCreate {
 	if t != nil {
-		rec.SetUpdatedTime(*t)
-	}
-	return rec
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (rec *RpcEndpointCreate) SetCreatedAt(t time.Time) *RpcEndpointCreate {
-	rec.mutation.SetCreatedAt(t)
-	return rec
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (rec *RpcEndpointCreate) SetNillableCreatedAt(t *time.Time) *RpcEndpointCreate {
-	if t != nil {
-		rec.SetCreatedAt(*t)
-	}
-	return rec
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (rec *RpcEndpointCreate) SetUpdatedAt(t time.Time) *RpcEndpointCreate {
-	rec.mutation.SetUpdatedAt(t)
-	return rec
-}
-
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (rec *RpcEndpointCreate) SetNillableUpdatedAt(t *time.Time) *RpcEndpointCreate {
-	if t != nil {
-		rec.SetUpdatedAt(*t)
+		rec.SetUpdateTime(*t)
 	}
 	return rec
 }
@@ -173,23 +145,23 @@ func (rec *RpcEndpointCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (rec *RpcEndpointCreate) defaults() {
-	if _, ok := rec.mutation.CreatedAt(); !ok {
-		v := rpcendpoint.DefaultCreatedAt()
-		rec.mutation.SetCreatedAt(v)
+	if _, ok := rec.mutation.CreateTime(); !ok {
+		v := rpcendpoint.DefaultCreateTime()
+		rec.mutation.SetCreateTime(v)
 	}
-	if _, ok := rec.mutation.UpdatedAt(); !ok {
-		v := rpcendpoint.DefaultUpdatedAt()
-		rec.mutation.SetUpdatedAt(v)
+	if _, ok := rec.mutation.UpdateTime(); !ok {
+		v := rpcendpoint.DefaultUpdateTime()
+		rec.mutation.SetUpdateTime(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (rec *RpcEndpointCreate) check() error {
-	if _, ok := rec.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "RpcEndpoint.created_at"`)}
+	if _, ok := rec.mutation.CreateTime(); !ok {
+		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "RpcEndpoint.create_time"`)}
 	}
-	if _, ok := rec.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "RpcEndpoint.updated_at"`)}
+	if _, ok := rec.mutation.UpdateTime(); !ok {
+		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "RpcEndpoint.update_time"`)}
 	}
 	if _, ok := rec.mutation.Endpoint(); !ok {
 		return &ValidationError{Name: "endpoint", err: errors.New(`ent: missing required field "RpcEndpoint.endpoint"`)}
@@ -229,29 +201,13 @@ func (rec *RpcEndpointCreate) createSpec() (*RpcEndpoint, *sqlgraph.CreateSpec) 
 		})
 		_node.CreateTime = value
 	}
-	if value, ok := rec.mutation.UpdatedTime(); ok {
+	if value, ok := rec.mutation.UpdateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: rpcendpoint.FieldUpdatedTime,
+			Column: rpcendpoint.FieldUpdateTime,
 		})
-		_node.UpdatedTime = value
-	}
-	if value, ok := rec.mutation.CreatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: rpcendpoint.FieldCreatedAt,
-		})
-		_node.CreatedAt = value
-	}
-	if value, ok := rec.mutation.UpdatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: rpcendpoint.FieldUpdatedAt,
-		})
-		_node.UpdatedAt = value
+		_node.UpdateTime = value
 	}
 	if value, ok := rec.mutation.Endpoint(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

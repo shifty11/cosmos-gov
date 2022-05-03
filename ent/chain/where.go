@@ -100,24 +100,10 @@ func CreateTime(v time.Time) predicate.Chain {
 	})
 }
 
-// UpdatedTime applies equality check predicate on the "updated_time" field. It's identical to UpdatedTimeEQ.
-func UpdatedTime(v time.Time) predicate.Chain {
+// UpdateTime applies equality check predicate on the "update_time" field. It's identical to UpdateTimeEQ.
+func UpdateTime(v time.Time) predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUpdatedTime), v))
-	})
-}
-
-// CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
-func CreatedAt(v time.Time) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCreatedAt), v))
-	})
-}
-
-// UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
-func UpdatedAt(v time.Time) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUpdatedAt), v))
+		s.Where(sql.EQ(s.C(FieldUpdateTime), v))
 	})
 }
 
@@ -232,36 +218,22 @@ func CreateTimeLTE(v time.Time) predicate.Chain {
 	})
 }
 
-// CreateTimeIsNil applies the IsNil predicate on the "create_time" field.
-func CreateTimeIsNil() predicate.Chain {
+// UpdateTimeEQ applies the EQ predicate on the "update_time" field.
+func UpdateTimeEQ(v time.Time) predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldCreateTime)))
+		s.Where(sql.EQ(s.C(FieldUpdateTime), v))
 	})
 }
 
-// CreateTimeNotNil applies the NotNil predicate on the "create_time" field.
-func CreateTimeNotNil() predicate.Chain {
+// UpdateTimeNEQ applies the NEQ predicate on the "update_time" field.
+func UpdateTimeNEQ(v time.Time) predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldCreateTime)))
+		s.Where(sql.NEQ(s.C(FieldUpdateTime), v))
 	})
 }
 
-// UpdatedTimeEQ applies the EQ predicate on the "updated_time" field.
-func UpdatedTimeEQ(v time.Time) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUpdatedTime), v))
-	})
-}
-
-// UpdatedTimeNEQ applies the NEQ predicate on the "updated_time" field.
-func UpdatedTimeNEQ(v time.Time) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldUpdatedTime), v))
-	})
-}
-
-// UpdatedTimeIn applies the In predicate on the "updated_time" field.
-func UpdatedTimeIn(vs ...time.Time) predicate.Chain {
+// UpdateTimeIn applies the In predicate on the "update_time" field.
+func UpdateTimeIn(vs ...time.Time) predicate.Chain {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -273,12 +245,12 @@ func UpdatedTimeIn(vs ...time.Time) predicate.Chain {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.In(s.C(FieldUpdatedTime), v...))
+		s.Where(sql.In(s.C(FieldUpdateTime), v...))
 	})
 }
 
-// UpdatedTimeNotIn applies the NotIn predicate on the "updated_time" field.
-func UpdatedTimeNotIn(vs ...time.Time) predicate.Chain {
+// UpdateTimeNotIn applies the NotIn predicate on the "update_time" field.
+func UpdateTimeNotIn(vs ...time.Time) predicate.Chain {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -290,201 +262,35 @@ func UpdatedTimeNotIn(vs ...time.Time) predicate.Chain {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.NotIn(s.C(FieldUpdatedTime), v...))
+		s.Where(sql.NotIn(s.C(FieldUpdateTime), v...))
 	})
 }
 
-// UpdatedTimeGT applies the GT predicate on the "updated_time" field.
-func UpdatedTimeGT(v time.Time) predicate.Chain {
+// UpdateTimeGT applies the GT predicate on the "update_time" field.
+func UpdateTimeGT(v time.Time) predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldUpdatedTime), v))
+		s.Where(sql.GT(s.C(FieldUpdateTime), v))
 	})
 }
 
-// UpdatedTimeGTE applies the GTE predicate on the "updated_time" field.
-func UpdatedTimeGTE(v time.Time) predicate.Chain {
+// UpdateTimeGTE applies the GTE predicate on the "update_time" field.
+func UpdateTimeGTE(v time.Time) predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldUpdatedTime), v))
+		s.Where(sql.GTE(s.C(FieldUpdateTime), v))
 	})
 }
 
-// UpdatedTimeLT applies the LT predicate on the "updated_time" field.
-func UpdatedTimeLT(v time.Time) predicate.Chain {
+// UpdateTimeLT applies the LT predicate on the "update_time" field.
+func UpdateTimeLT(v time.Time) predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldUpdatedTime), v))
+		s.Where(sql.LT(s.C(FieldUpdateTime), v))
 	})
 }
 
-// UpdatedTimeLTE applies the LTE predicate on the "updated_time" field.
-func UpdatedTimeLTE(v time.Time) predicate.Chain {
+// UpdateTimeLTE applies the LTE predicate on the "update_time" field.
+func UpdateTimeLTE(v time.Time) predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldUpdatedTime), v))
-	})
-}
-
-// UpdatedTimeIsNil applies the IsNil predicate on the "updated_time" field.
-func UpdatedTimeIsNil() predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldUpdatedTime)))
-	})
-}
-
-// UpdatedTimeNotNil applies the NotNil predicate on the "updated_time" field.
-func UpdatedTimeNotNil() predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldUpdatedTime)))
-	})
-}
-
-// CreatedAtEQ applies the EQ predicate on the "created_at" field.
-func CreatedAtEQ(v time.Time) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCreatedAt), v))
-	})
-}
-
-// CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
-func CreatedAtNEQ(v time.Time) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldCreatedAt), v))
-	})
-}
-
-// CreatedAtIn applies the In predicate on the "created_at" field.
-func CreatedAtIn(vs ...time.Time) predicate.Chain {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Chain(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.In(s.C(FieldCreatedAt), v...))
-	})
-}
-
-// CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
-func CreatedAtNotIn(vs ...time.Time) predicate.Chain {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Chain(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.NotIn(s.C(FieldCreatedAt), v...))
-	})
-}
-
-// CreatedAtGT applies the GT predicate on the "created_at" field.
-func CreatedAtGT(v time.Time) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldCreatedAt), v))
-	})
-}
-
-// CreatedAtGTE applies the GTE predicate on the "created_at" field.
-func CreatedAtGTE(v time.Time) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldCreatedAt), v))
-	})
-}
-
-// CreatedAtLT applies the LT predicate on the "created_at" field.
-func CreatedAtLT(v time.Time) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldCreatedAt), v))
-	})
-}
-
-// CreatedAtLTE applies the LTE predicate on the "created_at" field.
-func CreatedAtLTE(v time.Time) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldCreatedAt), v))
-	})
-}
-
-// UpdatedAtEQ applies the EQ predicate on the "updated_at" field.
-func UpdatedAtEQ(v time.Time) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUpdatedAt), v))
-	})
-}
-
-// UpdatedAtNEQ applies the NEQ predicate on the "updated_at" field.
-func UpdatedAtNEQ(v time.Time) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldUpdatedAt), v))
-	})
-}
-
-// UpdatedAtIn applies the In predicate on the "updated_at" field.
-func UpdatedAtIn(vs ...time.Time) predicate.Chain {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Chain(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.In(s.C(FieldUpdatedAt), v...))
-	})
-}
-
-// UpdatedAtNotIn applies the NotIn predicate on the "updated_at" field.
-func UpdatedAtNotIn(vs ...time.Time) predicate.Chain {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Chain(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.NotIn(s.C(FieldUpdatedAt), v...))
-	})
-}
-
-// UpdatedAtGT applies the GT predicate on the "updated_at" field.
-func UpdatedAtGT(v time.Time) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldUpdatedAt), v))
-	})
-}
-
-// UpdatedAtGTE applies the GTE predicate on the "updated_at" field.
-func UpdatedAtGTE(v time.Time) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldUpdatedAt), v))
-	})
-}
-
-// UpdatedAtLT applies the LT predicate on the "updated_at" field.
-func UpdatedAtLT(v time.Time) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldUpdatedAt), v))
-	})
-}
-
-// UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
-func UpdatedAtLTE(v time.Time) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldUpdatedAt), v))
+		s.Where(sql.LTE(s.C(FieldUpdateTime), v))
 	})
 }
 
@@ -971,34 +777,6 @@ func IsEnabledEQ(v bool) predicate.Chain {
 func IsEnabledNEQ(v bool) predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldIsEnabled), v))
-	})
-}
-
-// HasUsers applies the HasEdge predicate on the "users" edge.
-func HasUsers() predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(UsersTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, UsersTable, UsersPrimaryKey...),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasUsersWith applies the HasEdge predicate on the "users" edge with a given conditions (other predicates).
-func HasUsersWith(preds ...predicate.User) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(UsersInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, UsersTable, UsersPrimaryKey...),
-		)
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
 	})
 }
 

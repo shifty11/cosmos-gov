@@ -10,7 +10,6 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/shifty11/cosmos-gov/ent/chain"
 	"github.com/shifty11/cosmos-gov/ent/discordchannel"
 	"github.com/shifty11/cosmos-gov/ent/telegramchat"
 	"github.com/shifty11/cosmos-gov/ent/user"
@@ -38,44 +37,16 @@ func (uc *UserCreate) SetNillableCreateTime(t *time.Time) *UserCreate {
 	return uc
 }
 
-// SetUpdatedTime sets the "updated_time" field.
-func (uc *UserCreate) SetUpdatedTime(t time.Time) *UserCreate {
-	uc.mutation.SetUpdatedTime(t)
+// SetUpdateTime sets the "update_time" field.
+func (uc *UserCreate) SetUpdateTime(t time.Time) *UserCreate {
+	uc.mutation.SetUpdateTime(t)
 	return uc
 }
 
-// SetNillableUpdatedTime sets the "updated_time" field if the given value is not nil.
-func (uc *UserCreate) SetNillableUpdatedTime(t *time.Time) *UserCreate {
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (uc *UserCreate) SetNillableUpdateTime(t *time.Time) *UserCreate {
 	if t != nil {
-		uc.SetUpdatedTime(*t)
-	}
-	return uc
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (uc *UserCreate) SetCreatedAt(t time.Time) *UserCreate {
-	uc.mutation.SetCreatedAt(t)
-	return uc
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (uc *UserCreate) SetNillableCreatedAt(t *time.Time) *UserCreate {
-	if t != nil {
-		uc.SetCreatedAt(*t)
-	}
-	return uc
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (uc *UserCreate) SetUpdatedAt(t time.Time) *UserCreate {
-	uc.mutation.SetUpdatedAt(t)
-	return uc
-}
-
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (uc *UserCreate) SetNillableUpdatedAt(t *time.Time) *UserCreate {
-	if t != nil {
-		uc.SetUpdatedAt(*t)
+		uc.SetUpdateTime(*t)
 	}
 	return uc
 }
@@ -100,20 +71,6 @@ func (uc *UserCreate) SetName(s string) *UserCreate {
 	return uc
 }
 
-// SetNillableName sets the "name" field if the given value is not nil.
-func (uc *UserCreate) SetNillableName(s *string) *UserCreate {
-	if s != nil {
-		uc.SetName(*s)
-	}
-	return uc
-}
-
-// SetChatID sets the "chat_id" field.
-func (uc *UserCreate) SetChatID(i int64) *UserCreate {
-	uc.mutation.SetChatID(i)
-	return uc
-}
-
 // SetType sets the "type" field.
 func (uc *UserCreate) SetType(u user.Type) *UserCreate {
 	uc.mutation.SetType(u)
@@ -124,71 +81,6 @@ func (uc *UserCreate) SetType(u user.Type) *UserCreate {
 func (uc *UserCreate) SetLoginToken(s string) *UserCreate {
 	uc.mutation.SetLoginToken(s)
 	return uc
-}
-
-// SetNillableLoginToken sets the "login_token" field if the given value is not nil.
-func (uc *UserCreate) SetNillableLoginToken(s *string) *UserCreate {
-	if s != nil {
-		uc.SetLoginToken(*s)
-	}
-	return uc
-}
-
-// SetUserName sets the "user_name" field.
-func (uc *UserCreate) SetUserName(s string) *UserCreate {
-	uc.mutation.SetUserName(s)
-	return uc
-}
-
-// SetNillableUserName sets the "user_name" field if the given value is not nil.
-func (uc *UserCreate) SetNillableUserName(s *string) *UserCreate {
-	if s != nil {
-		uc.SetUserName(*s)
-	}
-	return uc
-}
-
-// SetChatName sets the "chat_name" field.
-func (uc *UserCreate) SetChatName(s string) *UserCreate {
-	uc.mutation.SetChatName(s)
-	return uc
-}
-
-// SetNillableChatName sets the "chat_name" field if the given value is not nil.
-func (uc *UserCreate) SetNillableChatName(s *string) *UserCreate {
-	if s != nil {
-		uc.SetChatName(*s)
-	}
-	return uc
-}
-
-// SetIsGroup sets the "is_group" field.
-func (uc *UserCreate) SetIsGroup(b bool) *UserCreate {
-	uc.mutation.SetIsGroup(b)
-	return uc
-}
-
-// SetNillableIsGroup sets the "is_group" field if the given value is not nil.
-func (uc *UserCreate) SetNillableIsGroup(b *bool) *UserCreate {
-	if b != nil {
-		uc.SetIsGroup(*b)
-	}
-	return uc
-}
-
-// AddChainIDs adds the "chains" edge to the Chain entity by IDs.
-func (uc *UserCreate) AddChainIDs(ids ...int) *UserCreate {
-	uc.mutation.AddChainIDs(ids...)
-	return uc
-}
-
-// AddChains adds the "chains" edges to the Chain entity.
-func (uc *UserCreate) AddChains(c ...*Chain) *UserCreate {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
-	}
-	return uc.AddChainIDs(ids...)
 }
 
 // AddTelegramChatIDs adds the "telegram_chats" edge to the TelegramChat entity by IDs.
@@ -307,49 +199,26 @@ func (uc *UserCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (uc *UserCreate) defaults() {
-	if _, ok := uc.mutation.CreatedAt(); !ok {
-		v := user.DefaultCreatedAt()
-		uc.mutation.SetCreatedAt(v)
+	if _, ok := uc.mutation.CreateTime(); !ok {
+		v := user.DefaultCreateTime()
+		uc.mutation.SetCreateTime(v)
 	}
-	if _, ok := uc.mutation.UpdatedAt(); !ok {
-		v := user.DefaultUpdatedAt()
-		uc.mutation.SetUpdatedAt(v)
-	}
-	if _, ok := uc.mutation.Name(); !ok {
-		v := user.DefaultName
-		uc.mutation.SetName(v)
-	}
-	if _, ok := uc.mutation.LoginToken(); !ok {
-		v := user.DefaultLoginToken
-		uc.mutation.SetLoginToken(v)
-	}
-	if _, ok := uc.mutation.UserName(); !ok {
-		v := user.DefaultUserName
-		uc.mutation.SetUserName(v)
-	}
-	if _, ok := uc.mutation.ChatName(); !ok {
-		v := user.DefaultChatName
-		uc.mutation.SetChatName(v)
-	}
-	if _, ok := uc.mutation.IsGroup(); !ok {
-		v := user.DefaultIsGroup
-		uc.mutation.SetIsGroup(v)
+	if _, ok := uc.mutation.UpdateTime(); !ok {
+		v := user.DefaultUpdateTime()
+		uc.mutation.SetUpdateTime(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (uc *UserCreate) check() error {
-	if _, ok := uc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "User.created_at"`)}
+	if _, ok := uc.mutation.CreateTime(); !ok {
+		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "User.create_time"`)}
 	}
-	if _, ok := uc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "User.updated_at"`)}
+	if _, ok := uc.mutation.UpdateTime(); !ok {
+		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "User.update_time"`)}
 	}
 	if _, ok := uc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "User.name"`)}
-	}
-	if _, ok := uc.mutation.ChatID(); !ok {
-		return &ValidationError{Name: "chat_id", err: errors.New(`ent: missing required field "User.chat_id"`)}
 	}
 	if _, ok := uc.mutation.GetType(); !ok {
 		return &ValidationError{Name: "type", err: errors.New(`ent: missing required field "User.type"`)}
@@ -361,15 +230,6 @@ func (uc *UserCreate) check() error {
 	}
 	if _, ok := uc.mutation.LoginToken(); !ok {
 		return &ValidationError{Name: "login_token", err: errors.New(`ent: missing required field "User.login_token"`)}
-	}
-	if _, ok := uc.mutation.UserName(); !ok {
-		return &ValidationError{Name: "user_name", err: errors.New(`ent: missing required field "User.user_name"`)}
-	}
-	if _, ok := uc.mutation.ChatName(); !ok {
-		return &ValidationError{Name: "chat_name", err: errors.New(`ent: missing required field "User.chat_name"`)}
-	}
-	if _, ok := uc.mutation.IsGroup(); !ok {
-		return &ValidationError{Name: "is_group", err: errors.New(`ent: missing required field "User.is_group"`)}
 	}
 	return nil
 }
@@ -406,29 +266,13 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		})
 		_node.CreateTime = value
 	}
-	if value, ok := uc.mutation.UpdatedTime(); ok {
+	if value, ok := uc.mutation.UpdateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: user.FieldUpdatedTime,
+			Column: user.FieldUpdateTime,
 		})
-		_node.UpdatedTime = value
-	}
-	if value, ok := uc.mutation.CreatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: user.FieldCreatedAt,
-		})
-		_node.CreatedAt = value
-	}
-	if value, ok := uc.mutation.UpdatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: user.FieldUpdatedAt,
-		})
-		_node.UpdatedAt = value
+		_node.UpdateTime = value
 	}
 	if value, ok := uc.mutation.UserID(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -446,14 +290,6 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		})
 		_node.Name = value
 	}
-	if value, ok := uc.mutation.ChatID(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
-			Value:  value,
-			Column: user.FieldChatID,
-		})
-		_node.ChatID = value
-	}
 	if value, ok := uc.mutation.GetType(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeEnum,
@@ -469,49 +305,6 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Column: user.FieldLoginToken,
 		})
 		_node.LoginToken = value
-	}
-	if value, ok := uc.mutation.UserName(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldUserName,
-		})
-		_node.UserName = value
-	}
-	if value, ok := uc.mutation.ChatName(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldChatName,
-		})
-		_node.ChatName = value
-	}
-	if value, ok := uc.mutation.IsGroup(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: user.FieldIsGroup,
-		})
-		_node.IsGroup = value
-	}
-	if nodes := uc.mutation.ChainsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.ChainsTable,
-			Columns: user.ChainsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: chain.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := uc.mutation.TelegramChatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

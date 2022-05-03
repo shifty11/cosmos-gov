@@ -28,7 +28,6 @@ type hooks struct {
 	DiscordChannel []ent.Hook
 	Grant          []ent.Hook
 	LensChainInfo  []ent.Hook
-	MigrationInfo  []ent.Hook
 	Proposal       []ent.Hook
 	RpcEndpoint    []ent.Hook
 	TelegramChat   []ent.Hook

@@ -29,49 +29,9 @@ func (reu *RpcEndpointUpdate) Where(ps ...predicate.RpcEndpoint) *RpcEndpointUpd
 	return reu
 }
 
-// SetCreateTime sets the "create_time" field.
-func (reu *RpcEndpointUpdate) SetCreateTime(t time.Time) *RpcEndpointUpdate {
-	reu.mutation.SetCreateTime(t)
-	return reu
-}
-
-// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
-func (reu *RpcEndpointUpdate) SetNillableCreateTime(t *time.Time) *RpcEndpointUpdate {
-	if t != nil {
-		reu.SetCreateTime(*t)
-	}
-	return reu
-}
-
-// ClearCreateTime clears the value of the "create_time" field.
-func (reu *RpcEndpointUpdate) ClearCreateTime() *RpcEndpointUpdate {
-	reu.mutation.ClearCreateTime()
-	return reu
-}
-
-// SetUpdatedTime sets the "updated_time" field.
-func (reu *RpcEndpointUpdate) SetUpdatedTime(t time.Time) *RpcEndpointUpdate {
-	reu.mutation.SetUpdatedTime(t)
-	return reu
-}
-
-// SetNillableUpdatedTime sets the "updated_time" field if the given value is not nil.
-func (reu *RpcEndpointUpdate) SetNillableUpdatedTime(t *time.Time) *RpcEndpointUpdate {
-	if t != nil {
-		reu.SetUpdatedTime(*t)
-	}
-	return reu
-}
-
-// ClearUpdatedTime clears the value of the "updated_time" field.
-func (reu *RpcEndpointUpdate) ClearUpdatedTime() *RpcEndpointUpdate {
-	reu.mutation.ClearUpdatedTime()
-	return reu
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (reu *RpcEndpointUpdate) SetUpdatedAt(t time.Time) *RpcEndpointUpdate {
-	reu.mutation.SetUpdatedAt(t)
+// SetUpdateTime sets the "update_time" field.
+func (reu *RpcEndpointUpdate) SetUpdateTime(t time.Time) *RpcEndpointUpdate {
+	reu.mutation.SetUpdateTime(t)
 	return reu
 }
 
@@ -168,9 +128,9 @@ func (reu *RpcEndpointUpdate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (reu *RpcEndpointUpdate) defaults() {
-	if _, ok := reu.mutation.UpdatedAt(); !ok {
-		v := rpcendpoint.UpdateDefaultUpdatedAt()
-		reu.mutation.SetUpdatedAt(v)
+	if _, ok := reu.mutation.UpdateTime(); !ok {
+		v := rpcendpoint.UpdateDefaultUpdateTime()
+		reu.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -192,37 +152,11 @@ func (reu *RpcEndpointUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := reu.mutation.CreateTime(); ok {
+	if value, ok := reu.mutation.UpdateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: rpcendpoint.FieldCreateTime,
-		})
-	}
-	if reu.mutation.CreateTimeCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Column: rpcendpoint.FieldCreateTime,
-		})
-	}
-	if value, ok := reu.mutation.UpdatedTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: rpcendpoint.FieldUpdatedTime,
-		})
-	}
-	if reu.mutation.UpdatedTimeCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Column: rpcendpoint.FieldUpdatedTime,
-		})
-	}
-	if value, ok := reu.mutation.UpdatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: rpcendpoint.FieldUpdatedAt,
+			Column: rpcendpoint.FieldUpdateTime,
 		})
 	}
 	if value, ok := reu.mutation.Endpoint(); ok {
@@ -286,49 +220,9 @@ type RpcEndpointUpdateOne struct {
 	mutation *RpcEndpointMutation
 }
 
-// SetCreateTime sets the "create_time" field.
-func (reuo *RpcEndpointUpdateOne) SetCreateTime(t time.Time) *RpcEndpointUpdateOne {
-	reuo.mutation.SetCreateTime(t)
-	return reuo
-}
-
-// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
-func (reuo *RpcEndpointUpdateOne) SetNillableCreateTime(t *time.Time) *RpcEndpointUpdateOne {
-	if t != nil {
-		reuo.SetCreateTime(*t)
-	}
-	return reuo
-}
-
-// ClearCreateTime clears the value of the "create_time" field.
-func (reuo *RpcEndpointUpdateOne) ClearCreateTime() *RpcEndpointUpdateOne {
-	reuo.mutation.ClearCreateTime()
-	return reuo
-}
-
-// SetUpdatedTime sets the "updated_time" field.
-func (reuo *RpcEndpointUpdateOne) SetUpdatedTime(t time.Time) *RpcEndpointUpdateOne {
-	reuo.mutation.SetUpdatedTime(t)
-	return reuo
-}
-
-// SetNillableUpdatedTime sets the "updated_time" field if the given value is not nil.
-func (reuo *RpcEndpointUpdateOne) SetNillableUpdatedTime(t *time.Time) *RpcEndpointUpdateOne {
-	if t != nil {
-		reuo.SetUpdatedTime(*t)
-	}
-	return reuo
-}
-
-// ClearUpdatedTime clears the value of the "updated_time" field.
-func (reuo *RpcEndpointUpdateOne) ClearUpdatedTime() *RpcEndpointUpdateOne {
-	reuo.mutation.ClearUpdatedTime()
-	return reuo
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (reuo *RpcEndpointUpdateOne) SetUpdatedAt(t time.Time) *RpcEndpointUpdateOne {
-	reuo.mutation.SetUpdatedAt(t)
+// SetUpdateTime sets the "update_time" field.
+func (reuo *RpcEndpointUpdateOne) SetUpdateTime(t time.Time) *RpcEndpointUpdateOne {
+	reuo.mutation.SetUpdateTime(t)
 	return reuo
 }
 
@@ -432,9 +326,9 @@ func (reuo *RpcEndpointUpdateOne) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (reuo *RpcEndpointUpdateOne) defaults() {
-	if _, ok := reuo.mutation.UpdatedAt(); !ok {
-		v := rpcendpoint.UpdateDefaultUpdatedAt()
-		reuo.mutation.SetUpdatedAt(v)
+	if _, ok := reuo.mutation.UpdateTime(); !ok {
+		v := rpcendpoint.UpdateDefaultUpdateTime()
+		reuo.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -473,37 +367,11 @@ func (reuo *RpcEndpointUpdateOne) sqlSave(ctx context.Context) (_node *RpcEndpoi
 			}
 		}
 	}
-	if value, ok := reuo.mutation.CreateTime(); ok {
+	if value, ok := reuo.mutation.UpdateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: rpcendpoint.FieldCreateTime,
-		})
-	}
-	if reuo.mutation.CreateTimeCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Column: rpcendpoint.FieldCreateTime,
-		})
-	}
-	if value, ok := reuo.mutation.UpdatedTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: rpcendpoint.FieldUpdatedTime,
-		})
-	}
-	if reuo.mutation.UpdatedTimeCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Column: rpcendpoint.FieldUpdatedTime,
-		})
-	}
-	if value, ok := reuo.mutation.UpdatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: rpcendpoint.FieldUpdatedAt,
+			Column: rpcendpoint.FieldUpdateTime,
 		})
 	}
 	if value, ok := reuo.mutation.Endpoint(); ok {
