@@ -7,7 +7,6 @@ import (
 	"github.com/shifty11/cosmos-gov/api/discord"
 	"github.com/shifty11/cosmos-gov/api/grpc"
 	"github.com/shifty11/cosmos-gov/api/telegram"
-	"github.com/shifty11/cosmos-gov/authz"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/datasource"
 	"github.com/shifty11/cosmos-gov/log"
@@ -90,8 +89,6 @@ func main() {
 		startDiscordServer()
 	} else if len(args) > 0 && args[0] == "grpc" {
 		startGrpcServer()
-	} else if len(args) > 0 && args[0] == "authz" {
-		authz.ExecAuthz()
 	} else {
 		initDatabase(nil, nil)
 		startProposalFetching(ds)
