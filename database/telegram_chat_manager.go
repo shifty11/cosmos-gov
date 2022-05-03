@@ -174,7 +174,7 @@ func (manager *TelegramChatManager) GetChatIdsWithGrants(entChain *ent.Chain) []
 func (manager *TelegramChatManager) GetAllChatIds() []int {
 	chatIds, err := manager.client.TelegramChat.
 		Query().
-		Select(telegramchat.FieldID).
+		Select(telegramchat.FieldChatID).
 		Ints(manager.ctx)
 	if err != nil {
 		log.Sugar.Panicf("Error while querying all Telegram chatIds: %v", err)
