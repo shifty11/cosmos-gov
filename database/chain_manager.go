@@ -23,10 +23,12 @@ func NewChainManager(client *ent.Client, ctx context.Context) *ChainManager {
 	return &ChainManager{client: client, ctx: ctx}
 }
 
-//type ChainQueryOptions struct {
-//	WithWallets bool
-//	WithGrants  bool
-//}
+type ChainQueryOptions struct {
+	//WithWallets      bool
+	//WithGrants       bool
+	WithRpcAddresses bool
+}
+
 //
 //func (manager *ChainManager) ByName(name string, options *ChainQueryOptions) (*ent.Chain, error) {
 //	q := manager.client.Chain.
@@ -49,12 +51,15 @@ func (manager *ChainManager) ByName(name string) (*ent.Chain, error) {
 		Only(manager.ctx)
 }
 
-func (manager *ChainManager) Enabled() []*ent.Chain {
-	allChains, err := manager.client.Chain.
+func (manager *ChainManager) Enabled(options *ChainQueryOptions) []*ent.Chain {
+	query := manager.client.Chain.
 		Query().
 		Where(chain.IsEnabledEQ(true)).
-		Order(ent.Asc(chain.FieldDisplayName)).
-		All(manager.ctx)
+		Order(ent.Asc(chain.FieldDisplayName))
+	if options != nil && options.WithRpcAddresses {
+		query = query.WithRPCEndpoints()
+	}
+	allChains, err := query.All(manager.ctx)
 	if err != nil {
 		log.Sugar.Panicf("Error while querying enabled chains: %v", err)
 	}

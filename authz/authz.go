@@ -156,13 +156,17 @@ func (client AuthzClient) ExecAuthzVote(entUser *ent.User, voteData *VoteData) e
 	return nil
 }
 
-func (client AuthzClient) GetGrant(granter string, grantee string) (*database.GrantData, error) {
-	entChain, err := client.chainManager.ByName("osmosis")
+func (client AuthzClient) GetGrant(chainName string, granter string, grantee string) (*database.GrantData, error) {
+	entChain, err := client.chainManager.ByName(chainName)
 	if err != nil {
 		return nil, err
 	}
 	msgType := "/cosmos.gov.v1beta1.MsgVote"
 	lensClient, err := client.chainManager.BuildLensClient(entChain)
+	if err != nil {
+		return nil, err
+	}
+
 	response, err := lensClient.QueryAuthzGrants(client.ctx, granter, grantee, msgType, nil)
 	if err != nil {
 		return nil, err

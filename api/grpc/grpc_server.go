@@ -37,7 +37,7 @@ func Start() {
 
 	authServer := auth.NewAuthServer(managers.UserManager, jwtManager)
 	subscriptionServer := subscription.NewSubscriptionsServer(managers.SubscriptionManager)
-	votePermissionServer := vote_permission.NewVotePermissionsServer(authzClient, managers.WalletManager)
+	votePermissionServer := vote_permission.NewVotePermissionsServer(authzClient, managers.ChainManager, managers.WalletManager)
 
 	server := grpc.NewServer(
 		grpc.UnaryInterceptor(interceptor.Unary()),

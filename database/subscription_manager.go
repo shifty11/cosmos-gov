@@ -47,7 +47,7 @@ func NewSubscriptionManager(
 }
 
 func getSubscriptions(chainManager *ChainManager, chainsOfUser []*ent.Chain) []*Subscription {
-	allChains := chainManager.Enabled()
+	allChains := chainManager.Enabled(nil)
 	var chains []*Subscription
 	for _, c := range allChains {
 		var chainEntry = Subscription{Name: c.Name, DisplayName: c.DisplayName, Notify: false}
