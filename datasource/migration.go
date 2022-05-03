@@ -9,12 +9,12 @@ import (
 func (ds Datasource) Migrate(chainManager *database.ChainManager) {
 	log.Sugar.Info("Update chains")
 	for _, c := range chainManager.All() {
-		if c.ChainID == "" {
+		if c.ChainID == "" || c.AccountPrefix == "" {
 			_, info, _, err := ds.getChainInfo(c.Name)
 			if err != nil {
 				return
 			}
-			c.Update().SetChainID(info.ChainID).SetAccountPrefix(c.AccountPrefix).SaveX(context.Background())
+			c.Update().SetChainID(info.ChainID).SetAccountPrefix(info.Bech32Prefix).SaveX(context.Background())
 		}
 	}
 	log.Sugar.Info("All chains updated")
