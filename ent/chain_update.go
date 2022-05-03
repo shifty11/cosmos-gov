@@ -45,37 +45,9 @@ func (cu *ChainUpdate) SetChainID(s string) *ChainUpdate {
 	return cu
 }
 
-// SetNillableChainID sets the "chain_id" field if the given value is not nil.
-func (cu *ChainUpdate) SetNillableChainID(s *string) *ChainUpdate {
-	if s != nil {
-		cu.SetChainID(*s)
-	}
-	return cu
-}
-
-// ClearChainID clears the value of the "chain_id" field.
-func (cu *ChainUpdate) ClearChainID() *ChainUpdate {
-	cu.mutation.ClearChainID()
-	return cu
-}
-
 // SetAccountPrefix sets the "account_prefix" field.
 func (cu *ChainUpdate) SetAccountPrefix(s string) *ChainUpdate {
 	cu.mutation.SetAccountPrefix(s)
-	return cu
-}
-
-// SetNillableAccountPrefix sets the "account_prefix" field if the given value is not nil.
-func (cu *ChainUpdate) SetNillableAccountPrefix(s *string) *ChainUpdate {
-	if s != nil {
-		cu.SetAccountPrefix(*s)
-	}
-	return cu
-}
-
-// ClearAccountPrefix clears the value of the "account_prefix" field.
-func (cu *ChainUpdate) ClearAccountPrefix() *ChainUpdate {
-	cu.mutation.ClearAccountPrefix()
 	return cu
 }
 
@@ -385,22 +357,10 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: chain.FieldChainID,
 		})
 	}
-	if cu.mutation.ChainIDCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: chain.FieldChainID,
-		})
-	}
 	if value, ok := cu.mutation.AccountPrefix(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: chain.FieldAccountPrefix,
-		})
-	}
-	if cu.mutation.AccountPrefixCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
 			Column: chain.FieldAccountPrefix,
 		})
 	}
@@ -726,37 +686,9 @@ func (cuo *ChainUpdateOne) SetChainID(s string) *ChainUpdateOne {
 	return cuo
 }
 
-// SetNillableChainID sets the "chain_id" field if the given value is not nil.
-func (cuo *ChainUpdateOne) SetNillableChainID(s *string) *ChainUpdateOne {
-	if s != nil {
-		cuo.SetChainID(*s)
-	}
-	return cuo
-}
-
-// ClearChainID clears the value of the "chain_id" field.
-func (cuo *ChainUpdateOne) ClearChainID() *ChainUpdateOne {
-	cuo.mutation.ClearChainID()
-	return cuo
-}
-
 // SetAccountPrefix sets the "account_prefix" field.
 func (cuo *ChainUpdateOne) SetAccountPrefix(s string) *ChainUpdateOne {
 	cuo.mutation.SetAccountPrefix(s)
-	return cuo
-}
-
-// SetNillableAccountPrefix sets the "account_prefix" field if the given value is not nil.
-func (cuo *ChainUpdateOne) SetNillableAccountPrefix(s *string) *ChainUpdateOne {
-	if s != nil {
-		cuo.SetAccountPrefix(*s)
-	}
-	return cuo
-}
-
-// ClearAccountPrefix clears the value of the "account_prefix" field.
-func (cuo *ChainUpdateOne) ClearAccountPrefix() *ChainUpdateOne {
-	cuo.mutation.ClearAccountPrefix()
 	return cuo
 }
 
@@ -1090,22 +1022,10 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 			Column: chain.FieldChainID,
 		})
 	}
-	if cuo.mutation.ChainIDCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: chain.FieldChainID,
-		})
-	}
 	if value, ok := cuo.mutation.AccountPrefix(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: chain.FieldAccountPrefix,
-		})
-	}
-	if cuo.mutation.AccountPrefixCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
 			Column: chain.FieldAccountPrefix,
 		})
 	}

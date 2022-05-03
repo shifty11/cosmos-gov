@@ -24,16 +24,14 @@ func (Chain) Mixin() []ent.Mixin {
 func (Chain) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("chain_id").
-			Unique().
-			Optional(), // TODO: remove optional
-		field.String("account_prefix").
-			Optional(), // TODO: remove optional
+			Unique(),
+		field.String("account_prefix"),
 		field.String("name").
 			Unique(),
 		field.String("display_name").
 			Unique(),
 		field.Bool("is_enabled").
-			Default(true),
+			Default(false),
 	}
 }
 

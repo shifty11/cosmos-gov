@@ -59,25 +59,9 @@ func (cc *ChainCreate) SetChainID(s string) *ChainCreate {
 	return cc
 }
 
-// SetNillableChainID sets the "chain_id" field if the given value is not nil.
-func (cc *ChainCreate) SetNillableChainID(s *string) *ChainCreate {
-	if s != nil {
-		cc.SetChainID(*s)
-	}
-	return cc
-}
-
 // SetAccountPrefix sets the "account_prefix" field.
 func (cc *ChainCreate) SetAccountPrefix(s string) *ChainCreate {
 	cc.mutation.SetAccountPrefix(s)
-	return cc
-}
-
-// SetNillableAccountPrefix sets the "account_prefix" field if the given value is not nil.
-func (cc *ChainCreate) SetNillableAccountPrefix(s *string) *ChainCreate {
-	if s != nil {
-		cc.SetAccountPrefix(*s)
-	}
 	return cc
 }
 
@@ -274,6 +258,12 @@ func (cc *ChainCreate) check() error {
 	}
 	if _, ok := cc.mutation.UpdateTime(); !ok {
 		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "Chain.update_time"`)}
+	}
+	if _, ok := cc.mutation.ChainID(); !ok {
+		return &ValidationError{Name: "chain_id", err: errors.New(`ent: missing required field "Chain.chain_id"`)}
+	}
+	if _, ok := cc.mutation.AccountPrefix(); !ok {
+		return &ValidationError{Name: "account_prefix", err: errors.New(`ent: missing required field "Chain.account_prefix"`)}
 	}
 	if _, ok := cc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Chain.name"`)}

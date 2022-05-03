@@ -278,22 +278,9 @@ func (m *ChainMutation) OldChainID(ctx context.Context) (v string, err error) {
 	return oldValue.ChainID, nil
 }
 
-// ClearChainID clears the value of the "chain_id" field.
-func (m *ChainMutation) ClearChainID() {
-	m.chain_id = nil
-	m.clearedFields[chain.FieldChainID] = struct{}{}
-}
-
-// ChainIDCleared returns if the "chain_id" field was cleared in this mutation.
-func (m *ChainMutation) ChainIDCleared() bool {
-	_, ok := m.clearedFields[chain.FieldChainID]
-	return ok
-}
-
 // ResetChainID resets all changes to the "chain_id" field.
 func (m *ChainMutation) ResetChainID() {
 	m.chain_id = nil
-	delete(m.clearedFields, chain.FieldChainID)
 }
 
 // SetAccountPrefix sets the "account_prefix" field.
@@ -327,22 +314,9 @@ func (m *ChainMutation) OldAccountPrefix(ctx context.Context) (v string, err err
 	return oldValue.AccountPrefix, nil
 }
 
-// ClearAccountPrefix clears the value of the "account_prefix" field.
-func (m *ChainMutation) ClearAccountPrefix() {
-	m.account_prefix = nil
-	m.clearedFields[chain.FieldAccountPrefix] = struct{}{}
-}
-
-// AccountPrefixCleared returns if the "account_prefix" field was cleared in this mutation.
-func (m *ChainMutation) AccountPrefixCleared() bool {
-	_, ok := m.clearedFields[chain.FieldAccountPrefix]
-	return ok
-}
-
 // ResetAccountPrefix resets all changes to the "account_prefix" field.
 func (m *ChainMutation) ResetAccountPrefix() {
 	m.account_prefix = nil
-	delete(m.clearedFields, chain.FieldAccountPrefix)
 }
 
 // SetName sets the "name" field.
@@ -896,14 +870,7 @@ func (m *ChainMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *ChainMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(chain.FieldChainID) {
-		fields = append(fields, chain.FieldChainID)
-	}
-	if m.FieldCleared(chain.FieldAccountPrefix) {
-		fields = append(fields, chain.FieldAccountPrefix)
-	}
-	return fields
+	return nil
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -916,14 +883,6 @@ func (m *ChainMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *ChainMutation) ClearField(name string) error {
-	switch name {
-	case chain.FieldChainID:
-		m.ClearChainID()
-		return nil
-	case chain.FieldAccountPrefix:
-		m.ClearAccountPrefix()
-		return nil
-	}
 	return fmt.Errorf("unknown Chain nullable field %s", name)
 }
 

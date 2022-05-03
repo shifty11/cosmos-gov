@@ -391,20 +391,6 @@ func ChainIDHasSuffix(v string) predicate.Chain {
 	})
 }
 
-// ChainIDIsNil applies the IsNil predicate on the "chain_id" field.
-func ChainIDIsNil() predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldChainID)))
-	})
-}
-
-// ChainIDNotNil applies the NotNil predicate on the "chain_id" field.
-func ChainIDNotNil() predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldChainID)))
-	})
-}
-
 // ChainIDEqualFold applies the EqualFold predicate on the "chain_id" field.
 func ChainIDEqualFold(v string) predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {
@@ -513,20 +499,6 @@ func AccountPrefixHasPrefix(v string) predicate.Chain {
 func AccountPrefixHasSuffix(v string) predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {
 		s.Where(sql.HasSuffix(s.C(FieldAccountPrefix), v))
-	})
-}
-
-// AccountPrefixIsNil applies the IsNil predicate on the "account_prefix" field.
-func AccountPrefixIsNil() predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldAccountPrefix)))
-	})
-}
-
-// AccountPrefixNotNil applies the NotNil predicate on the "account_prefix" field.
-func AccountPrefixNotNil() predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldAccountPrefix)))
 	})
 }
 

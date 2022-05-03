@@ -13,11 +13,11 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
-		{Name: "chain_id", Type: field.TypeString, Unique: true, Nullable: true},
-		{Name: "account_prefix", Type: field.TypeString, Nullable: true},
+		{Name: "chain_id", Type: field.TypeString, Unique: true},
+		{Name: "account_prefix", Type: field.TypeString},
 		{Name: "name", Type: field.TypeString, Unique: true},
 		{Name: "display_name", Type: field.TypeString, Unique: true},
-		{Name: "is_enabled", Type: field.TypeBool, Default: true},
+		{Name: "is_enabled", Type: field.TypeBool, Default: false},
 	}
 	// ChainsTable holds the schema information for the "chains" table.
 	ChainsTable = &schema.Table{
@@ -119,7 +119,7 @@ var (
 		{Name: "description", Type: field.TypeString},
 		{Name: "voting_start_time", Type: field.TypeTime},
 		{Name: "voting_end_time", Type: field.TypeTime},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"PROPOSAL_STATUS_VOTING_PERIOD", "PROPOSAL_STATUS_PASSED", "PROPOSAL_STATUS_REJECTED", "PROPOSAL_STATUS_FAILED", "PROPOSAL_STATUS_UNSPECIFIED", "PROPOSAL_STATUS_DEPOSIT_PERIOD"}},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"PROPOSAL_STATUS_FAILED", "PROPOSAL_STATUS_UNSPECIFIED", "PROPOSAL_STATUS_DEPOSIT_PERIOD", "PROPOSAL_STATUS_VOTING_PERIOD", "PROPOSAL_STATUS_PASSED", "PROPOSAL_STATUS_REJECTED"}},
 		{Name: "chain_proposals", Type: field.TypeInt, Nullable: true},
 	}
 	// ProposalsTable holds the schema information for the "proposals" table.
