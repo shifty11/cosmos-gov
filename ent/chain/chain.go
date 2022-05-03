@@ -25,6 +25,8 @@ const (
 	FieldDisplayName = "display_name"
 	// FieldIsEnabled holds the string denoting the is_enabled field in the database.
 	FieldIsEnabled = "is_enabled"
+	// EdgeUsers holds the string denoting the users edge name in mutations.
+	EdgeUsers = "users"
 	// EdgeProposals holds the string denoting the proposals edge name in mutations.
 	EdgeProposals = "proposals"
 	// EdgeTelegramChats holds the string denoting the telegram_chats edge name in mutations.
@@ -37,6 +39,11 @@ const (
 	EdgeWallets = "wallets"
 	// Table holds the table name of the chain in the database.
 	Table = "chains"
+	// UsersTable is the table that holds the users relation/edge. The primary key declared below.
+	UsersTable = "user_chains"
+	// UsersInverseTable is the table name for the User entity.
+	// It exists in this package in order to avoid circular dependency with the "user" package.
+	UsersInverseTable = "users"
 	// ProposalsTable is the table that holds the proposals relation/edge.
 	ProposalsTable = "proposals"
 	// ProposalsInverseTable is the table name for the Proposal entity.
@@ -83,6 +90,9 @@ var Columns = []string{
 }
 
 var (
+	// UsersPrimaryKey and UsersColumn2 are the table columns denoting the
+	// primary key for the users relation (M2M).
+	UsersPrimaryKey = []string{"user_id", "chain_id"}
 	// TelegramChatsPrimaryKey and TelegramChatsColumn2 are the table columns denoting the
 	// primary key for the telegram_chats relation (M2M).
 	TelegramChatsPrimaryKey = []string{"telegram_chat_id", "chain_id"}

@@ -271,6 +271,22 @@ func (c *ChainClient) GetX(ctx context.Context, id int) *Chain {
 	return obj
 }
 
+// QueryUsers queries the users edge of a Chain.
+func (c *ChainClient) QueryUsers(ch *Chain) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ch.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(chain.Table, chain.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, chain.UsersTable, chain.UsersPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(ch.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryProposals queries the proposals edge of a Chain.
 func (c *ChainClient) QueryProposals(ch *Chain) *ProposalQuery {
 	query := &ProposalQuery{config: c.config}
@@ -1181,6 +1197,22 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 		panic(err)
 	}
 	return obj
+}
+
+// QueryChains queries the chains edge of a User.
+func (c *UserClient) QueryChains(u *User) *ChainQuery {
+	query := &ChainQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(chain.Table, chain.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, user.ChainsTable, user.ChainsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // QueryTelegramChats queries the telegram_chats edge of a User.

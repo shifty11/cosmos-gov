@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/shifty11/cosmos-gov/ent/migrate"
+	"github.com/shifty11/cosmos-gov/ent/migrationinfo"
 	"github.com/shifty11/cosmos-gov/ent/user"
 	"os"
 
@@ -79,80 +80,79 @@ func MigrateDatabase() {
 // TODO: remove after migration
 // TODO: I don't have the user ids of telegram/discord... needs an additional migration step or empty user
 func migrateUsers() {
-	//client, ctx := connect()
-	//doesExist, err := client.MigrationInfo.
-	//	Query().
-	//	Where(migrationinfo.IsMigratedEQ(true)).
-	//	Exist(ctx)
-	//if err != nil {
-	//	log.Sugar.Panicf("Failed migrating %v", err)
-	//}
-	//if doesExist {
-	//	return
-	//}
-	//
-	//users, err := client.User.
-	//	Query().
-	//	WithChains().
-	//	All(ctx)
-	//if err != nil {
-	//	log.Sugar.Panicf("Failed migrating %v", err)
-	//}
-	//
-	//_, err = client.TelegramChat.
-	//	Delete().
-	//	Exec(ctx)
-	//if err != nil {
-	//	log.Sugar.Panicf("Failed migrating %v", err)
-	//}
-	//_, err = client.DiscordChannel.
-	//	Delete().
-	//	Exec(ctx)
-	//if err != nil {
-	//	log.Sugar.Panicf("Failed migrating %v", err)
-	//}
-	//
-	//for _, u := range users {
-	//	chains, err := u.QueryChains().All(ctx)
-	//	if err != nil {
-	//		log.Sugar.Panicf("Failed migrating %v", err)
-	//	}
-	//	if u.Type == user.TypeTelegram {
-	//		err = client.TelegramChat.
-	//			Create().
-	//			SetID(u.ChatID).
-	//			SetName("<not set>"). // TODO: set this field properly
-	//			SetIsGroup(u.ChatID < 0).
-	//			SetUser(u).
-	//			AddChains(chains...).
-	//			Exec(ctx)
-	//		if err != nil {
-	//			log.Sugar.Panicf("Failed migrating %v", err)
-	//		}
-	//	} else {
-	//		err = client.DiscordChannel.
-	//			Create().
-	//			SetID(u.ChatID).
-	//			SetName("<not set>"). // TODO: set this field properly
-	//			SetIsGroup(true).     // TODO: set this field properly
-	//			SetUser(u).
-	//			AddChains(chains...).
-	//			Exec(ctx)
-	//		if err != nil {
-	//			log.Sugar.Panicf("Failed migrating %v", err)
-	//		}
-	//	}
-	//	u.Update().SetId(0).Exec(ctx)		// TODO: make ID field temporary mutable
-	//}
-	//
-	//err = client.MigrationInfo.
-	//	Create().
-	//	SetIsMigrated(true).
-	//	Exec(ctx)
-	//if err != nil {
-	//	log.Sugar.Panicf("Failed migrating %v", err)
-	//}
-	//log.Sugar.Info("User migration successful")
+	client, ctx := connect()
+	doesExist, err := client.MigrationInfo.
+		Query().
+		Where(migrationinfo.IsMigratedEQ(true)).
+		Exist(ctx)
+	if err != nil {
+		log.Sugar.Panicf("Failed migrating %v", err)
+	}
+	if doesExist {
+		return
+	}
+
+	users, err := client.User.
+		Query().
+		WithChains().
+		All(ctx)
+	if err != nil {
+		log.Sugar.Panicf("Failed migrating %v", err)
+	}
+
+	_, err = client.TelegramChat.
+		Delete().
+		Exec(ctx)
+	if err != nil {
+		log.Sugar.Panicf("Failed migrating %v", err)
+	}
+	_, err = client.DiscordChannel.
+		Delete().
+		Exec(ctx)
+	if err != nil {
+		log.Sugar.Panicf("Failed migrating %v", err)
+	}
+
+	for _, u := range users {
+		chains, err := u.QueryChains().All(ctx)
+		if err != nil {
+			log.Sugar.Panicf("Failed migrating %v", err)
+		}
+		if u.Type == user.TypeTelegram {
+			err = client.TelegramChat.
+				Create().
+				SetChatID(u.ChatID).
+				SetName(u.UserName).
+				SetIsGroup(u.ChatID < 0).
+				SetUser(u).
+				AddChains(chains...).
+				Exec(ctx)
+			if err != nil {
+				log.Sugar.Panicf("Failed migrating %v", err)
+			}
+		} else {
+			err = client.DiscordChannel.
+				Create().
+				SetChannelID(u.ChatID).
+				SetName(u.UserName).
+				SetIsGroup(true). // TODO: set this field properly
+				SetUser(u).
+				AddChains(chains...).
+				Exec(ctx)
+			if err != nil {
+				log.Sugar.Panicf("Failed migrating %v", err)
+			}
+		}
+	}
+
+	err = client.MigrationInfo.
+		Create().
+		SetIsMigrated(true).
+		Exec(ctx)
+	if err != nil {
+		log.Sugar.Panicf("Failed migrating %v", err)
+	}
+	log.Sugar.Info("User migration successful")
 }
 
 type DbManagers struct {

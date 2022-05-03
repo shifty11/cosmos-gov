@@ -15,6 +15,7 @@ import (
 	"github.com/shifty11/cosmos-gov/ent/proposal"
 	"github.com/shifty11/cosmos-gov/ent/rpcendpoint"
 	"github.com/shifty11/cosmos-gov/ent/telegramchat"
+	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/ent/wallet"
 )
 
@@ -89,6 +90,21 @@ func (cc *ChainCreate) SetNillableIsEnabled(b *bool) *ChainCreate {
 		cc.SetIsEnabled(*b)
 	}
 	return cc
+}
+
+// AddUserIDs adds the "users" edge to the User entity by IDs.
+func (cc *ChainCreate) AddUserIDs(ids ...int) *ChainCreate {
+	cc.mutation.AddUserIDs(ids...)
+	return cc
+}
+
+// AddUsers adds the "users" edges to the User entity.
+func (cc *ChainCreate) AddUsers(u ...*User) *ChainCreate {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return cc.AddUserIDs(ids...)
 }
 
 // AddProposalIDs adds the "proposals" edge to the Proposal entity by IDs.
@@ -356,6 +372,25 @@ func (cc *ChainCreate) createSpec() (*Chain, *sqlgraph.CreateSpec) {
 			Column: chain.FieldIsEnabled,
 		})
 		_node.IsEnabled = value
+	}
+	if nodes := cc.mutation.UsersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chain.UsersTable,
+			Columns: chain.UsersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := cc.mutation.ProposalsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

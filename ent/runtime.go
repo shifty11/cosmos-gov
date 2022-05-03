@@ -169,10 +169,26 @@ func init() {
 	user.DefaultUpdateTime = userDescUpdateTime.Default.(func() time.Time)
 	// user.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
 	user.UpdateDefaultUpdateTime = userDescUpdateTime.UpdateDefault.(func() time.Time)
+	// userDescUserID is the schema descriptor for user_id field.
+	userDescUserID := userFields[0].Descriptor()
+	// user.DefaultUserID holds the default value on creation for the user_id field.
+	user.DefaultUserID = userDescUserID.Default.(int64)
 	// userDescLoginToken is the schema descriptor for login_token field.
-	userDescLoginToken := userFields[3].Descriptor()
+	userDescLoginToken := userFields[4].Descriptor()
 	// user.DefaultLoginToken holds the default value on creation for the login_token field.
 	user.DefaultLoginToken = userDescLoginToken.Default.(string)
+	// userDescUserName is the schema descriptor for user_name field.
+	userDescUserName := userFields[5].Descriptor()
+	// user.DefaultUserName holds the default value on creation for the user_name field.
+	user.DefaultUserName = userDescUserName.Default.(string)
+	// userDescChatName is the schema descriptor for chat_name field.
+	userDescChatName := userFields[6].Descriptor()
+	// user.DefaultChatName holds the default value on creation for the chat_name field.
+	user.DefaultChatName = userDescChatName.Default.(string)
+	// userDescIsGroup is the schema descriptor for is_group field.
+	userDescIsGroup := userFields[7].Descriptor()
+	// user.DefaultIsGroup holds the default value on creation for the is_group field.
+	user.DefaultIsGroup = userDescIsGroup.Default.(bool)
 	walletMixin := schema.Wallet{}.Mixin()
 	walletMixinFields0 := walletMixin[0].Fields()
 	_ = walletMixinFields0

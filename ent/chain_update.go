@@ -17,6 +17,7 @@ import (
 	"github.com/shifty11/cosmos-gov/ent/proposal"
 	"github.com/shifty11/cosmos-gov/ent/rpcendpoint"
 	"github.com/shifty11/cosmos-gov/ent/telegramchat"
+	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/ent/wallet"
 )
 
@@ -75,6 +76,21 @@ func (cu *ChainUpdate) SetNillableIsEnabled(b *bool) *ChainUpdate {
 		cu.SetIsEnabled(*b)
 	}
 	return cu
+}
+
+// AddUserIDs adds the "users" edge to the User entity by IDs.
+func (cu *ChainUpdate) AddUserIDs(ids ...int) *ChainUpdate {
+	cu.mutation.AddUserIDs(ids...)
+	return cu
+}
+
+// AddUsers adds the "users" edges to the User entity.
+func (cu *ChainUpdate) AddUsers(u ...*User) *ChainUpdate {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return cu.AddUserIDs(ids...)
 }
 
 // AddProposalIDs adds the "proposals" edge to the Proposal entity by IDs.
@@ -155,6 +171,27 @@ func (cu *ChainUpdate) AddWallets(w ...*Wallet) *ChainUpdate {
 // Mutation returns the ChainMutation object of the builder.
 func (cu *ChainUpdate) Mutation() *ChainMutation {
 	return cu.mutation
+}
+
+// ClearUsers clears all "users" edges to the User entity.
+func (cu *ChainUpdate) ClearUsers() *ChainUpdate {
+	cu.mutation.ClearUsers()
+	return cu
+}
+
+// RemoveUserIDs removes the "users" edge to User entities by IDs.
+func (cu *ChainUpdate) RemoveUserIDs(ids ...int) *ChainUpdate {
+	cu.mutation.RemoveUserIDs(ids...)
+	return cu
+}
+
+// RemoveUsers removes "users" edges to User entities.
+func (cu *ChainUpdate) RemoveUsers(u ...*User) *ChainUpdate {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return cu.RemoveUserIDs(ids...)
 }
 
 // ClearProposals clears all "proposals" edges to the Proposal entity.
@@ -384,6 +421,60 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Value:  value,
 			Column: chain.FieldIsEnabled,
 		})
+	}
+	if cu.mutation.UsersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chain.UsersTable,
+			Columns: chain.UsersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.RemovedUsersIDs(); len(nodes) > 0 && !cu.mutation.UsersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chain.UsersTable,
+			Columns: chain.UsersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.UsersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chain.UsersTable,
+			Columns: chain.UsersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if cu.mutation.ProposalsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -718,6 +809,21 @@ func (cuo *ChainUpdateOne) SetNillableIsEnabled(b *bool) *ChainUpdateOne {
 	return cuo
 }
 
+// AddUserIDs adds the "users" edge to the User entity by IDs.
+func (cuo *ChainUpdateOne) AddUserIDs(ids ...int) *ChainUpdateOne {
+	cuo.mutation.AddUserIDs(ids...)
+	return cuo
+}
+
+// AddUsers adds the "users" edges to the User entity.
+func (cuo *ChainUpdateOne) AddUsers(u ...*User) *ChainUpdateOne {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return cuo.AddUserIDs(ids...)
+}
+
 // AddProposalIDs adds the "proposals" edge to the Proposal entity by IDs.
 func (cuo *ChainUpdateOne) AddProposalIDs(ids ...int) *ChainUpdateOne {
 	cuo.mutation.AddProposalIDs(ids...)
@@ -796,6 +902,27 @@ func (cuo *ChainUpdateOne) AddWallets(w ...*Wallet) *ChainUpdateOne {
 // Mutation returns the ChainMutation object of the builder.
 func (cuo *ChainUpdateOne) Mutation() *ChainMutation {
 	return cuo.mutation
+}
+
+// ClearUsers clears all "users" edges to the User entity.
+func (cuo *ChainUpdateOne) ClearUsers() *ChainUpdateOne {
+	cuo.mutation.ClearUsers()
+	return cuo
+}
+
+// RemoveUserIDs removes the "users" edge to User entities by IDs.
+func (cuo *ChainUpdateOne) RemoveUserIDs(ids ...int) *ChainUpdateOne {
+	cuo.mutation.RemoveUserIDs(ids...)
+	return cuo
+}
+
+// RemoveUsers removes "users" edges to User entities.
+func (cuo *ChainUpdateOne) RemoveUsers(u ...*User) *ChainUpdateOne {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return cuo.RemoveUserIDs(ids...)
 }
 
 // ClearProposals clears all "proposals" edges to the Proposal entity.
@@ -1049,6 +1176,60 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 			Value:  value,
 			Column: chain.FieldIsEnabled,
 		})
+	}
+	if cuo.mutation.UsersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chain.UsersTable,
+			Columns: chain.UsersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.RemovedUsersIDs(); len(nodes) > 0 && !cuo.mutation.UsersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chain.UsersTable,
+			Columns: chain.UsersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.UsersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chain.UsersTable,
+			Columns: chain.UsersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if cuo.mutation.ProposalsCleared() {
 		edge := &sqlgraph.EdgeSpec{

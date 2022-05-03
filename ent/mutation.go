@@ -59,6 +59,9 @@ type ChainMutation struct {
 	display_name            *string
 	is_enabled              *bool
 	clearedFields           map[string]struct{}
+	users                   map[int]struct{}
+	removedusers            map[int]struct{}
+	clearedusers            bool
 	proposals               map[int]struct{}
 	removedproposals        map[int]struct{}
 	clearedproposals        bool
@@ -427,6 +430,60 @@ func (m *ChainMutation) OldIsEnabled(ctx context.Context) (v bool, err error) {
 // ResetIsEnabled resets all changes to the "is_enabled" field.
 func (m *ChainMutation) ResetIsEnabled() {
 	m.is_enabled = nil
+}
+
+// AddUserIDs adds the "users" edge to the User entity by ids.
+func (m *ChainMutation) AddUserIDs(ids ...int) {
+	if m.users == nil {
+		m.users = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.users[ids[i]] = struct{}{}
+	}
+}
+
+// ClearUsers clears the "users" edge to the User entity.
+func (m *ChainMutation) ClearUsers() {
+	m.clearedusers = true
+}
+
+// UsersCleared reports if the "users" edge to the User entity was cleared.
+func (m *ChainMutation) UsersCleared() bool {
+	return m.clearedusers
+}
+
+// RemoveUserIDs removes the "users" edge to the User entity by IDs.
+func (m *ChainMutation) RemoveUserIDs(ids ...int) {
+	if m.removedusers == nil {
+		m.removedusers = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.users, ids[i])
+		m.removedusers[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedUsers returns the removed IDs of the "users" edge to the User entity.
+func (m *ChainMutation) RemovedUsersIDs() (ids []int) {
+	for id := range m.removedusers {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// UsersIDs returns the "users" edge IDs in the mutation.
+func (m *ChainMutation) UsersIDs() (ids []int) {
+	for id := range m.users {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetUsers resets all changes to the "users" edge.
+func (m *ChainMutation) ResetUsers() {
+	m.users = nil
+	m.clearedusers = false
+	m.removedusers = nil
 }
 
 // AddProposalIDs adds the "proposals" edge to the Proposal entity by ids.
@@ -919,7 +976,10 @@ func (m *ChainMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ChainMutation) AddedEdges() []string {
-	edges := make([]string, 0, 5)
+	edges := make([]string, 0, 6)
+	if m.users != nil {
+		edges = append(edges, chain.EdgeUsers)
+	}
 	if m.proposals != nil {
 		edges = append(edges, chain.EdgeProposals)
 	}
@@ -942,6 +1002,12 @@ func (m *ChainMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *ChainMutation) AddedIDs(name string) []ent.Value {
 	switch name {
+	case chain.EdgeUsers:
+		ids := make([]ent.Value, 0, len(m.users))
+		for id := range m.users {
+			ids = append(ids, id)
+		}
+		return ids
 	case chain.EdgeProposals:
 		ids := make([]ent.Value, 0, len(m.proposals))
 		for id := range m.proposals {
@@ -978,7 +1044,10 @@ func (m *ChainMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ChainMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 5)
+	edges := make([]string, 0, 6)
+	if m.removedusers != nil {
+		edges = append(edges, chain.EdgeUsers)
+	}
 	if m.removedproposals != nil {
 		edges = append(edges, chain.EdgeProposals)
 	}
@@ -1001,6 +1070,12 @@ func (m *ChainMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *ChainMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
+	case chain.EdgeUsers:
+		ids := make([]ent.Value, 0, len(m.removedusers))
+		for id := range m.removedusers {
+			ids = append(ids, id)
+		}
+		return ids
 	case chain.EdgeProposals:
 		ids := make([]ent.Value, 0, len(m.removedproposals))
 		for id := range m.removedproposals {
@@ -1037,7 +1112,10 @@ func (m *ChainMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ChainMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 5)
+	edges := make([]string, 0, 6)
+	if m.clearedusers {
+		edges = append(edges, chain.EdgeUsers)
+	}
 	if m.clearedproposals {
 		edges = append(edges, chain.EdgeProposals)
 	}
@@ -1060,6 +1138,8 @@ func (m *ChainMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *ChainMutation) EdgeCleared(name string) bool {
 	switch name {
+	case chain.EdgeUsers:
+		return m.clearedusers
 	case chain.EdgeProposals:
 		return m.clearedproposals
 	case chain.EdgeTelegramChats:
@@ -1086,6 +1166,9 @@ func (m *ChainMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *ChainMutation) ResetEdge(name string) error {
 	switch name {
+	case chain.EdgeUsers:
+		m.ResetUsers()
+		return nil
 	case chain.EdgeProposals:
 		m.ResetProposals()
 		return nil
@@ -5406,9 +5489,17 @@ type UserMutation struct {
 	user_id                 *int64
 	adduser_id              *int64
 	name                    *string
+	chat_id                 *int64
+	addchat_id              *int64
 	_type                   *user.Type
 	login_token             *string
+	user_name               *string
+	chat_name               *string
+	is_group                *bool
 	clearedFields           map[string]struct{}
+	chains                  map[int]struct{}
+	removedchains           map[int]struct{}
+	clearedchains           bool
 	telegram_chats          map[int]struct{}
 	removedtelegram_chats   map[int]struct{}
 	clearedtelegram_chats   bool
@@ -5685,6 +5776,62 @@ func (m *UserMutation) ResetName() {
 	m.name = nil
 }
 
+// SetChatID sets the "chat_id" field.
+func (m *UserMutation) SetChatID(i int64) {
+	m.chat_id = &i
+	m.addchat_id = nil
+}
+
+// ChatID returns the value of the "chat_id" field in the mutation.
+func (m *UserMutation) ChatID() (r int64, exists bool) {
+	v := m.chat_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldChatID returns the old "chat_id" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldChatID(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldChatID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldChatID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldChatID: %w", err)
+	}
+	return oldValue.ChatID, nil
+}
+
+// AddChatID adds i to the "chat_id" field.
+func (m *UserMutation) AddChatID(i int64) {
+	if m.addchat_id != nil {
+		*m.addchat_id += i
+	} else {
+		m.addchat_id = &i
+	}
+}
+
+// AddedChatID returns the value that was added to the "chat_id" field in this mutation.
+func (m *UserMutation) AddedChatID() (r int64, exists bool) {
+	v := m.addchat_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetChatID resets all changes to the "chat_id" field.
+func (m *UserMutation) ResetChatID() {
+	m.chat_id = nil
+	m.addchat_id = nil
+}
+
 // SetType sets the "type" field.
 func (m *UserMutation) SetType(u user.Type) {
 	m._type = &u
@@ -5755,6 +5902,168 @@ func (m *UserMutation) OldLoginToken(ctx context.Context) (v string, err error) 
 // ResetLoginToken resets all changes to the "login_token" field.
 func (m *UserMutation) ResetLoginToken() {
 	m.login_token = nil
+}
+
+// SetUserName sets the "user_name" field.
+func (m *UserMutation) SetUserName(s string) {
+	m.user_name = &s
+}
+
+// UserName returns the value of the "user_name" field in the mutation.
+func (m *UserMutation) UserName() (r string, exists bool) {
+	v := m.user_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserName returns the old "user_name" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldUserName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserName: %w", err)
+	}
+	return oldValue.UserName, nil
+}
+
+// ResetUserName resets all changes to the "user_name" field.
+func (m *UserMutation) ResetUserName() {
+	m.user_name = nil
+}
+
+// SetChatName sets the "chat_name" field.
+func (m *UserMutation) SetChatName(s string) {
+	m.chat_name = &s
+}
+
+// ChatName returns the value of the "chat_name" field in the mutation.
+func (m *UserMutation) ChatName() (r string, exists bool) {
+	v := m.chat_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldChatName returns the old "chat_name" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldChatName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldChatName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldChatName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldChatName: %w", err)
+	}
+	return oldValue.ChatName, nil
+}
+
+// ResetChatName resets all changes to the "chat_name" field.
+func (m *UserMutation) ResetChatName() {
+	m.chat_name = nil
+}
+
+// SetIsGroup sets the "is_group" field.
+func (m *UserMutation) SetIsGroup(b bool) {
+	m.is_group = &b
+}
+
+// IsGroup returns the value of the "is_group" field in the mutation.
+func (m *UserMutation) IsGroup() (r bool, exists bool) {
+	v := m.is_group
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsGroup returns the old "is_group" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldIsGroup(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsGroup is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsGroup requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsGroup: %w", err)
+	}
+	return oldValue.IsGroup, nil
+}
+
+// ResetIsGroup resets all changes to the "is_group" field.
+func (m *UserMutation) ResetIsGroup() {
+	m.is_group = nil
+}
+
+// AddChainIDs adds the "chains" edge to the Chain entity by ids.
+func (m *UserMutation) AddChainIDs(ids ...int) {
+	if m.chains == nil {
+		m.chains = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.chains[ids[i]] = struct{}{}
+	}
+}
+
+// ClearChains clears the "chains" edge to the Chain entity.
+func (m *UserMutation) ClearChains() {
+	m.clearedchains = true
+}
+
+// ChainsCleared reports if the "chains" edge to the Chain entity was cleared.
+func (m *UserMutation) ChainsCleared() bool {
+	return m.clearedchains
+}
+
+// RemoveChainIDs removes the "chains" edge to the Chain entity by IDs.
+func (m *UserMutation) RemoveChainIDs(ids ...int) {
+	if m.removedchains == nil {
+		m.removedchains = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.chains, ids[i])
+		m.removedchains[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedChains returns the removed IDs of the "chains" edge to the Chain entity.
+func (m *UserMutation) RemovedChainsIDs() (ids []int) {
+	for id := range m.removedchains {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ChainsIDs returns the "chains" edge IDs in the mutation.
+func (m *UserMutation) ChainsIDs() (ids []int) {
+	for id := range m.chains {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetChains resets all changes to the "chains" edge.
+func (m *UserMutation) ResetChains() {
+	m.chains = nil
+	m.clearedchains = false
+	m.removedchains = nil
 }
 
 // AddTelegramChatIDs adds the "telegram_chats" edge to the TelegramChat entity by ids.
@@ -5938,7 +6247,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 10)
 	if m.create_time != nil {
 		fields = append(fields, user.FieldCreateTime)
 	}
@@ -5951,11 +6260,23 @@ func (m *UserMutation) Fields() []string {
 	if m.name != nil {
 		fields = append(fields, user.FieldName)
 	}
+	if m.chat_id != nil {
+		fields = append(fields, user.FieldChatID)
+	}
 	if m._type != nil {
 		fields = append(fields, user.FieldType)
 	}
 	if m.login_token != nil {
 		fields = append(fields, user.FieldLoginToken)
+	}
+	if m.user_name != nil {
+		fields = append(fields, user.FieldUserName)
+	}
+	if m.chat_name != nil {
+		fields = append(fields, user.FieldChatName)
+	}
+	if m.is_group != nil {
+		fields = append(fields, user.FieldIsGroup)
 	}
 	return fields
 }
@@ -5973,10 +6294,18 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.UserID()
 	case user.FieldName:
 		return m.Name()
+	case user.FieldChatID:
+		return m.ChatID()
 	case user.FieldType:
 		return m.GetType()
 	case user.FieldLoginToken:
 		return m.LoginToken()
+	case user.FieldUserName:
+		return m.UserName()
+	case user.FieldChatName:
+		return m.ChatName()
+	case user.FieldIsGroup:
+		return m.IsGroup()
 	}
 	return nil, false
 }
@@ -5994,10 +6323,18 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldUserID(ctx)
 	case user.FieldName:
 		return m.OldName(ctx)
+	case user.FieldChatID:
+		return m.OldChatID(ctx)
 	case user.FieldType:
 		return m.OldType(ctx)
 	case user.FieldLoginToken:
 		return m.OldLoginToken(ctx)
+	case user.FieldUserName:
+		return m.OldUserName(ctx)
+	case user.FieldChatName:
+		return m.OldChatName(ctx)
+	case user.FieldIsGroup:
+		return m.OldIsGroup(ctx)
 	}
 	return nil, fmt.Errorf("unknown User field %s", name)
 }
@@ -6035,6 +6372,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetName(v)
 		return nil
+	case user.FieldChatID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetChatID(v)
+		return nil
 	case user.FieldType:
 		v, ok := value.(user.Type)
 		if !ok {
@@ -6049,6 +6393,27 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetLoginToken(v)
 		return nil
+	case user.FieldUserName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserName(v)
+		return nil
+	case user.FieldChatName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetChatName(v)
+		return nil
+	case user.FieldIsGroup:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsGroup(v)
+		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
 }
@@ -6060,6 +6425,9 @@ func (m *UserMutation) AddedFields() []string {
 	if m.adduser_id != nil {
 		fields = append(fields, user.FieldUserID)
 	}
+	if m.addchat_id != nil {
+		fields = append(fields, user.FieldChatID)
+	}
 	return fields
 }
 
@@ -6070,6 +6438,8 @@ func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case user.FieldUserID:
 		return m.AddedUserID()
+	case user.FieldChatID:
+		return m.AddedChatID()
 	}
 	return nil, false
 }
@@ -6085,6 +6455,13 @@ func (m *UserMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddUserID(v)
+		return nil
+	case user.FieldChatID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddChatID(v)
 		return nil
 	}
 	return fmt.Errorf("unknown User numeric field %s", name)
@@ -6125,11 +6502,23 @@ func (m *UserMutation) ResetField(name string) error {
 	case user.FieldName:
 		m.ResetName()
 		return nil
+	case user.FieldChatID:
+		m.ResetChatID()
+		return nil
 	case user.FieldType:
 		m.ResetType()
 		return nil
 	case user.FieldLoginToken:
 		m.ResetLoginToken()
+		return nil
+	case user.FieldUserName:
+		m.ResetUserName()
+		return nil
+	case user.FieldChatName:
+		m.ResetChatName()
+		return nil
+	case user.FieldIsGroup:
+		m.ResetIsGroup()
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
@@ -6137,7 +6526,10 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
+	if m.chains != nil {
+		edges = append(edges, user.EdgeChains)
+	}
 	if m.telegram_chats != nil {
 		edges = append(edges, user.EdgeTelegramChats)
 	}
@@ -6154,6 +6546,12 @@ func (m *UserMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *UserMutation) AddedIDs(name string) []ent.Value {
 	switch name {
+	case user.EdgeChains:
+		ids := make([]ent.Value, 0, len(m.chains))
+		for id := range m.chains {
+			ids = append(ids, id)
+		}
+		return ids
 	case user.EdgeTelegramChats:
 		ids := make([]ent.Value, 0, len(m.telegram_chats))
 		for id := range m.telegram_chats {
@@ -6178,7 +6576,10 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
+	if m.removedchains != nil {
+		edges = append(edges, user.EdgeChains)
+	}
 	if m.removedtelegram_chats != nil {
 		edges = append(edges, user.EdgeTelegramChats)
 	}
@@ -6195,6 +6596,12 @@ func (m *UserMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
+	case user.EdgeChains:
+		ids := make([]ent.Value, 0, len(m.removedchains))
+		for id := range m.removedchains {
+			ids = append(ids, id)
+		}
+		return ids
 	case user.EdgeTelegramChats:
 		ids := make([]ent.Value, 0, len(m.removedtelegram_chats))
 		for id := range m.removedtelegram_chats {
@@ -6219,7 +6626,10 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
+	if m.clearedchains {
+		edges = append(edges, user.EdgeChains)
+	}
 	if m.clearedtelegram_chats {
 		edges = append(edges, user.EdgeTelegramChats)
 	}
@@ -6236,6 +6646,8 @@ func (m *UserMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *UserMutation) EdgeCleared(name string) bool {
 	switch name {
+	case user.EdgeChains:
+		return m.clearedchains
 	case user.EdgeTelegramChats:
 		return m.clearedtelegram_chats
 	case user.EdgeDiscordChannels:
@@ -6258,6 +6670,9 @@ func (m *UserMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *UserMutation) ResetEdge(name string) error {
 	switch name {
+	case user.EdgeChains:
+		m.ResetChains()
+		return nil
 	case user.EdgeTelegramChats:
 		m.ResetTelegramChats()
 		return nil

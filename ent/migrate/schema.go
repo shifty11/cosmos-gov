@@ -132,7 +132,7 @@ var (
 		{Name: "description", Type: field.TypeString},
 		{Name: "voting_start_time", Type: field.TypeTime},
 		{Name: "voting_end_time", Type: field.TypeTime},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"PROPOSAL_STATUS_UNSPECIFIED", "PROPOSAL_STATUS_DEPOSIT_PERIOD", "PROPOSAL_STATUS_VOTING_PERIOD", "PROPOSAL_STATUS_PASSED", "PROPOSAL_STATUS_REJECTED", "PROPOSAL_STATUS_FAILED"}},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"PROPOSAL_STATUS_FAILED", "PROPOSAL_STATUS_UNSPECIFIED", "PROPOSAL_STATUS_DEPOSIT_PERIOD", "PROPOSAL_STATUS_VOTING_PERIOD", "PROPOSAL_STATUS_PASSED", "PROPOSAL_STATUS_REJECTED"}},
 		{Name: "chain_proposals", Type: field.TypeInt, Nullable: true},
 	}
 	// ProposalsTable holds the schema information for the "proposals" table.
@@ -221,10 +221,14 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
-		{Name: "user_id", Type: field.TypeInt64},
+		{Name: "user_id", Type: field.TypeInt64, Default: 0},
 		{Name: "name", Type: field.TypeString},
+		{Name: "chat_id", Type: field.TypeInt64},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"telegram", "discord"}},
 		{Name: "login_token", Type: field.TypeString, Default: ""},
+		{Name: "user_name", Type: field.TypeString, Default: "<not set>"},
+		{Name: "chat_name", Type: field.TypeString, Default: "<not set>"},
+		{Name: "is_group", Type: field.TypeBool, Default: false},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
@@ -235,7 +239,7 @@ var (
 			{
 				Name:    "user_user_id_type",
 				Unique:  true,
-				Columns: []*schema.Column{UsersColumns[3], UsersColumns[5]},
+				Columns: []*schema.Column{UsersColumns[3], UsersColumns[6]},
 			},
 		},
 	}
@@ -323,6 +327,31 @@ var (
 			},
 		},
 	}
+	// UserChainsColumns holds the columns for the "user_chains" table.
+	UserChainsColumns = []*schema.Column{
+		{Name: "user_id", Type: field.TypeInt},
+		{Name: "chain_id", Type: field.TypeInt},
+	}
+	// UserChainsTable holds the schema information for the "user_chains" table.
+	UserChainsTable = &schema.Table{
+		Name:       "user_chains",
+		Columns:    UserChainsColumns,
+		PrimaryKey: []*schema.Column{UserChainsColumns[0], UserChainsColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "user_chains_user_id",
+				Columns:    []*schema.Column{UserChainsColumns[0]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "user_chains_chain_id",
+				Columns:    []*schema.Column{UserChainsColumns[1]},
+				RefColumns: []*schema.Column{ChainsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// UserWalletsColumns holds the columns for the "user_wallets" table.
 	UserWalletsColumns = []*schema.Column{
 		{Name: "user_id", Type: field.TypeInt},
@@ -362,6 +391,7 @@ var (
 		WalletsTable,
 		DiscordChannelChainsTable,
 		TelegramChatChainsTable,
+		UserChainsTable,
 		UserWalletsTable,
 	}
 )
@@ -377,6 +407,8 @@ func init() {
 	DiscordChannelChainsTable.ForeignKeys[1].RefTable = ChainsTable
 	TelegramChatChainsTable.ForeignKeys[0].RefTable = TelegramChatsTable
 	TelegramChatChainsTable.ForeignKeys[1].RefTable = ChainsTable
+	UserChainsTable.ForeignKeys[0].RefTable = UsersTable
+	UserChainsTable.ForeignKeys[1].RefTable = ChainsTable
 	UserWalletsTable.ForeignKeys[0].RefTable = UsersTable
 	UserWalletsTable.ForeignKeys[1].RefTable = WalletsTable
 }

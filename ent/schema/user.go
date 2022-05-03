@@ -23,10 +23,11 @@ func (User) Mixin() []ent.Mixin {
 // Fields of the User.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int64("user_id"),
+		field.Int64("user_id").
+			Default(0), // TODO: remove default
 		field.String("name"),
-		//field.Int64("chat_id"). // TODO: has to be removed
-		//			Immutable(),
+		field.Int64("chat_id"). // TODO: has to be removed
+					Immutable(),
 		field.Enum("type").
 			Values("telegram", "discord").
 			Immutable(),
@@ -34,21 +35,19 @@ func (User) Fields() []ent.Field {
 			Default(""),
 
 		//TODO: remove this fields (or rename)
-		//field.Int64("user_id").
-		//	Default(0),
-		//field.String("user_name").
-		//	Default("<not set>"),
-		//field.String("chat_name").
-		//	Default("<not set>"),
-		//field.Bool("is_group").
-		//	Default(false),
+		field.String("user_name").
+			Default("<not set>"),
+		field.String("chat_name").
+			Default("<not set>"),
+		field.Bool("is_group").
+			Default(false),
 	}
 }
 
 // Edges of the User.
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
-		//edge.To("chains", Chain.Type), // TODO: has to be removed
+		edge.To("chains", Chain.Type), // TODO: has to be removed
 		edge.From("telegram_chats", TelegramChat.Type).
 			Ref("user").
 			Annotations(entsql.Annotation{
