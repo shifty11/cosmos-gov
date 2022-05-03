@@ -14,8 +14,12 @@ const (
 	FieldID = "id"
 	// FieldCreateTime holds the string denoting the create_time field in the database.
 	FieldCreateTime = "create_time"
-	// FieldUpdateTime holds the string denoting the update_time field in the database.
-	FieldUpdateTime = "update_time"
+	// FieldUpdatedTime holds the string denoting the updated_time field in the database.
+	FieldUpdatedTime = "updated_time"
+	// FieldCreatedAt holds the string denoting the created_at field in the database.
+	FieldCreatedAt = "created_at"
+	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
+	FieldUpdatedAt = "updated_at"
 	// FieldUserID holds the string denoting the user_id field in the database.
 	FieldUserID = "user_id"
 	// FieldName holds the string denoting the name field in the database.
@@ -72,7 +76,9 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldCreateTime,
-	FieldUpdateTime,
+	FieldUpdatedTime,
+	FieldCreatedAt,
+	FieldUpdatedAt,
 	FieldUserID,
 	FieldName,
 	FieldChatID,
@@ -103,14 +109,14 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// DefaultCreateTime holds the default value on creation for the "create_time" field.
-	DefaultCreateTime func() time.Time
-	// DefaultUpdateTime holds the default value on creation for the "update_time" field.
-	DefaultUpdateTime func() time.Time
-	// UpdateDefaultUpdateTime holds the default value on update for the "update_time" field.
-	UpdateDefaultUpdateTime func() time.Time
-	// DefaultUserID holds the default value on creation for the "user_id" field.
-	DefaultUserID int64
+	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
+	DefaultCreatedAt func() time.Time
+	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
+	DefaultUpdatedAt func() time.Time
+	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
+	UpdateDefaultUpdatedAt func() time.Time
+	// DefaultName holds the default value on creation for the "name" field.
+	DefaultName string
 	// DefaultLoginToken holds the default value on creation for the "login_token" field.
 	DefaultLoginToken string
 	// DefaultUserName holds the default value on creation for the "user_name" field.

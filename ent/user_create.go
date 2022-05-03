@@ -38,16 +38,44 @@ func (uc *UserCreate) SetNillableCreateTime(t *time.Time) *UserCreate {
 	return uc
 }
 
-// SetUpdateTime sets the "update_time" field.
-func (uc *UserCreate) SetUpdateTime(t time.Time) *UserCreate {
-	uc.mutation.SetUpdateTime(t)
+// SetUpdatedTime sets the "updated_time" field.
+func (uc *UserCreate) SetUpdatedTime(t time.Time) *UserCreate {
+	uc.mutation.SetUpdatedTime(t)
 	return uc
 }
 
-// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
-func (uc *UserCreate) SetNillableUpdateTime(t *time.Time) *UserCreate {
+// SetNillableUpdatedTime sets the "updated_time" field if the given value is not nil.
+func (uc *UserCreate) SetNillableUpdatedTime(t *time.Time) *UserCreate {
 	if t != nil {
-		uc.SetUpdateTime(*t)
+		uc.SetUpdatedTime(*t)
+	}
+	return uc
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (uc *UserCreate) SetCreatedAt(t time.Time) *UserCreate {
+	uc.mutation.SetCreatedAt(t)
+	return uc
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (uc *UserCreate) SetNillableCreatedAt(t *time.Time) *UserCreate {
+	if t != nil {
+		uc.SetCreatedAt(*t)
+	}
+	return uc
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (uc *UserCreate) SetUpdatedAt(t time.Time) *UserCreate {
+	uc.mutation.SetUpdatedAt(t)
+	return uc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (uc *UserCreate) SetNillableUpdatedAt(t *time.Time) *UserCreate {
+	if t != nil {
+		uc.SetUpdatedAt(*t)
 	}
 	return uc
 }
@@ -69,6 +97,14 @@ func (uc *UserCreate) SetNillableUserID(i *int64) *UserCreate {
 // SetName sets the "name" field.
 func (uc *UserCreate) SetName(s string) *UserCreate {
 	uc.mutation.SetName(s)
+	return uc
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (uc *UserCreate) SetNillableName(s *string) *UserCreate {
+	if s != nil {
+		uc.SetName(*s)
+	}
 	return uc
 }
 
@@ -271,17 +307,17 @@ func (uc *UserCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (uc *UserCreate) defaults() {
-	if _, ok := uc.mutation.CreateTime(); !ok {
-		v := user.DefaultCreateTime()
-		uc.mutation.SetCreateTime(v)
+	if _, ok := uc.mutation.CreatedAt(); !ok {
+		v := user.DefaultCreatedAt()
+		uc.mutation.SetCreatedAt(v)
 	}
-	if _, ok := uc.mutation.UpdateTime(); !ok {
-		v := user.DefaultUpdateTime()
-		uc.mutation.SetUpdateTime(v)
+	if _, ok := uc.mutation.UpdatedAt(); !ok {
+		v := user.DefaultUpdatedAt()
+		uc.mutation.SetUpdatedAt(v)
 	}
-	if _, ok := uc.mutation.UserID(); !ok {
-		v := user.DefaultUserID
-		uc.mutation.SetUserID(v)
+	if _, ok := uc.mutation.Name(); !ok {
+		v := user.DefaultName
+		uc.mutation.SetName(v)
 	}
 	if _, ok := uc.mutation.LoginToken(); !ok {
 		v := user.DefaultLoginToken
@@ -303,14 +339,11 @@ func (uc *UserCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (uc *UserCreate) check() error {
-	if _, ok := uc.mutation.CreateTime(); !ok {
-		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "User.create_time"`)}
+	if _, ok := uc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "User.created_at"`)}
 	}
-	if _, ok := uc.mutation.UpdateTime(); !ok {
-		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "User.update_time"`)}
-	}
-	if _, ok := uc.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "User.user_id"`)}
+	if _, ok := uc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "User.updated_at"`)}
 	}
 	if _, ok := uc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "User.name"`)}
@@ -373,13 +406,29 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		})
 		_node.CreateTime = value
 	}
-	if value, ok := uc.mutation.UpdateTime(); ok {
+	if value, ok := uc.mutation.UpdatedTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: user.FieldUpdateTime,
+			Column: user.FieldUpdatedTime,
 		})
-		_node.UpdateTime = value
+		_node.UpdatedTime = value
+	}
+	if value, ok := uc.mutation.CreatedAt(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: user.FieldCreatedAt,
+		})
+		_node.CreatedAt = value
+	}
+	if value, ok := uc.mutation.UpdatedAt(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: user.FieldUpdatedAt,
+		})
+		_node.UpdatedAt = value
 	}
 	if value, ok := uc.mutation.UserID(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

@@ -5,7 +5,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
-	"entgo.io/ent/schema/mixin"
+	"time"
 )
 
 // RpcEndpoint holds the schema definition for the RpcEndpoint entity.
@@ -15,13 +15,22 @@ type RpcEndpoint struct {
 
 func (RpcEndpoint) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		mixin.Time{},
+		//mixin.Time{},
 	}
 }
 
 // Fields of the RpcEndpoint.
 func (RpcEndpoint) Fields() []ent.Field {
 	return []ent.Field{
+		field.Time("create_time").Optional(),
+		field.Time("updated_time").Optional(),
+		field.Time("created_at").
+			Default(time.Now).
+			Immutable(),
+		field.Time("updated_at").
+			Default(time.Now).
+			UpdateDefault(time.Now),
+
 		field.String("endpoint").
 			Unique(),
 	}

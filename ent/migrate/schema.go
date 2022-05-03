@@ -11,10 +11,12 @@ var (
 	// ChainsColumns holds the columns for the "chains" table.
 	ChainsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "create_time", Type: field.TypeTime},
-		{Name: "update_time", Type: field.TypeTime},
-		{Name: "chain_id", Type: field.TypeString, Unique: true},
-		{Name: "account_prefix", Type: field.TypeString},
+		{Name: "create_time", Type: field.TypeTime, Nullable: true},
+		{Name: "updated_time", Type: field.TypeTime, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "chain_id", Type: field.TypeString, Unique: true, Nullable: true},
+		{Name: "account_prefix", Type: field.TypeString, Nullable: true},
 		{Name: "name", Type: field.TypeString, Unique: true},
 		{Name: "display_name", Type: field.TypeString, Unique: true},
 		{Name: "is_enabled", Type: field.TypeBool, Default: true},
@@ -28,7 +30,7 @@ var (
 			{
 				Name:    "chain_name",
 				Unique:  true,
-				Columns: []*schema.Column{ChainsColumns[5]},
+				Columns: []*schema.Column{ChainsColumns[7]},
 			},
 		},
 	}
@@ -91,8 +93,10 @@ var (
 	// LensChainInfosColumns holds the columns for the "lens_chain_infos" table.
 	LensChainInfosColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "create_time", Type: field.TypeTime},
-		{Name: "update_time", Type: field.TypeTime},
+		{Name: "create_time", Type: field.TypeTime, Nullable: true},
+		{Name: "updated_time", Type: field.TypeTime, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "name", Type: field.TypeString, Unique: true},
 		{Name: "cnt_errors", Type: field.TypeInt},
 	}
@@ -105,7 +109,7 @@ var (
 			{
 				Name:    "lenschaininfo_name",
 				Unique:  true,
-				Columns: []*schema.Column{LensChainInfosColumns[3]},
+				Columns: []*schema.Column{LensChainInfosColumns[5]},
 			},
 		},
 	}
@@ -125,14 +129,16 @@ var (
 	// ProposalsColumns holds the columns for the "proposals" table.
 	ProposalsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "create_time", Type: field.TypeTime},
-		{Name: "update_time", Type: field.TypeTime},
+		{Name: "create_time", Type: field.TypeTime, Nullable: true},
+		{Name: "updated_time", Type: field.TypeTime, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "proposal_id", Type: field.TypeUint64},
 		{Name: "title", Type: field.TypeString},
 		{Name: "description", Type: field.TypeString},
 		{Name: "voting_start_time", Type: field.TypeTime},
 		{Name: "voting_end_time", Type: field.TypeTime},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"PROPOSAL_STATUS_FAILED", "PROPOSAL_STATUS_UNSPECIFIED", "PROPOSAL_STATUS_DEPOSIT_PERIOD", "PROPOSAL_STATUS_VOTING_PERIOD", "PROPOSAL_STATUS_PASSED", "PROPOSAL_STATUS_REJECTED"}},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"PROPOSAL_STATUS_VOTING_PERIOD", "PROPOSAL_STATUS_PASSED", "PROPOSAL_STATUS_REJECTED", "PROPOSAL_STATUS_FAILED", "PROPOSAL_STATUS_UNSPECIFIED", "PROPOSAL_STATUS_DEPOSIT_PERIOD"}},
 		{Name: "chain_proposals", Type: field.TypeInt, Nullable: true},
 	}
 	// ProposalsTable holds the schema information for the "proposals" table.
@@ -143,7 +149,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "proposals_chains_proposals",
-				Columns:    []*schema.Column{ProposalsColumns[9]},
+				Columns:    []*schema.Column{ProposalsColumns[11]},
 				RefColumns: []*schema.Column{ChainsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -152,15 +158,17 @@ var (
 			{
 				Name:    "proposal_proposal_id_chain_proposals",
 				Unique:  true,
-				Columns: []*schema.Column{ProposalsColumns[3], ProposalsColumns[9]},
+				Columns: []*schema.Column{ProposalsColumns[5], ProposalsColumns[11]},
 			},
 		},
 	}
 	// RPCEndpointsColumns holds the columns for the "rpc_endpoints" table.
 	RPCEndpointsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "create_time", Type: field.TypeTime},
-		{Name: "update_time", Type: field.TypeTime},
+		{Name: "create_time", Type: field.TypeTime, Nullable: true},
+		{Name: "updated_time", Type: field.TypeTime, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "endpoint", Type: field.TypeString, Unique: true},
 		{Name: "chain_rpc_endpoints", Type: field.TypeInt, Nullable: true},
 	}
@@ -172,7 +180,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "rpc_endpoints_chains_rpc_endpoints",
-				Columns:    []*schema.Column{RPCEndpointsColumns[4]},
+				Columns:    []*schema.Column{RPCEndpointsColumns[6]},
 				RefColumns: []*schema.Column{ChainsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -181,7 +189,7 @@ var (
 			{
 				Name:    "rpcendpoint_endpoint",
 				Unique:  true,
-				Columns: []*schema.Column{RPCEndpointsColumns[3]},
+				Columns: []*schema.Column{RPCEndpointsColumns[5]},
 			},
 		},
 	}
@@ -219,10 +227,12 @@ var (
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "create_time", Type: field.TypeTime},
-		{Name: "update_time", Type: field.TypeTime},
-		{Name: "user_id", Type: field.TypeInt64, Default: 0},
-		{Name: "name", Type: field.TypeString},
+		{Name: "create_time", Type: field.TypeTime, Nullable: true},
+		{Name: "updated_time", Type: field.TypeTime, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeInt64, Nullable: true},
+		{Name: "name", Type: field.TypeString, Default: "<not set>"},
 		{Name: "chat_id", Type: field.TypeInt64},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"telegram", "discord"}},
 		{Name: "login_token", Type: field.TypeString, Default: ""},
@@ -237,9 +247,9 @@ var (
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
 		Indexes: []*schema.Index{
 			{
-				Name:    "user_user_id_type",
+				Name:    "user_chat_id_type",
 				Unique:  true,
-				Columns: []*schema.Column{UsersColumns[3], UsersColumns[6]},
+				Columns: []*schema.Column{UsersColumns[7], UsersColumns[8]},
 			},
 		},
 	}

@@ -6,6 +6,7 @@ import (
 	"github.com/shifty11/cosmos-gov/ent/migrate"
 	"github.com/shifty11/cosmos-gov/ent/migrationinfo"
 	"github.com/shifty11/cosmos-gov/ent/user"
+	regen "github.com/zach-klippenstein/goregen"
 	"os"
 
 	"github.com/shifty11/cosmos-gov/ent"
@@ -118,11 +119,16 @@ func migrateUsers() {
 		if err != nil {
 			log.Sugar.Panicf("Failed migrating %v", err)
 		}
+		token, err := regen.Generate("[A-Za-z0-9]{32}")
+		if err != nil {
+			log.Sugar.Panicf("Failed migrating %v", err)
+		}
+		u.Update().SetName(u.UserName).SetLoginToken(token).SaveX(ctx)
 		if u.Type == user.TypeTelegram {
 			err = client.TelegramChat.
 				Create().
 				SetChatID(u.ChatID).
-				SetName(u.UserName).
+				SetName(u.ChatName).
 				SetIsGroup(u.ChatID < 0).
 				SetUser(u).
 				AddChains(chains...).
@@ -134,7 +140,7 @@ func migrateUsers() {
 			err = client.DiscordChannel.
 				Create().
 				SetChannelID(u.ChatID).
-				SetName(u.UserName).
+				SetName(u.ChatName).
 				SetIsGroup(true). // TODO: set this field properly
 				SetUser(u).
 				AddChains(chains...).
@@ -143,6 +149,37 @@ func migrateUsers() {
 				log.Sugar.Panicf("Failed migrating %v", err)
 			}
 		}
+	}
+
+	for _, c := range client.Chain.Query().AllX(ctx) {
+		c.Update().
+			SetCreateTime(c.CreatedAt).
+			SetUpdatedTime(c.UpdatedAt).
+			SaveX(ctx)
+	}
+	for _, c := range client.LensChainInfo.Query().AllX(ctx) {
+		c.Update().
+			SetCreateTime(c.CreatedAt).
+			SetUpdatedTime(c.UpdatedAt).
+			SaveX(ctx)
+	}
+	for _, c := range client.Proposal.Query().AllX(ctx) {
+		c.Update().
+			SetCreateTime(c.CreatedAt).
+			SetUpdatedTime(c.UpdatedAt).
+			SaveX(ctx)
+	}
+	for _, c := range client.RpcEndpoint.Query().AllX(ctx) {
+		c.Update().
+			SetCreateTime(c.CreatedAt).
+			SetUpdatedTime(c.UpdatedAt).
+			SaveX(ctx)
+	}
+	for _, c := range client.User.Query().AllX(ctx) {
+		c.Update().
+			SetCreateTime(c.CreatedAt).
+			SetUpdatedTime(c.UpdatedAt).
+			SaveX(ctx)
 	}
 
 	err = client.MigrationInfo.

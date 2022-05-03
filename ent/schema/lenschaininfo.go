@@ -4,7 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
-	"entgo.io/ent/schema/mixin"
+	"time"
 )
 
 // LensChainInfo holds the schema definition for the LensChainInfo entity.
@@ -14,13 +14,22 @@ type LensChainInfo struct {
 
 func (LensChainInfo) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		mixin.Time{},
+		//mixin.Time{},
 	}
 }
 
 // Fields of the LensChainInfo.
 func (LensChainInfo) Fields() []ent.Field {
 	return []ent.Field{
+		field.Time("create_time").Optional(),
+		field.Time("updated_time").Optional(),
+		field.Time("created_at").
+			Default(time.Now).
+			Immutable(),
+		field.Time("updated_at").
+			Default(time.Now).
+			UpdateDefault(time.Now),
+
 		field.String("name").
 			Unique(),
 		field.Int("cnt_errors"),

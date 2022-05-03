@@ -34,9 +34,49 @@ func (cu *ChainUpdate) Where(ps ...predicate.Chain) *ChainUpdate {
 	return cu
 }
 
-// SetUpdateTime sets the "update_time" field.
-func (cu *ChainUpdate) SetUpdateTime(t time.Time) *ChainUpdate {
-	cu.mutation.SetUpdateTime(t)
+// SetCreateTime sets the "create_time" field.
+func (cu *ChainUpdate) SetCreateTime(t time.Time) *ChainUpdate {
+	cu.mutation.SetCreateTime(t)
+	return cu
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (cu *ChainUpdate) SetNillableCreateTime(t *time.Time) *ChainUpdate {
+	if t != nil {
+		cu.SetCreateTime(*t)
+	}
+	return cu
+}
+
+// ClearCreateTime clears the value of the "create_time" field.
+func (cu *ChainUpdate) ClearCreateTime() *ChainUpdate {
+	cu.mutation.ClearCreateTime()
+	return cu
+}
+
+// SetUpdatedTime sets the "updated_time" field.
+func (cu *ChainUpdate) SetUpdatedTime(t time.Time) *ChainUpdate {
+	cu.mutation.SetUpdatedTime(t)
+	return cu
+}
+
+// SetNillableUpdatedTime sets the "updated_time" field if the given value is not nil.
+func (cu *ChainUpdate) SetNillableUpdatedTime(t *time.Time) *ChainUpdate {
+	if t != nil {
+		cu.SetUpdatedTime(*t)
+	}
+	return cu
+}
+
+// ClearUpdatedTime clears the value of the "updated_time" field.
+func (cu *ChainUpdate) ClearUpdatedTime() *ChainUpdate {
+	cu.mutation.ClearUpdatedTime()
+	return cu
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (cu *ChainUpdate) SetUpdatedAt(t time.Time) *ChainUpdate {
+	cu.mutation.SetUpdatedAt(t)
 	return cu
 }
 
@@ -46,9 +86,37 @@ func (cu *ChainUpdate) SetChainID(s string) *ChainUpdate {
 	return cu
 }
 
+// SetNillableChainID sets the "chain_id" field if the given value is not nil.
+func (cu *ChainUpdate) SetNillableChainID(s *string) *ChainUpdate {
+	if s != nil {
+		cu.SetChainID(*s)
+	}
+	return cu
+}
+
+// ClearChainID clears the value of the "chain_id" field.
+func (cu *ChainUpdate) ClearChainID() *ChainUpdate {
+	cu.mutation.ClearChainID()
+	return cu
+}
+
 // SetAccountPrefix sets the "account_prefix" field.
 func (cu *ChainUpdate) SetAccountPrefix(s string) *ChainUpdate {
 	cu.mutation.SetAccountPrefix(s)
+	return cu
+}
+
+// SetNillableAccountPrefix sets the "account_prefix" field if the given value is not nil.
+func (cu *ChainUpdate) SetNillableAccountPrefix(s *string) *ChainUpdate {
+	if s != nil {
+		cu.SetAccountPrefix(*s)
+	}
+	return cu
+}
+
+// ClearAccountPrefix clears the value of the "account_prefix" field.
+func (cu *ChainUpdate) ClearAccountPrefix() *ChainUpdate {
+	cu.mutation.ClearAccountPrefix()
 	return cu
 }
 
@@ -356,9 +424,9 @@ func (cu *ChainUpdate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (cu *ChainUpdate) defaults() {
-	if _, ok := cu.mutation.UpdateTime(); !ok {
-		v := chain.UpdateDefaultUpdateTime()
-		cu.mutation.SetUpdateTime(v)
+	if _, ok := cu.mutation.UpdatedAt(); !ok {
+		v := chain.UpdateDefaultUpdatedAt()
+		cu.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -380,11 +448,37 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := cu.mutation.UpdateTime(); ok {
+	if value, ok := cu.mutation.CreateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: chain.FieldUpdateTime,
+			Column: chain.FieldCreateTime,
+		})
+	}
+	if cu.mutation.CreateTimeCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: chain.FieldCreateTime,
+		})
+	}
+	if value, ok := cu.mutation.UpdatedTime(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: chain.FieldUpdatedTime,
+		})
+	}
+	if cu.mutation.UpdatedTimeCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: chain.FieldUpdatedTime,
+		})
+	}
+	if value, ok := cu.mutation.UpdatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: chain.FieldUpdatedAt,
 		})
 	}
 	if value, ok := cu.mutation.ChainID(); ok {
@@ -394,10 +488,22 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: chain.FieldChainID,
 		})
 	}
+	if cu.mutation.ChainIDCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: chain.FieldChainID,
+		})
+	}
 	if value, ok := cu.mutation.AccountPrefix(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
+			Column: chain.FieldAccountPrefix,
+		})
+	}
+	if cu.mutation.AccountPrefixCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
 			Column: chain.FieldAccountPrefix,
 		})
 	}
@@ -765,9 +871,49 @@ type ChainUpdateOne struct {
 	mutation *ChainMutation
 }
 
-// SetUpdateTime sets the "update_time" field.
-func (cuo *ChainUpdateOne) SetUpdateTime(t time.Time) *ChainUpdateOne {
-	cuo.mutation.SetUpdateTime(t)
+// SetCreateTime sets the "create_time" field.
+func (cuo *ChainUpdateOne) SetCreateTime(t time.Time) *ChainUpdateOne {
+	cuo.mutation.SetCreateTime(t)
+	return cuo
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (cuo *ChainUpdateOne) SetNillableCreateTime(t *time.Time) *ChainUpdateOne {
+	if t != nil {
+		cuo.SetCreateTime(*t)
+	}
+	return cuo
+}
+
+// ClearCreateTime clears the value of the "create_time" field.
+func (cuo *ChainUpdateOne) ClearCreateTime() *ChainUpdateOne {
+	cuo.mutation.ClearCreateTime()
+	return cuo
+}
+
+// SetUpdatedTime sets the "updated_time" field.
+func (cuo *ChainUpdateOne) SetUpdatedTime(t time.Time) *ChainUpdateOne {
+	cuo.mutation.SetUpdatedTime(t)
+	return cuo
+}
+
+// SetNillableUpdatedTime sets the "updated_time" field if the given value is not nil.
+func (cuo *ChainUpdateOne) SetNillableUpdatedTime(t *time.Time) *ChainUpdateOne {
+	if t != nil {
+		cuo.SetUpdatedTime(*t)
+	}
+	return cuo
+}
+
+// ClearUpdatedTime clears the value of the "updated_time" field.
+func (cuo *ChainUpdateOne) ClearUpdatedTime() *ChainUpdateOne {
+	cuo.mutation.ClearUpdatedTime()
+	return cuo
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (cuo *ChainUpdateOne) SetUpdatedAt(t time.Time) *ChainUpdateOne {
+	cuo.mutation.SetUpdatedAt(t)
 	return cuo
 }
 
@@ -777,9 +923,37 @@ func (cuo *ChainUpdateOne) SetChainID(s string) *ChainUpdateOne {
 	return cuo
 }
 
+// SetNillableChainID sets the "chain_id" field if the given value is not nil.
+func (cuo *ChainUpdateOne) SetNillableChainID(s *string) *ChainUpdateOne {
+	if s != nil {
+		cuo.SetChainID(*s)
+	}
+	return cuo
+}
+
+// ClearChainID clears the value of the "chain_id" field.
+func (cuo *ChainUpdateOne) ClearChainID() *ChainUpdateOne {
+	cuo.mutation.ClearChainID()
+	return cuo
+}
+
 // SetAccountPrefix sets the "account_prefix" field.
 func (cuo *ChainUpdateOne) SetAccountPrefix(s string) *ChainUpdateOne {
 	cuo.mutation.SetAccountPrefix(s)
+	return cuo
+}
+
+// SetNillableAccountPrefix sets the "account_prefix" field if the given value is not nil.
+func (cuo *ChainUpdateOne) SetNillableAccountPrefix(s *string) *ChainUpdateOne {
+	if s != nil {
+		cuo.SetAccountPrefix(*s)
+	}
+	return cuo
+}
+
+// ClearAccountPrefix clears the value of the "account_prefix" field.
+func (cuo *ChainUpdateOne) ClearAccountPrefix() *ChainUpdateOne {
+	cuo.mutation.ClearAccountPrefix()
 	return cuo
 }
 
@@ -1094,9 +1268,9 @@ func (cuo *ChainUpdateOne) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (cuo *ChainUpdateOne) defaults() {
-	if _, ok := cuo.mutation.UpdateTime(); !ok {
-		v := chain.UpdateDefaultUpdateTime()
-		cuo.mutation.SetUpdateTime(v)
+	if _, ok := cuo.mutation.UpdatedAt(); !ok {
+		v := chain.UpdateDefaultUpdatedAt()
+		cuo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -1135,11 +1309,37 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 			}
 		}
 	}
-	if value, ok := cuo.mutation.UpdateTime(); ok {
+	if value, ok := cuo.mutation.CreateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: chain.FieldUpdateTime,
+			Column: chain.FieldCreateTime,
+		})
+	}
+	if cuo.mutation.CreateTimeCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: chain.FieldCreateTime,
+		})
+	}
+	if value, ok := cuo.mutation.UpdatedTime(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: chain.FieldUpdatedTime,
+		})
+	}
+	if cuo.mutation.UpdatedTimeCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: chain.FieldUpdatedTime,
+		})
+	}
+	if value, ok := cuo.mutation.UpdatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: chain.FieldUpdatedAt,
 		})
 	}
 	if value, ok := cuo.mutation.ChainID(); ok {
@@ -1149,10 +1349,22 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 			Column: chain.FieldChainID,
 		})
 	}
+	if cuo.mutation.ChainIDCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: chain.FieldChainID,
+		})
+	}
 	if value, ok := cuo.mutation.AccountPrefix(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
+			Column: chain.FieldAccountPrefix,
+		})
+	}
+	if cuo.mutation.AccountPrefixCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
 			Column: chain.FieldAccountPrefix,
 		})
 	}

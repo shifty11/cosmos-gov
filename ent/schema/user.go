@@ -6,7 +6,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
-	"entgo.io/ent/schema/mixin"
+	"time"
 )
 
 // User holds the schema definition for the User entity.
@@ -16,23 +16,33 @@ type User struct {
 
 func (User) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		mixin.Time{},
+		//mixin.Time{},
 	}
 }
 
 // Fields of the User.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
+		field.Time("create_time").Optional(),
+		field.Time("updated_time").Optional(),
+		field.Time("created_at").
+			Default(time.Now).
+			Immutable(),
+		field.Time("updated_at").
+			Default(time.Now).
+			UpdateDefault(time.Now),
+
 		field.Int64("user_id").
-			Default(0), // TODO: remove default
-		field.String("name"),
+			Optional(), // TODO: remove optional
+		field.String("name").
+			Default("<not set>"), // TODO: remove default
 		field.Int64("chat_id"). // TODO: has to be removed
 					Immutable(),
 		field.Enum("type").
 			Values("telegram", "discord").
 			Immutable(),
 		field.String("login_token").
-			Default(""),
+			Default(""), // TODO: remove default
 
 		//TODO: remove this fields (or rename)
 		field.String("user_name").
@@ -67,9 +77,9 @@ func (User) Edges() []ent.Edge {
 
 func (User) Indexes() []ent.Index {
 	return []ent.Index{
-		//index.Fields("chat_id", "type"). // TODO: has to be removed
-		//					Unique(),
-		index.Fields("user_id", "type"). // TODO: disable for migration
+		index.Fields("chat_id", "type"). // TODO: has to be removed
 							Unique(),
+		//index.Fields("user_id", "type"). // TODO: disable for migration
+		//					Unique(),
 	}
 }

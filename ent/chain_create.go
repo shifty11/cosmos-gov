@@ -40,16 +40,44 @@ func (cc *ChainCreate) SetNillableCreateTime(t *time.Time) *ChainCreate {
 	return cc
 }
 
-// SetUpdateTime sets the "update_time" field.
-func (cc *ChainCreate) SetUpdateTime(t time.Time) *ChainCreate {
-	cc.mutation.SetUpdateTime(t)
+// SetUpdatedTime sets the "updated_time" field.
+func (cc *ChainCreate) SetUpdatedTime(t time.Time) *ChainCreate {
+	cc.mutation.SetUpdatedTime(t)
 	return cc
 }
 
-// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
-func (cc *ChainCreate) SetNillableUpdateTime(t *time.Time) *ChainCreate {
+// SetNillableUpdatedTime sets the "updated_time" field if the given value is not nil.
+func (cc *ChainCreate) SetNillableUpdatedTime(t *time.Time) *ChainCreate {
 	if t != nil {
-		cc.SetUpdateTime(*t)
+		cc.SetUpdatedTime(*t)
+	}
+	return cc
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (cc *ChainCreate) SetCreatedAt(t time.Time) *ChainCreate {
+	cc.mutation.SetCreatedAt(t)
+	return cc
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (cc *ChainCreate) SetNillableCreatedAt(t *time.Time) *ChainCreate {
+	if t != nil {
+		cc.SetCreatedAt(*t)
+	}
+	return cc
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (cc *ChainCreate) SetUpdatedAt(t time.Time) *ChainCreate {
+	cc.mutation.SetUpdatedAt(t)
+	return cc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (cc *ChainCreate) SetNillableUpdatedAt(t *time.Time) *ChainCreate {
+	if t != nil {
+		cc.SetUpdatedAt(*t)
 	}
 	return cc
 }
@@ -60,9 +88,25 @@ func (cc *ChainCreate) SetChainID(s string) *ChainCreate {
 	return cc
 }
 
+// SetNillableChainID sets the "chain_id" field if the given value is not nil.
+func (cc *ChainCreate) SetNillableChainID(s *string) *ChainCreate {
+	if s != nil {
+		cc.SetChainID(*s)
+	}
+	return cc
+}
+
 // SetAccountPrefix sets the "account_prefix" field.
 func (cc *ChainCreate) SetAccountPrefix(s string) *ChainCreate {
 	cc.mutation.SetAccountPrefix(s)
+	return cc
+}
+
+// SetNillableAccountPrefix sets the "account_prefix" field if the given value is not nil.
+func (cc *ChainCreate) SetNillableAccountPrefix(s *string) *ChainCreate {
+	if s != nil {
+		cc.SetAccountPrefix(*s)
+	}
 	return cc
 }
 
@@ -253,13 +297,13 @@ func (cc *ChainCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (cc *ChainCreate) defaults() {
-	if _, ok := cc.mutation.CreateTime(); !ok {
-		v := chain.DefaultCreateTime()
-		cc.mutation.SetCreateTime(v)
+	if _, ok := cc.mutation.CreatedAt(); !ok {
+		v := chain.DefaultCreatedAt()
+		cc.mutation.SetCreatedAt(v)
 	}
-	if _, ok := cc.mutation.UpdateTime(); !ok {
-		v := chain.DefaultUpdateTime()
-		cc.mutation.SetUpdateTime(v)
+	if _, ok := cc.mutation.UpdatedAt(); !ok {
+		v := chain.DefaultUpdatedAt()
+		cc.mutation.SetUpdatedAt(v)
 	}
 	if _, ok := cc.mutation.IsEnabled(); !ok {
 		v := chain.DefaultIsEnabled
@@ -269,17 +313,11 @@ func (cc *ChainCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (cc *ChainCreate) check() error {
-	if _, ok := cc.mutation.CreateTime(); !ok {
-		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "Chain.create_time"`)}
+	if _, ok := cc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Chain.created_at"`)}
 	}
-	if _, ok := cc.mutation.UpdateTime(); !ok {
-		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "Chain.update_time"`)}
-	}
-	if _, ok := cc.mutation.ChainID(); !ok {
-		return &ValidationError{Name: "chain_id", err: errors.New(`ent: missing required field "Chain.chain_id"`)}
-	}
-	if _, ok := cc.mutation.AccountPrefix(); !ok {
-		return &ValidationError{Name: "account_prefix", err: errors.New(`ent: missing required field "Chain.account_prefix"`)}
+	if _, ok := cc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Chain.updated_at"`)}
 	}
 	if _, ok := cc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Chain.name"`)}
@@ -325,13 +363,29 @@ func (cc *ChainCreate) createSpec() (*Chain, *sqlgraph.CreateSpec) {
 		})
 		_node.CreateTime = value
 	}
-	if value, ok := cc.mutation.UpdateTime(); ok {
+	if value, ok := cc.mutation.UpdatedTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: chain.FieldUpdateTime,
+			Column: chain.FieldUpdatedTime,
 		})
-		_node.UpdateTime = value
+		_node.UpdatedTime = value
+	}
+	if value, ok := cc.mutation.CreatedAt(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: chain.FieldCreatedAt,
+		})
+		_node.CreatedAt = value
+	}
+	if value, ok := cc.mutation.UpdatedAt(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: chain.FieldUpdatedAt,
+		})
+		_node.UpdatedAt = value
 	}
 	if value, ok := cc.mutation.ChainID(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
