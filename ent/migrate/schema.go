@@ -12,7 +12,7 @@ var (
 	ChainsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "create_time", Type: field.TypeTime, Nullable: true},
-		{Name: "updated_time", Type: field.TypeTime, Nullable: true},
+		{Name: "update_time", Type: field.TypeTime, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "chain_id", Type: field.TypeString, Unique: true, Nullable: true},
@@ -94,7 +94,7 @@ var (
 	LensChainInfosColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "create_time", Type: field.TypeTime, Nullable: true},
-		{Name: "updated_time", Type: field.TypeTime, Nullable: true},
+		{Name: "update_time", Type: field.TypeTime, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "name", Type: field.TypeString, Unique: true},
@@ -130,7 +130,7 @@ var (
 	ProposalsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "create_time", Type: field.TypeTime, Nullable: true},
-		{Name: "updated_time", Type: field.TypeTime, Nullable: true},
+		{Name: "update_time", Type: field.TypeTime, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "proposal_id", Type: field.TypeUint64},
@@ -138,7 +138,7 @@ var (
 		{Name: "description", Type: field.TypeString},
 		{Name: "voting_start_time", Type: field.TypeTime},
 		{Name: "voting_end_time", Type: field.TypeTime},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"PROPOSAL_STATUS_VOTING_PERIOD", "PROPOSAL_STATUS_PASSED", "PROPOSAL_STATUS_REJECTED", "PROPOSAL_STATUS_FAILED", "PROPOSAL_STATUS_UNSPECIFIED", "PROPOSAL_STATUS_DEPOSIT_PERIOD"}},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"PROPOSAL_STATUS_DEPOSIT_PERIOD", "PROPOSAL_STATUS_VOTING_PERIOD", "PROPOSAL_STATUS_PASSED", "PROPOSAL_STATUS_REJECTED", "PROPOSAL_STATUS_FAILED", "PROPOSAL_STATUS_UNSPECIFIED"}},
 		{Name: "chain_proposals", Type: field.TypeInt, Nullable: true},
 	}
 	// ProposalsTable holds the schema information for the "proposals" table.
@@ -166,7 +166,7 @@ var (
 	RPCEndpointsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "create_time", Type: field.TypeTime, Nullable: true},
-		{Name: "updated_time", Type: field.TypeTime, Nullable: true},
+		{Name: "update_time", Type: field.TypeTime, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "endpoint", Type: field.TypeString, Unique: true},
@@ -228,7 +228,7 @@ var (
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "create_time", Type: field.TypeTime, Nullable: true},
-		{Name: "updated_time", Type: field.TypeTime, Nullable: true},
+		{Name: "update_time", Type: field.TypeTime, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "user_id", Type: field.TypeInt64, Nullable: true},

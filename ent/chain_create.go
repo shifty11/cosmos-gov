@@ -40,16 +40,16 @@ func (cc *ChainCreate) SetNillableCreateTime(t *time.Time) *ChainCreate {
 	return cc
 }
 
-// SetUpdatedTime sets the "updated_time" field.
-func (cc *ChainCreate) SetUpdatedTime(t time.Time) *ChainCreate {
-	cc.mutation.SetUpdatedTime(t)
+// SetUpdateTime sets the "update_time" field.
+func (cc *ChainCreate) SetUpdateTime(t time.Time) *ChainCreate {
+	cc.mutation.SetUpdateTime(t)
 	return cc
 }
 
-// SetNillableUpdatedTime sets the "updated_time" field if the given value is not nil.
-func (cc *ChainCreate) SetNillableUpdatedTime(t *time.Time) *ChainCreate {
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (cc *ChainCreate) SetNillableUpdateTime(t *time.Time) *ChainCreate {
 	if t != nil {
-		cc.SetUpdatedTime(*t)
+		cc.SetUpdateTime(*t)
 	}
 	return cc
 }
@@ -363,13 +363,13 @@ func (cc *ChainCreate) createSpec() (*Chain, *sqlgraph.CreateSpec) {
 		})
 		_node.CreateTime = value
 	}
-	if value, ok := cc.mutation.UpdatedTime(); ok {
+	if value, ok := cc.mutation.UpdateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: chain.FieldUpdatedTime,
+			Column: chain.FieldUpdateTime,
 		})
-		_node.UpdatedTime = value
+		_node.UpdateTime = value
 	}
 	if value, ok := cc.mutation.CreatedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

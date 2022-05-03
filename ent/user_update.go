@@ -52,23 +52,23 @@ func (uu *UserUpdate) ClearCreateTime() *UserUpdate {
 	return uu
 }
 
-// SetUpdatedTime sets the "updated_time" field.
-func (uu *UserUpdate) SetUpdatedTime(t time.Time) *UserUpdate {
-	uu.mutation.SetUpdatedTime(t)
+// SetUpdateTime sets the "update_time" field.
+func (uu *UserUpdate) SetUpdateTime(t time.Time) *UserUpdate {
+	uu.mutation.SetUpdateTime(t)
 	return uu
 }
 
-// SetNillableUpdatedTime sets the "updated_time" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableUpdatedTime(t *time.Time) *UserUpdate {
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableUpdateTime(t *time.Time) *UserUpdate {
 	if t != nil {
-		uu.SetUpdatedTime(*t)
+		uu.SetUpdateTime(*t)
 	}
 	return uu
 }
 
-// ClearUpdatedTime clears the value of the "updated_time" field.
-func (uu *UserUpdate) ClearUpdatedTime() *UserUpdate {
-	uu.mutation.ClearUpdatedTime()
+// ClearUpdateTime clears the value of the "update_time" field.
+func (uu *UserUpdate) ClearUpdateTime() *UserUpdate {
+	uu.mutation.ClearUpdateTime()
 	return uu
 }
 
@@ -418,17 +418,17 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: user.FieldCreateTime,
 		})
 	}
-	if value, ok := uu.mutation.UpdatedTime(); ok {
+	if value, ok := uu.mutation.UpdateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: user.FieldUpdatedTime,
+			Column: user.FieldUpdateTime,
 		})
 	}
-	if uu.mutation.UpdatedTimeCleared() {
+	if uu.mutation.UpdateTimeCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
-			Column: user.FieldUpdatedTime,
+			Column: user.FieldUpdateTime,
 		})
 	}
 	if value, ok := uu.mutation.UpdatedAt(); ok {
@@ -748,23 +748,23 @@ func (uuo *UserUpdateOne) ClearCreateTime() *UserUpdateOne {
 	return uuo
 }
 
-// SetUpdatedTime sets the "updated_time" field.
-func (uuo *UserUpdateOne) SetUpdatedTime(t time.Time) *UserUpdateOne {
-	uuo.mutation.SetUpdatedTime(t)
+// SetUpdateTime sets the "update_time" field.
+func (uuo *UserUpdateOne) SetUpdateTime(t time.Time) *UserUpdateOne {
+	uuo.mutation.SetUpdateTime(t)
 	return uuo
 }
 
-// SetNillableUpdatedTime sets the "updated_time" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableUpdatedTime(t *time.Time) *UserUpdateOne {
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableUpdateTime(t *time.Time) *UserUpdateOne {
 	if t != nil {
-		uuo.SetUpdatedTime(*t)
+		uuo.SetUpdateTime(*t)
 	}
 	return uuo
 }
 
-// ClearUpdatedTime clears the value of the "updated_time" field.
-func (uuo *UserUpdateOne) ClearUpdatedTime() *UserUpdateOne {
-	uuo.mutation.ClearUpdatedTime()
+// ClearUpdateTime clears the value of the "update_time" field.
+func (uuo *UserUpdateOne) ClearUpdateTime() *UserUpdateOne {
+	uuo.mutation.ClearUpdateTime()
 	return uuo
 }
 
@@ -1138,17 +1138,17 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Column: user.FieldCreateTime,
 		})
 	}
-	if value, ok := uuo.mutation.UpdatedTime(); ok {
+	if value, ok := uuo.mutation.UpdateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: user.FieldUpdatedTime,
+			Column: user.FieldUpdateTime,
 		})
 	}
-	if uuo.mutation.UpdatedTimeCleared() {
+	if uuo.mutation.UpdateTimeCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
-			Column: user.FieldUpdatedTime,
+			Column: user.FieldUpdateTime,
 		})
 	}
 	if value, ok := uuo.mutation.UpdatedAt(); ok {

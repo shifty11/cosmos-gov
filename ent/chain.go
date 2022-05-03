@@ -18,8 +18,8 @@ type Chain struct {
 	ID int `json:"id,omitempty"`
 	// CreateTime holds the value of the "create_time" field.
 	CreateTime time.Time `json:"create_time,omitempty"`
-	// UpdatedTime holds the value of the "updated_time" field.
-	UpdatedTime time.Time `json:"updated_time,omitempty"`
+	// UpdateTime holds the value of the "update_time" field.
+	UpdateTime time.Time `json:"update_time,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -123,7 +123,7 @@ func (*Chain) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullInt64)
 		case chain.FieldChainID, chain.FieldAccountPrefix, chain.FieldName, chain.FieldDisplayName:
 			values[i] = new(sql.NullString)
-		case chain.FieldCreateTime, chain.FieldUpdatedTime, chain.FieldCreatedAt, chain.FieldUpdatedAt:
+		case chain.FieldCreateTime, chain.FieldUpdateTime, chain.FieldCreatedAt, chain.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Chain", columns[i])
@@ -152,11 +152,11 @@ func (c *Chain) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				c.CreateTime = value.Time
 			}
-		case chain.FieldUpdatedTime:
+		case chain.FieldUpdateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field updated_time", values[i])
+				return fmt.Errorf("unexpected type %T for field update_time", values[i])
 			} else if value.Valid {
-				c.UpdatedTime = value.Time
+				c.UpdateTime = value.Time
 			}
 		case chain.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -260,8 +260,8 @@ func (c *Chain) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", c.ID))
 	builder.WriteString(", create_time=")
 	builder.WriteString(c.CreateTime.Format(time.ANSIC))
-	builder.WriteString(", updated_time=")
-	builder.WriteString(c.UpdatedTime.Format(time.ANSIC))
+	builder.WriteString(", update_time=")
+	builder.WriteString(c.UpdateTime.Format(time.ANSIC))
 	builder.WriteString(", created_at=")
 	builder.WriteString(c.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", updated_at=")

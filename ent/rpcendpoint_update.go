@@ -49,23 +49,23 @@ func (reu *RpcEndpointUpdate) ClearCreateTime() *RpcEndpointUpdate {
 	return reu
 }
 
-// SetUpdatedTime sets the "updated_time" field.
-func (reu *RpcEndpointUpdate) SetUpdatedTime(t time.Time) *RpcEndpointUpdate {
-	reu.mutation.SetUpdatedTime(t)
+// SetUpdateTime sets the "update_time" field.
+func (reu *RpcEndpointUpdate) SetUpdateTime(t time.Time) *RpcEndpointUpdate {
+	reu.mutation.SetUpdateTime(t)
 	return reu
 }
 
-// SetNillableUpdatedTime sets the "updated_time" field if the given value is not nil.
-func (reu *RpcEndpointUpdate) SetNillableUpdatedTime(t *time.Time) *RpcEndpointUpdate {
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (reu *RpcEndpointUpdate) SetNillableUpdateTime(t *time.Time) *RpcEndpointUpdate {
 	if t != nil {
-		reu.SetUpdatedTime(*t)
+		reu.SetUpdateTime(*t)
 	}
 	return reu
 }
 
-// ClearUpdatedTime clears the value of the "updated_time" field.
-func (reu *RpcEndpointUpdate) ClearUpdatedTime() *RpcEndpointUpdate {
-	reu.mutation.ClearUpdatedTime()
+// ClearUpdateTime clears the value of the "update_time" field.
+func (reu *RpcEndpointUpdate) ClearUpdateTime() *RpcEndpointUpdate {
+	reu.mutation.ClearUpdateTime()
 	return reu
 }
 
@@ -205,17 +205,17 @@ func (reu *RpcEndpointUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: rpcendpoint.FieldCreateTime,
 		})
 	}
-	if value, ok := reu.mutation.UpdatedTime(); ok {
+	if value, ok := reu.mutation.UpdateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: rpcendpoint.FieldUpdatedTime,
+			Column: rpcendpoint.FieldUpdateTime,
 		})
 	}
-	if reu.mutation.UpdatedTimeCleared() {
+	if reu.mutation.UpdateTimeCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
-			Column: rpcendpoint.FieldUpdatedTime,
+			Column: rpcendpoint.FieldUpdateTime,
 		})
 	}
 	if value, ok := reu.mutation.UpdatedAt(); ok {
@@ -306,23 +306,23 @@ func (reuo *RpcEndpointUpdateOne) ClearCreateTime() *RpcEndpointUpdateOne {
 	return reuo
 }
 
-// SetUpdatedTime sets the "updated_time" field.
-func (reuo *RpcEndpointUpdateOne) SetUpdatedTime(t time.Time) *RpcEndpointUpdateOne {
-	reuo.mutation.SetUpdatedTime(t)
+// SetUpdateTime sets the "update_time" field.
+func (reuo *RpcEndpointUpdateOne) SetUpdateTime(t time.Time) *RpcEndpointUpdateOne {
+	reuo.mutation.SetUpdateTime(t)
 	return reuo
 }
 
-// SetNillableUpdatedTime sets the "updated_time" field if the given value is not nil.
-func (reuo *RpcEndpointUpdateOne) SetNillableUpdatedTime(t *time.Time) *RpcEndpointUpdateOne {
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (reuo *RpcEndpointUpdateOne) SetNillableUpdateTime(t *time.Time) *RpcEndpointUpdateOne {
 	if t != nil {
-		reuo.SetUpdatedTime(*t)
+		reuo.SetUpdateTime(*t)
 	}
 	return reuo
 }
 
-// ClearUpdatedTime clears the value of the "updated_time" field.
-func (reuo *RpcEndpointUpdateOne) ClearUpdatedTime() *RpcEndpointUpdateOne {
-	reuo.mutation.ClearUpdatedTime()
+// ClearUpdateTime clears the value of the "update_time" field.
+func (reuo *RpcEndpointUpdateOne) ClearUpdateTime() *RpcEndpointUpdateOne {
+	reuo.mutation.ClearUpdateTime()
 	return reuo
 }
 
@@ -486,17 +486,17 @@ func (reuo *RpcEndpointUpdateOne) sqlSave(ctx context.Context) (_node *RpcEndpoi
 			Column: rpcendpoint.FieldCreateTime,
 		})
 	}
-	if value, ok := reuo.mutation.UpdatedTime(); ok {
+	if value, ok := reuo.mutation.UpdateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: rpcendpoint.FieldUpdatedTime,
+			Column: rpcendpoint.FieldUpdateTime,
 		})
 	}
-	if reuo.mutation.UpdatedTimeCleared() {
+	if reuo.mutation.UpdateTimeCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
-			Column: rpcendpoint.FieldUpdatedTime,
+			Column: rpcendpoint.FieldUpdateTime,
 		})
 	}
 	if value, ok := reuo.mutation.UpdatedAt(); ok {

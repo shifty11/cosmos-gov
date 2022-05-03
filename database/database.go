@@ -154,31 +154,31 @@ func migrateUsers() {
 	for _, c := range client.Chain.Query().AllX(ctx) {
 		c.Update().
 			SetCreateTime(c.CreatedAt).
-			SetUpdatedTime(c.UpdatedAt).
+			SetUpdateTime(c.UpdatedAt).
 			SaveX(ctx)
 	}
 	for _, c := range client.LensChainInfo.Query().AllX(ctx) {
 		c.Update().
 			SetCreateTime(c.CreatedAt).
-			SetUpdatedTime(c.UpdatedAt).
+			SetUpdateTime(c.UpdatedAt).
 			SaveX(ctx)
 	}
 	for _, c := range client.Proposal.Query().AllX(ctx) {
 		c.Update().
 			SetCreateTime(c.CreatedAt).
-			SetUpdatedTime(c.UpdatedAt).
+			SetUpdateTime(c.UpdatedAt).
 			SaveX(ctx)
 	}
 	for _, c := range client.RpcEndpoint.Query().AllX(ctx) {
 		c.Update().
 			SetCreateTime(c.CreatedAt).
-			SetUpdatedTime(c.UpdatedAt).
+			SetUpdateTime(c.UpdatedAt).
 			SaveX(ctx)
 	}
 	for _, c := range client.User.Query().AllX(ctx) {
 		c.Update().
 			SetCreateTime(c.CreatedAt).
-			SetUpdatedTime(c.UpdatedAt).
+			SetUpdateTime(c.UpdatedAt).
 			SaveX(ctx)
 	}
 

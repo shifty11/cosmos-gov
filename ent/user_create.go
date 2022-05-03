@@ -38,16 +38,16 @@ func (uc *UserCreate) SetNillableCreateTime(t *time.Time) *UserCreate {
 	return uc
 }
 
-// SetUpdatedTime sets the "updated_time" field.
-func (uc *UserCreate) SetUpdatedTime(t time.Time) *UserCreate {
-	uc.mutation.SetUpdatedTime(t)
+// SetUpdateTime sets the "update_time" field.
+func (uc *UserCreate) SetUpdateTime(t time.Time) *UserCreate {
+	uc.mutation.SetUpdateTime(t)
 	return uc
 }
 
-// SetNillableUpdatedTime sets the "updated_time" field if the given value is not nil.
-func (uc *UserCreate) SetNillableUpdatedTime(t *time.Time) *UserCreate {
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (uc *UserCreate) SetNillableUpdateTime(t *time.Time) *UserCreate {
 	if t != nil {
-		uc.SetUpdatedTime(*t)
+		uc.SetUpdateTime(*t)
 	}
 	return uc
 }
@@ -406,13 +406,13 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		})
 		_node.CreateTime = value
 	}
-	if value, ok := uc.mutation.UpdatedTime(); ok {
+	if value, ok := uc.mutation.UpdateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: user.FieldUpdatedTime,
+			Column: user.FieldUpdateTime,
 		})
-		_node.UpdatedTime = value
+		_node.UpdateTime = value
 	}
 	if value, ok := uc.mutation.CreatedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

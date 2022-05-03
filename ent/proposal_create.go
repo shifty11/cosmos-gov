@@ -35,16 +35,16 @@ func (pc *ProposalCreate) SetNillableCreateTime(t *time.Time) *ProposalCreate {
 	return pc
 }
 
-// SetUpdatedTime sets the "updated_time" field.
-func (pc *ProposalCreate) SetUpdatedTime(t time.Time) *ProposalCreate {
-	pc.mutation.SetUpdatedTime(t)
+// SetUpdateTime sets the "update_time" field.
+func (pc *ProposalCreate) SetUpdateTime(t time.Time) *ProposalCreate {
+	pc.mutation.SetUpdateTime(t)
 	return pc
 }
 
-// SetNillableUpdatedTime sets the "updated_time" field if the given value is not nil.
-func (pc *ProposalCreate) SetNillableUpdatedTime(t *time.Time) *ProposalCreate {
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (pc *ProposalCreate) SetNillableUpdateTime(t *time.Time) *ProposalCreate {
 	if t != nil {
-		pc.SetUpdatedTime(*t)
+		pc.SetUpdateTime(*t)
 	}
 	return pc
 }
@@ -279,13 +279,13 @@ func (pc *ProposalCreate) createSpec() (*Proposal, *sqlgraph.CreateSpec) {
 		})
 		_node.CreateTime = value
 	}
-	if value, ok := pc.mutation.UpdatedTime(); ok {
+	if value, ok := pc.mutation.UpdateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: proposal.FieldUpdatedTime,
+			Column: proposal.FieldUpdateTime,
 		})
-		_node.UpdatedTime = value
+		_node.UpdateTime = value
 	}
 	if value, ok := pc.mutation.CreatedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

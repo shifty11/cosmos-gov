@@ -100,10 +100,10 @@ func CreateTime(v time.Time) predicate.RpcEndpoint {
 	})
 }
 
-// UpdatedTime applies equality check predicate on the "updated_time" field. It's identical to UpdatedTimeEQ.
-func UpdatedTime(v time.Time) predicate.RpcEndpoint {
+// UpdateTime applies equality check predicate on the "update_time" field. It's identical to UpdateTimeEQ.
+func UpdateTime(v time.Time) predicate.RpcEndpoint {
 	return predicate.RpcEndpoint(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUpdatedTime), v))
+		s.Where(sql.EQ(s.C(FieldUpdateTime), v))
 	})
 }
 
@@ -218,22 +218,22 @@ func CreateTimeNotNil() predicate.RpcEndpoint {
 	})
 }
 
-// UpdatedTimeEQ applies the EQ predicate on the "updated_time" field.
-func UpdatedTimeEQ(v time.Time) predicate.RpcEndpoint {
+// UpdateTimeEQ applies the EQ predicate on the "update_time" field.
+func UpdateTimeEQ(v time.Time) predicate.RpcEndpoint {
 	return predicate.RpcEndpoint(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUpdatedTime), v))
+		s.Where(sql.EQ(s.C(FieldUpdateTime), v))
 	})
 }
 
-// UpdatedTimeNEQ applies the NEQ predicate on the "updated_time" field.
-func UpdatedTimeNEQ(v time.Time) predicate.RpcEndpoint {
+// UpdateTimeNEQ applies the NEQ predicate on the "update_time" field.
+func UpdateTimeNEQ(v time.Time) predicate.RpcEndpoint {
 	return predicate.RpcEndpoint(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldUpdatedTime), v))
+		s.Where(sql.NEQ(s.C(FieldUpdateTime), v))
 	})
 }
 
-// UpdatedTimeIn applies the In predicate on the "updated_time" field.
-func UpdatedTimeIn(vs ...time.Time) predicate.RpcEndpoint {
+// UpdateTimeIn applies the In predicate on the "update_time" field.
+func UpdateTimeIn(vs ...time.Time) predicate.RpcEndpoint {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -245,12 +245,12 @@ func UpdatedTimeIn(vs ...time.Time) predicate.RpcEndpoint {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.In(s.C(FieldUpdatedTime), v...))
+		s.Where(sql.In(s.C(FieldUpdateTime), v...))
 	})
 }
 
-// UpdatedTimeNotIn applies the NotIn predicate on the "updated_time" field.
-func UpdatedTimeNotIn(vs ...time.Time) predicate.RpcEndpoint {
+// UpdateTimeNotIn applies the NotIn predicate on the "update_time" field.
+func UpdateTimeNotIn(vs ...time.Time) predicate.RpcEndpoint {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -262,49 +262,49 @@ func UpdatedTimeNotIn(vs ...time.Time) predicate.RpcEndpoint {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.NotIn(s.C(FieldUpdatedTime), v...))
+		s.Where(sql.NotIn(s.C(FieldUpdateTime), v...))
 	})
 }
 
-// UpdatedTimeGT applies the GT predicate on the "updated_time" field.
-func UpdatedTimeGT(v time.Time) predicate.RpcEndpoint {
+// UpdateTimeGT applies the GT predicate on the "update_time" field.
+func UpdateTimeGT(v time.Time) predicate.RpcEndpoint {
 	return predicate.RpcEndpoint(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldUpdatedTime), v))
+		s.Where(sql.GT(s.C(FieldUpdateTime), v))
 	})
 }
 
-// UpdatedTimeGTE applies the GTE predicate on the "updated_time" field.
-func UpdatedTimeGTE(v time.Time) predicate.RpcEndpoint {
+// UpdateTimeGTE applies the GTE predicate on the "update_time" field.
+func UpdateTimeGTE(v time.Time) predicate.RpcEndpoint {
 	return predicate.RpcEndpoint(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldUpdatedTime), v))
+		s.Where(sql.GTE(s.C(FieldUpdateTime), v))
 	})
 }
 
-// UpdatedTimeLT applies the LT predicate on the "updated_time" field.
-func UpdatedTimeLT(v time.Time) predicate.RpcEndpoint {
+// UpdateTimeLT applies the LT predicate on the "update_time" field.
+func UpdateTimeLT(v time.Time) predicate.RpcEndpoint {
 	return predicate.RpcEndpoint(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldUpdatedTime), v))
+		s.Where(sql.LT(s.C(FieldUpdateTime), v))
 	})
 }
 
-// UpdatedTimeLTE applies the LTE predicate on the "updated_time" field.
-func UpdatedTimeLTE(v time.Time) predicate.RpcEndpoint {
+// UpdateTimeLTE applies the LTE predicate on the "update_time" field.
+func UpdateTimeLTE(v time.Time) predicate.RpcEndpoint {
 	return predicate.RpcEndpoint(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldUpdatedTime), v))
+		s.Where(sql.LTE(s.C(FieldUpdateTime), v))
 	})
 }
 
-// UpdatedTimeIsNil applies the IsNil predicate on the "updated_time" field.
-func UpdatedTimeIsNil() predicate.RpcEndpoint {
+// UpdateTimeIsNil applies the IsNil predicate on the "update_time" field.
+func UpdateTimeIsNil() predicate.RpcEndpoint {
 	return predicate.RpcEndpoint(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldUpdatedTime)))
+		s.Where(sql.IsNull(s.C(FieldUpdateTime)))
 	})
 }
 
-// UpdatedTimeNotNil applies the NotNil predicate on the "updated_time" field.
-func UpdatedTimeNotNil() predicate.RpcEndpoint {
+// UpdateTimeNotNil applies the NotNil predicate on the "update_time" field.
+func UpdateTimeNotNil() predicate.RpcEndpoint {
 	return predicate.RpcEndpoint(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldUpdatedTime)))
+		s.Where(sql.NotNull(s.C(FieldUpdateTime)))
 	})
 }
 

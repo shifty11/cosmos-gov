@@ -24,7 +24,7 @@ func (Chain) Mixin() []ent.Mixin {
 func (Chain) Fields() []ent.Field {
 	return []ent.Field{
 		field.Time("create_time").Optional(),
-		field.Time("updated_time").Optional(),
+		field.Time("update_time").Optional(),
 		field.Time("created_at").
 			Default(time.Now).
 			Immutable(),

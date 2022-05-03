@@ -18,8 +18,8 @@ type LensChainInfo struct {
 	ID int `json:"id,omitempty"`
 	// CreateTime holds the value of the "create_time" field.
 	CreateTime time.Time `json:"create_time,omitempty"`
-	// UpdatedTime holds the value of the "updated_time" field.
-	UpdatedTime time.Time `json:"updated_time,omitempty"`
+	// UpdateTime holds the value of the "update_time" field.
+	UpdateTime time.Time `json:"update_time,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -39,7 +39,7 @@ func (*LensChainInfo) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullInt64)
 		case lenschaininfo.FieldName:
 			values[i] = new(sql.NullString)
-		case lenschaininfo.FieldCreateTime, lenschaininfo.FieldUpdatedTime, lenschaininfo.FieldCreatedAt, lenschaininfo.FieldUpdatedAt:
+		case lenschaininfo.FieldCreateTime, lenschaininfo.FieldUpdateTime, lenschaininfo.FieldCreatedAt, lenschaininfo.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type LensChainInfo", columns[i])
@@ -68,11 +68,11 @@ func (lci *LensChainInfo) assignValues(columns []string, values []interface{}) e
 			} else if value.Valid {
 				lci.CreateTime = value.Time
 			}
-		case lenschaininfo.FieldUpdatedTime:
+		case lenschaininfo.FieldUpdateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field updated_time", values[i])
+				return fmt.Errorf("unexpected type %T for field update_time", values[i])
 			} else if value.Valid {
-				lci.UpdatedTime = value.Time
+				lci.UpdateTime = value.Time
 			}
 		case lenschaininfo.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -128,8 +128,8 @@ func (lci *LensChainInfo) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", lci.ID))
 	builder.WriteString(", create_time=")
 	builder.WriteString(lci.CreateTime.Format(time.ANSIC))
-	builder.WriteString(", updated_time=")
-	builder.WriteString(lci.UpdatedTime.Format(time.ANSIC))
+	builder.WriteString(", update_time=")
+	builder.WriteString(lci.UpdateTime.Format(time.ANSIC))
 	builder.WriteString(", created_at=")
 	builder.WriteString(lci.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", updated_at=")

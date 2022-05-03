@@ -22,7 +22,7 @@ func (LensChainInfo) Mixin() []ent.Mixin {
 func (LensChainInfo) Fields() []ent.Field {
 	return []ent.Field{
 		field.Time("create_time").Optional(),
-		field.Time("updated_time").Optional(),
+		field.Time("update_time").Optional(),
 		field.Time("created_at").
 			Default(time.Now).
 			Immutable(),

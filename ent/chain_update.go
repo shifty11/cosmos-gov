@@ -54,23 +54,23 @@ func (cu *ChainUpdate) ClearCreateTime() *ChainUpdate {
 	return cu
 }
 
-// SetUpdatedTime sets the "updated_time" field.
-func (cu *ChainUpdate) SetUpdatedTime(t time.Time) *ChainUpdate {
-	cu.mutation.SetUpdatedTime(t)
+// SetUpdateTime sets the "update_time" field.
+func (cu *ChainUpdate) SetUpdateTime(t time.Time) *ChainUpdate {
+	cu.mutation.SetUpdateTime(t)
 	return cu
 }
 
-// SetNillableUpdatedTime sets the "updated_time" field if the given value is not nil.
-func (cu *ChainUpdate) SetNillableUpdatedTime(t *time.Time) *ChainUpdate {
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (cu *ChainUpdate) SetNillableUpdateTime(t *time.Time) *ChainUpdate {
 	if t != nil {
-		cu.SetUpdatedTime(*t)
+		cu.SetUpdateTime(*t)
 	}
 	return cu
 }
 
-// ClearUpdatedTime clears the value of the "updated_time" field.
-func (cu *ChainUpdate) ClearUpdatedTime() *ChainUpdate {
-	cu.mutation.ClearUpdatedTime()
+// ClearUpdateTime clears the value of the "update_time" field.
+func (cu *ChainUpdate) ClearUpdateTime() *ChainUpdate {
+	cu.mutation.ClearUpdateTime()
 	return cu
 }
 
@@ -461,17 +461,17 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: chain.FieldCreateTime,
 		})
 	}
-	if value, ok := cu.mutation.UpdatedTime(); ok {
+	if value, ok := cu.mutation.UpdateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: chain.FieldUpdatedTime,
+			Column: chain.FieldUpdateTime,
 		})
 	}
-	if cu.mutation.UpdatedTimeCleared() {
+	if cu.mutation.UpdateTimeCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
-			Column: chain.FieldUpdatedTime,
+			Column: chain.FieldUpdateTime,
 		})
 	}
 	if value, ok := cu.mutation.UpdatedAt(); ok {
@@ -891,23 +891,23 @@ func (cuo *ChainUpdateOne) ClearCreateTime() *ChainUpdateOne {
 	return cuo
 }
 
-// SetUpdatedTime sets the "updated_time" field.
-func (cuo *ChainUpdateOne) SetUpdatedTime(t time.Time) *ChainUpdateOne {
-	cuo.mutation.SetUpdatedTime(t)
+// SetUpdateTime sets the "update_time" field.
+func (cuo *ChainUpdateOne) SetUpdateTime(t time.Time) *ChainUpdateOne {
+	cuo.mutation.SetUpdateTime(t)
 	return cuo
 }
 
-// SetNillableUpdatedTime sets the "updated_time" field if the given value is not nil.
-func (cuo *ChainUpdateOne) SetNillableUpdatedTime(t *time.Time) *ChainUpdateOne {
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (cuo *ChainUpdateOne) SetNillableUpdateTime(t *time.Time) *ChainUpdateOne {
 	if t != nil {
-		cuo.SetUpdatedTime(*t)
+		cuo.SetUpdateTime(*t)
 	}
 	return cuo
 }
 
-// ClearUpdatedTime clears the value of the "updated_time" field.
-func (cuo *ChainUpdateOne) ClearUpdatedTime() *ChainUpdateOne {
-	cuo.mutation.ClearUpdatedTime()
+// ClearUpdateTime clears the value of the "update_time" field.
+func (cuo *ChainUpdateOne) ClearUpdateTime() *ChainUpdateOne {
+	cuo.mutation.ClearUpdateTime()
 	return cuo
 }
 
@@ -1322,17 +1322,17 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 			Column: chain.FieldCreateTime,
 		})
 	}
-	if value, ok := cuo.mutation.UpdatedTime(); ok {
+	if value, ok := cuo.mutation.UpdateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: chain.FieldUpdatedTime,
+			Column: chain.FieldUpdateTime,
 		})
 	}
-	if cuo.mutation.UpdatedTimeCleared() {
+	if cuo.mutation.UpdateTimeCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
-			Column: chain.FieldUpdatedTime,
+			Column: chain.FieldUpdateTime,
 		})
 	}
 	if value, ok := cuo.mutation.UpdatedAt(); ok {
