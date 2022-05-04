@@ -1,13 +1,14 @@
 package telegram
 
 import (
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	"github.com/shifty11/cosmos-gov/common"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/shifty11/cosmos-gov/database"
-	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/log"
+	"golang.org/x/exp/slices"
 	"strings"
 )
+
+var mHack database.DbManagers // TODO: get rid of this hack
 
 func isExpectingMessage(update *tgbotapi.Update) bool {
 	currentState := getState(update)
@@ -90,7 +91,7 @@ func handleMessage(update *tgbotapi.Update) {
 	case StateConfirmBroadcast:
 		yesOptions := []string{"yes", "y"}
 		abortOptions := []string{"abort", "a"}
-		if common.Contains(yesOptions, strings.ToLower(update.Message.Text)) {
+		if slices.Contains(yesOptions, strings.ToLower(update.Message.Text)) {
 			data := getStateData(update)
 			if data.BroadcastStateData == nil || data.BroadcastStateData.Message == "" {
 				log.Sugar.Fatal("No message to broadcast. This should never happen!")
@@ -98,7 +99,7 @@ func handleMessage(update *tgbotapi.Update) {
 			sendBroadcastMessage(data.BroadcastStateData.Message)
 			sendBroadcastEndInfoMessage(update, true)
 			setState(update, StateNil, nil)
-		} else if common.Contains(abortOptions, strings.ToLower(update.Message.Text)) {
+		} else if slices.Contains(abortOptions, strings.ToLower(update.Message.Text)) {
 			sendBroadcastEndInfoMessage(update, false)
 			setState(update, StateNil, nil)
 		} else {
@@ -112,12 +113,7 @@ func handleCallbackQuery(update *tgbotapi.Update) {
 	callbackData := ToCallbackData(update.CallbackQuery.Data)
 	switch callbackData.Command {
 	case CallbackCmdShowSubscriptions:
-		userId := getUserIdX(update)
-		userName := getUserName(update)
-		chatName := getChatName(update)
-		isGroup := isGroupX(update)
-
-		database.PerformUpdateSubscription(getChatIdX(update), user.TypeTelegram, callbackData.Data, userId, userName, chatName, isGroup)
+		performUpdateSubscription(update, callbackData.Data)
 		sendSubscriptions(update)
 	case CallbackCmdShowProposals:
 		sendCurrentProposals(update)
@@ -125,6 +121,8 @@ func handleCallbackQuery(update *tgbotapi.Update) {
 		sendHelp(update)
 	case CallbackCmdShowSupport:
 		sendSupport(update)
+	case CallbackCmdVote:
+		performVote(update, callbackData.Data)
 	default:
 		if isBotAdmin(update) { // Check for admin callbacks
 			switch callbackData.Command {
@@ -149,7 +147,7 @@ func handleCallbackQuery(update *tgbotapi.Update) {
 // groups -> just admins and creators can interact with the bot
 // private -> everything is allowed
 func isInteractionAllowed(update *tgbotapi.Update) bool {
-	if isUpdateFromGroup(update) {
+	if isGroupX(update) {
 		return isUpdateFromCreatorOrAdministrator(update)
 	}
 	return true
@@ -228,13 +226,12 @@ func manageUpdateChannels() {
 
 func Start() {
 	log.Sugar.Info("Start telegram bot")
+
+	mHack = database.NewDefaultDbManagers()
 	api := getApi()
 
 	updateConfig := tgbotapi.NewUpdate(0)
-	updates, err := api.GetUpdatesChan(updateConfig)
-	if err != nil {
-		log.Sugar.Panic(err)
-	}
+	updates := api.GetUpdatesChan(updateConfig)
 
 	updateChannels = make(map[int64]chan tgbotapi.Update)
 	go manageUpdateChannels()

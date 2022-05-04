@@ -10,10 +10,15 @@ import (
 	"github.com/shifty11/cosmos-gov/ent/migrate"
 
 	"github.com/shifty11/cosmos-gov/ent/chain"
+	"github.com/shifty11/cosmos-gov/ent/discordchannel"
+	"github.com/shifty11/cosmos-gov/ent/grant"
 	"github.com/shifty11/cosmos-gov/ent/lenschaininfo"
+	"github.com/shifty11/cosmos-gov/ent/migrationinfo"
 	"github.com/shifty11/cosmos-gov/ent/proposal"
 	"github.com/shifty11/cosmos-gov/ent/rpcendpoint"
+	"github.com/shifty11/cosmos-gov/ent/telegramchat"
 	"github.com/shifty11/cosmos-gov/ent/user"
+	"github.com/shifty11/cosmos-gov/ent/wallet"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -27,14 +32,24 @@ type Client struct {
 	Schema *migrate.Schema
 	// Chain is the client for interacting with the Chain builders.
 	Chain *ChainClient
+	// DiscordChannel is the client for interacting with the DiscordChannel builders.
+	DiscordChannel *DiscordChannelClient
+	// Grant is the client for interacting with the Grant builders.
+	Grant *GrantClient
 	// LensChainInfo is the client for interacting with the LensChainInfo builders.
 	LensChainInfo *LensChainInfoClient
+	// MigrationInfo is the client for interacting with the MigrationInfo builders.
+	MigrationInfo *MigrationInfoClient
 	// Proposal is the client for interacting with the Proposal builders.
 	Proposal *ProposalClient
 	// RpcEndpoint is the client for interacting with the RpcEndpoint builders.
 	RpcEndpoint *RpcEndpointClient
+	// TelegramChat is the client for interacting with the TelegramChat builders.
+	TelegramChat *TelegramChatClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
+	// Wallet is the client for interacting with the Wallet builders.
+	Wallet *WalletClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -49,10 +64,15 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Chain = NewChainClient(c.config)
+	c.DiscordChannel = NewDiscordChannelClient(c.config)
+	c.Grant = NewGrantClient(c.config)
 	c.LensChainInfo = NewLensChainInfoClient(c.config)
+	c.MigrationInfo = NewMigrationInfoClient(c.config)
 	c.Proposal = NewProposalClient(c.config)
 	c.RpcEndpoint = NewRpcEndpointClient(c.config)
+	c.TelegramChat = NewTelegramChatClient(c.config)
 	c.User = NewUserClient(c.config)
+	c.Wallet = NewWalletClient(c.config)
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -84,13 +104,18 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:           ctx,
-		config:        cfg,
-		Chain:         NewChainClient(cfg),
-		LensChainInfo: NewLensChainInfoClient(cfg),
-		Proposal:      NewProposalClient(cfg),
-		RpcEndpoint:   NewRpcEndpointClient(cfg),
-		User:          NewUserClient(cfg),
+		ctx:            ctx,
+		config:         cfg,
+		Chain:          NewChainClient(cfg),
+		DiscordChannel: NewDiscordChannelClient(cfg),
+		Grant:          NewGrantClient(cfg),
+		LensChainInfo:  NewLensChainInfoClient(cfg),
+		MigrationInfo:  NewMigrationInfoClient(cfg),
+		Proposal:       NewProposalClient(cfg),
+		RpcEndpoint:    NewRpcEndpointClient(cfg),
+		TelegramChat:   NewTelegramChatClient(cfg),
+		User:           NewUserClient(cfg),
+		Wallet:         NewWalletClient(cfg),
 	}, nil
 }
 
@@ -108,13 +133,18 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:           ctx,
-		config:        cfg,
-		Chain:         NewChainClient(cfg),
-		LensChainInfo: NewLensChainInfoClient(cfg),
-		Proposal:      NewProposalClient(cfg),
-		RpcEndpoint:   NewRpcEndpointClient(cfg),
-		User:          NewUserClient(cfg),
+		ctx:            ctx,
+		config:         cfg,
+		Chain:          NewChainClient(cfg),
+		DiscordChannel: NewDiscordChannelClient(cfg),
+		Grant:          NewGrantClient(cfg),
+		LensChainInfo:  NewLensChainInfoClient(cfg),
+		MigrationInfo:  NewMigrationInfoClient(cfg),
+		Proposal:       NewProposalClient(cfg),
+		RpcEndpoint:    NewRpcEndpointClient(cfg),
+		TelegramChat:   NewTelegramChatClient(cfg),
+		User:           NewUserClient(cfg),
+		Wallet:         NewWalletClient(cfg),
 	}, nil
 }
 
@@ -145,10 +175,15 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	c.Chain.Use(hooks...)
+	c.DiscordChannel.Use(hooks...)
+	c.Grant.Use(hooks...)
 	c.LensChainInfo.Use(hooks...)
+	c.MigrationInfo.Use(hooks...)
 	c.Proposal.Use(hooks...)
 	c.RpcEndpoint.Use(hooks...)
+	c.TelegramChat.Use(hooks...)
 	c.User.Use(hooks...)
+	c.Wallet.Use(hooks...)
 }
 
 // ChainClient is a client for the Chain schema.
@@ -268,6 +303,38 @@ func (c *ChainClient) QueryProposals(ch *Chain) *ProposalQuery {
 	return query
 }
 
+// QueryTelegramChats queries the telegram_chats edge of a Chain.
+func (c *ChainClient) QueryTelegramChats(ch *Chain) *TelegramChatQuery {
+	query := &TelegramChatQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ch.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(chain.Table, chain.FieldID, id),
+			sqlgraph.To(telegramchat.Table, telegramchat.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, chain.TelegramChatsTable, chain.TelegramChatsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(ch.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDiscordChannels queries the discord_channels edge of a Chain.
+func (c *ChainClient) QueryDiscordChannels(ch *Chain) *DiscordChannelQuery {
+	query := &DiscordChannelQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ch.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(chain.Table, chain.FieldID, id),
+			sqlgraph.To(discordchannel.Table, discordchannel.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, chain.DiscordChannelsTable, chain.DiscordChannelsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(ch.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryRPCEndpoints queries the rpc_endpoints edge of a Chain.
 func (c *ChainClient) QueryRPCEndpoints(ch *Chain) *RpcEndpointQuery {
 	query := &RpcEndpointQuery{config: c.config}
@@ -284,9 +351,253 @@ func (c *ChainClient) QueryRPCEndpoints(ch *Chain) *RpcEndpointQuery {
 	return query
 }
 
+// QueryWallets queries the wallets edge of a Chain.
+func (c *ChainClient) QueryWallets(ch *Chain) *WalletQuery {
+	query := &WalletQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ch.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(chain.Table, chain.FieldID, id),
+			sqlgraph.To(wallet.Table, wallet.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, chain.WalletsTable, chain.WalletsColumn),
+		)
+		fromV = sqlgraph.Neighbors(ch.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *ChainClient) Hooks() []Hook {
 	return c.hooks.Chain
+}
+
+// DiscordChannelClient is a client for the DiscordChannel schema.
+type DiscordChannelClient struct {
+	config
+}
+
+// NewDiscordChannelClient returns a client for the DiscordChannel from the given config.
+func NewDiscordChannelClient(c config) *DiscordChannelClient {
+	return &DiscordChannelClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `discordchannel.Hooks(f(g(h())))`.
+func (c *DiscordChannelClient) Use(hooks ...Hook) {
+	c.hooks.DiscordChannel = append(c.hooks.DiscordChannel, hooks...)
+}
+
+// Create returns a create builder for DiscordChannel.
+func (c *DiscordChannelClient) Create() *DiscordChannelCreate {
+	mutation := newDiscordChannelMutation(c.config, OpCreate)
+	return &DiscordChannelCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of DiscordChannel entities.
+func (c *DiscordChannelClient) CreateBulk(builders ...*DiscordChannelCreate) *DiscordChannelCreateBulk {
+	return &DiscordChannelCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for DiscordChannel.
+func (c *DiscordChannelClient) Update() *DiscordChannelUpdate {
+	mutation := newDiscordChannelMutation(c.config, OpUpdate)
+	return &DiscordChannelUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *DiscordChannelClient) UpdateOne(dc *DiscordChannel) *DiscordChannelUpdateOne {
+	mutation := newDiscordChannelMutation(c.config, OpUpdateOne, withDiscordChannel(dc))
+	return &DiscordChannelUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *DiscordChannelClient) UpdateOneID(id int) *DiscordChannelUpdateOne {
+	mutation := newDiscordChannelMutation(c.config, OpUpdateOne, withDiscordChannelID(id))
+	return &DiscordChannelUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for DiscordChannel.
+func (c *DiscordChannelClient) Delete() *DiscordChannelDelete {
+	mutation := newDiscordChannelMutation(c.config, OpDelete)
+	return &DiscordChannelDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *DiscordChannelClient) DeleteOne(dc *DiscordChannel) *DiscordChannelDeleteOne {
+	return c.DeleteOneID(dc.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *DiscordChannelClient) DeleteOneID(id int) *DiscordChannelDeleteOne {
+	builder := c.Delete().Where(discordchannel.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &DiscordChannelDeleteOne{builder}
+}
+
+// Query returns a query builder for DiscordChannel.
+func (c *DiscordChannelClient) Query() *DiscordChannelQuery {
+	return &DiscordChannelQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a DiscordChannel entity by its id.
+func (c *DiscordChannelClient) Get(ctx context.Context, id int) (*DiscordChannel, error) {
+	return c.Query().Where(discordchannel.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *DiscordChannelClient) GetX(ctx context.Context, id int) *DiscordChannel {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a DiscordChannel.
+func (c *DiscordChannelClient) QueryUser(dc *DiscordChannel) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := dc.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(discordchannel.Table, discordchannel.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, discordchannel.UserTable, discordchannel.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(dc.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryChains queries the chains edge of a DiscordChannel.
+func (c *DiscordChannelClient) QueryChains(dc *DiscordChannel) *ChainQuery {
+	query := &ChainQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := dc.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(discordchannel.Table, discordchannel.FieldID, id),
+			sqlgraph.To(chain.Table, chain.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, discordchannel.ChainsTable, discordchannel.ChainsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(dc.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *DiscordChannelClient) Hooks() []Hook {
+	return c.hooks.DiscordChannel
+}
+
+// GrantClient is a client for the Grant schema.
+type GrantClient struct {
+	config
+}
+
+// NewGrantClient returns a client for the Grant from the given config.
+func NewGrantClient(c config) *GrantClient {
+	return &GrantClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `grant.Hooks(f(g(h())))`.
+func (c *GrantClient) Use(hooks ...Hook) {
+	c.hooks.Grant = append(c.hooks.Grant, hooks...)
+}
+
+// Create returns a create builder for Grant.
+func (c *GrantClient) Create() *GrantCreate {
+	mutation := newGrantMutation(c.config, OpCreate)
+	return &GrantCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Grant entities.
+func (c *GrantClient) CreateBulk(builders ...*GrantCreate) *GrantCreateBulk {
+	return &GrantCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Grant.
+func (c *GrantClient) Update() *GrantUpdate {
+	mutation := newGrantMutation(c.config, OpUpdate)
+	return &GrantUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *GrantClient) UpdateOne(gr *Grant) *GrantUpdateOne {
+	mutation := newGrantMutation(c.config, OpUpdateOne, withGrant(gr))
+	return &GrantUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *GrantClient) UpdateOneID(id int) *GrantUpdateOne {
+	mutation := newGrantMutation(c.config, OpUpdateOne, withGrantID(id))
+	return &GrantUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Grant.
+func (c *GrantClient) Delete() *GrantDelete {
+	mutation := newGrantMutation(c.config, OpDelete)
+	return &GrantDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *GrantClient) DeleteOne(gr *Grant) *GrantDeleteOne {
+	return c.DeleteOneID(gr.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *GrantClient) DeleteOneID(id int) *GrantDeleteOne {
+	builder := c.Delete().Where(grant.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &GrantDeleteOne{builder}
+}
+
+// Query returns a query builder for Grant.
+func (c *GrantClient) Query() *GrantQuery {
+	return &GrantQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Grant entity by its id.
+func (c *GrantClient) Get(ctx context.Context, id int) (*Grant, error) {
+	return c.Query().Where(grant.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *GrantClient) GetX(ctx context.Context, id int) *Grant {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryGranter queries the granter edge of a Grant.
+func (c *GrantClient) QueryGranter(gr *Grant) *WalletQuery {
+	query := &WalletQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := gr.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(grant.Table, grant.FieldID, id),
+			sqlgraph.To(wallet.Table, wallet.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, grant.GranterTable, grant.GranterColumn),
+		)
+		fromV = sqlgraph.Neighbors(gr.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *GrantClient) Hooks() []Hook {
+	return c.hooks.Grant
 }
 
 // LensChainInfoClient is a client for the LensChainInfo schema.
@@ -377,6 +688,96 @@ func (c *LensChainInfoClient) GetX(ctx context.Context, id int) *LensChainInfo {
 // Hooks returns the client hooks.
 func (c *LensChainInfoClient) Hooks() []Hook {
 	return c.hooks.LensChainInfo
+}
+
+// MigrationInfoClient is a client for the MigrationInfo schema.
+type MigrationInfoClient struct {
+	config
+}
+
+// NewMigrationInfoClient returns a client for the MigrationInfo from the given config.
+func NewMigrationInfoClient(c config) *MigrationInfoClient {
+	return &MigrationInfoClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `migrationinfo.Hooks(f(g(h())))`.
+func (c *MigrationInfoClient) Use(hooks ...Hook) {
+	c.hooks.MigrationInfo = append(c.hooks.MigrationInfo, hooks...)
+}
+
+// Create returns a create builder for MigrationInfo.
+func (c *MigrationInfoClient) Create() *MigrationInfoCreate {
+	mutation := newMigrationInfoMutation(c.config, OpCreate)
+	return &MigrationInfoCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of MigrationInfo entities.
+func (c *MigrationInfoClient) CreateBulk(builders ...*MigrationInfoCreate) *MigrationInfoCreateBulk {
+	return &MigrationInfoCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for MigrationInfo.
+func (c *MigrationInfoClient) Update() *MigrationInfoUpdate {
+	mutation := newMigrationInfoMutation(c.config, OpUpdate)
+	return &MigrationInfoUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *MigrationInfoClient) UpdateOne(mi *MigrationInfo) *MigrationInfoUpdateOne {
+	mutation := newMigrationInfoMutation(c.config, OpUpdateOne, withMigrationInfo(mi))
+	return &MigrationInfoUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *MigrationInfoClient) UpdateOneID(id int) *MigrationInfoUpdateOne {
+	mutation := newMigrationInfoMutation(c.config, OpUpdateOne, withMigrationInfoID(id))
+	return &MigrationInfoUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for MigrationInfo.
+func (c *MigrationInfoClient) Delete() *MigrationInfoDelete {
+	mutation := newMigrationInfoMutation(c.config, OpDelete)
+	return &MigrationInfoDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *MigrationInfoClient) DeleteOne(mi *MigrationInfo) *MigrationInfoDeleteOne {
+	return c.DeleteOneID(mi.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *MigrationInfoClient) DeleteOneID(id int) *MigrationInfoDeleteOne {
+	builder := c.Delete().Where(migrationinfo.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &MigrationInfoDeleteOne{builder}
+}
+
+// Query returns a query builder for MigrationInfo.
+func (c *MigrationInfoClient) Query() *MigrationInfoQuery {
+	return &MigrationInfoQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a MigrationInfo entity by its id.
+func (c *MigrationInfoClient) Get(ctx context.Context, id int) (*MigrationInfo, error) {
+	return c.Query().Where(migrationinfo.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *MigrationInfoClient) GetX(ctx context.Context, id int) *MigrationInfo {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *MigrationInfoClient) Hooks() []Hook {
+	return c.hooks.MigrationInfo
 }
 
 // ProposalClient is a client for the Proposal schema.
@@ -591,6 +992,128 @@ func (c *RpcEndpointClient) Hooks() []Hook {
 	return c.hooks.RpcEndpoint
 }
 
+// TelegramChatClient is a client for the TelegramChat schema.
+type TelegramChatClient struct {
+	config
+}
+
+// NewTelegramChatClient returns a client for the TelegramChat from the given config.
+func NewTelegramChatClient(c config) *TelegramChatClient {
+	return &TelegramChatClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `telegramchat.Hooks(f(g(h())))`.
+func (c *TelegramChatClient) Use(hooks ...Hook) {
+	c.hooks.TelegramChat = append(c.hooks.TelegramChat, hooks...)
+}
+
+// Create returns a create builder for TelegramChat.
+func (c *TelegramChatClient) Create() *TelegramChatCreate {
+	mutation := newTelegramChatMutation(c.config, OpCreate)
+	return &TelegramChatCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of TelegramChat entities.
+func (c *TelegramChatClient) CreateBulk(builders ...*TelegramChatCreate) *TelegramChatCreateBulk {
+	return &TelegramChatCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for TelegramChat.
+func (c *TelegramChatClient) Update() *TelegramChatUpdate {
+	mutation := newTelegramChatMutation(c.config, OpUpdate)
+	return &TelegramChatUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TelegramChatClient) UpdateOne(tc *TelegramChat) *TelegramChatUpdateOne {
+	mutation := newTelegramChatMutation(c.config, OpUpdateOne, withTelegramChat(tc))
+	return &TelegramChatUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TelegramChatClient) UpdateOneID(id int) *TelegramChatUpdateOne {
+	mutation := newTelegramChatMutation(c.config, OpUpdateOne, withTelegramChatID(id))
+	return &TelegramChatUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for TelegramChat.
+func (c *TelegramChatClient) Delete() *TelegramChatDelete {
+	mutation := newTelegramChatMutation(c.config, OpDelete)
+	return &TelegramChatDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *TelegramChatClient) DeleteOne(tc *TelegramChat) *TelegramChatDeleteOne {
+	return c.DeleteOneID(tc.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *TelegramChatClient) DeleteOneID(id int) *TelegramChatDeleteOne {
+	builder := c.Delete().Where(telegramchat.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TelegramChatDeleteOne{builder}
+}
+
+// Query returns a query builder for TelegramChat.
+func (c *TelegramChatClient) Query() *TelegramChatQuery {
+	return &TelegramChatQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a TelegramChat entity by its id.
+func (c *TelegramChatClient) Get(ctx context.Context, id int) (*TelegramChat, error) {
+	return c.Query().Where(telegramchat.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TelegramChatClient) GetX(ctx context.Context, id int) *TelegramChat {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a TelegramChat.
+func (c *TelegramChatClient) QueryUser(tc *TelegramChat) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := tc.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(telegramchat.Table, telegramchat.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, telegramchat.UserTable, telegramchat.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(tc.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryChains queries the chains edge of a TelegramChat.
+func (c *TelegramChatClient) QueryChains(tc *TelegramChat) *ChainQuery {
+	query := &ChainQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := tc.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(telegramchat.Table, telegramchat.FieldID, id),
+			sqlgraph.To(chain.Table, chain.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, telegramchat.ChainsTable, telegramchat.ChainsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(tc.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *TelegramChatClient) Hooks() []Hook {
+	return c.hooks.TelegramChat
+}
+
 // UserClient is a client for the User schema.
 type UserClient struct {
 	config
@@ -692,7 +1215,193 @@ func (c *UserClient) QueryChains(u *User) *ChainQuery {
 	return query
 }
 
+// QueryTelegramChats queries the telegram_chats edge of a User.
+func (c *UserClient) QueryTelegramChats(u *User) *TelegramChatQuery {
+	query := &TelegramChatQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(telegramchat.Table, telegramchat.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, user.TelegramChatsTable, user.TelegramChatsColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDiscordChannels queries the discord_channels edge of a User.
+func (c *UserClient) QueryDiscordChannels(u *User) *DiscordChannelQuery {
+	query := &DiscordChannelQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(discordchannel.Table, discordchannel.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, user.DiscordChannelsTable, user.DiscordChannelsColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryWallets queries the wallets edge of a User.
+func (c *UserClient) QueryWallets(u *User) *WalletQuery {
+	query := &WalletQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(wallet.Table, wallet.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, user.WalletsTable, user.WalletsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
+}
+
+// WalletClient is a client for the Wallet schema.
+type WalletClient struct {
+	config
+}
+
+// NewWalletClient returns a client for the Wallet from the given config.
+func NewWalletClient(c config) *WalletClient {
+	return &WalletClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `wallet.Hooks(f(g(h())))`.
+func (c *WalletClient) Use(hooks ...Hook) {
+	c.hooks.Wallet = append(c.hooks.Wallet, hooks...)
+}
+
+// Create returns a create builder for Wallet.
+func (c *WalletClient) Create() *WalletCreate {
+	mutation := newWalletMutation(c.config, OpCreate)
+	return &WalletCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Wallet entities.
+func (c *WalletClient) CreateBulk(builders ...*WalletCreate) *WalletCreateBulk {
+	return &WalletCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Wallet.
+func (c *WalletClient) Update() *WalletUpdate {
+	mutation := newWalletMutation(c.config, OpUpdate)
+	return &WalletUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *WalletClient) UpdateOne(w *Wallet) *WalletUpdateOne {
+	mutation := newWalletMutation(c.config, OpUpdateOne, withWallet(w))
+	return &WalletUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *WalletClient) UpdateOneID(id int) *WalletUpdateOne {
+	mutation := newWalletMutation(c.config, OpUpdateOne, withWalletID(id))
+	return &WalletUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Wallet.
+func (c *WalletClient) Delete() *WalletDelete {
+	mutation := newWalletMutation(c.config, OpDelete)
+	return &WalletDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *WalletClient) DeleteOne(w *Wallet) *WalletDeleteOne {
+	return c.DeleteOneID(w.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *WalletClient) DeleteOneID(id int) *WalletDeleteOne {
+	builder := c.Delete().Where(wallet.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &WalletDeleteOne{builder}
+}
+
+// Query returns a query builder for Wallet.
+func (c *WalletClient) Query() *WalletQuery {
+	return &WalletQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Wallet entity by its id.
+func (c *WalletClient) Get(ctx context.Context, id int) (*Wallet, error) {
+	return c.Query().Where(wallet.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *WalletClient) GetX(ctx context.Context, id int) *Wallet {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUsers queries the users edge of a Wallet.
+func (c *WalletClient) QueryUsers(w *Wallet) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := w.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(wallet.Table, wallet.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, wallet.UsersTable, wallet.UsersPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(w.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryChain queries the chain edge of a Wallet.
+func (c *WalletClient) QueryChain(w *Wallet) *ChainQuery {
+	query := &ChainQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := w.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(wallet.Table, wallet.FieldID, id),
+			sqlgraph.To(chain.Table, chain.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, wallet.ChainTable, wallet.ChainColumn),
+		)
+		fromV = sqlgraph.Neighbors(w.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryGrants queries the grants edge of a Wallet.
+func (c *WalletClient) QueryGrants(w *Wallet) *GrantQuery {
+	query := &GrantQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := w.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(wallet.Table, wallet.FieldID, id),
+			sqlgraph.To(grant.Table, grant.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, wallet.GrantsTable, wallet.GrantsColumn),
+		)
+		fromV = sqlgraph.Neighbors(w.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *WalletClient) Hooks() []Hook {
+	return c.hooks.Wallet
 }

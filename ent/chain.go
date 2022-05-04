@@ -16,10 +16,18 @@ type Chain struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// CreateTime holds the value of the "create_time" field.
+	CreateTime time.Time `json:"create_time,omitempty"`
+	// UpdateTime holds the value of the "update_time" field.
+	UpdateTime time.Time `json:"update_time,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// ChainID holds the value of the "chain_id" field.
+	ChainID string `json:"chain_id,omitempty"`
+	// AccountPrefix holds the value of the "account_prefix" field.
+	AccountPrefix string `json:"account_prefix,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// DisplayName holds the value of the "display_name" field.
@@ -37,11 +45,17 @@ type ChainEdges struct {
 	Users []*User `json:"users,omitempty"`
 	// Proposals holds the value of the proposals edge.
 	Proposals []*Proposal `json:"proposals,omitempty"`
+	// TelegramChats holds the value of the telegram_chats edge.
+	TelegramChats []*TelegramChat `json:"telegram_chats,omitempty"`
+	// DiscordChannels holds the value of the discord_channels edge.
+	DiscordChannels []*DiscordChannel `json:"discord_channels,omitempty"`
 	// RPCEndpoints holds the value of the rpc_endpoints edge.
 	RPCEndpoints []*RpcEndpoint `json:"rpc_endpoints,omitempty"`
+	// Wallets holds the value of the wallets edge.
+	Wallets []*Wallet `json:"wallets,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [6]bool
 }
 
 // UsersOrErr returns the Users value or an error if the edge
@@ -62,13 +76,40 @@ func (e ChainEdges) ProposalsOrErr() ([]*Proposal, error) {
 	return nil, &NotLoadedError{edge: "proposals"}
 }
 
+// TelegramChatsOrErr returns the TelegramChats value or an error if the edge
+// was not loaded in eager-loading.
+func (e ChainEdges) TelegramChatsOrErr() ([]*TelegramChat, error) {
+	if e.loadedTypes[2] {
+		return e.TelegramChats, nil
+	}
+	return nil, &NotLoadedError{edge: "telegram_chats"}
+}
+
+// DiscordChannelsOrErr returns the DiscordChannels value or an error if the edge
+// was not loaded in eager-loading.
+func (e ChainEdges) DiscordChannelsOrErr() ([]*DiscordChannel, error) {
+	if e.loadedTypes[3] {
+		return e.DiscordChannels, nil
+	}
+	return nil, &NotLoadedError{edge: "discord_channels"}
+}
+
 // RPCEndpointsOrErr returns the RPCEndpoints value or an error if the edge
 // was not loaded in eager-loading.
 func (e ChainEdges) RPCEndpointsOrErr() ([]*RpcEndpoint, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[4] {
 		return e.RPCEndpoints, nil
 	}
 	return nil, &NotLoadedError{edge: "rpc_endpoints"}
+}
+
+// WalletsOrErr returns the Wallets value or an error if the edge
+// was not loaded in eager-loading.
+func (e ChainEdges) WalletsOrErr() ([]*Wallet, error) {
+	if e.loadedTypes[5] {
+		return e.Wallets, nil
+	}
+	return nil, &NotLoadedError{edge: "wallets"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -80,9 +121,9 @@ func (*Chain) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullBool)
 		case chain.FieldID:
 			values[i] = new(sql.NullInt64)
-		case chain.FieldName, chain.FieldDisplayName:
+		case chain.FieldChainID, chain.FieldAccountPrefix, chain.FieldName, chain.FieldDisplayName:
 			values[i] = new(sql.NullString)
-		case chain.FieldCreatedAt, chain.FieldUpdatedAt:
+		case chain.FieldCreateTime, chain.FieldUpdateTime, chain.FieldCreatedAt, chain.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Chain", columns[i])
@@ -105,6 +146,18 @@ func (c *Chain) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			c.ID = int(value.Int64)
+		case chain.FieldCreateTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field create_time", values[i])
+			} else if value.Valid {
+				c.CreateTime = value.Time
+			}
+		case chain.FieldUpdateTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field update_time", values[i])
+			} else if value.Valid {
+				c.UpdateTime = value.Time
+			}
 		case chain.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
@@ -116,6 +169,18 @@ func (c *Chain) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
 				c.UpdatedAt = value.Time
+			}
+		case chain.FieldChainID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field chain_id", values[i])
+			} else if value.Valid {
+				c.ChainID = value.String
+			}
+		case chain.FieldAccountPrefix:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field account_prefix", values[i])
+			} else if value.Valid {
+				c.AccountPrefix = value.String
 			}
 		case chain.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -150,9 +215,24 @@ func (c *Chain) QueryProposals() *ProposalQuery {
 	return (&ChainClient{config: c.config}).QueryProposals(c)
 }
 
+// QueryTelegramChats queries the "telegram_chats" edge of the Chain entity.
+func (c *Chain) QueryTelegramChats() *TelegramChatQuery {
+	return (&ChainClient{config: c.config}).QueryTelegramChats(c)
+}
+
+// QueryDiscordChannels queries the "discord_channels" edge of the Chain entity.
+func (c *Chain) QueryDiscordChannels() *DiscordChannelQuery {
+	return (&ChainClient{config: c.config}).QueryDiscordChannels(c)
+}
+
 // QueryRPCEndpoints queries the "rpc_endpoints" edge of the Chain entity.
 func (c *Chain) QueryRPCEndpoints() *RpcEndpointQuery {
 	return (&ChainClient{config: c.config}).QueryRPCEndpoints(c)
+}
+
+// QueryWallets queries the "wallets" edge of the Chain entity.
+func (c *Chain) QueryWallets() *WalletQuery {
+	return (&ChainClient{config: c.config}).QueryWallets(c)
 }
 
 // Update returns a builder for updating this Chain.
@@ -178,10 +258,18 @@ func (c *Chain) String() string {
 	var builder strings.Builder
 	builder.WriteString("Chain(")
 	builder.WriteString(fmt.Sprintf("id=%v", c.ID))
+	builder.WriteString(", create_time=")
+	builder.WriteString(c.CreateTime.Format(time.ANSIC))
+	builder.WriteString(", update_time=")
+	builder.WriteString(c.UpdateTime.Format(time.ANSIC))
 	builder.WriteString(", created_at=")
 	builder.WriteString(c.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", updated_at=")
 	builder.WriteString(c.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", chain_id=")
+	builder.WriteString(c.ChainID)
+	builder.WriteString(", account_prefix=")
+	builder.WriteString(c.AccountPrefix)
 	builder.WriteString(", name=")
 	builder.WriteString(c.Name)
 	builder.WriteString(", display_name=")

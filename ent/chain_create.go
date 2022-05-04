@@ -11,9 +11,12 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/shifty11/cosmos-gov/ent/chain"
+	"github.com/shifty11/cosmos-gov/ent/discordchannel"
 	"github.com/shifty11/cosmos-gov/ent/proposal"
 	"github.com/shifty11/cosmos-gov/ent/rpcendpoint"
+	"github.com/shifty11/cosmos-gov/ent/telegramchat"
 	"github.com/shifty11/cosmos-gov/ent/user"
+	"github.com/shifty11/cosmos-gov/ent/wallet"
 )
 
 // ChainCreate is the builder for creating a Chain entity.
@@ -21,6 +24,34 @@ type ChainCreate struct {
 	config
 	mutation *ChainMutation
 	hooks    []Hook
+}
+
+// SetCreateTime sets the "create_time" field.
+func (cc *ChainCreate) SetCreateTime(t time.Time) *ChainCreate {
+	cc.mutation.SetCreateTime(t)
+	return cc
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (cc *ChainCreate) SetNillableCreateTime(t *time.Time) *ChainCreate {
+	if t != nil {
+		cc.SetCreateTime(*t)
+	}
+	return cc
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (cc *ChainCreate) SetUpdateTime(t time.Time) *ChainCreate {
+	cc.mutation.SetUpdateTime(t)
+	return cc
+}
+
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (cc *ChainCreate) SetNillableUpdateTime(t *time.Time) *ChainCreate {
+	if t != nil {
+		cc.SetUpdateTime(*t)
+	}
+	return cc
 }
 
 // SetCreatedAt sets the "created_at" field.
@@ -47,6 +78,34 @@ func (cc *ChainCreate) SetUpdatedAt(t time.Time) *ChainCreate {
 func (cc *ChainCreate) SetNillableUpdatedAt(t *time.Time) *ChainCreate {
 	if t != nil {
 		cc.SetUpdatedAt(*t)
+	}
+	return cc
+}
+
+// SetChainID sets the "chain_id" field.
+func (cc *ChainCreate) SetChainID(s string) *ChainCreate {
+	cc.mutation.SetChainID(s)
+	return cc
+}
+
+// SetNillableChainID sets the "chain_id" field if the given value is not nil.
+func (cc *ChainCreate) SetNillableChainID(s *string) *ChainCreate {
+	if s != nil {
+		cc.SetChainID(*s)
+	}
+	return cc
+}
+
+// SetAccountPrefix sets the "account_prefix" field.
+func (cc *ChainCreate) SetAccountPrefix(s string) *ChainCreate {
+	cc.mutation.SetAccountPrefix(s)
+	return cc
+}
+
+// SetNillableAccountPrefix sets the "account_prefix" field if the given value is not nil.
+func (cc *ChainCreate) SetNillableAccountPrefix(s *string) *ChainCreate {
+	if s != nil {
+		cc.SetAccountPrefix(*s)
 	}
 	return cc
 }
@@ -107,6 +166,36 @@ func (cc *ChainCreate) AddProposals(p ...*Proposal) *ChainCreate {
 	return cc.AddProposalIDs(ids...)
 }
 
+// AddTelegramChatIDs adds the "telegram_chats" edge to the TelegramChat entity by IDs.
+func (cc *ChainCreate) AddTelegramChatIDs(ids ...int) *ChainCreate {
+	cc.mutation.AddTelegramChatIDs(ids...)
+	return cc
+}
+
+// AddTelegramChats adds the "telegram_chats" edges to the TelegramChat entity.
+func (cc *ChainCreate) AddTelegramChats(t ...*TelegramChat) *ChainCreate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return cc.AddTelegramChatIDs(ids...)
+}
+
+// AddDiscordChannelIDs adds the "discord_channels" edge to the DiscordChannel entity by IDs.
+func (cc *ChainCreate) AddDiscordChannelIDs(ids ...int) *ChainCreate {
+	cc.mutation.AddDiscordChannelIDs(ids...)
+	return cc
+}
+
+// AddDiscordChannels adds the "discord_channels" edges to the DiscordChannel entity.
+func (cc *ChainCreate) AddDiscordChannels(d ...*DiscordChannel) *ChainCreate {
+	ids := make([]int, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return cc.AddDiscordChannelIDs(ids...)
+}
+
 // AddRPCEndpointIDs adds the "rpc_endpoints" edge to the RpcEndpoint entity by IDs.
 func (cc *ChainCreate) AddRPCEndpointIDs(ids ...int) *ChainCreate {
 	cc.mutation.AddRPCEndpointIDs(ids...)
@@ -120,6 +209,21 @@ func (cc *ChainCreate) AddRPCEndpoints(r ...*RpcEndpoint) *ChainCreate {
 		ids[i] = r[i].ID
 	}
 	return cc.AddRPCEndpointIDs(ids...)
+}
+
+// AddWalletIDs adds the "wallets" edge to the Wallet entity by IDs.
+func (cc *ChainCreate) AddWalletIDs(ids ...int) *ChainCreate {
+	cc.mutation.AddWalletIDs(ids...)
+	return cc
+}
+
+// AddWallets adds the "wallets" edges to the Wallet entity.
+func (cc *ChainCreate) AddWallets(w ...*Wallet) *ChainCreate {
+	ids := make([]int, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return cc.AddWalletIDs(ids...)
 }
 
 // Mutation returns the ChainMutation object of the builder.
@@ -251,6 +355,22 @@ func (cc *ChainCreate) createSpec() (*Chain, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+	if value, ok := cc.mutation.CreateTime(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: chain.FieldCreateTime,
+		})
+		_node.CreateTime = value
+	}
+	if value, ok := cc.mutation.UpdateTime(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: chain.FieldUpdateTime,
+		})
+		_node.UpdateTime = value
+	}
 	if value, ok := cc.mutation.CreatedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -266,6 +386,22 @@ func (cc *ChainCreate) createSpec() (*Chain, *sqlgraph.CreateSpec) {
 			Column: chain.FieldUpdatedAt,
 		})
 		_node.UpdatedAt = value
+	}
+	if value, ok := cc.mutation.ChainID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: chain.FieldChainID,
+		})
+		_node.ChainID = value
+	}
+	if value, ok := cc.mutation.AccountPrefix(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: chain.FieldAccountPrefix,
+		})
+		_node.AccountPrefix = value
 	}
 	if value, ok := cc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -329,6 +465,44 @@ func (cc *ChainCreate) createSpec() (*Chain, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
+	if nodes := cc.mutation.TelegramChatsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chain.TelegramChatsTable,
+			Columns: chain.TelegramChatsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: telegramchat.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := cc.mutation.DiscordChannelsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chain.DiscordChannelsTable,
+			Columns: chain.DiscordChannelsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: discordchannel.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	if nodes := cc.mutation.RPCEndpointsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -340,6 +514,25 @@ func (cc *ChainCreate) createSpec() (*Chain, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: rpcendpoint.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := cc.mutation.WalletsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.WalletsTable,
+			Columns: []string{chain.WalletsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: wallet.FieldID,
 				},
 			},
 		}

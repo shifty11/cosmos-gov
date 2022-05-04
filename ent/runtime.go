@@ -6,11 +6,16 @@ import (
 	"time"
 
 	"github.com/shifty11/cosmos-gov/ent/chain"
+	"github.com/shifty11/cosmos-gov/ent/discordchannel"
+	"github.com/shifty11/cosmos-gov/ent/grant"
 	"github.com/shifty11/cosmos-gov/ent/lenschaininfo"
+	"github.com/shifty11/cosmos-gov/ent/migrationinfo"
 	"github.com/shifty11/cosmos-gov/ent/proposal"
 	"github.com/shifty11/cosmos-gov/ent/rpcendpoint"
 	"github.com/shifty11/cosmos-gov/ent/schema"
+	"github.com/shifty11/cosmos-gov/ent/telegramchat"
 	"github.com/shifty11/cosmos-gov/ent/user"
+	"github.com/shifty11/cosmos-gov/ent/wallet"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -20,39 +25,92 @@ func init() {
 	chainFields := schema.Chain{}.Fields()
 	_ = chainFields
 	// chainDescCreatedAt is the schema descriptor for created_at field.
-	chainDescCreatedAt := chainFields[0].Descriptor()
+	chainDescCreatedAt := chainFields[2].Descriptor()
 	// chain.DefaultCreatedAt holds the default value on creation for the created_at field.
 	chain.DefaultCreatedAt = chainDescCreatedAt.Default.(func() time.Time)
 	// chainDescUpdatedAt is the schema descriptor for updated_at field.
-	chainDescUpdatedAt := chainFields[1].Descriptor()
+	chainDescUpdatedAt := chainFields[3].Descriptor()
 	// chain.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	chain.DefaultUpdatedAt = chainDescUpdatedAt.Default.(func() time.Time)
 	// chain.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	chain.UpdateDefaultUpdatedAt = chainDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// chainDescIsEnabled is the schema descriptor for is_enabled field.
-	chainDescIsEnabled := chainFields[4].Descriptor()
+	chainDescIsEnabled := chainFields[8].Descriptor()
 	// chain.DefaultIsEnabled holds the default value on creation for the is_enabled field.
 	chain.DefaultIsEnabled = chainDescIsEnabled.Default.(bool)
+	discordchannelMixin := schema.DiscordChannel{}.Mixin()
+	discordchannelMixinFields0 := discordchannelMixin[0].Fields()
+	_ = discordchannelMixinFields0
+	discordchannelFields := schema.DiscordChannel{}.Fields()
+	_ = discordchannelFields
+	// discordchannelDescCreateTime is the schema descriptor for create_time field.
+	discordchannelDescCreateTime := discordchannelMixinFields0[0].Descriptor()
+	// discordchannel.DefaultCreateTime holds the default value on creation for the create_time field.
+	discordchannel.DefaultCreateTime = discordchannelDescCreateTime.Default.(func() time.Time)
+	// discordchannelDescUpdateTime is the schema descriptor for update_time field.
+	discordchannelDescUpdateTime := discordchannelMixinFields0[1].Descriptor()
+	// discordchannel.DefaultUpdateTime holds the default value on creation for the update_time field.
+	discordchannel.DefaultUpdateTime = discordchannelDescUpdateTime.Default.(func() time.Time)
+	// discordchannel.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
+	discordchannel.UpdateDefaultUpdateTime = discordchannelDescUpdateTime.UpdateDefault.(func() time.Time)
+	// discordchannelDescRoles is the schema descriptor for roles field.
+	discordchannelDescRoles := discordchannelFields[3].Descriptor()
+	// discordchannel.DefaultRoles holds the default value on creation for the roles field.
+	discordchannel.DefaultRoles = discordchannelDescRoles.Default.(string)
+	grantMixin := schema.Grant{}.Mixin()
+	grantMixinFields0 := grantMixin[0].Fields()
+	_ = grantMixinFields0
+	grantFields := schema.Grant{}.Fields()
+	_ = grantFields
+	// grantDescCreateTime is the schema descriptor for create_time field.
+	grantDescCreateTime := grantMixinFields0[0].Descriptor()
+	// grant.DefaultCreateTime holds the default value on creation for the create_time field.
+	grant.DefaultCreateTime = grantDescCreateTime.Default.(func() time.Time)
+	// grantDescUpdateTime is the schema descriptor for update_time field.
+	grantDescUpdateTime := grantMixinFields0[1].Descriptor()
+	// grant.DefaultUpdateTime holds the default value on creation for the update_time field.
+	grant.DefaultUpdateTime = grantDescUpdateTime.Default.(func() time.Time)
+	// grant.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
+	grant.UpdateDefaultUpdateTime = grantDescUpdateTime.UpdateDefault.(func() time.Time)
 	lenschaininfoFields := schema.LensChainInfo{}.Fields()
 	_ = lenschaininfoFields
 	// lenschaininfoDescCreatedAt is the schema descriptor for created_at field.
-	lenschaininfoDescCreatedAt := lenschaininfoFields[0].Descriptor()
+	lenschaininfoDescCreatedAt := lenschaininfoFields[2].Descriptor()
 	// lenschaininfo.DefaultCreatedAt holds the default value on creation for the created_at field.
 	lenschaininfo.DefaultCreatedAt = lenschaininfoDescCreatedAt.Default.(func() time.Time)
 	// lenschaininfoDescUpdatedAt is the schema descriptor for updated_at field.
-	lenschaininfoDescUpdatedAt := lenschaininfoFields[1].Descriptor()
+	lenschaininfoDescUpdatedAt := lenschaininfoFields[3].Descriptor()
 	// lenschaininfo.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	lenschaininfo.DefaultUpdatedAt = lenschaininfoDescUpdatedAt.Default.(func() time.Time)
 	// lenschaininfo.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	lenschaininfo.UpdateDefaultUpdatedAt = lenschaininfoDescUpdatedAt.UpdateDefault.(func() time.Time)
+	migrationinfoMixin := schema.MigrationInfo{}.Mixin()
+	migrationinfoMixinFields0 := migrationinfoMixin[0].Fields()
+	_ = migrationinfoMixinFields0
+	migrationinfoFields := schema.MigrationInfo{}.Fields()
+	_ = migrationinfoFields
+	// migrationinfoDescCreateTime is the schema descriptor for create_time field.
+	migrationinfoDescCreateTime := migrationinfoMixinFields0[0].Descriptor()
+	// migrationinfo.DefaultCreateTime holds the default value on creation for the create_time field.
+	migrationinfo.DefaultCreateTime = migrationinfoDescCreateTime.Default.(func() time.Time)
+	// migrationinfoDescUpdateTime is the schema descriptor for update_time field.
+	migrationinfoDescUpdateTime := migrationinfoMixinFields0[1].Descriptor()
+	// migrationinfo.DefaultUpdateTime holds the default value on creation for the update_time field.
+	migrationinfo.DefaultUpdateTime = migrationinfoDescUpdateTime.Default.(func() time.Time)
+	// migrationinfo.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
+	migrationinfo.UpdateDefaultUpdateTime = migrationinfoDescUpdateTime.UpdateDefault.(func() time.Time)
+	// migrationinfoDescIsMigrated is the schema descriptor for is_migrated field.
+	migrationinfoDescIsMigrated := migrationinfoFields[0].Descriptor()
+	// migrationinfo.DefaultIsMigrated holds the default value on creation for the is_migrated field.
+	migrationinfo.DefaultIsMigrated = migrationinfoDescIsMigrated.Default.(bool)
 	proposalFields := schema.Proposal{}.Fields()
 	_ = proposalFields
 	// proposalDescCreatedAt is the schema descriptor for created_at field.
-	proposalDescCreatedAt := proposalFields[0].Descriptor()
+	proposalDescCreatedAt := proposalFields[2].Descriptor()
 	// proposal.DefaultCreatedAt holds the default value on creation for the created_at field.
 	proposal.DefaultCreatedAt = proposalDescCreatedAt.Default.(func() time.Time)
 	// proposalDescUpdatedAt is the schema descriptor for updated_at field.
-	proposalDescUpdatedAt := proposalFields[1].Descriptor()
+	proposalDescUpdatedAt := proposalFields[3].Descriptor()
 	// proposal.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	proposal.DefaultUpdatedAt = proposalDescUpdatedAt.Default.(func() time.Time)
 	// proposal.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -60,41 +118,75 @@ func init() {
 	rpcendpointFields := schema.RpcEndpoint{}.Fields()
 	_ = rpcendpointFields
 	// rpcendpointDescCreatedAt is the schema descriptor for created_at field.
-	rpcendpointDescCreatedAt := rpcendpointFields[0].Descriptor()
+	rpcendpointDescCreatedAt := rpcendpointFields[2].Descriptor()
 	// rpcendpoint.DefaultCreatedAt holds the default value on creation for the created_at field.
 	rpcendpoint.DefaultCreatedAt = rpcendpointDescCreatedAt.Default.(func() time.Time)
 	// rpcendpointDescUpdatedAt is the schema descriptor for updated_at field.
-	rpcendpointDescUpdatedAt := rpcendpointFields[1].Descriptor()
+	rpcendpointDescUpdatedAt := rpcendpointFields[3].Descriptor()
 	// rpcendpoint.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	rpcendpoint.DefaultUpdatedAt = rpcendpointDescUpdatedAt.Default.(func() time.Time)
 	// rpcendpoint.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	rpcendpoint.UpdateDefaultUpdatedAt = rpcendpointDescUpdatedAt.UpdateDefault.(func() time.Time)
+	telegramchatMixin := schema.TelegramChat{}.Mixin()
+	telegramchatMixinFields0 := telegramchatMixin[0].Fields()
+	_ = telegramchatMixinFields0
+	telegramchatFields := schema.TelegramChat{}.Fields()
+	_ = telegramchatFields
+	// telegramchatDescCreateTime is the schema descriptor for create_time field.
+	telegramchatDescCreateTime := telegramchatMixinFields0[0].Descriptor()
+	// telegramchat.DefaultCreateTime holds the default value on creation for the create_time field.
+	telegramchat.DefaultCreateTime = telegramchatDescCreateTime.Default.(func() time.Time)
+	// telegramchatDescUpdateTime is the schema descriptor for update_time field.
+	telegramchatDescUpdateTime := telegramchatMixinFields0[1].Descriptor()
+	// telegramchat.DefaultUpdateTime holds the default value on creation for the update_time field.
+	telegramchat.DefaultUpdateTime = telegramchatDescUpdateTime.Default.(func() time.Time)
+	// telegramchat.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
+	telegramchat.UpdateDefaultUpdateTime = telegramchatDescUpdateTime.UpdateDefault.(func() time.Time)
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescCreatedAt is the schema descriptor for created_at field.
-	userDescCreatedAt := userFields[0].Descriptor()
+	userDescCreatedAt := userFields[2].Descriptor()
 	// user.DefaultCreatedAt holds the default value on creation for the created_at field.
 	user.DefaultCreatedAt = userDescCreatedAt.Default.(func() time.Time)
 	// userDescUpdatedAt is the schema descriptor for updated_at field.
-	userDescUpdatedAt := userFields[1].Descriptor()
+	userDescUpdatedAt := userFields[3].Descriptor()
 	// user.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	user.DefaultUpdatedAt = userDescUpdatedAt.Default.(func() time.Time)
 	// user.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	user.UpdateDefaultUpdatedAt = userDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// userDescUserID is the schema descriptor for user_id field.
-	userDescUserID := userFields[4].Descriptor()
-	// user.DefaultUserID holds the default value on creation for the user_id field.
-	user.DefaultUserID = userDescUserID.Default.(int64)
+	// userDescName is the schema descriptor for name field.
+	userDescName := userFields[5].Descriptor()
+	// user.DefaultName holds the default value on creation for the name field.
+	user.DefaultName = userDescName.Default.(string)
+	// userDescLoginToken is the schema descriptor for login_token field.
+	userDescLoginToken := userFields[8].Descriptor()
+	// user.DefaultLoginToken holds the default value on creation for the login_token field.
+	user.DefaultLoginToken = userDescLoginToken.Default.(string)
 	// userDescUserName is the schema descriptor for user_name field.
-	userDescUserName := userFields[5].Descriptor()
+	userDescUserName := userFields[9].Descriptor()
 	// user.DefaultUserName holds the default value on creation for the user_name field.
 	user.DefaultUserName = userDescUserName.Default.(string)
 	// userDescChatName is the schema descriptor for chat_name field.
-	userDescChatName := userFields[6].Descriptor()
+	userDescChatName := userFields[10].Descriptor()
 	// user.DefaultChatName holds the default value on creation for the chat_name field.
 	user.DefaultChatName = userDescChatName.Default.(string)
 	// userDescIsGroup is the schema descriptor for is_group field.
-	userDescIsGroup := userFields[7].Descriptor()
+	userDescIsGroup := userFields[11].Descriptor()
 	// user.DefaultIsGroup holds the default value on creation for the is_group field.
 	user.DefaultIsGroup = userDescIsGroup.Default.(bool)
+	walletMixin := schema.Wallet{}.Mixin()
+	walletMixinFields0 := walletMixin[0].Fields()
+	_ = walletMixinFields0
+	walletFields := schema.Wallet{}.Fields()
+	_ = walletFields
+	// walletDescCreateTime is the schema descriptor for create_time field.
+	walletDescCreateTime := walletMixinFields0[0].Descriptor()
+	// wallet.DefaultCreateTime holds the default value on creation for the create_time field.
+	wallet.DefaultCreateTime = walletDescCreateTime.Default.(func() time.Time)
+	// walletDescUpdateTime is the schema descriptor for update_time field.
+	walletDescUpdateTime := walletMixinFields0[1].Descriptor()
+	// wallet.DefaultUpdateTime holds the default value on creation for the update_time field.
+	wallet.DefaultUpdateTime = walletDescUpdateTime.Default.(func() time.Time)
+	// wallet.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
+	wallet.UpdateDefaultUpdateTime = walletDescUpdateTime.UpdateDefault.(func() time.Time)
 }

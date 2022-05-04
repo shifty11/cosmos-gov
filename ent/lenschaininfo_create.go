@@ -20,6 +20,34 @@ type LensChainInfoCreate struct {
 	hooks    []Hook
 }
 
+// SetCreateTime sets the "create_time" field.
+func (lcic *LensChainInfoCreate) SetCreateTime(t time.Time) *LensChainInfoCreate {
+	lcic.mutation.SetCreateTime(t)
+	return lcic
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (lcic *LensChainInfoCreate) SetNillableCreateTime(t *time.Time) *LensChainInfoCreate {
+	if t != nil {
+		lcic.SetCreateTime(*t)
+	}
+	return lcic
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (lcic *LensChainInfoCreate) SetUpdateTime(t time.Time) *LensChainInfoCreate {
+	lcic.mutation.SetUpdateTime(t)
+	return lcic
+}
+
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (lcic *LensChainInfoCreate) SetNillableUpdateTime(t *time.Time) *LensChainInfoCreate {
+	if t != nil {
+		lcic.SetUpdateTime(*t)
+	}
+	return lcic
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (lcic *LensChainInfoCreate) SetCreatedAt(t time.Time) *LensChainInfoCreate {
 	lcic.mutation.SetCreatedAt(t)
@@ -182,6 +210,22 @@ func (lcic *LensChainInfoCreate) createSpec() (*LensChainInfo, *sqlgraph.CreateS
 			},
 		}
 	)
+	if value, ok := lcic.mutation.CreateTime(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: lenschaininfo.FieldCreateTime,
+		})
+		_node.CreateTime = value
+	}
+	if value, ok := lcic.mutation.UpdateTime(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: lenschaininfo.FieldUpdateTime,
+		})
+		_node.UpdateTime = value
+	}
 	if value, ok := lcic.mutation.CreatedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,

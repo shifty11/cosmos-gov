@@ -28,6 +28,46 @@ func (lciu *LensChainInfoUpdate) Where(ps ...predicate.LensChainInfo) *LensChain
 	return lciu
 }
 
+// SetCreateTime sets the "create_time" field.
+func (lciu *LensChainInfoUpdate) SetCreateTime(t time.Time) *LensChainInfoUpdate {
+	lciu.mutation.SetCreateTime(t)
+	return lciu
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (lciu *LensChainInfoUpdate) SetNillableCreateTime(t *time.Time) *LensChainInfoUpdate {
+	if t != nil {
+		lciu.SetCreateTime(*t)
+	}
+	return lciu
+}
+
+// ClearCreateTime clears the value of the "create_time" field.
+func (lciu *LensChainInfoUpdate) ClearCreateTime() *LensChainInfoUpdate {
+	lciu.mutation.ClearCreateTime()
+	return lciu
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (lciu *LensChainInfoUpdate) SetUpdateTime(t time.Time) *LensChainInfoUpdate {
+	lciu.mutation.SetUpdateTime(t)
+	return lciu
+}
+
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (lciu *LensChainInfoUpdate) SetNillableUpdateTime(t *time.Time) *LensChainInfoUpdate {
+	if t != nil {
+		lciu.SetUpdateTime(*t)
+	}
+	return lciu
+}
+
+// ClearUpdateTime clears the value of the "update_time" field.
+func (lciu *LensChainInfoUpdate) ClearUpdateTime() *LensChainInfoUpdate {
+	lciu.mutation.ClearUpdateTime()
+	return lciu
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (lciu *LensChainInfoUpdate) SetUpdatedAt(t time.Time) *LensChainInfoUpdate {
 	lciu.mutation.SetUpdatedAt(t)
@@ -139,6 +179,32 @@ func (lciu *LensChainInfoUpdate) sqlSave(ctx context.Context) (n int, err error)
 			}
 		}
 	}
+	if value, ok := lciu.mutation.CreateTime(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: lenschaininfo.FieldCreateTime,
+		})
+	}
+	if lciu.mutation.CreateTimeCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: lenschaininfo.FieldCreateTime,
+		})
+	}
+	if value, ok := lciu.mutation.UpdateTime(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: lenschaininfo.FieldUpdateTime,
+		})
+	}
+	if lciu.mutation.UpdateTimeCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: lenschaininfo.FieldUpdateTime,
+		})
+	}
 	if value, ok := lciu.mutation.UpdatedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -184,6 +250,46 @@ type LensChainInfoUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *LensChainInfoMutation
+}
+
+// SetCreateTime sets the "create_time" field.
+func (lciuo *LensChainInfoUpdateOne) SetCreateTime(t time.Time) *LensChainInfoUpdateOne {
+	lciuo.mutation.SetCreateTime(t)
+	return lciuo
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (lciuo *LensChainInfoUpdateOne) SetNillableCreateTime(t *time.Time) *LensChainInfoUpdateOne {
+	if t != nil {
+		lciuo.SetCreateTime(*t)
+	}
+	return lciuo
+}
+
+// ClearCreateTime clears the value of the "create_time" field.
+func (lciuo *LensChainInfoUpdateOne) ClearCreateTime() *LensChainInfoUpdateOne {
+	lciuo.mutation.ClearCreateTime()
+	return lciuo
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (lciuo *LensChainInfoUpdateOne) SetUpdateTime(t time.Time) *LensChainInfoUpdateOne {
+	lciuo.mutation.SetUpdateTime(t)
+	return lciuo
+}
+
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (lciuo *LensChainInfoUpdateOne) SetNillableUpdateTime(t *time.Time) *LensChainInfoUpdateOne {
+	if t != nil {
+		lciuo.SetUpdateTime(*t)
+	}
+	return lciuo
+}
+
+// ClearUpdateTime clears the value of the "update_time" field.
+func (lciuo *LensChainInfoUpdateOne) ClearUpdateTime() *LensChainInfoUpdateOne {
+	lciuo.mutation.ClearUpdateTime()
+	return lciuo
 }
 
 // SetUpdatedAt sets the "updated_at" field.
@@ -320,6 +426,32 @@ func (lciuo *LensChainInfoUpdateOne) sqlSave(ctx context.Context) (_node *LensCh
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := lciuo.mutation.CreateTime(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: lenschaininfo.FieldCreateTime,
+		})
+	}
+	if lciuo.mutation.CreateTimeCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: lenschaininfo.FieldCreateTime,
+		})
+	}
+	if value, ok := lciuo.mutation.UpdateTime(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: lenschaininfo.FieldUpdateTime,
+		})
+	}
+	if lciuo.mutation.UpdateTimeCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: lenschaininfo.FieldUpdateTime,
+		})
 	}
 	if value, ok := lciuo.mutation.UpdatedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{

@@ -106,7 +106,7 @@ func (lciq *LensChainInfoQuery) FirstIDX(ctx context.Context) int {
 }
 
 // Only returns a single LensChainInfo entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one LensChainInfo entity is not found.
+// Returns a *NotSingularError when more than one LensChainInfo entity is found.
 // Returns a *NotFoundError when no LensChainInfo entities are found.
 func (lciq *LensChainInfoQuery) Only(ctx context.Context) (*LensChainInfo, error) {
 	nodes, err := lciq.Limit(2).All(ctx)
@@ -133,7 +133,7 @@ func (lciq *LensChainInfoQuery) OnlyX(ctx context.Context) *LensChainInfo {
 }
 
 // OnlyID is like Only, but returns the only LensChainInfo ID in the query.
-// Returns a *NotSingularError when exactly one LensChainInfo ID is not found.
+// Returns a *NotSingularError when more than one LensChainInfo ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (lciq *LensChainInfoQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
@@ -242,8 +242,9 @@ func (lciq *LensChainInfoQuery) Clone() *LensChainInfoQuery {
 		order:      append([]OrderFunc{}, lciq.order...),
 		predicates: append([]predicate.LensChainInfo{}, lciq.predicates...),
 		// clone intermediate query.
-		sql:  lciq.sql.Clone(),
-		path: lciq.path,
+		sql:    lciq.sql.Clone(),
+		path:   lciq.path,
+		unique: lciq.unique,
 	}
 }
 
@@ -253,12 +254,12 @@ func (lciq *LensChainInfoQuery) Clone() *LensChainInfoQuery {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		CreateTime time.Time `json:"create_time,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.LensChainInfo.Query().
-//		GroupBy(lenschaininfo.FieldCreatedAt).
+//		GroupBy(lenschaininfo.FieldCreateTime).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -280,11 +281,11 @@ func (lciq *LensChainInfoQuery) GroupBy(field string, fields ...string) *LensCha
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		CreateTime time.Time `json:"create_time,omitempty"`
 //	}
 //
 //	client.LensChainInfo.Query().
-//		Select(lenschaininfo.FieldCreatedAt).
+//		Select(lenschaininfo.FieldCreateTime).
 //		Scan(ctx, &v)
 //
 func (lciq *LensChainInfoQuery) Select(fields ...string) *LensChainInfoSelect {

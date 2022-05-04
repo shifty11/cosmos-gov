@@ -39,7 +39,7 @@ func getUserName(i *discordgo.InteractionCreate) string {
 	return i.User.Username
 }
 
-func getChatName(i *discordgo.InteractionCreate) string {
+func getChannelName(i *discordgo.InteractionCreate) string {
 	if isGroup(i) {
 		channel, err := s.Channel(i.ChannelID)
 		if err != nil {

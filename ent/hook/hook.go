@@ -22,6 +22,32 @@ func (f ChainFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error
 	return f(ctx, mv)
 }
 
+// The DiscordChannelFunc type is an adapter to allow the use of ordinary
+// function as DiscordChannel mutator.
+type DiscordChannelFunc func(context.Context, *ent.DiscordChannelMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f DiscordChannelFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.DiscordChannelMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DiscordChannelMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The GrantFunc type is an adapter to allow the use of ordinary
+// function as Grant mutator.
+type GrantFunc func(context.Context, *ent.GrantMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f GrantFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.GrantMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.GrantMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The LensChainInfoFunc type is an adapter to allow the use of ordinary
 // function as LensChainInfo mutator.
 type LensChainInfoFunc func(context.Context, *ent.LensChainInfoMutation) (ent.Value, error)
@@ -31,6 +57,19 @@ func (f LensChainInfoFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Valu
 	mv, ok := m.(*ent.LensChainInfoMutation)
 	if !ok {
 		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LensChainInfoMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The MigrationInfoFunc type is an adapter to allow the use of ordinary
+// function as MigrationInfo mutator.
+type MigrationInfoFunc func(context.Context, *ent.MigrationInfoMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f MigrationInfoFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.MigrationInfoMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.MigrationInfoMutation", m)
 	}
 	return f(ctx, mv)
 }
@@ -61,6 +100,19 @@ func (f RpcEndpointFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value,
 	return f(ctx, mv)
 }
 
+// The TelegramChatFunc type is an adapter to allow the use of ordinary
+// function as TelegramChat mutator.
+type TelegramChatFunc func(context.Context, *ent.TelegramChatMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f TelegramChatFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.TelegramChatMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TelegramChatMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The UserFunc type is an adapter to allow the use of ordinary
 // function as User mutator.
 type UserFunc func(context.Context, *ent.UserMutation) (ent.Value, error)
@@ -70,6 +122,19 @@ func (f UserFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error)
 	mv, ok := m.(*ent.UserMutation)
 	if !ok {
 		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The WalletFunc type is an adapter to allow the use of ordinary
+// function as Wallet mutator.
+type WalletFunc func(context.Context, *ent.WalletMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f WalletFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.WalletMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.WalletMutation", m)
 	}
 	return f(ctx, mv)
 }

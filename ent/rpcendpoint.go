@@ -17,6 +17,10 @@ type RpcEndpoint struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// CreateTime holds the value of the "create_time" field.
+	CreateTime time.Time `json:"create_time,omitempty"`
+	// UpdateTime holds the value of the "update_time" field.
+	UpdateTime time.Time `json:"update_time,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -61,7 +65,7 @@ func (*RpcEndpoint) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullInt64)
 		case rpcendpoint.FieldEndpoint:
 			values[i] = new(sql.NullString)
-		case rpcendpoint.FieldCreatedAt, rpcendpoint.FieldUpdatedAt:
+		case rpcendpoint.FieldCreateTime, rpcendpoint.FieldUpdateTime, rpcendpoint.FieldCreatedAt, rpcendpoint.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case rpcendpoint.ForeignKeys[0]: // chain_rpc_endpoints
 			values[i] = new(sql.NullInt64)
@@ -86,6 +90,18 @@ func (re *RpcEndpoint) assignValues(columns []string, values []interface{}) erro
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			re.ID = int(value.Int64)
+		case rpcendpoint.FieldCreateTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field create_time", values[i])
+			} else if value.Valid {
+				re.CreateTime = value.Time
+			}
+		case rpcendpoint.FieldUpdateTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field update_time", values[i])
+			} else if value.Valid {
+				re.UpdateTime = value.Time
+			}
 		case rpcendpoint.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
@@ -144,6 +160,10 @@ func (re *RpcEndpoint) String() string {
 	var builder strings.Builder
 	builder.WriteString("RpcEndpoint(")
 	builder.WriteString(fmt.Sprintf("id=%v", re.ID))
+	builder.WriteString(", create_time=")
+	builder.WriteString(re.CreateTime.Format(time.ANSIC))
+	builder.WriteString(", update_time=")
+	builder.WriteString(re.UpdateTime.Format(time.ANSIC))
 	builder.WriteString(", created_at=")
 	builder.WriteString(re.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", updated_at=")

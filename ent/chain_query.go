@@ -13,10 +13,13 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/shifty11/cosmos-gov/ent/chain"
+	"github.com/shifty11/cosmos-gov/ent/discordchannel"
 	"github.com/shifty11/cosmos-gov/ent/predicate"
 	"github.com/shifty11/cosmos-gov/ent/proposal"
 	"github.com/shifty11/cosmos-gov/ent/rpcendpoint"
+	"github.com/shifty11/cosmos-gov/ent/telegramchat"
 	"github.com/shifty11/cosmos-gov/ent/user"
+	"github.com/shifty11/cosmos-gov/ent/wallet"
 )
 
 // ChainQuery is the builder for querying Chain entities.
@@ -29,9 +32,12 @@ type ChainQuery struct {
 	fields     []string
 	predicates []predicate.Chain
 	// eager-loading edges.
-	withUsers        *UserQuery
-	withProposals    *ProposalQuery
-	withRPCEndpoints *RpcEndpointQuery
+	withUsers           *UserQuery
+	withProposals       *ProposalQuery
+	withTelegramChats   *TelegramChatQuery
+	withDiscordChannels *DiscordChannelQuery
+	withRPCEndpoints    *RpcEndpointQuery
+	withWallets         *WalletQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -112,6 +118,50 @@ func (cq *ChainQuery) QueryProposals() *ProposalQuery {
 	return query
 }
 
+// QueryTelegramChats chains the current query on the "telegram_chats" edge.
+func (cq *ChainQuery) QueryTelegramChats() *TelegramChatQuery {
+	query := &TelegramChatQuery{config: cq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := cq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := cq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(chain.Table, chain.FieldID, selector),
+			sqlgraph.To(telegramchat.Table, telegramchat.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, chain.TelegramChatsTable, chain.TelegramChatsPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryDiscordChannels chains the current query on the "discord_channels" edge.
+func (cq *ChainQuery) QueryDiscordChannels() *DiscordChannelQuery {
+	query := &DiscordChannelQuery{config: cq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := cq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := cq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(chain.Table, chain.FieldID, selector),
+			sqlgraph.To(discordchannel.Table, discordchannel.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, chain.DiscordChannelsTable, chain.DiscordChannelsPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // QueryRPCEndpoints chains the current query on the "rpc_endpoints" edge.
 func (cq *ChainQuery) QueryRPCEndpoints() *RpcEndpointQuery {
 	query := &RpcEndpointQuery{config: cq.config}
@@ -127,6 +177,28 @@ func (cq *ChainQuery) QueryRPCEndpoints() *RpcEndpointQuery {
 			sqlgraph.From(chain.Table, chain.FieldID, selector),
 			sqlgraph.To(rpcendpoint.Table, rpcendpoint.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, chain.RPCEndpointsTable, chain.RPCEndpointsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryWallets chains the current query on the "wallets" edge.
+func (cq *ChainQuery) QueryWallets() *WalletQuery {
+	query := &WalletQuery{config: cq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := cq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := cq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(chain.Table, chain.FieldID, selector),
+			sqlgraph.To(wallet.Table, wallet.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, chain.WalletsTable, chain.WalletsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
 		return fromU, nil
@@ -180,7 +252,7 @@ func (cq *ChainQuery) FirstIDX(ctx context.Context) int {
 }
 
 // Only returns a single Chain entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one Chain entity is not found.
+// Returns a *NotSingularError when more than one Chain entity is found.
 // Returns a *NotFoundError when no Chain entities are found.
 func (cq *ChainQuery) Only(ctx context.Context) (*Chain, error) {
 	nodes, err := cq.Limit(2).All(ctx)
@@ -207,7 +279,7 @@ func (cq *ChainQuery) OnlyX(ctx context.Context) *Chain {
 }
 
 // OnlyID is like Only, but returns the only Chain ID in the query.
-// Returns a *NotSingularError when exactly one Chain ID is not found.
+// Returns a *NotSingularError when more than one Chain ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (cq *ChainQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
@@ -310,17 +382,21 @@ func (cq *ChainQuery) Clone() *ChainQuery {
 		return nil
 	}
 	return &ChainQuery{
-		config:           cq.config,
-		limit:            cq.limit,
-		offset:           cq.offset,
-		order:            append([]OrderFunc{}, cq.order...),
-		predicates:       append([]predicate.Chain{}, cq.predicates...),
-		withUsers:        cq.withUsers.Clone(),
-		withProposals:    cq.withProposals.Clone(),
-		withRPCEndpoints: cq.withRPCEndpoints.Clone(),
+		config:              cq.config,
+		limit:               cq.limit,
+		offset:              cq.offset,
+		order:               append([]OrderFunc{}, cq.order...),
+		predicates:          append([]predicate.Chain{}, cq.predicates...),
+		withUsers:           cq.withUsers.Clone(),
+		withProposals:       cq.withProposals.Clone(),
+		withTelegramChats:   cq.withTelegramChats.Clone(),
+		withDiscordChannels: cq.withDiscordChannels.Clone(),
+		withRPCEndpoints:    cq.withRPCEndpoints.Clone(),
+		withWallets:         cq.withWallets.Clone(),
 		// clone intermediate query.
-		sql:  cq.sql.Clone(),
-		path: cq.path,
+		sql:    cq.sql.Clone(),
+		path:   cq.path,
+		unique: cq.unique,
 	}
 }
 
@@ -346,6 +422,28 @@ func (cq *ChainQuery) WithProposals(opts ...func(*ProposalQuery)) *ChainQuery {
 	return cq
 }
 
+// WithTelegramChats tells the query-builder to eager-load the nodes that are connected to
+// the "telegram_chats" edge. The optional arguments are used to configure the query builder of the edge.
+func (cq *ChainQuery) WithTelegramChats(opts ...func(*TelegramChatQuery)) *ChainQuery {
+	query := &TelegramChatQuery{config: cq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	cq.withTelegramChats = query
+	return cq
+}
+
+// WithDiscordChannels tells the query-builder to eager-load the nodes that are connected to
+// the "discord_channels" edge. The optional arguments are used to configure the query builder of the edge.
+func (cq *ChainQuery) WithDiscordChannels(opts ...func(*DiscordChannelQuery)) *ChainQuery {
+	query := &DiscordChannelQuery{config: cq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	cq.withDiscordChannels = query
+	return cq
+}
+
 // WithRPCEndpoints tells the query-builder to eager-load the nodes that are connected to
 // the "rpc_endpoints" edge. The optional arguments are used to configure the query builder of the edge.
 func (cq *ChainQuery) WithRPCEndpoints(opts ...func(*RpcEndpointQuery)) *ChainQuery {
@@ -357,18 +455,29 @@ func (cq *ChainQuery) WithRPCEndpoints(opts ...func(*RpcEndpointQuery)) *ChainQu
 	return cq
 }
 
+// WithWallets tells the query-builder to eager-load the nodes that are connected to
+// the "wallets" edge. The optional arguments are used to configure the query builder of the edge.
+func (cq *ChainQuery) WithWallets(opts ...func(*WalletQuery)) *ChainQuery {
+	query := &WalletQuery{config: cq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	cq.withWallets = query
+	return cq
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		CreateTime time.Time `json:"create_time,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Chain.Query().
-//		GroupBy(chain.FieldCreatedAt).
+//		GroupBy(chain.FieldCreateTime).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -390,11 +499,11 @@ func (cq *ChainQuery) GroupBy(field string, fields ...string) *ChainGroupBy {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		CreateTime time.Time `json:"create_time,omitempty"`
 //	}
 //
 //	client.Chain.Query().
-//		Select(chain.FieldCreatedAt).
+//		Select(chain.FieldCreateTime).
 //		Scan(ctx, &v)
 //
 func (cq *ChainQuery) Select(fields ...string) *ChainSelect {
@@ -422,10 +531,13 @@ func (cq *ChainQuery) sqlAll(ctx context.Context) ([]*Chain, error) {
 	var (
 		nodes       = []*Chain{}
 		_spec       = cq.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [6]bool{
 			cq.withUsers != nil,
 			cq.withProposals != nil,
+			cq.withTelegramChats != nil,
+			cq.withDiscordChannels != nil,
 			cq.withRPCEndpoints != nil,
+			cq.withWallets != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
@@ -542,6 +654,136 @@ func (cq *ChainQuery) sqlAll(ctx context.Context) ([]*Chain, error) {
 		}
 	}
 
+	if query := cq.withTelegramChats; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		ids := make(map[int]*Chain, len(nodes))
+		for _, node := range nodes {
+			ids[node.ID] = node
+			fks = append(fks, node.ID)
+			node.Edges.TelegramChats = []*TelegramChat{}
+		}
+		var (
+			edgeids []int
+			edges   = make(map[int][]*Chain)
+		)
+		_spec := &sqlgraph.EdgeQuerySpec{
+			Edge: &sqlgraph.EdgeSpec{
+				Inverse: true,
+				Table:   chain.TelegramChatsTable,
+				Columns: chain.TelegramChatsPrimaryKey,
+			},
+			Predicate: func(s *sql.Selector) {
+				s.Where(sql.InValues(chain.TelegramChatsPrimaryKey[1], fks...))
+			},
+			ScanValues: func() [2]interface{} {
+				return [2]interface{}{new(sql.NullInt64), new(sql.NullInt64)}
+			},
+			Assign: func(out, in interface{}) error {
+				eout, ok := out.(*sql.NullInt64)
+				if !ok || eout == nil {
+					return fmt.Errorf("unexpected id value for edge-out")
+				}
+				ein, ok := in.(*sql.NullInt64)
+				if !ok || ein == nil {
+					return fmt.Errorf("unexpected id value for edge-in")
+				}
+				outValue := int(eout.Int64)
+				inValue := int(ein.Int64)
+				node, ok := ids[outValue]
+				if !ok {
+					return fmt.Errorf("unexpected node id in edges: %v", outValue)
+				}
+				if _, ok := edges[inValue]; !ok {
+					edgeids = append(edgeids, inValue)
+				}
+				edges[inValue] = append(edges[inValue], node)
+				return nil
+			},
+		}
+		if err := sqlgraph.QueryEdges(ctx, cq.driver, _spec); err != nil {
+			return nil, fmt.Errorf(`query edges "telegram_chats": %w`, err)
+		}
+		query.Where(telegramchat.IDIn(edgeids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := edges[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected "telegram_chats" node returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.TelegramChats = append(nodes[i].Edges.TelegramChats, n)
+			}
+		}
+	}
+
+	if query := cq.withDiscordChannels; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		ids := make(map[int]*Chain, len(nodes))
+		for _, node := range nodes {
+			ids[node.ID] = node
+			fks = append(fks, node.ID)
+			node.Edges.DiscordChannels = []*DiscordChannel{}
+		}
+		var (
+			edgeids []int
+			edges   = make(map[int][]*Chain)
+		)
+		_spec := &sqlgraph.EdgeQuerySpec{
+			Edge: &sqlgraph.EdgeSpec{
+				Inverse: true,
+				Table:   chain.DiscordChannelsTable,
+				Columns: chain.DiscordChannelsPrimaryKey,
+			},
+			Predicate: func(s *sql.Selector) {
+				s.Where(sql.InValues(chain.DiscordChannelsPrimaryKey[1], fks...))
+			},
+			ScanValues: func() [2]interface{} {
+				return [2]interface{}{new(sql.NullInt64), new(sql.NullInt64)}
+			},
+			Assign: func(out, in interface{}) error {
+				eout, ok := out.(*sql.NullInt64)
+				if !ok || eout == nil {
+					return fmt.Errorf("unexpected id value for edge-out")
+				}
+				ein, ok := in.(*sql.NullInt64)
+				if !ok || ein == nil {
+					return fmt.Errorf("unexpected id value for edge-in")
+				}
+				outValue := int(eout.Int64)
+				inValue := int(ein.Int64)
+				node, ok := ids[outValue]
+				if !ok {
+					return fmt.Errorf("unexpected node id in edges: %v", outValue)
+				}
+				if _, ok := edges[inValue]; !ok {
+					edgeids = append(edgeids, inValue)
+				}
+				edges[inValue] = append(edges[inValue], node)
+				return nil
+			},
+		}
+		if err := sqlgraph.QueryEdges(ctx, cq.driver, _spec); err != nil {
+			return nil, fmt.Errorf(`query edges "discord_channels": %w`, err)
+		}
+		query.Where(discordchannel.IDIn(edgeids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := edges[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected "discord_channels" node returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.DiscordChannels = append(nodes[i].Edges.DiscordChannels, n)
+			}
+		}
+	}
+
 	if query := cq.withRPCEndpoints; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
 		nodeids := make(map[int]*Chain)
@@ -568,6 +810,35 @@ func (cq *ChainQuery) sqlAll(ctx context.Context) ([]*Chain, error) {
 				return nil, fmt.Errorf(`unexpected foreign-key "chain_rpc_endpoints" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.RPCEndpoints = append(node.Edges.RPCEndpoints, n)
+		}
+	}
+
+	if query := cq.withWallets; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*Chain)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Wallets = []*Wallet{}
+		}
+		query.withFKs = true
+		query.Where(predicate.Wallet(func(s *sql.Selector) {
+			s.Where(sql.InValues(chain.WalletsColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.chain_wallets
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "chain_wallets" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "chain_wallets" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Wallets = append(node.Edges.Wallets, n)
 		}
 	}
 

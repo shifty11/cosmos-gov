@@ -132,7 +132,7 @@ func (req *RpcEndpointQuery) FirstIDX(ctx context.Context) int {
 }
 
 // Only returns a single RpcEndpoint entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one RpcEndpoint entity is not found.
+// Returns a *NotSingularError when more than one RpcEndpoint entity is found.
 // Returns a *NotFoundError when no RpcEndpoint entities are found.
 func (req *RpcEndpointQuery) Only(ctx context.Context) (*RpcEndpoint, error) {
 	nodes, err := req.Limit(2).All(ctx)
@@ -159,7 +159,7 @@ func (req *RpcEndpointQuery) OnlyX(ctx context.Context) *RpcEndpoint {
 }
 
 // OnlyID is like Only, but returns the only RpcEndpoint ID in the query.
-// Returns a *NotSingularError when exactly one RpcEndpoint ID is not found.
+// Returns a *NotSingularError when more than one RpcEndpoint ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (req *RpcEndpointQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
@@ -269,8 +269,9 @@ func (req *RpcEndpointQuery) Clone() *RpcEndpointQuery {
 		predicates: append([]predicate.RpcEndpoint{}, req.predicates...),
 		withChain:  req.withChain.Clone(),
 		// clone intermediate query.
-		sql:  req.sql.Clone(),
-		path: req.path,
+		sql:    req.sql.Clone(),
+		path:   req.path,
+		unique: req.unique,
 	}
 }
 
@@ -291,12 +292,12 @@ func (req *RpcEndpointQuery) WithChain(opts ...func(*ChainQuery)) *RpcEndpointQu
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		CreateTime time.Time `json:"create_time,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.RpcEndpoint.Query().
-//		GroupBy(rpcendpoint.FieldCreatedAt).
+//		GroupBy(rpcendpoint.FieldCreateTime).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -318,11 +319,11 @@ func (req *RpcEndpointQuery) GroupBy(field string, fields ...string) *RpcEndpoin
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		CreateTime time.Time `json:"create_time,omitempty"`
 //	}
 //
 //	client.RpcEndpoint.Query().
-//		Select(rpcendpoint.FieldCreatedAt).
+//		Select(rpcendpoint.FieldCreateTime).
 //		Scan(ctx, &v)
 //
 func (req *RpcEndpointQuery) Select(fields ...string) *RpcEndpointSelect {

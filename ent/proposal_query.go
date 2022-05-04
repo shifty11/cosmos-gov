@@ -132,7 +132,7 @@ func (pq *ProposalQuery) FirstIDX(ctx context.Context) int {
 }
 
 // Only returns a single Proposal entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one Proposal entity is not found.
+// Returns a *NotSingularError when more than one Proposal entity is found.
 // Returns a *NotFoundError when no Proposal entities are found.
 func (pq *ProposalQuery) Only(ctx context.Context) (*Proposal, error) {
 	nodes, err := pq.Limit(2).All(ctx)
@@ -159,7 +159,7 @@ func (pq *ProposalQuery) OnlyX(ctx context.Context) *Proposal {
 }
 
 // OnlyID is like Only, but returns the only Proposal ID in the query.
-// Returns a *NotSingularError when exactly one Proposal ID is not found.
+// Returns a *NotSingularError when more than one Proposal ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (pq *ProposalQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
@@ -269,8 +269,9 @@ func (pq *ProposalQuery) Clone() *ProposalQuery {
 		predicates: append([]predicate.Proposal{}, pq.predicates...),
 		withChain:  pq.withChain.Clone(),
 		// clone intermediate query.
-		sql:  pq.sql.Clone(),
-		path: pq.path,
+		sql:    pq.sql.Clone(),
+		path:   pq.path,
+		unique: pq.unique,
 	}
 }
 
@@ -291,12 +292,12 @@ func (pq *ProposalQuery) WithChain(opts ...func(*ChainQuery)) *ProposalQuery {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		CreateTime time.Time `json:"create_time,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Proposal.Query().
-//		GroupBy(proposal.FieldCreatedAt).
+//		GroupBy(proposal.FieldCreateTime).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -318,11 +319,11 @@ func (pq *ProposalQuery) GroupBy(field string, fields ...string) *ProposalGroupB
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		CreateTime time.Time `json:"create_time,omitempty"`
 //	}
 //
 //	client.Proposal.Query().
-//		Select(proposal.FieldCreatedAt).
+//		Select(proposal.FieldCreateTime).
 //		Scan(ctx, &v)
 //
 func (pq *ProposalQuery) Select(fields ...string) *ProposalSelect {

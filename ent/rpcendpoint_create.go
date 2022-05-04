@@ -21,6 +21,34 @@ type RpcEndpointCreate struct {
 	hooks    []Hook
 }
 
+// SetCreateTime sets the "create_time" field.
+func (rec *RpcEndpointCreate) SetCreateTime(t time.Time) *RpcEndpointCreate {
+	rec.mutation.SetCreateTime(t)
+	return rec
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (rec *RpcEndpointCreate) SetNillableCreateTime(t *time.Time) *RpcEndpointCreate {
+	if t != nil {
+		rec.SetCreateTime(*t)
+	}
+	return rec
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (rec *RpcEndpointCreate) SetUpdateTime(t time.Time) *RpcEndpointCreate {
+	rec.mutation.SetUpdateTime(t)
+	return rec
+}
+
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (rec *RpcEndpointCreate) SetNillableUpdateTime(t *time.Time) *RpcEndpointCreate {
+	if t != nil {
+		rec.SetUpdateTime(*t)
+	}
+	return rec
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (rec *RpcEndpointCreate) SetCreatedAt(t time.Time) *RpcEndpointCreate {
 	rec.mutation.SetCreatedAt(t)
@@ -193,6 +221,22 @@ func (rec *RpcEndpointCreate) createSpec() (*RpcEndpoint, *sqlgraph.CreateSpec) 
 			},
 		}
 	)
+	if value, ok := rec.mutation.CreateTime(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: rpcendpoint.FieldCreateTime,
+		})
+		_node.CreateTime = value
+	}
+	if value, ok := rec.mutation.UpdateTime(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: rpcendpoint.FieldUpdateTime,
+		})
+		_node.UpdateTime = value
+	}
 	if value, ok := rec.mutation.CreatedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,

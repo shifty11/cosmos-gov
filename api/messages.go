@@ -1,50 +1,30 @@
-package api
+package messages
 
-import (
-	"fmt"
-	"github.com/shifty11/cosmos-gov/common"
-	"github.com/shifty11/cosmos-gov/database"
-	"github.com/shifty11/cosmos-gov/ent/user"
-	"strings"
-)
+const SubscriptionCmd = "subscriptions"
+const SubscriptionsMsg = `🔔 *Subscriptions*
 
-type MsgFormat string
+Select the projects that you want to follow. You will receive notifications about new governance proposals once they enter the voting period.
 
-const (
-	MsgFormatMarkdown MsgFormat = "markdown"
-	MsgFormatHtml     MsgFormat = "html"
-)
+Powered by [DeCrypto](https://decrypto.online)
+`
 
-func (m MsgFormat) String() string {
-	return string(m)
-}
+const ProposalsCmd = "proposals"
+const ProposalsMsg = `
 
-func GetOngoingProposalsText(chatId int64, userType user.Type, format MsgFormat) string {
-	header := common.ProposalsTitleHtmlMsg
-	if format == MsgFormatMarkdown {
-		header = common.ProposalsTitleMarkdownMsg
-	}
-	chains := database.GetProposalsInVotingPeriodForUser(chatId, userType)
-	if len(chains) == 0 {
-		return header + common.NoSubscriptionsMsg
-	} else {
-		var hasProposals = false
-		var text = common.ProposalsMsg
-		for _, chain := range chains {
-			for _, prop := range chain.Edges.Proposals {
-				hasProposals = true
-				if format == MsgFormatMarkdown {
-					title := strings.Replace(prop.Title, "_", "\\_", -1)
-					title = strings.Replace(title, "*", "\\*", -1)
-					text += fmt.Sprintf("**%v #%d** _%v_\n\n", chain.DisplayName, prop.ProposalID, title)
-				} else {
-					text += fmt.Sprintf("<b>%v #%d</b> <i>%v</i>\n\n", chain.DisplayName, prop.ProposalID, prop.Title)
-				}
-			}
-		}
-		if !hasProposals {
-			return header + common.NoProposalsMsg
-		}
-		return header + text
-	}
-}
+This are all ongoing proposals for your subscriptions.
+
+`
+const NoSubscriptionsMsg = `
+
+You are not subscribed to any project.
+Type /subscriptions to select the projects that you want to follow.
+`
+const NoProposalsMsg = `
+
+There are currently no proposals in voting period.`
+
+const SupportCmd = "support"
+const SupportMsg = "💰 *Support*\n\nI would like to continue developing this bot and other products that improve the Cosmos ecosystem.\n\n" +
+	"You can support me by staking to my validator [DeCrypto](https://decrypto.online) on [Dig](https://ping.pub/dig/staking/digvaloper1fhp54fwlfmpwwgrnfwk3v47v53yjtp8fw6nelw) " +
+	"and [Lum](https://www.mintscan.io/lum/validators/lumvaloper18rd4dk828pfgw680hr93rxjfmj8zvr5xc03hd3).\n\n" +
+	"You have a good idea, feedback or want to contribute in other ways? Shoot a message to %v."

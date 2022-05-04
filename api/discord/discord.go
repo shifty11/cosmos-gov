@@ -2,12 +2,14 @@ package discord
 
 import (
 	"github.com/bwmarrin/discordgo"
+	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/log"
 	"os"
 	"os/signal"
 )
 
 var s *discordgo.Session
+var mHack database.DbManagers // TODO: get rid of this hack
 
 func initDiscord() {
 	log.Sugar.Info("Init discord bot")
@@ -31,6 +33,8 @@ func initDiscord() {
 			}
 		}
 	})
+
+	mHack = database.NewDefaultDbManagers()
 }
 
 func addCommands() {

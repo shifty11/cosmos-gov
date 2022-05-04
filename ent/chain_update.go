@@ -12,10 +12,13 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/shifty11/cosmos-gov/ent/chain"
+	"github.com/shifty11/cosmos-gov/ent/discordchannel"
 	"github.com/shifty11/cosmos-gov/ent/predicate"
 	"github.com/shifty11/cosmos-gov/ent/proposal"
 	"github.com/shifty11/cosmos-gov/ent/rpcendpoint"
+	"github.com/shifty11/cosmos-gov/ent/telegramchat"
 	"github.com/shifty11/cosmos-gov/ent/user"
+	"github.com/shifty11/cosmos-gov/ent/wallet"
 )
 
 // ChainUpdate is the builder for updating Chain entities.
@@ -31,9 +34,89 @@ func (cu *ChainUpdate) Where(ps ...predicate.Chain) *ChainUpdate {
 	return cu
 }
 
+// SetCreateTime sets the "create_time" field.
+func (cu *ChainUpdate) SetCreateTime(t time.Time) *ChainUpdate {
+	cu.mutation.SetCreateTime(t)
+	return cu
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (cu *ChainUpdate) SetNillableCreateTime(t *time.Time) *ChainUpdate {
+	if t != nil {
+		cu.SetCreateTime(*t)
+	}
+	return cu
+}
+
+// ClearCreateTime clears the value of the "create_time" field.
+func (cu *ChainUpdate) ClearCreateTime() *ChainUpdate {
+	cu.mutation.ClearCreateTime()
+	return cu
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (cu *ChainUpdate) SetUpdateTime(t time.Time) *ChainUpdate {
+	cu.mutation.SetUpdateTime(t)
+	return cu
+}
+
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (cu *ChainUpdate) SetNillableUpdateTime(t *time.Time) *ChainUpdate {
+	if t != nil {
+		cu.SetUpdateTime(*t)
+	}
+	return cu
+}
+
+// ClearUpdateTime clears the value of the "update_time" field.
+func (cu *ChainUpdate) ClearUpdateTime() *ChainUpdate {
+	cu.mutation.ClearUpdateTime()
+	return cu
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (cu *ChainUpdate) SetUpdatedAt(t time.Time) *ChainUpdate {
 	cu.mutation.SetUpdatedAt(t)
+	return cu
+}
+
+// SetChainID sets the "chain_id" field.
+func (cu *ChainUpdate) SetChainID(s string) *ChainUpdate {
+	cu.mutation.SetChainID(s)
+	return cu
+}
+
+// SetNillableChainID sets the "chain_id" field if the given value is not nil.
+func (cu *ChainUpdate) SetNillableChainID(s *string) *ChainUpdate {
+	if s != nil {
+		cu.SetChainID(*s)
+	}
+	return cu
+}
+
+// ClearChainID clears the value of the "chain_id" field.
+func (cu *ChainUpdate) ClearChainID() *ChainUpdate {
+	cu.mutation.ClearChainID()
+	return cu
+}
+
+// SetAccountPrefix sets the "account_prefix" field.
+func (cu *ChainUpdate) SetAccountPrefix(s string) *ChainUpdate {
+	cu.mutation.SetAccountPrefix(s)
+	return cu
+}
+
+// SetNillableAccountPrefix sets the "account_prefix" field if the given value is not nil.
+func (cu *ChainUpdate) SetNillableAccountPrefix(s *string) *ChainUpdate {
+	if s != nil {
+		cu.SetAccountPrefix(*s)
+	}
+	return cu
+}
+
+// ClearAccountPrefix clears the value of the "account_prefix" field.
+func (cu *ChainUpdate) ClearAccountPrefix() *ChainUpdate {
+	cu.mutation.ClearAccountPrefix()
 	return cu
 }
 
@@ -93,6 +176,36 @@ func (cu *ChainUpdate) AddProposals(p ...*Proposal) *ChainUpdate {
 	return cu.AddProposalIDs(ids...)
 }
 
+// AddTelegramChatIDs adds the "telegram_chats" edge to the TelegramChat entity by IDs.
+func (cu *ChainUpdate) AddTelegramChatIDs(ids ...int) *ChainUpdate {
+	cu.mutation.AddTelegramChatIDs(ids...)
+	return cu
+}
+
+// AddTelegramChats adds the "telegram_chats" edges to the TelegramChat entity.
+func (cu *ChainUpdate) AddTelegramChats(t ...*TelegramChat) *ChainUpdate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return cu.AddTelegramChatIDs(ids...)
+}
+
+// AddDiscordChannelIDs adds the "discord_channels" edge to the DiscordChannel entity by IDs.
+func (cu *ChainUpdate) AddDiscordChannelIDs(ids ...int) *ChainUpdate {
+	cu.mutation.AddDiscordChannelIDs(ids...)
+	return cu
+}
+
+// AddDiscordChannels adds the "discord_channels" edges to the DiscordChannel entity.
+func (cu *ChainUpdate) AddDiscordChannels(d ...*DiscordChannel) *ChainUpdate {
+	ids := make([]int, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return cu.AddDiscordChannelIDs(ids...)
+}
+
 // AddRPCEndpointIDs adds the "rpc_endpoints" edge to the RpcEndpoint entity by IDs.
 func (cu *ChainUpdate) AddRPCEndpointIDs(ids ...int) *ChainUpdate {
 	cu.mutation.AddRPCEndpointIDs(ids...)
@@ -106,6 +219,21 @@ func (cu *ChainUpdate) AddRPCEndpoints(r ...*RpcEndpoint) *ChainUpdate {
 		ids[i] = r[i].ID
 	}
 	return cu.AddRPCEndpointIDs(ids...)
+}
+
+// AddWalletIDs adds the "wallets" edge to the Wallet entity by IDs.
+func (cu *ChainUpdate) AddWalletIDs(ids ...int) *ChainUpdate {
+	cu.mutation.AddWalletIDs(ids...)
+	return cu
+}
+
+// AddWallets adds the "wallets" edges to the Wallet entity.
+func (cu *ChainUpdate) AddWallets(w ...*Wallet) *ChainUpdate {
+	ids := make([]int, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return cu.AddWalletIDs(ids...)
 }
 
 // Mutation returns the ChainMutation object of the builder.
@@ -155,6 +283,48 @@ func (cu *ChainUpdate) RemoveProposals(p ...*Proposal) *ChainUpdate {
 	return cu.RemoveProposalIDs(ids...)
 }
 
+// ClearTelegramChats clears all "telegram_chats" edges to the TelegramChat entity.
+func (cu *ChainUpdate) ClearTelegramChats() *ChainUpdate {
+	cu.mutation.ClearTelegramChats()
+	return cu
+}
+
+// RemoveTelegramChatIDs removes the "telegram_chats" edge to TelegramChat entities by IDs.
+func (cu *ChainUpdate) RemoveTelegramChatIDs(ids ...int) *ChainUpdate {
+	cu.mutation.RemoveTelegramChatIDs(ids...)
+	return cu
+}
+
+// RemoveTelegramChats removes "telegram_chats" edges to TelegramChat entities.
+func (cu *ChainUpdate) RemoveTelegramChats(t ...*TelegramChat) *ChainUpdate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return cu.RemoveTelegramChatIDs(ids...)
+}
+
+// ClearDiscordChannels clears all "discord_channels" edges to the DiscordChannel entity.
+func (cu *ChainUpdate) ClearDiscordChannels() *ChainUpdate {
+	cu.mutation.ClearDiscordChannels()
+	return cu
+}
+
+// RemoveDiscordChannelIDs removes the "discord_channels" edge to DiscordChannel entities by IDs.
+func (cu *ChainUpdate) RemoveDiscordChannelIDs(ids ...int) *ChainUpdate {
+	cu.mutation.RemoveDiscordChannelIDs(ids...)
+	return cu
+}
+
+// RemoveDiscordChannels removes "discord_channels" edges to DiscordChannel entities.
+func (cu *ChainUpdate) RemoveDiscordChannels(d ...*DiscordChannel) *ChainUpdate {
+	ids := make([]int, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return cu.RemoveDiscordChannelIDs(ids...)
+}
+
 // ClearRPCEndpoints clears all "rpc_endpoints" edges to the RpcEndpoint entity.
 func (cu *ChainUpdate) ClearRPCEndpoints() *ChainUpdate {
 	cu.mutation.ClearRPCEndpoints()
@@ -174,6 +344,27 @@ func (cu *ChainUpdate) RemoveRPCEndpoints(r ...*RpcEndpoint) *ChainUpdate {
 		ids[i] = r[i].ID
 	}
 	return cu.RemoveRPCEndpointIDs(ids...)
+}
+
+// ClearWallets clears all "wallets" edges to the Wallet entity.
+func (cu *ChainUpdate) ClearWallets() *ChainUpdate {
+	cu.mutation.ClearWallets()
+	return cu
+}
+
+// RemoveWalletIDs removes the "wallets" edge to Wallet entities by IDs.
+func (cu *ChainUpdate) RemoveWalletIDs(ids ...int) *ChainUpdate {
+	cu.mutation.RemoveWalletIDs(ids...)
+	return cu
+}
+
+// RemoveWallets removes "wallets" edges to Wallet entities.
+func (cu *ChainUpdate) RemoveWallets(w ...*Wallet) *ChainUpdate {
+	ids := make([]int, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return cu.RemoveWalletIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -257,11 +448,63 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
+	if value, ok := cu.mutation.CreateTime(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: chain.FieldCreateTime,
+		})
+	}
+	if cu.mutation.CreateTimeCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: chain.FieldCreateTime,
+		})
+	}
+	if value, ok := cu.mutation.UpdateTime(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: chain.FieldUpdateTime,
+		})
+	}
+	if cu.mutation.UpdateTimeCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: chain.FieldUpdateTime,
+		})
+	}
 	if value, ok := cu.mutation.UpdatedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
 			Column: chain.FieldUpdatedAt,
+		})
+	}
+	if value, ok := cu.mutation.ChainID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: chain.FieldChainID,
+		})
+	}
+	if cu.mutation.ChainIDCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: chain.FieldChainID,
+		})
+	}
+	if value, ok := cu.mutation.AccountPrefix(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: chain.FieldAccountPrefix,
+		})
+	}
+	if cu.mutation.AccountPrefixCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: chain.FieldAccountPrefix,
 		})
 	}
 	if value, ok := cu.mutation.Name(); ok {
@@ -393,6 +636,114 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if cu.mutation.TelegramChatsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chain.TelegramChatsTable,
+			Columns: chain.TelegramChatsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: telegramchat.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.RemovedTelegramChatsIDs(); len(nodes) > 0 && !cu.mutation.TelegramChatsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chain.TelegramChatsTable,
+			Columns: chain.TelegramChatsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: telegramchat.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.TelegramChatsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chain.TelegramChatsTable,
+			Columns: chain.TelegramChatsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: telegramchat.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if cu.mutation.DiscordChannelsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chain.DiscordChannelsTable,
+			Columns: chain.DiscordChannelsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: discordchannel.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.RemovedDiscordChannelsIDs(); len(nodes) > 0 && !cu.mutation.DiscordChannelsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chain.DiscordChannelsTable,
+			Columns: chain.DiscordChannelsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: discordchannel.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.DiscordChannelsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chain.DiscordChannelsTable,
+			Columns: chain.DiscordChannelsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: discordchannel.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if cu.mutation.RPCEndpointsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -447,6 +798,60 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if cu.mutation.WalletsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.WalletsTable,
+			Columns: []string{chain.WalletsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: wallet.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.RemovedWalletsIDs(); len(nodes) > 0 && !cu.mutation.WalletsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.WalletsTable,
+			Columns: []string{chain.WalletsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: wallet.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.WalletsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.WalletsTable,
+			Columns: []string{chain.WalletsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: wallet.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{chain.Label}
@@ -466,9 +871,89 @@ type ChainUpdateOne struct {
 	mutation *ChainMutation
 }
 
+// SetCreateTime sets the "create_time" field.
+func (cuo *ChainUpdateOne) SetCreateTime(t time.Time) *ChainUpdateOne {
+	cuo.mutation.SetCreateTime(t)
+	return cuo
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (cuo *ChainUpdateOne) SetNillableCreateTime(t *time.Time) *ChainUpdateOne {
+	if t != nil {
+		cuo.SetCreateTime(*t)
+	}
+	return cuo
+}
+
+// ClearCreateTime clears the value of the "create_time" field.
+func (cuo *ChainUpdateOne) ClearCreateTime() *ChainUpdateOne {
+	cuo.mutation.ClearCreateTime()
+	return cuo
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (cuo *ChainUpdateOne) SetUpdateTime(t time.Time) *ChainUpdateOne {
+	cuo.mutation.SetUpdateTime(t)
+	return cuo
+}
+
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (cuo *ChainUpdateOne) SetNillableUpdateTime(t *time.Time) *ChainUpdateOne {
+	if t != nil {
+		cuo.SetUpdateTime(*t)
+	}
+	return cuo
+}
+
+// ClearUpdateTime clears the value of the "update_time" field.
+func (cuo *ChainUpdateOne) ClearUpdateTime() *ChainUpdateOne {
+	cuo.mutation.ClearUpdateTime()
+	return cuo
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (cuo *ChainUpdateOne) SetUpdatedAt(t time.Time) *ChainUpdateOne {
 	cuo.mutation.SetUpdatedAt(t)
+	return cuo
+}
+
+// SetChainID sets the "chain_id" field.
+func (cuo *ChainUpdateOne) SetChainID(s string) *ChainUpdateOne {
+	cuo.mutation.SetChainID(s)
+	return cuo
+}
+
+// SetNillableChainID sets the "chain_id" field if the given value is not nil.
+func (cuo *ChainUpdateOne) SetNillableChainID(s *string) *ChainUpdateOne {
+	if s != nil {
+		cuo.SetChainID(*s)
+	}
+	return cuo
+}
+
+// ClearChainID clears the value of the "chain_id" field.
+func (cuo *ChainUpdateOne) ClearChainID() *ChainUpdateOne {
+	cuo.mutation.ClearChainID()
+	return cuo
+}
+
+// SetAccountPrefix sets the "account_prefix" field.
+func (cuo *ChainUpdateOne) SetAccountPrefix(s string) *ChainUpdateOne {
+	cuo.mutation.SetAccountPrefix(s)
+	return cuo
+}
+
+// SetNillableAccountPrefix sets the "account_prefix" field if the given value is not nil.
+func (cuo *ChainUpdateOne) SetNillableAccountPrefix(s *string) *ChainUpdateOne {
+	if s != nil {
+		cuo.SetAccountPrefix(*s)
+	}
+	return cuo
+}
+
+// ClearAccountPrefix clears the value of the "account_prefix" field.
+func (cuo *ChainUpdateOne) ClearAccountPrefix() *ChainUpdateOne {
+	cuo.mutation.ClearAccountPrefix()
 	return cuo
 }
 
@@ -528,6 +1013,36 @@ func (cuo *ChainUpdateOne) AddProposals(p ...*Proposal) *ChainUpdateOne {
 	return cuo.AddProposalIDs(ids...)
 }
 
+// AddTelegramChatIDs adds the "telegram_chats" edge to the TelegramChat entity by IDs.
+func (cuo *ChainUpdateOne) AddTelegramChatIDs(ids ...int) *ChainUpdateOne {
+	cuo.mutation.AddTelegramChatIDs(ids...)
+	return cuo
+}
+
+// AddTelegramChats adds the "telegram_chats" edges to the TelegramChat entity.
+func (cuo *ChainUpdateOne) AddTelegramChats(t ...*TelegramChat) *ChainUpdateOne {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return cuo.AddTelegramChatIDs(ids...)
+}
+
+// AddDiscordChannelIDs adds the "discord_channels" edge to the DiscordChannel entity by IDs.
+func (cuo *ChainUpdateOne) AddDiscordChannelIDs(ids ...int) *ChainUpdateOne {
+	cuo.mutation.AddDiscordChannelIDs(ids...)
+	return cuo
+}
+
+// AddDiscordChannels adds the "discord_channels" edges to the DiscordChannel entity.
+func (cuo *ChainUpdateOne) AddDiscordChannels(d ...*DiscordChannel) *ChainUpdateOne {
+	ids := make([]int, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return cuo.AddDiscordChannelIDs(ids...)
+}
+
 // AddRPCEndpointIDs adds the "rpc_endpoints" edge to the RpcEndpoint entity by IDs.
 func (cuo *ChainUpdateOne) AddRPCEndpointIDs(ids ...int) *ChainUpdateOne {
 	cuo.mutation.AddRPCEndpointIDs(ids...)
@@ -541,6 +1056,21 @@ func (cuo *ChainUpdateOne) AddRPCEndpoints(r ...*RpcEndpoint) *ChainUpdateOne {
 		ids[i] = r[i].ID
 	}
 	return cuo.AddRPCEndpointIDs(ids...)
+}
+
+// AddWalletIDs adds the "wallets" edge to the Wallet entity by IDs.
+func (cuo *ChainUpdateOne) AddWalletIDs(ids ...int) *ChainUpdateOne {
+	cuo.mutation.AddWalletIDs(ids...)
+	return cuo
+}
+
+// AddWallets adds the "wallets" edges to the Wallet entity.
+func (cuo *ChainUpdateOne) AddWallets(w ...*Wallet) *ChainUpdateOne {
+	ids := make([]int, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return cuo.AddWalletIDs(ids...)
 }
 
 // Mutation returns the ChainMutation object of the builder.
@@ -590,6 +1120,48 @@ func (cuo *ChainUpdateOne) RemoveProposals(p ...*Proposal) *ChainUpdateOne {
 	return cuo.RemoveProposalIDs(ids...)
 }
 
+// ClearTelegramChats clears all "telegram_chats" edges to the TelegramChat entity.
+func (cuo *ChainUpdateOne) ClearTelegramChats() *ChainUpdateOne {
+	cuo.mutation.ClearTelegramChats()
+	return cuo
+}
+
+// RemoveTelegramChatIDs removes the "telegram_chats" edge to TelegramChat entities by IDs.
+func (cuo *ChainUpdateOne) RemoveTelegramChatIDs(ids ...int) *ChainUpdateOne {
+	cuo.mutation.RemoveTelegramChatIDs(ids...)
+	return cuo
+}
+
+// RemoveTelegramChats removes "telegram_chats" edges to TelegramChat entities.
+func (cuo *ChainUpdateOne) RemoveTelegramChats(t ...*TelegramChat) *ChainUpdateOne {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return cuo.RemoveTelegramChatIDs(ids...)
+}
+
+// ClearDiscordChannels clears all "discord_channels" edges to the DiscordChannel entity.
+func (cuo *ChainUpdateOne) ClearDiscordChannels() *ChainUpdateOne {
+	cuo.mutation.ClearDiscordChannels()
+	return cuo
+}
+
+// RemoveDiscordChannelIDs removes the "discord_channels" edge to DiscordChannel entities by IDs.
+func (cuo *ChainUpdateOne) RemoveDiscordChannelIDs(ids ...int) *ChainUpdateOne {
+	cuo.mutation.RemoveDiscordChannelIDs(ids...)
+	return cuo
+}
+
+// RemoveDiscordChannels removes "discord_channels" edges to DiscordChannel entities.
+func (cuo *ChainUpdateOne) RemoveDiscordChannels(d ...*DiscordChannel) *ChainUpdateOne {
+	ids := make([]int, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return cuo.RemoveDiscordChannelIDs(ids...)
+}
+
 // ClearRPCEndpoints clears all "rpc_endpoints" edges to the RpcEndpoint entity.
 func (cuo *ChainUpdateOne) ClearRPCEndpoints() *ChainUpdateOne {
 	cuo.mutation.ClearRPCEndpoints()
@@ -609,6 +1181,27 @@ func (cuo *ChainUpdateOne) RemoveRPCEndpoints(r ...*RpcEndpoint) *ChainUpdateOne
 		ids[i] = r[i].ID
 	}
 	return cuo.RemoveRPCEndpointIDs(ids...)
+}
+
+// ClearWallets clears all "wallets" edges to the Wallet entity.
+func (cuo *ChainUpdateOne) ClearWallets() *ChainUpdateOne {
+	cuo.mutation.ClearWallets()
+	return cuo
+}
+
+// RemoveWalletIDs removes the "wallets" edge to Wallet entities by IDs.
+func (cuo *ChainUpdateOne) RemoveWalletIDs(ids ...int) *ChainUpdateOne {
+	cuo.mutation.RemoveWalletIDs(ids...)
+	return cuo
+}
+
+// RemoveWallets removes "wallets" edges to Wallet entities.
+func (cuo *ChainUpdateOne) RemoveWallets(w ...*Wallet) *ChainUpdateOne {
+	ids := make([]int, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return cuo.RemoveWalletIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -716,11 +1309,63 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 			}
 		}
 	}
+	if value, ok := cuo.mutation.CreateTime(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: chain.FieldCreateTime,
+		})
+	}
+	if cuo.mutation.CreateTimeCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: chain.FieldCreateTime,
+		})
+	}
+	if value, ok := cuo.mutation.UpdateTime(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: chain.FieldUpdateTime,
+		})
+	}
+	if cuo.mutation.UpdateTimeCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: chain.FieldUpdateTime,
+		})
+	}
 	if value, ok := cuo.mutation.UpdatedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
 			Column: chain.FieldUpdatedAt,
+		})
+	}
+	if value, ok := cuo.mutation.ChainID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: chain.FieldChainID,
+		})
+	}
+	if cuo.mutation.ChainIDCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: chain.FieldChainID,
+		})
+	}
+	if value, ok := cuo.mutation.AccountPrefix(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: chain.FieldAccountPrefix,
+		})
+	}
+	if cuo.mutation.AccountPrefixCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: chain.FieldAccountPrefix,
 		})
 	}
 	if value, ok := cuo.mutation.Name(); ok {
@@ -852,6 +1497,114 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if cuo.mutation.TelegramChatsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chain.TelegramChatsTable,
+			Columns: chain.TelegramChatsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: telegramchat.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.RemovedTelegramChatsIDs(); len(nodes) > 0 && !cuo.mutation.TelegramChatsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chain.TelegramChatsTable,
+			Columns: chain.TelegramChatsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: telegramchat.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.TelegramChatsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chain.TelegramChatsTable,
+			Columns: chain.TelegramChatsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: telegramchat.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if cuo.mutation.DiscordChannelsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chain.DiscordChannelsTable,
+			Columns: chain.DiscordChannelsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: discordchannel.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.RemovedDiscordChannelsIDs(); len(nodes) > 0 && !cuo.mutation.DiscordChannelsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chain.DiscordChannelsTable,
+			Columns: chain.DiscordChannelsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: discordchannel.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.DiscordChannelsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chain.DiscordChannelsTable,
+			Columns: chain.DiscordChannelsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: discordchannel.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if cuo.mutation.RPCEndpointsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -898,6 +1651,60 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: rpcendpoint.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if cuo.mutation.WalletsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.WalletsTable,
+			Columns: []string{chain.WalletsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: wallet.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.RemovedWalletsIDs(); len(nodes) > 0 && !cuo.mutation.WalletsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.WalletsTable,
+			Columns: []string{chain.WalletsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: wallet.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.WalletsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.WalletsTable,
+			Columns: []string{chain.WalletsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: wallet.FieldID,
 				},
 			},
 		}

@@ -14,6 +14,12 @@ type Proposal struct {
 	ent.Schema
 }
 
+func (Proposal) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		//mixin.Time{},
+	}
+}
+
 // Fields of the Proposal.
 func (Proposal) Fields() []ent.Field {
 	var statusValues []string
@@ -21,12 +27,15 @@ func (Proposal) Fields() []ent.Field {
 		statusValues = append(statusValues, status)
 	}
 	return []ent.Field{
+		field.Time("create_time").Optional(),
+		field.Time("update_time").Optional(),
 		field.Time("created_at").
 			Default(time.Now).
 			Immutable(),
 		field.Time("updated_at").
 			Default(time.Now).
 			UpdateDefault(time.Now),
+
 		field.Uint64("proposal_id"),
 		field.String("title"),
 		field.String("description"),

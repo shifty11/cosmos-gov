@@ -2,12 +2,11 @@ package telegram
 
 import (
 	"fmt"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	"github.com/shifty11/cosmos-gov/common"
-	"github.com/shifty11/cosmos-gov/database"
-	"github.com/shifty11/cosmos-gov/ent/user"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/shifty11/cosmos-gov/authz"
 	"github.com/shifty11/cosmos-gov/log"
-	"math"
+	"golang.org/x/exp/slices"
 	"os"
 	"strings"
 )
@@ -53,6 +52,7 @@ const (
 
 	CallbackCmdStats        CallbackCommand = "STATS"         // admin command
 	CallbackCmdEnableChains CallbackCommand = "ENABLE_CHAINS" // admin command
+	CallbackCmdVote         CallbackCommand = "VOTE"
 	//CallbackCmdBroadcast    CallbackCommand = "BROADCAST"     // admin command
 )
 
@@ -69,8 +69,8 @@ func ToCallbackData(str string) CallbackData {
 	split := strings.Split(str, ":")
 	if len(split) == 1 {
 		return CallbackData{Command: CallbackCommand(split[0])}
-	} else if len(split) == 2 {
-		return CallbackData{Command: CallbackCommand(split[0]), Data: split[1]}
+	} else if len(split) >= 2 {
+		return CallbackData{Command: CallbackCommand(split[0]), Data: strings.Join(split[1:], ":")}
 	}
 	log.Sugar.Errorf("Can not convert string to CallbackData: '%v'", str)
 	return CallbackData{}
@@ -85,7 +85,7 @@ func NewButton(text string, callbackData CallbackData) Button {
 	return Button{Text: text, CallbackData: callbackData}
 }
 
-func createKeyboard(buttons [][]Button) tgbotapi.InlineKeyboardMarkup {
+func createKeyboard(buttons [][]Button) *tgbotapi.InlineKeyboardMarkup {
 	var keyboard [][]tgbotapi.InlineKeyboardButton
 	for _, row := range buttons {
 		var keyboardRow []tgbotapi.InlineKeyboardButton
@@ -96,7 +96,7 @@ func createKeyboard(buttons [][]Button) tgbotapi.InlineKeyboardMarkup {
 		}
 		keyboard = append(keyboard, keyboardRow)
 	}
-	return tgbotapi.InlineKeyboardMarkup{InlineKeyboard: keyboard}
+	return &tgbotapi.InlineKeyboardMarkup{InlineKeyboard: keyboard}
 }
 
 func hasChatId(update *tgbotapi.Update) bool {
@@ -149,10 +149,10 @@ func isGroupX(update *tgbotapi.Update) bool {
 
 func getUserIdX(update *tgbotapi.Update) int64 {
 	if update.CallbackQuery != nil {
-		return int64(update.CallbackQuery.From.ID)
+		return update.CallbackQuery.From.ID
 	}
 	if update.Message != nil {
-		return int64(update.Message.From.ID)
+		return update.Message.From.ID
 	}
 	log.Sugar.Panic("getUserIdX: unreachable code reached!!!")
 	return 0
@@ -186,7 +186,7 @@ func answerCallbackQuery(update *tgbotapi.Update) {
 	if update.CallbackQuery != nil {
 		callback := tgbotapi.NewCallback(update.CallbackQuery.ID, "")
 		api := getApi()
-		_, err := api.AnswerCallbackQuery(callback)
+		_, err := api.Request(callback)
 		if err != nil {
 			log.Sugar.Error(err)
 		}
@@ -204,33 +204,29 @@ var forbiddenErrors = []string{
 
 func handleError(chatId int, err error) {
 	if err != nil {
-		if common.Contains(forbiddenErrors, err.Error()) {
+		if slices.Contains(forbiddenErrors, err.Error()) {
 			log.Sugar.Debugf("Delete user #%v", chatId)
-			database.DeleteUser(int64(chatId), user.TypeTelegram)
+			mHack.TelegramChatManager.Delete(int64(chatId))
 		} else {
 			log.Sugar.Errorf("Error while sending message to chat #%v: %v", chatId, err)
 		}
 	}
 }
 
-// ChatId is negative for groups
-func isUpdateFromGroup(update *tgbotapi.Update) bool {
-	chatId := getChatIdX(update)
-	return math.Signbit(float64(chatId))
-}
-
 func isUpdateFromCreatorOrAdministrator(update *tgbotapi.Update) bool {
 	api := getApi()
 	chatId := getChatIdX(update)
 	userId := getUserIdX(update)
-	memberConfig := tgbotapi.ChatConfigWithUser{
-		ChatID:             chatId,
-		SuperGroupUsername: "",
-		UserID:             int(userId),
+	memberConfig := tgbotapi.GetChatMemberConfig{
+		ChatConfigWithUser: tgbotapi.ChatConfigWithUser{
+			ChatID:             chatId,
+			SuperGroupUsername: "",
+			UserID:             userId,
+		},
 	}
 	member, err := api.GetChatMember(memberConfig)
 	if err != nil {
-		if common.Contains(forbiddenErrors, err.Error()) {
+		if slices.Contains(forbiddenErrors, err.Error()) {
 			log.Sugar.Debugf("Error while getting member (ChatID: %v; UserID: %v): %v", chatId, userId, err)
 			return false
 		}
@@ -290,4 +286,24 @@ func getBotAdminMenuButtonRow(config BotAdminMenuButtonConfig) []Button {
 	//	buttonRow = append(buttonRow, NewButton("🔊 Broadcast", CallbackData{Command: CallbackCmdBroadcast}))
 	//}
 	return buttonRow
+}
+
+func getVoteButtons(vd *authz.VoteData) [][]Button {
+	var buttons [][]Button
+	var buttonRow []Button
+	var options = []govtypes.VoteOption{govtypes.OptionYes, govtypes.OptionNo, govtypes.OptionAbstain, govtypes.OptionNoWithVeto}
+	for i, option := range options {
+		s := authz.NotVoted
+		if option == vd.Vote {
+			s = vd.State
+		}
+		voteData := authz.ToVoteData(vd.ChainName, vd.ProposalId, option, s)
+		callbackData := CallbackData{Command: CallbackCmdVote, Data: voteData.ToString()}
+		buttonRow = append(buttonRow, NewButton(voteData.ButtonText(), callbackData))
+		if (i+1)%2 == 0 {
+			buttons = append(buttons, buttonRow)
+			buttonRow = []Button{}
+		}
+	}
+	return buttons
 }

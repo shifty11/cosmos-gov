@@ -1,26 +1,14 @@
 package datasource
 
 import (
-	"context"
 	"fmt"
 	"github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/shifty11/cosmos-gov/api/telegram"
-	"github.com/shifty11/cosmos-gov/common"
-	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/log"
-	registry "github.com/strangelove-ventures/lens/client/chain_registry"
+	"golang.org/x/exp/slices"
 	"sort"
 	"strings"
 )
-
-type Datasource struct {
-	ctx           context.Context
-	chainRegistry registry.CosmosGithubRegistry
-}
-
-func NewDatasource(ctx context.Context, chainRegistry registry.CosmosGithubRegistry) *Datasource {
-	return &Datasource{ctx: ctx, chainRegistry: chainRegistry}
-}
 
 func (ds Datasource) getChainsFromRegistry() ([]string, error) {
 	chains, err := ds.chainRegistry.ListChains(ds.ctx)
@@ -38,7 +26,7 @@ func (ds Datasource) getChainsFromRegistry() ([]string, error) {
 }
 
 func (ds Datasource) orderChainsByErrorCnt(chains []string) []string {
-	chainInfo := database.GetLensChainInfos()
+	chainInfo := ds.lensChainInfoManager.GetLensChainInfos()
 	var chainsWithErrors = make(map[int][]string)
 	chainsWithErrors[0] = []string{}
 	for _, chainName := range chains {
@@ -81,7 +69,7 @@ func (ds Datasource) getNewChains() []string {
 		return nil
 	}
 
-	chains := database.GetChains()
+	chains := ds.chainManager.All()
 	var chainNames []string
 	for _, chain := range chains {
 		chainNames = append(chainNames, chain.Name)
@@ -89,39 +77,57 @@ func (ds Datasource) getNewChains() []string {
 
 	var newChains []string
 	for _, chain := range chainsInRegistry {
-		if !common.Contains(chainNames, chain) {
+		if !slices.Contains(chainNames, chain) {
 			newChains = append(newChains, chain)
 		}
 	}
 	return ds.orderChainsByErrorCnt(newChains)
 }
 
+func (ds Datasource) updateRpcs(chainName string) {
+	_, _, rpcs, err := ds.getChainInfo(chainName)
+	if err != nil {
+		log.Sugar.Errorf("Error getting RPC's for chain %v: %v", chainName, err)
+	}
+	if len(rpcs) == 0 {
+		log.Sugar.Errorf("Found no RPC's for chain %v: %v", chainName, err)
+		return
+	}
+	err = ds.chainManager.UpdateRpcs(chainName, rpcs)
+	if err != nil {
+		log.Sugar.Errorf("Error while updating RPC's for chain %v: %v", chainName, err)
+	}
+}
+
 func (ds Datasource) AddNewChains() {
 	log.Sugar.Info("Add new chains")
 	chains := ds.getNewChains()
 	message := ""
+	chainManager := ds.chainManager
+	propManager := ds.proposalManager
+	lensChainManager := ds.lensChainInfoManager
 
 	for _, chainName := range chains {
-		client, rpcs, err := getChainInfo(chainName)
+		client, chainInfo, rpcs, err := ds.getChainInfo(chainName)
 		if err != nil {
 			log.Sugar.Debugf("Chain '%v' has %v errors", chainName, err)
-			database.AddErrorToLensChainInfo(chainName)
+			lensChainManager.AddErrorToLensChainInfo(chainName)
 		} else {
 			proposals, err := fetchProposals(chainName, types.StatusNil, nil, client)
 			if err != nil {
 				log.Sugar.Debugf("Chain '%v' has %v errors", chainName, err)
-				database.AddErrorToLensChainInfo(chainName)
+				lensChainManager.AddErrorToLensChainInfo(chainName)
 			} else {
 				if len(proposals.Proposals) >= 1 {
-					chainEnt := database.CreateChain(chainName, rpcs)
+					chainEnt := chainManager.Create(chainInfo.ChainID, chainName, chainInfo.Bech32Prefix, rpcs)
 					for _, prop := range proposals.Proposals {
-						database.CreateOrUpdateProposal(&prop, chainEnt)
+						propManager.CreateOrUpdateProposal(&prop, chainEnt)
 					}
-					database.DeleteLensChainInfo(chainName)
+					lensChainManager.DeleteLensChainInfo(chainName)
 					message += fmt.Sprintf("Added chain '%v' including %v proposals\n", chainName, len(proposals.Proposals))
 				} else {
 					log.Sugar.Debugf("Chain '%v' has no proposals", chainName)
-					database.AddErrorToLensChainInfo(chainName)
+					lensChainManager.AddErrorToLensChainInfo(chainName)
 				}
 			}
 		}

@@ -13,8 +13,11 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/shifty11/cosmos-gov/ent/chain"
+	"github.com/shifty11/cosmos-gov/ent/discordchannel"
 	"github.com/shifty11/cosmos-gov/ent/predicate"
+	"github.com/shifty11/cosmos-gov/ent/telegramchat"
 	"github.com/shifty11/cosmos-gov/ent/user"
+	"github.com/shifty11/cosmos-gov/ent/wallet"
 )
 
 // UserQuery is the builder for querying User entities.
@@ -27,7 +30,10 @@ type UserQuery struct {
 	fields     []string
 	predicates []predicate.User
 	// eager-loading edges.
-	withChains *ChainQuery
+	withChains          *ChainQuery
+	withTelegramChats   *TelegramChatQuery
+	withDiscordChannels *DiscordChannelQuery
+	withWallets         *WalletQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -86,6 +92,72 @@ func (uq *UserQuery) QueryChains() *ChainQuery {
 	return query
 }
 
+// QueryTelegramChats chains the current query on the "telegram_chats" edge.
+func (uq *UserQuery) QueryTelegramChats() *TelegramChatQuery {
+	query := &TelegramChatQuery{config: uq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(telegramchat.Table, telegramchat.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, user.TelegramChatsTable, user.TelegramChatsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryDiscordChannels chains the current query on the "discord_channels" edge.
+func (uq *UserQuery) QueryDiscordChannels() *DiscordChannelQuery {
+	query := &DiscordChannelQuery{config: uq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(discordchannel.Table, discordchannel.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, user.DiscordChannelsTable, user.DiscordChannelsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryWallets chains the current query on the "wallets" edge.
+func (uq *UserQuery) QueryWallets() *WalletQuery {
+	query := &WalletQuery{config: uq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(wallet.Table, wallet.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, user.WalletsTable, user.WalletsPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // First returns the first User entity from the query.
 // Returns a *NotFoundError when no User was found.
 func (uq *UserQuery) First(ctx context.Context) (*User, error) {
@@ -132,7 +204,7 @@ func (uq *UserQuery) FirstIDX(ctx context.Context) int {
 }
 
 // Only returns a single User entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one User entity is not found.
+// Returns a *NotSingularError when more than one User entity is found.
 // Returns a *NotFoundError when no User entities are found.
 func (uq *UserQuery) Only(ctx context.Context) (*User, error) {
 	nodes, err := uq.Limit(2).All(ctx)
@@ -159,7 +231,7 @@ func (uq *UserQuery) OnlyX(ctx context.Context) *User {
 }
 
 // OnlyID is like Only, but returns the only User ID in the query.
-// Returns a *NotSingularError when exactly one User ID is not found.
+// Returns a *NotSingularError when more than one User ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (uq *UserQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
@@ -262,15 +334,19 @@ func (uq *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:     uq.config,
-		limit:      uq.limit,
-		offset:     uq.offset,
-		order:      append([]OrderFunc{}, uq.order...),
-		predicates: append([]predicate.User{}, uq.predicates...),
-		withChains: uq.withChains.Clone(),
+		config:              uq.config,
+		limit:               uq.limit,
+		offset:              uq.offset,
+		order:               append([]OrderFunc{}, uq.order...),
+		predicates:          append([]predicate.User{}, uq.predicates...),
+		withChains:          uq.withChains.Clone(),
+		withTelegramChats:   uq.withTelegramChats.Clone(),
+		withDiscordChannels: uq.withDiscordChannels.Clone(),
+		withWallets:         uq.withWallets.Clone(),
 		// clone intermediate query.
-		sql:  uq.sql.Clone(),
-		path: uq.path,
+		sql:    uq.sql.Clone(),
+		path:   uq.path,
+		unique: uq.unique,
 	}
 }
 
@@ -285,18 +361,51 @@ func (uq *UserQuery) WithChains(opts ...func(*ChainQuery)) *UserQuery {
 	return uq
 }
 
+// WithTelegramChats tells the query-builder to eager-load the nodes that are connected to
+// the "telegram_chats" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithTelegramChats(opts ...func(*TelegramChatQuery)) *UserQuery {
+	query := &TelegramChatQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withTelegramChats = query
+	return uq
+}
+
+// WithDiscordChannels tells the query-builder to eager-load the nodes that are connected to
+// the "discord_channels" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithDiscordChannels(opts ...func(*DiscordChannelQuery)) *UserQuery {
+	query := &DiscordChannelQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withDiscordChannels = query
+	return uq
+}
+
+// WithWallets tells the query-builder to eager-load the nodes that are connected to
+// the "wallets" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithWallets(opts ...func(*WalletQuery)) *UserQuery {
+	query := &WalletQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withWallets = query
+	return uq
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		CreateTime time.Time `json:"create_time,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.User.Query().
-//		GroupBy(user.FieldCreatedAt).
+//		GroupBy(user.FieldCreateTime).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -318,11 +427,11 @@ func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		CreateTime time.Time `json:"create_time,omitempty"`
 //	}
 //
 //	client.User.Query().
-//		Select(user.FieldCreatedAt).
+//		Select(user.FieldCreateTime).
 //		Scan(ctx, &v)
 //
 func (uq *UserQuery) Select(fields ...string) *UserSelect {
@@ -350,8 +459,11 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [4]bool{
 			uq.withChains != nil,
+			uq.withTelegramChats != nil,
+			uq.withDiscordChannels != nil,
+			uq.withWallets != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
@@ -435,6 +547,129 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 			}
 			for i := range nodes {
 				nodes[i].Edges.Chains = append(nodes[i].Edges.Chains, n)
+			}
+		}
+	}
+
+	if query := uq.withTelegramChats; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*User)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.TelegramChats = []*TelegramChat{}
+		}
+		query.withFKs = true
+		query.Where(predicate.TelegramChat(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.TelegramChatsColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.telegram_chat_user
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "telegram_chat_user" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "telegram_chat_user" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.TelegramChats = append(node.Edges.TelegramChats, n)
+		}
+	}
+
+	if query := uq.withDiscordChannels; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*User)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.DiscordChannels = []*DiscordChannel{}
+		}
+		query.withFKs = true
+		query.Where(predicate.DiscordChannel(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.DiscordChannelsColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.discord_channel_user
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "discord_channel_user" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "discord_channel_user" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.DiscordChannels = append(node.Edges.DiscordChannels, n)
+		}
+	}
+
+	if query := uq.withWallets; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		ids := make(map[int]*User, len(nodes))
+		for _, node := range nodes {
+			ids[node.ID] = node
+			fks = append(fks, node.ID)
+			node.Edges.Wallets = []*Wallet{}
+		}
+		var (
+			edgeids []int
+			edges   = make(map[int][]*User)
+		)
+		_spec := &sqlgraph.EdgeQuerySpec{
+			Edge: &sqlgraph.EdgeSpec{
+				Inverse: false,
+				Table:   user.WalletsTable,
+				Columns: user.WalletsPrimaryKey,
+			},
+			Predicate: func(s *sql.Selector) {
+				s.Where(sql.InValues(user.WalletsPrimaryKey[0], fks...))
+			},
+			ScanValues: func() [2]interface{} {
+				return [2]interface{}{new(sql.NullInt64), new(sql.NullInt64)}
+			},
+			Assign: func(out, in interface{}) error {
+				eout, ok := out.(*sql.NullInt64)
+				if !ok || eout == nil {
+					return fmt.Errorf("unexpected id value for edge-out")
+				}
+				ein, ok := in.(*sql.NullInt64)
+				if !ok || ein == nil {
+					return fmt.Errorf("unexpected id value for edge-in")
+				}
+				outValue := int(eout.Int64)
+				inValue := int(ein.Int64)
+				node, ok := ids[outValue]
+				if !ok {
+					return fmt.Errorf("unexpected node id in edges: %v", outValue)
+				}
+				if _, ok := edges[inValue]; !ok {
+					edgeids = append(edgeids, inValue)
+				}
+				edges[inValue] = append(edges[inValue], node)
+				return nil
+			},
+		}
+		if err := sqlgraph.QueryEdges(ctx, uq.driver, _spec); err != nil {
+			return nil, fmt.Errorf(`query edges "wallets": %w`, err)
+		}
+		query.Where(wallet.IDIn(edgeids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := edges[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected "wallets" node returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Wallets = append(nodes[i].Edges.Wallets, n)
 			}
 		}
 	}

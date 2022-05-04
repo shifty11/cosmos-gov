@@ -21,6 +21,34 @@ type ProposalCreate struct {
 	hooks    []Hook
 }
 
+// SetCreateTime sets the "create_time" field.
+func (pc *ProposalCreate) SetCreateTime(t time.Time) *ProposalCreate {
+	pc.mutation.SetCreateTime(t)
+	return pc
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (pc *ProposalCreate) SetNillableCreateTime(t *time.Time) *ProposalCreate {
+	if t != nil {
+		pc.SetCreateTime(*t)
+	}
+	return pc
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (pc *ProposalCreate) SetUpdateTime(t time.Time) *ProposalCreate {
+	pc.mutation.SetUpdateTime(t)
+	return pc
+}
+
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (pc *ProposalCreate) SetNillableUpdateTime(t *time.Time) *ProposalCreate {
+	if t != nil {
+		pc.SetUpdateTime(*t)
+	}
+	return pc
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (pc *ProposalCreate) SetCreatedAt(t time.Time) *ProposalCreate {
 	pc.mutation.SetCreatedAt(t)
@@ -243,6 +271,22 @@ func (pc *ProposalCreate) createSpec() (*Proposal, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+	if value, ok := pc.mutation.CreateTime(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: proposal.FieldCreateTime,
+		})
+		_node.CreateTime = value
+	}
+	if value, ok := pc.mutation.UpdateTime(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: proposal.FieldUpdateTime,
+		})
+		_node.UpdateTime = value
+	}
 	if value, ok := pc.mutation.CreatedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,

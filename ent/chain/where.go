@@ -93,6 +93,20 @@ func IDLTE(id int) predicate.Chain {
 	})
 }
 
+// CreateTime applies equality check predicate on the "create_time" field. It's identical to CreateTimeEQ.
+func CreateTime(v time.Time) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldCreateTime), v))
+	})
+}
+
+// UpdateTime applies equality check predicate on the "update_time" field. It's identical to UpdateTimeEQ.
+func UpdateTime(v time.Time) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldUpdateTime), v))
+	})
+}
+
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
 func CreatedAt(v time.Time) predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {
@@ -104,6 +118,20 @@ func CreatedAt(v time.Time) predicate.Chain {
 func UpdatedAt(v time.Time) predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldUpdatedAt), v))
+	})
+}
+
+// ChainID applies equality check predicate on the "chain_id" field. It's identical to ChainIDEQ.
+func ChainID(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldChainID), v))
+	})
+}
+
+// AccountPrefix applies equality check predicate on the "account_prefix" field. It's identical to AccountPrefixEQ.
+func AccountPrefix(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldAccountPrefix), v))
 	})
 }
 
@@ -125,6 +153,186 @@ func DisplayName(v string) predicate.Chain {
 func IsEnabled(v bool) predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldIsEnabled), v))
+	})
+}
+
+// CreateTimeEQ applies the EQ predicate on the "create_time" field.
+func CreateTimeEQ(v time.Time) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldCreateTime), v))
+	})
+}
+
+// CreateTimeNEQ applies the NEQ predicate on the "create_time" field.
+func CreateTimeNEQ(v time.Time) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldCreateTime), v))
+	})
+}
+
+// CreateTimeIn applies the In predicate on the "create_time" field.
+func CreateTimeIn(vs ...time.Time) predicate.Chain {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Chain(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldCreateTime), v...))
+	})
+}
+
+// CreateTimeNotIn applies the NotIn predicate on the "create_time" field.
+func CreateTimeNotIn(vs ...time.Time) predicate.Chain {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Chain(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldCreateTime), v...))
+	})
+}
+
+// CreateTimeGT applies the GT predicate on the "create_time" field.
+func CreateTimeGT(v time.Time) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldCreateTime), v))
+	})
+}
+
+// CreateTimeGTE applies the GTE predicate on the "create_time" field.
+func CreateTimeGTE(v time.Time) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldCreateTime), v))
+	})
+}
+
+// CreateTimeLT applies the LT predicate on the "create_time" field.
+func CreateTimeLT(v time.Time) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldCreateTime), v))
+	})
+}
+
+// CreateTimeLTE applies the LTE predicate on the "create_time" field.
+func CreateTimeLTE(v time.Time) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldCreateTime), v))
+	})
+}
+
+// CreateTimeIsNil applies the IsNil predicate on the "create_time" field.
+func CreateTimeIsNil() predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldCreateTime)))
+	})
+}
+
+// CreateTimeNotNil applies the NotNil predicate on the "create_time" field.
+func CreateTimeNotNil() predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldCreateTime)))
+	})
+}
+
+// UpdateTimeEQ applies the EQ predicate on the "update_time" field.
+func UpdateTimeEQ(v time.Time) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldUpdateTime), v))
+	})
+}
+
+// UpdateTimeNEQ applies the NEQ predicate on the "update_time" field.
+func UpdateTimeNEQ(v time.Time) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldUpdateTime), v))
+	})
+}
+
+// UpdateTimeIn applies the In predicate on the "update_time" field.
+func UpdateTimeIn(vs ...time.Time) predicate.Chain {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Chain(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldUpdateTime), v...))
+	})
+}
+
+// UpdateTimeNotIn applies the NotIn predicate on the "update_time" field.
+func UpdateTimeNotIn(vs ...time.Time) predicate.Chain {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Chain(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldUpdateTime), v...))
+	})
+}
+
+// UpdateTimeGT applies the GT predicate on the "update_time" field.
+func UpdateTimeGT(v time.Time) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldUpdateTime), v))
+	})
+}
+
+// UpdateTimeGTE applies the GTE predicate on the "update_time" field.
+func UpdateTimeGTE(v time.Time) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldUpdateTime), v))
+	})
+}
+
+// UpdateTimeLT applies the LT predicate on the "update_time" field.
+func UpdateTimeLT(v time.Time) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldUpdateTime), v))
+	})
+}
+
+// UpdateTimeLTE applies the LTE predicate on the "update_time" field.
+func UpdateTimeLTE(v time.Time) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldUpdateTime), v))
+	})
+}
+
+// UpdateTimeIsNil applies the IsNil predicate on the "update_time" field.
+func UpdateTimeIsNil() predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldUpdateTime)))
+	})
+}
+
+// UpdateTimeNotNil applies the NotNil predicate on the "update_time" field.
+func UpdateTimeNotNil() predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldUpdateTime)))
 	})
 }
 
@@ -277,6 +485,256 @@ func UpdatedAtLT(v time.Time) predicate.Chain {
 func UpdatedAtLTE(v time.Time) predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldUpdatedAt), v))
+	})
+}
+
+// ChainIDEQ applies the EQ predicate on the "chain_id" field.
+func ChainIDEQ(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldChainID), v))
+	})
+}
+
+// ChainIDNEQ applies the NEQ predicate on the "chain_id" field.
+func ChainIDNEQ(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldChainID), v))
+	})
+}
+
+// ChainIDIn applies the In predicate on the "chain_id" field.
+func ChainIDIn(vs ...string) predicate.Chain {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Chain(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldChainID), v...))
+	})
+}
+
+// ChainIDNotIn applies the NotIn predicate on the "chain_id" field.
+func ChainIDNotIn(vs ...string) predicate.Chain {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Chain(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldChainID), v...))
+	})
+}
+
+// ChainIDGT applies the GT predicate on the "chain_id" field.
+func ChainIDGT(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldChainID), v))
+	})
+}
+
+// ChainIDGTE applies the GTE predicate on the "chain_id" field.
+func ChainIDGTE(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldChainID), v))
+	})
+}
+
+// ChainIDLT applies the LT predicate on the "chain_id" field.
+func ChainIDLT(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldChainID), v))
+	})
+}
+
+// ChainIDLTE applies the LTE predicate on the "chain_id" field.
+func ChainIDLTE(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldChainID), v))
+	})
+}
+
+// ChainIDContains applies the Contains predicate on the "chain_id" field.
+func ChainIDContains(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldChainID), v))
+	})
+}
+
+// ChainIDHasPrefix applies the HasPrefix predicate on the "chain_id" field.
+func ChainIDHasPrefix(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldChainID), v))
+	})
+}
+
+// ChainIDHasSuffix applies the HasSuffix predicate on the "chain_id" field.
+func ChainIDHasSuffix(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldChainID), v))
+	})
+}
+
+// ChainIDIsNil applies the IsNil predicate on the "chain_id" field.
+func ChainIDIsNil() predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldChainID)))
+	})
+}
+
+// ChainIDNotNil applies the NotNil predicate on the "chain_id" field.
+func ChainIDNotNil() predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldChainID)))
+	})
+}
+
+// ChainIDEqualFold applies the EqualFold predicate on the "chain_id" field.
+func ChainIDEqualFold(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldChainID), v))
+	})
+}
+
+// ChainIDContainsFold applies the ContainsFold predicate on the "chain_id" field.
+func ChainIDContainsFold(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldChainID), v))
+	})
+}
+
+// AccountPrefixEQ applies the EQ predicate on the "account_prefix" field.
+func AccountPrefixEQ(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldAccountPrefix), v))
+	})
+}
+
+// AccountPrefixNEQ applies the NEQ predicate on the "account_prefix" field.
+func AccountPrefixNEQ(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldAccountPrefix), v))
+	})
+}
+
+// AccountPrefixIn applies the In predicate on the "account_prefix" field.
+func AccountPrefixIn(vs ...string) predicate.Chain {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Chain(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldAccountPrefix), v...))
+	})
+}
+
+// AccountPrefixNotIn applies the NotIn predicate on the "account_prefix" field.
+func AccountPrefixNotIn(vs ...string) predicate.Chain {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Chain(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldAccountPrefix), v...))
+	})
+}
+
+// AccountPrefixGT applies the GT predicate on the "account_prefix" field.
+func AccountPrefixGT(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldAccountPrefix), v))
+	})
+}
+
+// AccountPrefixGTE applies the GTE predicate on the "account_prefix" field.
+func AccountPrefixGTE(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldAccountPrefix), v))
+	})
+}
+
+// AccountPrefixLT applies the LT predicate on the "account_prefix" field.
+func AccountPrefixLT(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldAccountPrefix), v))
+	})
+}
+
+// AccountPrefixLTE applies the LTE predicate on the "account_prefix" field.
+func AccountPrefixLTE(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldAccountPrefix), v))
+	})
+}
+
+// AccountPrefixContains applies the Contains predicate on the "account_prefix" field.
+func AccountPrefixContains(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldAccountPrefix), v))
+	})
+}
+
+// AccountPrefixHasPrefix applies the HasPrefix predicate on the "account_prefix" field.
+func AccountPrefixHasPrefix(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldAccountPrefix), v))
+	})
+}
+
+// AccountPrefixHasSuffix applies the HasSuffix predicate on the "account_prefix" field.
+func AccountPrefixHasSuffix(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldAccountPrefix), v))
+	})
+}
+
+// AccountPrefixIsNil applies the IsNil predicate on the "account_prefix" field.
+func AccountPrefixIsNil() predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldAccountPrefix)))
+	})
+}
+
+// AccountPrefixNotNil applies the NotNil predicate on the "account_prefix" field.
+func AccountPrefixNotNil() predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldAccountPrefix)))
+	})
+}
+
+// AccountPrefixEqualFold applies the EqualFold predicate on the "account_prefix" field.
+func AccountPrefixEqualFold(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldAccountPrefix), v))
+	})
+}
+
+// AccountPrefixContainsFold applies the ContainsFold predicate on the "account_prefix" field.
+func AccountPrefixContainsFold(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldAccountPrefix), v))
 	})
 }
 
@@ -572,6 +1030,62 @@ func HasProposalsWith(preds ...predicate.Proposal) predicate.Chain {
 	})
 }
 
+// HasTelegramChats applies the HasEdge predicate on the "telegram_chats" edge.
+func HasTelegramChats() predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(TelegramChatsTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, TelegramChatsTable, TelegramChatsPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasTelegramChatsWith applies the HasEdge predicate on the "telegram_chats" edge with a given conditions (other predicates).
+func HasTelegramChatsWith(preds ...predicate.TelegramChat) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(TelegramChatsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, TelegramChatsTable, TelegramChatsPrimaryKey...),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasDiscordChannels applies the HasEdge predicate on the "discord_channels" edge.
+func HasDiscordChannels() predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(DiscordChannelsTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, DiscordChannelsTable, DiscordChannelsPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasDiscordChannelsWith applies the HasEdge predicate on the "discord_channels" edge with a given conditions (other predicates).
+func HasDiscordChannelsWith(preds ...predicate.DiscordChannel) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(DiscordChannelsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, DiscordChannelsTable, DiscordChannelsPrimaryKey...),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasRPCEndpoints applies the HasEdge predicate on the "rpc_endpoints" edge.
 func HasRPCEndpoints() predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {
@@ -591,6 +1105,34 @@ func HasRPCEndpointsWith(preds ...predicate.RpcEndpoint) predicate.Chain {
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(RPCEndpointsInverseTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, RPCEndpointsTable, RPCEndpointsColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasWallets applies the HasEdge predicate on the "wallets" edge.
+func HasWallets() predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(WalletsTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, WalletsTable, WalletsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasWalletsWith applies the HasEdge predicate on the "wallets" edge with a given conditions (other predicates).
+func HasWalletsWith(preds ...predicate.Wallet) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(WalletsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, WalletsTable, WalletsColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

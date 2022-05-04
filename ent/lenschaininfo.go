@@ -16,6 +16,10 @@ type LensChainInfo struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// CreateTime holds the value of the "create_time" field.
+	CreateTime time.Time `json:"create_time,omitempty"`
+	// UpdateTime holds the value of the "update_time" field.
+	UpdateTime time.Time `json:"update_time,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -35,7 +39,7 @@ func (*LensChainInfo) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullInt64)
 		case lenschaininfo.FieldName:
 			values[i] = new(sql.NullString)
-		case lenschaininfo.FieldCreatedAt, lenschaininfo.FieldUpdatedAt:
+		case lenschaininfo.FieldCreateTime, lenschaininfo.FieldUpdateTime, lenschaininfo.FieldCreatedAt, lenschaininfo.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type LensChainInfo", columns[i])
@@ -58,6 +62,18 @@ func (lci *LensChainInfo) assignValues(columns []string, values []interface{}) e
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			lci.ID = int(value.Int64)
+		case lenschaininfo.FieldCreateTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field create_time", values[i])
+			} else if value.Valid {
+				lci.CreateTime = value.Time
+			}
+		case lenschaininfo.FieldUpdateTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field update_time", values[i])
+			} else if value.Valid {
+				lci.UpdateTime = value.Time
+			}
 		case lenschaininfo.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
@@ -110,6 +126,10 @@ func (lci *LensChainInfo) String() string {
 	var builder strings.Builder
 	builder.WriteString("LensChainInfo(")
 	builder.WriteString(fmt.Sprintf("id=%v", lci.ID))
+	builder.WriteString(", create_time=")
+	builder.WriteString(lci.CreateTime.Format(time.ANSIC))
+	builder.WriteString(", update_time=")
+	builder.WriteString(lci.UpdateTime.Format(time.ANSIC))
 	builder.WriteString(", created_at=")
 	builder.WriteString(lci.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", updated_at=")
