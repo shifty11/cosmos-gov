@@ -7,11 +7,14 @@ log_name=cosmosgov-log
 log_monitor=http://159.223.5.75:3100
 
 # Cosmos Gov
-cosmosgov_telegram_bot_token=BOT_TOKEN
+cosmosgov_telegram_bot_token=TELEGRAM_TOKEN
 cosmosgov_telegram_bot_admins=123,234
+cosmosgov_discord_bot_token=DISCORD_TOKEN
 cosmosgov_sentry_dns=SENTRY_DNS
-cosmosgov_database_url=DB_URL
-cosmosgov_lens_path=LENS_PATH
+cosmosgov_database_url=host=myhost user=myuser password=mypassword dbname=mydb port=25060 sslmode=require TimeZone=Europe/Zurich
+cosmosgov_lens_path=/home/myuser/.lens
+cosmosgov_jwt_secret_key=SECRET_KEY
+cosmosgov_web_app_url=https://mydomain.com
 
 # Git
 github_access_token=ACCESS_TOKEN

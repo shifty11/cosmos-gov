@@ -1,5 +1,5 @@
 [Unit]
-Description=Cosmos Gov Discord Bot
+Description=Cosmos Gov grpc server
 ConditionPathExists=/etc/cosmosgov/cosmos-gov/
 After=network.target
 
@@ -9,17 +9,20 @@ User=cosmosgov
 Group=cosmosgov
 
 WorkingDirectory=/etc/cosmosgov/cosmos-gov/
-ExecStart=/usr/local/go/bin/go run . discord
+ExecStart=/usr/local/go/bin/go run . grpc
 Restart=on-failure
 RestartSec=10
 StandardOutput=syslog
 StandardError=syslog
-SyslogIdentifier=cosmosgovdiscordservice
+SyslogIdentifier=cosmosgovgrpcservice
 
+Environment="TELEGRAM_TOKEN={{ cosmosgov_telegram_bot_token }}"
 Environment="DISCORD_TOKEN={{ cosmosgov_discord_bot_token }}"
 Environment="DATABASE_URL={{ cosmosgov_database_url }}"
 Environment="SENTRY_DSN={{ cosmosgov_sentry_dns }}"
+Environment="ADMIN_IDS={{ cosmosgov_telegram_bot_admins }}"
 Environment="LENS_PATH={{ cosmosgov_lens_path }}"
+Environment="JWT_SECRET_KEY={{ cosmosgov_jwt_secret_key }}"
 Environment="WEB_APP_URL={{ cosmosgov_web_app_url }}"
 Environment="DEBUG=true"
 

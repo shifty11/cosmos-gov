@@ -66,6 +66,14 @@
     group: root
     mode: 600
 
+- name: Copy cosmosgov-grpc service file
+  template:
+    src: 'cosmosgov-grpc.service.j2'
+    dest: '/etc/systemd/system/cosmosgov-grpc.service'
+    owner: root
+    group: root
+    mode: 600
+
 - name: Start cosmosgov-data service
   systemd:
     name: cosmosgov-data
@@ -85,6 +93,14 @@
 - name: Start cosmosgov-discord service
   systemd:
     name: cosmosgov-discord
+    state: restarted
+    daemon_reload: true
+    enabled: true
+  changed_when: false
+
+- name: Start cosmosgov-grpc service
+  systemd:
+    name: cosmosgov-grpc
     state: restarted
     daemon_reload: true
     enabled: true
