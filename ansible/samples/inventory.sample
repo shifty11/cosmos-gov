@@ -11,6 +11,7 @@ cosmosgov_telegram_bot_token=BOT_TOKEN
 cosmosgov_telegram_bot_admins=123,234
 cosmosgov_sentry_dns=SENTRY_DNS
 cosmosgov_database_url=DB_URL
+cosmosgov_lens_path=LENS_PATH
 
 # Git
 github_access_token=ACCESS_TOKEN

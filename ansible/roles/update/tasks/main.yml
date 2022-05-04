@@ -1,10 +1,30 @@
 ---
+- name: Remove /tmp/cosmos-gov directory
+  file:
+    path: /tmp/cosmos-gov
+    state: absent
+  changed_when: false
+
 - name: Clone cosmosgov github repository
   git:
     repo: https://{{ github_access_token }}@github.com/shifty11/cosmos-gov.git
-    dest: /etc/cosmosgov/cosmos-gov
+    dest: /tmp/cosmos-gov
     clone: yes
-    update: yes
+    update: no
+  become: yes
+  become_user: cosmosgov
+
+- name: Remove /etc/cosmosgov/cosmos-gov directory
+  file:
+    path: /etc/cosmosgov/cosmos-gov
+    state: absent
+  changed_when: false
+
+- name: Copy cosmos-gov repo
+  copy:
+    src: /tmp/cosmos-gov
+    dest: /etc/cosmosgov
+    remote_src: true
   become: yes
   become_user: cosmosgov
 
