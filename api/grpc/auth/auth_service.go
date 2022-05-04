@@ -2,11 +2,16 @@ package auth
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
+	"fmt"
 	pb "github.com/shifty11/cosmos-gov/api/grpc/protobuf/go/auth_service"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/ent/user"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"os"
 )
 
 //goland:noinspection GoNameStartsWithPackageName
@@ -20,7 +25,38 @@ func NewAuthServer(userManager *database.UserManager, jwtManager *JWTManager) pb
 	return &AuthServer{userManager: userManager, jwtManager: jwtManager}
 }
 
-func (server *AuthServer) TokenLogin(_ context.Context, req *pb.TokenLoginRequest) (*pb.TokenLoginResponse, error) {
+func (server *AuthServer) TelegramLogin(_ context.Context, req *pb.TelegramLoginRequest) (*pb.LoginResponse, error) {
+	telegramToken := os.Getenv("TELEGRAM_TOKEN")
+
+	dataCheckString := fmt.Sprintf("id=%v\nfirst_name=%v\nusername=%v\nphoto_url=%v\nauth_date=%v", req.Id, req.FirstName, req.Username, req.PhotoUrl, req.AuthDate)
+
+	h := hmac.New(sha256.New, []byte(telegramToken))
+	h.Write([]byte(dataCheckString))
+	hash := hex.EncodeToString(h.Sum(nil))
+	if hash != req.Hash {
+		return nil, status.Errorf(codes.Unauthenticated, "telegram data hash invalid")
+	}
+
+	entUser, err := server.userManager.Get(req.Id, user.TypeTelegram)
+	if err != nil {
+		return nil, status.Errorf(codes.NotFound, "cannot find user: %v", err)
+	}
+
+	accessToken, err := server.jwtManager.GenerateToken(entUser, AccessToken)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "cannot generate accessToken: %v", err)
+	}
+
+	refreshToken, err := server.jwtManager.GenerateToken(entUser, RefreshToken)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "cannot generate refreshToken: %v", err)
+	}
+
+	res := &pb.LoginResponse{AccessToken: accessToken, RefreshToken: refreshToken}
+	return res, nil
+}
+
+func (server *AuthServer) TokenLogin(_ context.Context, req *pb.TokenLoginRequest) (*pb.LoginResponse, error) {
 	var userType = user.TypeTelegram
 	if req.TYPE == pb.TokenLoginRequest_DISCORD {
 		userType = user.TypeDiscord
@@ -46,7 +82,7 @@ func (server *AuthServer) TokenLogin(_ context.Context, req *pb.TokenLoginReques
 		return nil, status.Errorf(codes.Internal, "cannot generate refreshToken: %v", err)
 	}
 
-	res := &pb.TokenLoginResponse{AccessToken: accessToken, RefreshToken: refreshToken}
+	res := &pb.LoginResponse{AccessToken: accessToken, RefreshToken: refreshToken}
 	return res, nil
 }
 
