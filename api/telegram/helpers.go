@@ -24,6 +24,7 @@ func getApi() *tgbotapi.BotAPI {
 			log.Sugar.Panic(err)
 		}
 		_api = botApi
+		//_api.Debug = os.Getenv("DEBUG") == "true"
 	}
 	return _api
 }
@@ -78,10 +79,11 @@ func ToCallbackData(str string) CallbackData {
 
 type Button struct {
 	Text         string
-	CallbackData CallbackData
+	CallbackData *CallbackData
+	LoginURL     *tgbotapi.LoginURL
 }
 
-func NewButton(text string, callbackData CallbackData) Button {
+func NewButton(text string, callbackData *CallbackData) Button {
 	return Button{Text: text, CallbackData: callbackData}
 }
 
@@ -90,8 +92,11 @@ func createKeyboard(buttons [][]Button) *tgbotapi.InlineKeyboardMarkup {
 	for _, row := range buttons {
 		var keyboardRow []tgbotapi.InlineKeyboardButton
 		for _, button := range row {
-			data := button.CallbackData.String()
-			btn := tgbotapi.InlineKeyboardButton{Text: button.Text, CallbackData: &data}
+			btn := tgbotapi.InlineKeyboardButton{Text: button.Text, LoginURL: button.LoginURL}
+			if button.CallbackData != nil {
+				s := button.CallbackData.String()
+				btn.CallbackData = &s
+			}
 			keyboardRow = append(keyboardRow, btn)
 		}
 		keyboard = append(keyboard, keyboardRow)
@@ -250,10 +255,10 @@ func createMenuButtonConfig() MenuButtonConfig {
 func getMenuButtonRow(config MenuButtonConfig) []Button {
 	var buttonRow []Button
 	if config.ShowSubscriptions {
-		buttonRow = append(buttonRow, NewButton("🔔 Subscriptions", CallbackData{Command: CallbackCmdShowSubscriptions}))
+		buttonRow = append(buttonRow, NewButton("🔔 Subscriptions", &CallbackData{Command: CallbackCmdShowSubscriptions}))
 	}
 	if config.ShowProposals {
-		buttonRow = append(buttonRow, NewButton("🗳 Proposals", CallbackData{Command: CallbackCmdShowProposals}))
+		buttonRow = append(buttonRow, NewButton("🗳 Proposals", &CallbackData{Command: CallbackCmdShowProposals}))
 	}
 	//if config.ShowHelp {
 	//	buttonRow = append(buttonRow, NewButton("🆘 Help", CallbackData{Command: CallbackCmdShowHelp}))
@@ -268,23 +273,29 @@ type BotAdminMenuButtonConfig struct {
 	ShowStats  bool
 	ShowChains bool
 	//ShowBroadcast bool
+	ShowWebAppLogin bool
 }
 
 func createBotAdminMenuButtonConfig() BotAdminMenuButtonConfig {
-	return BotAdminMenuButtonConfig{ShowStats: true, ShowChains: true}
+	return BotAdminMenuButtonConfig{ShowStats: true, ShowChains: true, ShowWebAppLogin: true}
 }
 
 func getBotAdminMenuButtonRow(config BotAdminMenuButtonConfig) []Button {
 	var buttonRow []Button
 	if config.ShowStats {
-		buttonRow = append(buttonRow, NewButton("📈 Stats", CallbackData{Command: CallbackCmdStats}))
+		buttonRow = append(buttonRow, NewButton("📈 Stats", &CallbackData{Command: CallbackCmdStats}))
 	}
 	if config.ShowChains {
-		buttonRow = append(buttonRow, NewButton("🔗 Chains", CallbackData{Command: CallbackCmdEnableChains}))
+		buttonRow = append(buttonRow, NewButton("🔗 Chains", &CallbackData{Command: CallbackCmdEnableChains}))
 	}
 	//if config.ShowBroadcast {
 	//	buttonRow = append(buttonRow, NewButton("🔊 Broadcast", CallbackData{Command: CallbackCmdBroadcast}))
 	//}
+	if config.ShowWebAppLogin {
+		button := NewButton("🌎 Web app", nil)
+		button.LoginURL = &tgbotapi.LoginURL{URL: "test.mydomain.com:40001"}
+		buttonRow = append(buttonRow, button)
+	}
 	return buttonRow
 }
 
@@ -298,7 +309,7 @@ func getVoteButtons(vd *authz.VoteData) [][]Button {
 			s = vd.State
 		}
 		voteData := authz.ToVoteData(vd.ChainName, vd.ProposalId, option, s)
-		callbackData := CallbackData{Command: CallbackCmdVote, Data: voteData.ToString()}
+		callbackData := &CallbackData{Command: CallbackCmdVote, Data: voteData.ToString()}
 		buttonRow = append(buttonRow, NewButton(voteData.ButtonText(), callbackData))
 		if (i+1)%2 == 0 {
 			buttons = append(buttons, buttonRow)

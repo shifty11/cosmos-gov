@@ -52,7 +52,7 @@ func sendSubscriptions(update *tgbotapi.Update) {
 		if c.Notify {
 			symbol = "✅ "
 		}
-		callbackData := CallbackData{Command: CallbackCmdShowSubscriptions, Data: c.Name}
+		callbackData := &CallbackData{Command: CallbackCmdShowSubscriptions, Data: c.Name}
 		buttonRow = append(buttonRow, NewButton(symbol+c.DisplayName, callbackData))
 		if (ix+1)%NbrOfButtonsPerRow == 0 || ix == len(chains)-1 {
 			buttons = append(buttons, buttonRow)

@@ -148,7 +148,7 @@ func sendChains(update *tgbotapi.Update) {
 		if c.IsEnabled {
 			symbol = "\U0001F7E2 "
 		}
-		callbackData := CallbackData{Command: CallbackCmdEnableChains, Data: c.Name}
+		callbackData := &CallbackData{Command: CallbackCmdEnableChains, Data: c.Name}
 		buttonRow = append(buttonRow, NewButton(symbol+c.DisplayName, callbackData))
 		if (ix+1)%NbrOfButtonsPerRow == 0 || ix == len(chains)-1 {
 			buttons = append(buttons, buttonRow)
