@@ -17,7 +17,6 @@ import (
 
 func initDatabase(ds *datasource.Datasource, chainManager *database.ChainManager) {
 	database.MigrateDatabase()
-	ds.Migrate(chainManager)
 
 	if len(chainManager.All()) == 0 { // Add chains after DB has been newly created
 		ds.AddNewChains()
@@ -81,22 +80,22 @@ func main() {
 	args := os.Args[1:]
 	if len(args) > 0 && args[0] == "fetching" {
 		initDatabase(ds, managers.ChainManager)
-		//	startProposalFetching(ds)
-		//	startNewChainFetching(ds)
-		//	startProposalUpdating(ds)
-		//} else if len(args) > 0 && args[0] == "telegram" {
-		//	startTelegramServer()
-		//} else if len(args) > 0 && args[0] == "discord" {
-		//	startDiscordServer()
-		//} else if len(args) > 0 && args[0] == "grpc" {
-		//	startGrpcServer()
-		//} else {
-		//	initDatabase(nil, nil)
-		//	startProposalFetching(ds)
-		//	startNewChainFetching(ds)
-		//	startProposalUpdating(ds)
-		//	startTelegramServer()
-		//	startDiscordServer()
+		startProposalFetching(ds)
+		startNewChainFetching(ds)
+		startProposalUpdating(ds)
+	} else if len(args) > 0 && args[0] == "telegram" {
+		startTelegramServer()
+	} else if len(args) > 0 && args[0] == "discord" {
+		startDiscordServer()
+	} else if len(args) > 0 && args[0] == "grpc" {
+		startGrpcServer()
+	} else {
+		initDatabase(nil, nil)
+		startProposalFetching(ds)
+		startNewChainFetching(ds)
+		startProposalUpdating(ds)
+		startTelegramServer()
+		startDiscordServer()
 	}
 
 	time.Sleep(time.Duration(1<<63 - 1))

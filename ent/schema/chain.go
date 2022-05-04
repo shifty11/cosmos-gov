@@ -6,7 +6,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
-	"time"
+	"entgo.io/ent/schema/mixin"
 )
 
 // Chain holds the schema definition for the Chain entity.
@@ -16,41 +16,28 @@ type Chain struct {
 
 func (Chain) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		//mixin.Time{},
+		mixin.Time{},
 	}
 }
 
 // Fields of the Chain.
 func (Chain) Fields() []ent.Field {
 	return []ent.Field{
-		field.Time("create_time").Optional(),
-		field.Time("update_time").Optional(),
-		field.Time("created_at").
-			Default(time.Now).
-			Immutable(),
-		field.Time("updated_at").
-			Default(time.Now).
-			UpdateDefault(time.Now),
-
 		field.String("chain_id").
-			Unique().
-			Optional(), // TODO: remove optional
-		field.String("account_prefix").
-			Optional(), // TODO: remove optional
+			Unique(),
+		field.String("account_prefix"),
 		field.String("name").
 			Unique(),
 		field.String("display_name").
 			Unique(),
 		field.Bool("is_enabled").
-			Default(true),
+			Default(false),
 	}
 }
 
 // Edges of the Chain.
 func (Chain) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("users", User.Type). // TODO: has to be removed
-						Ref("chains"),
 		edge.To("proposals", Proposal.Type).
 			Annotations(entsql.Annotation{
 				OnDelete: entsql.Cascade,

@@ -20,8 +20,6 @@ type Tx struct {
 	Grant *GrantClient
 	// LensChainInfo is the client for interacting with the LensChainInfo builders.
 	LensChainInfo *LensChainInfoClient
-	// MigrationInfo is the client for interacting with the MigrationInfo builders.
-	MigrationInfo *MigrationInfoClient
 	// Proposal is the client for interacting with the Proposal builders.
 	Proposal *ProposalClient
 	// RpcEndpoint is the client for interacting with the RpcEndpoint builders.
@@ -171,7 +169,6 @@ func (tx *Tx) init() {
 	tx.DiscordChannel = NewDiscordChannelClient(tx.config)
 	tx.Grant = NewGrantClient(tx.config)
 	tx.LensChainInfo = NewLensChainInfoClient(tx.config)
-	tx.MigrationInfo = NewMigrationInfoClient(tx.config)
 	tx.Proposal = NewProposalClient(tx.config)
 	tx.RpcEndpoint = NewRpcEndpointClient(tx.config)
 	tx.TelegramChat = NewTelegramChatClient(tx.config)

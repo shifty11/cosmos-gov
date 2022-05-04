@@ -16,10 +16,6 @@ const (
 	FieldCreateTime = "create_time"
 	// FieldUpdateTime holds the string denoting the update_time field in the database.
 	FieldUpdateTime = "update_time"
-	// FieldCreatedAt holds the string denoting the created_at field in the database.
-	FieldCreatedAt = "created_at"
-	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
-	FieldUpdatedAt = "updated_at"
 	// FieldProposalID holds the string denoting the proposal_id field in the database.
 	FieldProposalID = "proposal_id"
 	// FieldTitle holds the string denoting the title field in the database.
@@ -50,8 +46,6 @@ var Columns = []string{
 	FieldID,
 	FieldCreateTime,
 	FieldUpdateTime,
-	FieldCreatedAt,
-	FieldUpdatedAt,
 	FieldProposalID,
 	FieldTitle,
 	FieldDescription,
@@ -82,12 +76,12 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
-	DefaultCreatedAt func() time.Time
-	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
-	DefaultUpdatedAt func() time.Time
-	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
-	UpdateDefaultUpdatedAt func() time.Time
+	// DefaultCreateTime holds the default value on creation for the "create_time" field.
+	DefaultCreateTime func() time.Time
+	// DefaultUpdateTime holds the default value on creation for the "update_time" field.
+	DefaultUpdateTime func() time.Time
+	// UpdateDefaultUpdateTime holds the default value on update for the "update_time" field.
+	UpdateDefaultUpdateTime func() time.Time
 )
 
 // Status defines the type for the "status" enum field.
@@ -95,12 +89,12 @@ type Status string
 
 // Status values.
 const (
+	StatusPROPOSAL_STATUS_FAILED         Status = "PROPOSAL_STATUS_FAILED"
+	StatusPROPOSAL_STATUS_UNSPECIFIED    Status = "PROPOSAL_STATUS_UNSPECIFIED"
 	StatusPROPOSAL_STATUS_DEPOSIT_PERIOD Status = "PROPOSAL_STATUS_DEPOSIT_PERIOD"
 	StatusPROPOSAL_STATUS_VOTING_PERIOD  Status = "PROPOSAL_STATUS_VOTING_PERIOD"
 	StatusPROPOSAL_STATUS_PASSED         Status = "PROPOSAL_STATUS_PASSED"
 	StatusPROPOSAL_STATUS_REJECTED       Status = "PROPOSAL_STATUS_REJECTED"
-	StatusPROPOSAL_STATUS_FAILED         Status = "PROPOSAL_STATUS_FAILED"
-	StatusPROPOSAL_STATUS_UNSPECIFIED    Status = "PROPOSAL_STATUS_UNSPECIFIED"
 )
 
 func (s Status) String() string {
@@ -110,7 +104,7 @@ func (s Status) String() string {
 // StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
 func StatusValidator(s Status) error {
 	switch s {
-	case StatusPROPOSAL_STATUS_DEPOSIT_PERIOD, StatusPROPOSAL_STATUS_VOTING_PERIOD, StatusPROPOSAL_STATUS_PASSED, StatusPROPOSAL_STATUS_REJECTED, StatusPROPOSAL_STATUS_FAILED, StatusPROPOSAL_STATUS_UNSPECIFIED:
+	case StatusPROPOSAL_STATUS_FAILED, StatusPROPOSAL_STATUS_UNSPECIFIED, StatusPROPOSAL_STATUS_DEPOSIT_PERIOD, StatusPROPOSAL_STATUS_VOTING_PERIOD, StatusPROPOSAL_STATUS_PASSED, StatusPROPOSAL_STATUS_REJECTED:
 		return nil
 	default:
 		return fmt.Errorf("proposal: invalid enum value for status field: %q", s)

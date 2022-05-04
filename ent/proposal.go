@@ -21,10 +21,6 @@ type Proposal struct {
 	CreateTime time.Time `json:"create_time,omitempty"`
 	// UpdateTime holds the value of the "update_time" field.
 	UpdateTime time.Time `json:"update_time,omitempty"`
-	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt time.Time `json:"created_at,omitempty"`
-	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// ProposalID holds the value of the "proposal_id" field.
 	ProposalID uint64 `json:"proposal_id,omitempty"`
 	// Title holds the value of the "title" field.
@@ -75,7 +71,7 @@ func (*Proposal) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullInt64)
 		case proposal.FieldTitle, proposal.FieldDescription, proposal.FieldStatus:
 			values[i] = new(sql.NullString)
-		case proposal.FieldCreateTime, proposal.FieldUpdateTime, proposal.FieldCreatedAt, proposal.FieldUpdatedAt, proposal.FieldVotingStartTime, proposal.FieldVotingEndTime:
+		case proposal.FieldCreateTime, proposal.FieldUpdateTime, proposal.FieldVotingStartTime, proposal.FieldVotingEndTime:
 			values[i] = new(sql.NullTime)
 		case proposal.ForeignKeys[0]: // chain_proposals
 			values[i] = new(sql.NullInt64)
@@ -111,18 +107,6 @@ func (pr *Proposal) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field update_time", values[i])
 			} else if value.Valid {
 				pr.UpdateTime = value.Time
-			}
-		case proposal.FieldCreatedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field created_at", values[i])
-			} else if value.Valid {
-				pr.CreatedAt = value.Time
-			}
-		case proposal.FieldUpdatedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
-			} else if value.Valid {
-				pr.UpdatedAt = value.Time
 			}
 		case proposal.FieldProposalID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -204,10 +188,6 @@ func (pr *Proposal) String() string {
 	builder.WriteString(pr.CreateTime.Format(time.ANSIC))
 	builder.WriteString(", update_time=")
 	builder.WriteString(pr.UpdateTime.Format(time.ANSIC))
-	builder.WriteString(", created_at=")
-	builder.WriteString(pr.CreatedAt.Format(time.ANSIC))
-	builder.WriteString(", updated_at=")
-	builder.WriteString(pr.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", proposal_id=")
 	builder.WriteString(fmt.Sprintf("%v", pr.ProposalID))
 	builder.WriteString(", title=")

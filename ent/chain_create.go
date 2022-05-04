@@ -15,7 +15,6 @@ import (
 	"github.com/shifty11/cosmos-gov/ent/proposal"
 	"github.com/shifty11/cosmos-gov/ent/rpcendpoint"
 	"github.com/shifty11/cosmos-gov/ent/telegramchat"
-	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/ent/wallet"
 )
 
@@ -54,59 +53,15 @@ func (cc *ChainCreate) SetNillableUpdateTime(t *time.Time) *ChainCreate {
 	return cc
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (cc *ChainCreate) SetCreatedAt(t time.Time) *ChainCreate {
-	cc.mutation.SetCreatedAt(t)
-	return cc
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (cc *ChainCreate) SetNillableCreatedAt(t *time.Time) *ChainCreate {
-	if t != nil {
-		cc.SetCreatedAt(*t)
-	}
-	return cc
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (cc *ChainCreate) SetUpdatedAt(t time.Time) *ChainCreate {
-	cc.mutation.SetUpdatedAt(t)
-	return cc
-}
-
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (cc *ChainCreate) SetNillableUpdatedAt(t *time.Time) *ChainCreate {
-	if t != nil {
-		cc.SetUpdatedAt(*t)
-	}
-	return cc
-}
-
 // SetChainID sets the "chain_id" field.
 func (cc *ChainCreate) SetChainID(s string) *ChainCreate {
 	cc.mutation.SetChainID(s)
 	return cc
 }
 
-// SetNillableChainID sets the "chain_id" field if the given value is not nil.
-func (cc *ChainCreate) SetNillableChainID(s *string) *ChainCreate {
-	if s != nil {
-		cc.SetChainID(*s)
-	}
-	return cc
-}
-
 // SetAccountPrefix sets the "account_prefix" field.
 func (cc *ChainCreate) SetAccountPrefix(s string) *ChainCreate {
 	cc.mutation.SetAccountPrefix(s)
-	return cc
-}
-
-// SetNillableAccountPrefix sets the "account_prefix" field if the given value is not nil.
-func (cc *ChainCreate) SetNillableAccountPrefix(s *string) *ChainCreate {
-	if s != nil {
-		cc.SetAccountPrefix(*s)
-	}
 	return cc
 }
 
@@ -134,21 +89,6 @@ func (cc *ChainCreate) SetNillableIsEnabled(b *bool) *ChainCreate {
 		cc.SetIsEnabled(*b)
 	}
 	return cc
-}
-
-// AddUserIDs adds the "users" edge to the User entity by IDs.
-func (cc *ChainCreate) AddUserIDs(ids ...int) *ChainCreate {
-	cc.mutation.AddUserIDs(ids...)
-	return cc
-}
-
-// AddUsers adds the "users" edges to the User entity.
-func (cc *ChainCreate) AddUsers(u ...*User) *ChainCreate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
-	}
-	return cc.AddUserIDs(ids...)
 }
 
 // AddProposalIDs adds the "proposals" edge to the Proposal entity by IDs.
@@ -297,13 +237,13 @@ func (cc *ChainCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (cc *ChainCreate) defaults() {
-	if _, ok := cc.mutation.CreatedAt(); !ok {
-		v := chain.DefaultCreatedAt()
-		cc.mutation.SetCreatedAt(v)
+	if _, ok := cc.mutation.CreateTime(); !ok {
+		v := chain.DefaultCreateTime()
+		cc.mutation.SetCreateTime(v)
 	}
-	if _, ok := cc.mutation.UpdatedAt(); !ok {
-		v := chain.DefaultUpdatedAt()
-		cc.mutation.SetUpdatedAt(v)
+	if _, ok := cc.mutation.UpdateTime(); !ok {
+		v := chain.DefaultUpdateTime()
+		cc.mutation.SetUpdateTime(v)
 	}
 	if _, ok := cc.mutation.IsEnabled(); !ok {
 		v := chain.DefaultIsEnabled
@@ -313,11 +253,17 @@ func (cc *ChainCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (cc *ChainCreate) check() error {
-	if _, ok := cc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Chain.created_at"`)}
+	if _, ok := cc.mutation.CreateTime(); !ok {
+		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "Chain.create_time"`)}
 	}
-	if _, ok := cc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Chain.updated_at"`)}
+	if _, ok := cc.mutation.UpdateTime(); !ok {
+		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "Chain.update_time"`)}
+	}
+	if _, ok := cc.mutation.ChainID(); !ok {
+		return &ValidationError{Name: "chain_id", err: errors.New(`ent: missing required field "Chain.chain_id"`)}
+	}
+	if _, ok := cc.mutation.AccountPrefix(); !ok {
+		return &ValidationError{Name: "account_prefix", err: errors.New(`ent: missing required field "Chain.account_prefix"`)}
 	}
 	if _, ok := cc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Chain.name"`)}
@@ -371,22 +317,6 @@ func (cc *ChainCreate) createSpec() (*Chain, *sqlgraph.CreateSpec) {
 		})
 		_node.UpdateTime = value
 	}
-	if value, ok := cc.mutation.CreatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: chain.FieldCreatedAt,
-		})
-		_node.CreatedAt = value
-	}
-	if value, ok := cc.mutation.UpdatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: chain.FieldUpdatedAt,
-		})
-		_node.UpdatedAt = value
-	}
 	if value, ok := cc.mutation.ChainID(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -426,25 +356,6 @@ func (cc *ChainCreate) createSpec() (*Chain, *sqlgraph.CreateSpec) {
 			Column: chain.FieldIsEnabled,
 		})
 		_node.IsEnabled = value
-	}
-	if nodes := cc.mutation.UsersIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   chain.UsersTable,
-			Columns: chain.UsersPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := cc.mutation.ProposalsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

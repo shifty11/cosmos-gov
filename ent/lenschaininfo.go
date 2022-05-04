@@ -20,10 +20,6 @@ type LensChainInfo struct {
 	CreateTime time.Time `json:"create_time,omitempty"`
 	// UpdateTime holds the value of the "update_time" field.
 	UpdateTime time.Time `json:"update_time,omitempty"`
-	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt time.Time `json:"created_at,omitempty"`
-	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// CntErrors holds the value of the "cnt_errors" field.
@@ -39,7 +35,7 @@ func (*LensChainInfo) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullInt64)
 		case lenschaininfo.FieldName:
 			values[i] = new(sql.NullString)
-		case lenschaininfo.FieldCreateTime, lenschaininfo.FieldUpdateTime, lenschaininfo.FieldCreatedAt, lenschaininfo.FieldUpdatedAt:
+		case lenschaininfo.FieldCreateTime, lenschaininfo.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type LensChainInfo", columns[i])
@@ -73,18 +69,6 @@ func (lci *LensChainInfo) assignValues(columns []string, values []interface{}) e
 				return fmt.Errorf("unexpected type %T for field update_time", values[i])
 			} else if value.Valid {
 				lci.UpdateTime = value.Time
-			}
-		case lenschaininfo.FieldCreatedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field created_at", values[i])
-			} else if value.Valid {
-				lci.CreatedAt = value.Time
-			}
-		case lenschaininfo.FieldUpdatedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
-			} else if value.Valid {
-				lci.UpdatedAt = value.Time
 			}
 		case lenschaininfo.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -130,10 +114,6 @@ func (lci *LensChainInfo) String() string {
 	builder.WriteString(lci.CreateTime.Format(time.ANSIC))
 	builder.WriteString(", update_time=")
 	builder.WriteString(lci.UpdateTime.Format(time.ANSIC))
-	builder.WriteString(", created_at=")
-	builder.WriteString(lci.CreatedAt.Format(time.ANSIC))
-	builder.WriteString(", updated_at=")
-	builder.WriteString(lci.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", name=")
 	builder.WriteString(lci.Name)
 	builder.WriteString(", cnt_errors=")
