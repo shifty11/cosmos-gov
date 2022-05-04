@@ -88,11 +88,16 @@ func (manager *TypedUserManager) GetOrCreateUser(id int64, name string) *ent.Use
 			)).
 		Only(manager.ctx)
 	if err != nil {
+		token, err := regen.Generate("[A-Za-z0-9]{32}")
+		if err != nil {
+			log.Sugar.Errorf("Could not generate new login token: %v", err)
+		}
 		userEnt, err = manager.client.User.
 			Create().
 			SetUserID(id).
 			SetName(name).
 			SetType(manager.userType).
+			SetLoginToken(token).
 			Save(manager.ctx)
 		if err != nil {
 			log.Sugar.Panicf("Error while creating user: %v", err)
