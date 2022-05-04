@@ -29,6 +29,7 @@ func AccessibleRoles() map[string][]Role {
 	const votePermissionService = path + ".VotePermissionService/"
 
 	return map[string][]Role{
+		authService + "TelegramLogin":                   {Unauthenticated, User},
 		authService + "TokenLogin":                      {Unauthenticated, User},
 		authService + "RefreshAccessToken":              {Unauthenticated, User},
 		subsService + "GetSubscriptions":                {User},
