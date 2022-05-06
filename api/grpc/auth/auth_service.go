@@ -2,11 +2,16 @@ package auth
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	pb "github.com/shifty11/cosmos-gov/api/grpc/protobuf/go/auth_service"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/ent/user"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"os"
+	"time"
 )
 
 //goland:noinspection GoNameStartsWithPackageName
@@ -21,18 +26,23 @@ func NewAuthServer(userManager *database.UserManager, jwtManager *JWTManager) pb
 }
 
 func (server *AuthServer) TelegramLogin(_ context.Context, req *pb.TelegramLoginRequest) (*pb.LoginResponse, error) {
-	//TODO: fix this check
-	//telegramToken := os.Getenv("TELEGRAM_TOKEN")
+	telegramToken := os.Getenv("TELEGRAM_TOKEN")
 
-	//dataCheckString := fmt.Sprintf("id=%v\nfirst_name=%v\nusername=%v\nphoto_url=%v\nauth_date=%v", req.Id, req.FirstName, req.Username, req.PhotoUrl, req.AuthDate)
+	s := sha256.New()
+	s.Write([]byte(telegramToken))
+	secretKey := s.Sum(nil)
 
-	//h := hmac.New(sha256.New, []byte(telegramToken))
-	//h.Write([]byte(req.DataStr))
-	//hash := hex.EncodeToString(h.Sum(nil))
-	//if hash != req.Hash {
-	//	return nil, status.Errorf(codes.Unauthenticated, "telegram data hash invalid")
-	//}
-	//TODO: check auth_date
+	h := hmac.New(sha256.New, secretKey)
+	h.Write([]byte(req.DataStr))
+	hh := h.Sum(nil)
+	hash := hex.EncodeToString(hh)
+	if hash != req.Hash {
+		return nil, status.Errorf(codes.Unauthenticated, "telegram data invalid")
+	}
+
+	if time.Now().Sub(time.Unix(req.AuthDate, 0)) > time.Hour {
+		return nil, status.Errorf(codes.Unauthenticated, "telegram login expired")
+	}
 
 	entUser, err := server.userManager.Get(req.UserId, user.TypeTelegram)
 	if err != nil {
