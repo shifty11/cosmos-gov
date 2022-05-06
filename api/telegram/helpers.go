@@ -81,6 +81,7 @@ type Button struct {
 	Text         string
 	CallbackData *CallbackData
 	LoginURL     *tgbotapi.LoginURL
+	WebApp       *tgbotapi.WebAppInfo
 }
 
 func NewButton(text string, callbackData *CallbackData) Button {
@@ -92,7 +93,7 @@ func createKeyboard(buttons [][]Button) *tgbotapi.InlineKeyboardMarkup {
 	for _, row := range buttons {
 		var keyboardRow []tgbotapi.InlineKeyboardButton
 		for _, button := range row {
-			btn := tgbotapi.InlineKeyboardButton{Text: button.Text, LoginURL: button.LoginURL}
+			btn := tgbotapi.InlineKeyboardButton{Text: button.Text, LoginURL: button.LoginURL, WebApp: button.WebApp}
 			if button.CallbackData != nil {
 				s := button.CallbackData.String()
 				btn.CallbackData = &s
@@ -293,7 +294,11 @@ func getBotAdminMenuButtonRow(config BotAdminMenuButtonConfig) []Button {
 	//}
 	if config.ShowWebAppLogin {
 		button := NewButton("🌎 Web app", nil)
-		button.LoginURL = &tgbotapi.LoginURL{URL: os.Getenv("WEB_APP_URL")}
+		button.WebApp = &tgbotapi.WebAppInfo{URL: os.Getenv("WEB_APP_URL")}
+		buttonRow = append(buttonRow, button)
+
+		button = NewButton("⚙️Login", nil)
+		button.LoginURL = &tgbotapi.LoginURL{URL: "test.mydomain.com:40001"}
 		buttonRow = append(buttonRow, button)
 	}
 	return buttonRow
