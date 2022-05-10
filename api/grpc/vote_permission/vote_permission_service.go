@@ -57,12 +57,13 @@ func (server *VotePermissionServer) GetSupportedChains(context.Context, *emptypb
 		}
 
 		chains = append(chains, &pb.Chain{
-			ChainId:     c.ChainID,
-			Name:        c.Name,
-			DisplayName: c.DisplayName,
-			RpcAddress:  c.Edges.RPCEndpoints[0].Endpoint,
-			Grantee:     grantee,
-			Denom:       "u" + c.AccountPrefix,
+			ChainId:       c.ChainID,
+			Name:          c.Name,
+			DisplayName:   c.DisplayName,
+			RpcAddress:    c.Edges.RPCEndpoints[0].Endpoint,
+			Grantee:       grantee,
+			Denom:         "u" + c.AccountPrefix,
+			AccountPrefix: c.AccountPrefix,
 		})
 	}
 	return &pb.GetSupportedChainsResponse{Chains: chains}, nil
@@ -134,12 +135,13 @@ func (server *VotePermissionServer) GetVotePermissions(ctx context.Context, _ *e
 			}
 			vperms = append(vperms, &pb.VotePermission{
 				Chain: &pb.Chain{
-					ChainId:     w.Edges.Chain.ChainID,
-					Name:        w.Edges.Chain.Name,
-					DisplayName: w.Edges.Chain.DisplayName,
-					RpcAddress:  server.chainManager.GetFirstRpc(w.Edges.Chain).Endpoint,
-					Grantee:     grantee,
-					Denom:       "u" + w.Edges.Chain.AccountPrefix,
+					ChainId:       w.Edges.Chain.ChainID,
+					Name:          w.Edges.Chain.Name,
+					DisplayName:   w.Edges.Chain.DisplayName,
+					RpcAddress:    server.chainManager.GetFirstRpc(w.Edges.Chain).Endpoint,
+					Grantee:       grantee,
+					Denom:         "u" + w.Edges.Chain.AccountPrefix,
+					AccountPrefix: w.Edges.Chain.AccountPrefix,
 				},
 				Granter: w.Address,
 				ExpiresAt: &timestamppb.Timestamp{
