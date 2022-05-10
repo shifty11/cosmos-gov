@@ -3,6 +3,7 @@ package discord
 import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
+	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/ent"
 	"github.com/shifty11/cosmos-gov/log"
 	"os"
@@ -51,6 +52,8 @@ func SendProposals(entProp *ent.Proposal, entChain *ent.Chain) []int64 {
 	if len(text) > 2000 {
 		text = text[:1997] + "..."
 	}
+
+	mHack = database.NewDefaultDbManagers() //TODO: remove
 
 	var errIds []int64
 	channelIds := mHack.DiscordChannelManager.GetChannelIds(entChain)
