@@ -5,6 +5,10 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/shifty11/cosmos-gov/ent"
 	"github.com/shifty11/cosmos-gov/ent/user"
+	"golang.org/x/exp/slices"
+	"os"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -13,6 +17,7 @@ type Role string
 const (
 	Unauthenticated Role = "Unauthenticated"
 	User            Role = "User"
+	Admin           Role = "Admin"
 )
 
 type TokenType string
@@ -27,6 +32,7 @@ func AccessibleRoles() map[string][]Role {
 	const authService = path + ".AuthService/"
 	const subsService = path + ".SubscriptionService/"
 	const votePermissionService = path + ".VotePermissionService/"
+	const chainService = path + ".ChainService/"
 
 	return map[string][]Role{
 		authService + "TelegramLogin":                   {Unauthenticated, User},
@@ -38,6 +44,8 @@ func AccessibleRoles() map[string][]Role {
 		votePermissionService + "CreateVotePermission":  {User},
 		votePermissionService + "GetVotePermissions":    {User},
 		votePermissionService + "RefreshVotePermission": {User},
+		chainService + "GetChains":                      {Admin},
+		chainService + "SetEnabled":                     {Admin},
 	}
 }
 
@@ -68,13 +76,19 @@ func (manager *JWTManager) GenerateToken(entUser *ent.User, tokenType TokenType)
 		expirationTime = time.Now().Add(manager.refreshTokenDuration)
 	}
 
+	admins := strings.Split(strings.Trim(os.Getenv("ADMIN_IDS"), " "), ",")
+	var role = User
+	if slices.Contains(admins, strconv.FormatInt(entUser.UserID, 10)) {
+		role = Admin
+	}
+
 	claims := &Claims{
 		UserId: entUser.UserID,
 		Type:   entUser.Type,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 		},
-		Role: User,
+		Role: role,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

@@ -77,19 +77,15 @@ func (manager *ChainManager) All() []*ent.Chain {
 	return chains
 }
 
-func (manager *ChainManager) EnableOrDisableChain(chainName string) error {
+func (manager *ChainManager) EnableOrDisableChain(chainName string) (*ent.Chain, error) {
 	chainDto, err := manager.ByName(chainName)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	_, err = chainDto.
+	return chainDto.
 		Update().
 		SetIsEnabled(!chainDto.IsEnabled).
 		Save(manager.ctx)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func (manager *ChainManager) Create(chainId string, chainName string, accountPrefix string, rpcs []string) *ent.Chain {

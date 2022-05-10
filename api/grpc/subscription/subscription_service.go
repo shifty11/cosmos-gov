@@ -70,7 +70,7 @@ func (server *SubscriptionServer) ToggleSubscription(ctx context.Context, req *p
 
 	isSubscribed, err := server.subscriptionManager.ToggleSubscription(entUser, req.ChatRoomId, req.Name)
 	if err != nil {
-		log.Sugar.Error("error while toggling subscription: %v", err)
+		log.Sugar.Errorf("error while toggling subscription: %v", err)
 		return nil, status.Errorf(codes.Internal, "Unknown error occured")
 	}
 	var res = &pb.ToggleSubscriptionResponse{IsSubscribed: isSubscribed}

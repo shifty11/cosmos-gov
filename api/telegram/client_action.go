@@ -16,7 +16,7 @@ func performToggleChain(chainName string) {
 		return
 	}
 	log.Sugar.Debugf("Enable/disable chain %v", chainName)
-	err := mHack.ChainManager.EnableOrDisableChain(chainName)
+	_, err := mHack.ChainManager.EnableOrDisableChain(chainName)
 	if err != nil {
 		log.Sugar.Error("Error while toggle chain %v", chainName)
 	}

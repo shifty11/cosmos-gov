@@ -1,8 +1,10 @@
 package grpc
 
 import (
+	"github.com/shifty11/cosmos-gov/api/grpc/admin"
 	"github.com/shifty11/cosmos-gov/api/grpc/auth"
 	_ "github.com/shifty11/cosmos-gov/api/grpc/auth"
+	"github.com/shifty11/cosmos-gov/api/grpc/protobuf/go/admin_service"
 	"github.com/shifty11/cosmos-gov/api/grpc/protobuf/go/auth_service"
 	"github.com/shifty11/cosmos-gov/api/grpc/protobuf/go/subscription_service"
 	"github.com/shifty11/cosmos-gov/api/grpc/protobuf/go/vote_permission_service"
@@ -38,6 +40,7 @@ func Start() {
 	authServer := auth.NewAuthServer(managers.UserManager, jwtManager)
 	subscriptionServer := subscription.NewSubscriptionsServer(managers.SubscriptionManager)
 	votePermissionServer := vote_permission.NewVotePermissionsServer(authzClient, managers.ChainManager, managers.WalletManager)
+	adminServer := admin.NewAdminServer(managers.ChainManager)
 
 	server := grpc.NewServer(
 		grpc.UnaryInterceptor(interceptor.Unary()),
@@ -47,6 +50,7 @@ func Start() {
 	auth_service.RegisterAuthServiceServer(server, authServer)
 	subscription_service.RegisterSubscriptionServiceServer(server, subscriptionServer)
 	vote_permission_service.RegisterVotePermissionServiceServer(server, votePermissionServer)
+	admin_service.RegisterAdminServiceServer(server, adminServer)
 
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
