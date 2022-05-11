@@ -32,20 +32,20 @@ func AccessibleRoles() map[string][]Role {
 	const authService = path + ".AuthService/"
 	const subsService = path + ".SubscriptionService/"
 	const votePermissionService = path + ".VotePermissionService/"
-	const chainService = path + ".ChainService/"
+	const chainService = path + ".AdminService/"
 
 	return map[string][]Role{
-		authService + "TelegramLogin":                   {Unauthenticated, User},
-		authService + "TokenLogin":                      {Unauthenticated, User},
-		authService + "RefreshAccessToken":              {Unauthenticated, User},
-		subsService + "GetSubscriptions":                {User},
-		subsService + "ToggleSubscription":              {User},
-		votePermissionService + "GetSupportedChains":    {User},
-		votePermissionService + "CreateVotePermission":  {User},
-		votePermissionService + "GetVotePermissions":    {User},
-		votePermissionService + "RefreshVotePermission": {User},
+		authService + "TelegramLogin":                   {Unauthenticated, User, Admin},
+		authService + "TokenLogin":                      {Unauthenticated, User, Admin},
+		authService + "RefreshAccessToken":              {Unauthenticated, User, Admin},
+		subsService + "GetSubscriptions":                {User, Admin},
+		subsService + "ToggleSubscription":              {User, Admin},
+		votePermissionService + "GetSupportedChains":    {User, Admin},
+		votePermissionService + "CreateVotePermission":  {User, Admin},
+		votePermissionService + "GetVotePermissions":    {User, Admin},
+		votePermissionService + "RefreshVotePermission": {User, Admin},
 		chainService + "GetChains":                      {Admin},
-		chainService + "SetEnabled":                     {Admin},
+		chainService + "UpdateChain":                    {Admin},
 	}
 }
 

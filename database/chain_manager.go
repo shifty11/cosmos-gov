@@ -88,6 +88,17 @@ func (manager *ChainManager) EnableOrDisableChain(chainName string) (*ent.Chain,
 		Save(manager.ctx)
 }
 
+func (manager *ChainManager) Update(name string, isEnabled bool) (*ent.Chain, error) {
+	entChain, err := manager.ByName(name)
+	if err != nil {
+		return nil, err
+	}
+	return manager.client.Chain.
+		UpdateOne(entChain).
+		SetIsEnabled(isEnabled).
+		Save(manager.ctx)
+}
+
 func (manager *ChainManager) Create(chainId string, chainName string, accountPrefix string, rpcs []string) *ent.Chain {
 	log.Sugar.Infof("Create new chain: %v", chainName)
 	c, err := manager.client.Chain.

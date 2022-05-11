@@ -38,12 +38,19 @@ func (server *ChainServer) GetChains(_ context.Context, _ *emptypb.Empty) (*pb.G
 	return res, nil
 }
 
-func (server *ChainServer) SetEnabled(_ context.Context, req *pb.SetChainEnabledRequest) (*pb.SetChainEnabledResponse, error) {
-	chain, err := server.chainManager.EnableOrDisableChain(req.ChainId)
+func (server *ChainServer) UpdateChain(_ context.Context, req *pb.UpdateChainRequest) (*pb.UpdateChainResponse, error) {
+	chain, err := server.chainManager.EnableOrDisableChain(req.ChainName)
 	if err != nil {
-		log.Sugar.Errorf("error while toggling chain: %v", err)
+		log.Sugar.Errorf("error while updating chain: %v", err)
 		return nil, status.Errorf(codes.Internal, "Unknown error occurred")
 	}
-	var res = &pb.SetChainEnabledResponse{IsEnabled: chain.IsEnabled}
+	var res = &pb.UpdateChainResponse{Chain: &pb.ChainSettings{
+		ChainId:         chain.ChainID,
+		Name:            chain.Name,
+		DisplayName:     chain.DisplayName,
+		IsEnabled:       chain.IsEnabled,
+		IsVotingEnabled: false,
+		IsFeegrantUsed:  false,
+	}}
 	return res, nil
 }
