@@ -42,29 +42,36 @@ func getGranteeAddress(entChain *ent.Chain) (string, error) {
 	return grantee, nil
 }
 
+func chainToProtobuf(c *ent.Chain) (*pb.Chain, error) {
+	grantee, err := getGranteeAddress(c)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.Chain{
+		ChainId:        c.ChainID,
+		Name:           c.Name,
+		DisplayName:    c.DisplayName,
+		RpcAddress:     c.Edges.RPCEndpoints[0].Endpoint,
+		Grantee:        grantee,
+		Denom:          "u" + c.AccountPrefix,
+		AccountPrefix:  c.AccountPrefix,
+		IsFeegrantUsed: c.IsFeegrantUsed,
+	}, nil
+}
+
 func (server *VotePermissionServer) GetSupportedChains(context.Context, *emptypb.Empty) (*pb.GetSupportedChainsResponse, error) {
 	var chains []*pb.Chain
-	options := &database.ChainQueryOptions{WithRpcAddresses: true}
-	for _, c := range server.chainManager.Enabled(options) {
+	for _, c := range server.chainManager.CanVote() {
 		if len(c.Edges.RPCEndpoints) == 0 {
 			log.Sugar.Errorf("Chain %v has no RPC endpoint", c.DisplayName)
 			continue
 		}
 
-		grantee, err := getGranteeAddress(c)
+		pbChain, err := chainToProtobuf(c)
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "unknown error")
 		}
-
-		chains = append(chains, &pb.Chain{
-			ChainId:       c.ChainID,
-			Name:          c.Name,
-			DisplayName:   c.DisplayName,
-			RpcAddress:    c.Edges.RPCEndpoints[0].Endpoint,
-			Grantee:       grantee,
-			Denom:         "u" + c.AccountPrefix,
-			AccountPrefix: c.AccountPrefix,
-		})
+		chains = append(chains, pbChain)
 	}
 	return &pb.GetSupportedChainsResponse{Chains: chains}, nil
 }
@@ -129,20 +136,12 @@ func (server *VotePermissionServer) GetVotePermissions(ctx context.Context, _ *e
 	var vperms []*pb.VotePermission
 	for _, w := range wallets {
 		for _, g := range w.Edges.Grants {
-			grantee, err := getGranteeAddress(w.Edges.Chain)
+			pbChain, err := chainToProtobuf(w.Edges.Chain)
 			if err != nil {
 				return nil, status.Errorf(codes.Internal, "unknown error")
 			}
 			vperms = append(vperms, &pb.VotePermission{
-				Chain: &pb.Chain{
-					ChainId:       w.Edges.Chain.ChainID,
-					Name:          w.Edges.Chain.Name,
-					DisplayName:   w.Edges.Chain.DisplayName,
-					RpcAddress:    server.chainManager.GetFirstRpc(w.Edges.Chain).Endpoint,
-					Grantee:       grantee,
-					Denom:         "u" + w.Edges.Chain.AccountPrefix,
-					AccountPrefix: w.Edges.Chain.AccountPrefix,
-				},
+				Chain:   pbChain,
 				Granter: w.Address,
 				ExpiresAt: &timestamppb.Timestamp{
 					Seconds: g.ExpiresAt.Unix(),

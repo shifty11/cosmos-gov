@@ -18,6 +18,8 @@ var (
 		{Name: "name", Type: field.TypeString, Unique: true},
 		{Name: "display_name", Type: field.TypeString, Unique: true},
 		{Name: "is_enabled", Type: field.TypeBool, Default: false},
+		{Name: "is_voting_enabled", Type: field.TypeBool, Default: false},
+		{Name: "is_feegrant_used", Type: field.TypeBool, Default: false},
 	}
 	// ChainsTable holds the schema information for the "chains" table.
 	ChainsTable = &schema.Table{

@@ -30,7 +30,9 @@ func (manager *WalletManager) ByUser(entUser *ent.User) ([]*ent.Wallet, error) {
 	return entUser.
 		QueryWallets().
 		WithGrants().
-		WithChain().
+		WithChain(func(q *ent.ChainQuery) {
+			q.WithRPCEndpoints()
+		}).
 		All(manager.ctx)
 }
 

@@ -40,6 +40,14 @@ func init() {
 	chainDescIsEnabled := chainFields[4].Descriptor()
 	// chain.DefaultIsEnabled holds the default value on creation for the is_enabled field.
 	chain.DefaultIsEnabled = chainDescIsEnabled.Default.(bool)
+	// chainDescIsVotingEnabled is the schema descriptor for is_voting_enabled field.
+	chainDescIsVotingEnabled := chainFields[5].Descriptor()
+	// chain.DefaultIsVotingEnabled holds the default value on creation for the is_voting_enabled field.
+	chain.DefaultIsVotingEnabled = chainDescIsVotingEnabled.Default.(bool)
+	// chainDescIsFeegrantUsed is the schema descriptor for is_feegrant_used field.
+	chainDescIsFeegrantUsed := chainFields[6].Descriptor()
+	// chain.DefaultIsFeegrantUsed holds the default value on creation for the is_feegrant_used field.
+	chain.DefaultIsFeegrantUsed = chainDescIsFeegrantUsed.Default.(bool)
 	discordchannelMixin := schema.DiscordChannel{}.Mixin()
 	discordchannelMixinFields0 := discordchannelMixin[0].Fields()
 	_ = discordchannelMixinFields0

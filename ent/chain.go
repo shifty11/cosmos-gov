@@ -30,6 +30,10 @@ type Chain struct {
 	DisplayName string `json:"display_name,omitempty"`
 	// IsEnabled holds the value of the "is_enabled" field.
 	IsEnabled bool `json:"is_enabled,omitempty"`
+	// IsVotingEnabled holds the value of the "is_voting_enabled" field.
+	IsVotingEnabled bool `json:"is_voting_enabled,omitempty"`
+	// IsFeegrantUsed holds the value of the "is_feegrant_used" field.
+	IsFeegrantUsed bool `json:"is_feegrant_used,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ChainQuery when eager-loading is set.
 	Edges ChainEdges `json:"edges"`
@@ -102,7 +106,7 @@ func (*Chain) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case chain.FieldIsEnabled:
+		case chain.FieldIsEnabled, chain.FieldIsVotingEnabled, chain.FieldIsFeegrantUsed:
 			values[i] = new(sql.NullBool)
 		case chain.FieldID:
 			values[i] = new(sql.NullInt64)
@@ -173,6 +177,18 @@ func (c *Chain) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				c.IsEnabled = value.Bool
 			}
+		case chain.FieldIsVotingEnabled:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field is_voting_enabled", values[i])
+			} else if value.Valid {
+				c.IsVotingEnabled = value.Bool
+			}
+		case chain.FieldIsFeegrantUsed:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field is_feegrant_used", values[i])
+			} else if value.Valid {
+				c.IsFeegrantUsed = value.Bool
+			}
 		}
 	}
 	return nil
@@ -240,6 +256,10 @@ func (c *Chain) String() string {
 	builder.WriteString(c.DisplayName)
 	builder.WriteString(", is_enabled=")
 	builder.WriteString(fmt.Sprintf("%v", c.IsEnabled))
+	builder.WriteString(", is_voting_enabled=")
+	builder.WriteString(fmt.Sprintf("%v", c.IsVotingEnabled))
+	builder.WriteString(", is_feegrant_used=")
+	builder.WriteString(fmt.Sprintf("%v", c.IsFeegrantUsed))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -29,21 +29,6 @@ type ChainQueryOptions struct {
 	WithRpcAddresses bool
 }
 
-//
-//func (manager *ChainManager) ByName(name string, options *ChainQueryOptions) (*ent.Chain, error) {
-//	q := manager.client.Chain.
-//		Query().
-//		Where(chain.NameEQ(name))
-//	if options != nil && options.WithWallets {
-//		q.WithWallets(func(q *ent.WalletQuery) {
-//			if options.WithGrants {
-//				q.WithGrants()
-//			}
-//		})
-//	}
-//	return q.Only(manager.ctx)
-//}
-
 func (manager *ChainManager) ByName(name string) (*ent.Chain, error) {
 	return manager.client.Chain.
 		Query().
@@ -64,6 +49,22 @@ func (manager *ChainManager) Enabled(options *ChainQueryOptions) []*ent.Chain {
 		log.Sugar.Panicf("Error while querying enabled chains: %v", err)
 	}
 	return allChains
+}
+
+func (manager *ChainManager) CanVote() []*ent.Chain {
+	chains, err := manager.client.Chain.
+		Query().
+		Where(chain.And(
+			chain.IsEnabledEQ(true),
+			chain.IsVotingEnabled(true),
+		)).
+		WithRPCEndpoints().
+		Order(ent.Asc(chain.FieldDisplayName)).
+		All(manager.ctx)
+	if err != nil {
+		log.Sugar.Panicf("Error while querying enabled chains: %v", err)
+	}
+	return chains
 }
 
 func (manager *ChainManager) All() []*ent.Chain {
@@ -88,7 +89,7 @@ func (manager *ChainManager) EnableOrDisableChain(chainName string) (*ent.Chain,
 		Save(manager.ctx)
 }
 
-func (manager *ChainManager) Update(name string, isEnabled bool) (*ent.Chain, error) {
+func (manager *ChainManager) Update(name string, isEnabled bool, isVotingEnabled bool, isFeegrantUsed bool) (*ent.Chain, error) {
 	entChain, err := manager.ByName(name)
 	if err != nil {
 		return nil, err
@@ -96,6 +97,8 @@ func (manager *ChainManager) Update(name string, isEnabled bool) (*ent.Chain, er
 	return manager.client.Chain.
 		UpdateOne(entChain).
 		SetIsEnabled(isEnabled).
+		SetIsVotingEnabled(isVotingEnabled).
+		SetIsFeegrantUsed(isFeegrantUsed).
 		Save(manager.ctx)
 }
 

@@ -142,6 +142,20 @@ func IsEnabled(v bool) predicate.Chain {
 	})
 }
 
+// IsVotingEnabled applies equality check predicate on the "is_voting_enabled" field. It's identical to IsVotingEnabledEQ.
+func IsVotingEnabled(v bool) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldIsVotingEnabled), v))
+	})
+}
+
+// IsFeegrantUsed applies equality check predicate on the "is_feegrant_used" field. It's identical to IsFeegrantUsedEQ.
+func IsFeegrantUsed(v bool) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldIsFeegrantUsed), v))
+	})
+}
+
 // CreateTimeEQ applies the EQ predicate on the "create_time" field.
 func CreateTimeEQ(v time.Time) predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {
@@ -749,6 +763,34 @@ func IsEnabledEQ(v bool) predicate.Chain {
 func IsEnabledNEQ(v bool) predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldIsEnabled), v))
+	})
+}
+
+// IsVotingEnabledEQ applies the EQ predicate on the "is_voting_enabled" field.
+func IsVotingEnabledEQ(v bool) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldIsVotingEnabled), v))
+	})
+}
+
+// IsVotingEnabledNEQ applies the NEQ predicate on the "is_voting_enabled" field.
+func IsVotingEnabledNEQ(v bool) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldIsVotingEnabled), v))
+	})
+}
+
+// IsFeegrantUsedEQ applies the EQ predicate on the "is_feegrant_used" field.
+func IsFeegrantUsedEQ(v bool) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldIsFeegrantUsed), v))
+	})
+}
+
+// IsFeegrantUsedNEQ applies the NEQ predicate on the "is_feegrant_used" field.
+func IsFeegrantUsedNEQ(v bool) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldIsFeegrantUsed), v))
 	})
 }
 

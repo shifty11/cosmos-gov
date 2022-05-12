@@ -91,6 +91,34 @@ func (cc *ChainCreate) SetNillableIsEnabled(b *bool) *ChainCreate {
 	return cc
 }
 
+// SetIsVotingEnabled sets the "is_voting_enabled" field.
+func (cc *ChainCreate) SetIsVotingEnabled(b bool) *ChainCreate {
+	cc.mutation.SetIsVotingEnabled(b)
+	return cc
+}
+
+// SetNillableIsVotingEnabled sets the "is_voting_enabled" field if the given value is not nil.
+func (cc *ChainCreate) SetNillableIsVotingEnabled(b *bool) *ChainCreate {
+	if b != nil {
+		cc.SetIsVotingEnabled(*b)
+	}
+	return cc
+}
+
+// SetIsFeegrantUsed sets the "is_feegrant_used" field.
+func (cc *ChainCreate) SetIsFeegrantUsed(b bool) *ChainCreate {
+	cc.mutation.SetIsFeegrantUsed(b)
+	return cc
+}
+
+// SetNillableIsFeegrantUsed sets the "is_feegrant_used" field if the given value is not nil.
+func (cc *ChainCreate) SetNillableIsFeegrantUsed(b *bool) *ChainCreate {
+	if b != nil {
+		cc.SetIsFeegrantUsed(*b)
+	}
+	return cc
+}
+
 // AddProposalIDs adds the "proposals" edge to the Proposal entity by IDs.
 func (cc *ChainCreate) AddProposalIDs(ids ...int) *ChainCreate {
 	cc.mutation.AddProposalIDs(ids...)
@@ -249,6 +277,14 @@ func (cc *ChainCreate) defaults() {
 		v := chain.DefaultIsEnabled
 		cc.mutation.SetIsEnabled(v)
 	}
+	if _, ok := cc.mutation.IsVotingEnabled(); !ok {
+		v := chain.DefaultIsVotingEnabled
+		cc.mutation.SetIsVotingEnabled(v)
+	}
+	if _, ok := cc.mutation.IsFeegrantUsed(); !ok {
+		v := chain.DefaultIsFeegrantUsed
+		cc.mutation.SetIsFeegrantUsed(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -273,6 +309,12 @@ func (cc *ChainCreate) check() error {
 	}
 	if _, ok := cc.mutation.IsEnabled(); !ok {
 		return &ValidationError{Name: "is_enabled", err: errors.New(`ent: missing required field "Chain.is_enabled"`)}
+	}
+	if _, ok := cc.mutation.IsVotingEnabled(); !ok {
+		return &ValidationError{Name: "is_voting_enabled", err: errors.New(`ent: missing required field "Chain.is_voting_enabled"`)}
+	}
+	if _, ok := cc.mutation.IsFeegrantUsed(); !ok {
+		return &ValidationError{Name: "is_feegrant_used", err: errors.New(`ent: missing required field "Chain.is_feegrant_used"`)}
 	}
 	return nil
 }
@@ -356,6 +398,22 @@ func (cc *ChainCreate) createSpec() (*Chain, *sqlgraph.CreateSpec) {
 			Column: chain.FieldIsEnabled,
 		})
 		_node.IsEnabled = value
+	}
+	if value, ok := cc.mutation.IsVotingEnabled(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: chain.FieldIsVotingEnabled,
+		})
+		_node.IsVotingEnabled = value
+	}
+	if value, ok := cc.mutation.IsFeegrantUsed(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: chain.FieldIsFeegrantUsed,
+		})
+		_node.IsFeegrantUsed = value
 	}
 	if nodes := cc.mutation.ProposalsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

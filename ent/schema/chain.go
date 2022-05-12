@@ -32,6 +32,10 @@ func (Chain) Fields() []ent.Field {
 			Unique(),
 		field.Bool("is_enabled").
 			Default(false),
+		field.Bool("is_voting_enabled").
+			Default(false),
+		field.Bool("is_feegrant_used").
+			Default(false),
 	}
 }
 

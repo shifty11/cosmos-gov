@@ -56,6 +56,8 @@ type ChainMutation struct {
 	name                    *string
 	display_name            *string
 	is_enabled              *bool
+	is_voting_enabled       *bool
+	is_feegrant_used        *bool
 	clearedFields           map[string]struct{}
 	proposals               map[int]struct{}
 	removedproposals        map[int]struct{}
@@ -427,6 +429,78 @@ func (m *ChainMutation) ResetIsEnabled() {
 	m.is_enabled = nil
 }
 
+// SetIsVotingEnabled sets the "is_voting_enabled" field.
+func (m *ChainMutation) SetIsVotingEnabled(b bool) {
+	m.is_voting_enabled = &b
+}
+
+// IsVotingEnabled returns the value of the "is_voting_enabled" field in the mutation.
+func (m *ChainMutation) IsVotingEnabled() (r bool, exists bool) {
+	v := m.is_voting_enabled
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsVotingEnabled returns the old "is_voting_enabled" field's value of the Chain entity.
+// If the Chain object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ChainMutation) OldIsVotingEnabled(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsVotingEnabled is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsVotingEnabled requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsVotingEnabled: %w", err)
+	}
+	return oldValue.IsVotingEnabled, nil
+}
+
+// ResetIsVotingEnabled resets all changes to the "is_voting_enabled" field.
+func (m *ChainMutation) ResetIsVotingEnabled() {
+	m.is_voting_enabled = nil
+}
+
+// SetIsFeegrantUsed sets the "is_feegrant_used" field.
+func (m *ChainMutation) SetIsFeegrantUsed(b bool) {
+	m.is_feegrant_used = &b
+}
+
+// IsFeegrantUsed returns the value of the "is_feegrant_used" field in the mutation.
+func (m *ChainMutation) IsFeegrantUsed() (r bool, exists bool) {
+	v := m.is_feegrant_used
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsFeegrantUsed returns the old "is_feegrant_used" field's value of the Chain entity.
+// If the Chain object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ChainMutation) OldIsFeegrantUsed(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsFeegrantUsed is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsFeegrantUsed requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsFeegrantUsed: %w", err)
+	}
+	return oldValue.IsFeegrantUsed, nil
+}
+
+// ResetIsFeegrantUsed resets all changes to the "is_feegrant_used" field.
+func (m *ChainMutation) ResetIsFeegrantUsed() {
+	m.is_feegrant_used = nil
+}
+
 // AddProposalIDs adds the "proposals" edge to the Proposal entity by ids.
 func (m *ChainMutation) AddProposalIDs(ids ...int) {
 	if m.proposals == nil {
@@ -716,7 +790,7 @@ func (m *ChainMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ChainMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 9)
 	if m.create_time != nil {
 		fields = append(fields, chain.FieldCreateTime)
 	}
@@ -737,6 +811,12 @@ func (m *ChainMutation) Fields() []string {
 	}
 	if m.is_enabled != nil {
 		fields = append(fields, chain.FieldIsEnabled)
+	}
+	if m.is_voting_enabled != nil {
+		fields = append(fields, chain.FieldIsVotingEnabled)
+	}
+	if m.is_feegrant_used != nil {
+		fields = append(fields, chain.FieldIsFeegrantUsed)
 	}
 	return fields
 }
@@ -760,6 +840,10 @@ func (m *ChainMutation) Field(name string) (ent.Value, bool) {
 		return m.DisplayName()
 	case chain.FieldIsEnabled:
 		return m.IsEnabled()
+	case chain.FieldIsVotingEnabled:
+		return m.IsVotingEnabled()
+	case chain.FieldIsFeegrantUsed:
+		return m.IsFeegrantUsed()
 	}
 	return nil, false
 }
@@ -783,6 +867,10 @@ func (m *ChainMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldDisplayName(ctx)
 	case chain.FieldIsEnabled:
 		return m.OldIsEnabled(ctx)
+	case chain.FieldIsVotingEnabled:
+		return m.OldIsVotingEnabled(ctx)
+	case chain.FieldIsFeegrantUsed:
+		return m.OldIsFeegrantUsed(ctx)
 	}
 	return nil, fmt.Errorf("unknown Chain field %s", name)
 }
@@ -840,6 +928,20 @@ func (m *ChainMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetIsEnabled(v)
+		return nil
+	case chain.FieldIsVotingEnabled:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsVotingEnabled(v)
+		return nil
+	case chain.FieldIsFeegrantUsed:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsFeegrantUsed(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Chain field %s", name)
@@ -910,6 +1012,12 @@ func (m *ChainMutation) ResetField(name string) error {
 		return nil
 	case chain.FieldIsEnabled:
 		m.ResetIsEnabled()
+		return nil
+	case chain.FieldIsVotingEnabled:
+		m.ResetIsVotingEnabled()
+		return nil
+	case chain.FieldIsFeegrantUsed:
+		m.ResetIsFeegrantUsed()
 		return nil
 	}
 	return fmt.Errorf("unknown Chain field %s", name)

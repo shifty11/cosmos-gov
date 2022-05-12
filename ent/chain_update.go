@@ -77,6 +77,34 @@ func (cu *ChainUpdate) SetNillableIsEnabled(b *bool) *ChainUpdate {
 	return cu
 }
 
+// SetIsVotingEnabled sets the "is_voting_enabled" field.
+func (cu *ChainUpdate) SetIsVotingEnabled(b bool) *ChainUpdate {
+	cu.mutation.SetIsVotingEnabled(b)
+	return cu
+}
+
+// SetNillableIsVotingEnabled sets the "is_voting_enabled" field if the given value is not nil.
+func (cu *ChainUpdate) SetNillableIsVotingEnabled(b *bool) *ChainUpdate {
+	if b != nil {
+		cu.SetIsVotingEnabled(*b)
+	}
+	return cu
+}
+
+// SetIsFeegrantUsed sets the "is_feegrant_used" field.
+func (cu *ChainUpdate) SetIsFeegrantUsed(b bool) *ChainUpdate {
+	cu.mutation.SetIsFeegrantUsed(b)
+	return cu
+}
+
+// SetNillableIsFeegrantUsed sets the "is_feegrant_used" field if the given value is not nil.
+func (cu *ChainUpdate) SetNillableIsFeegrantUsed(b *bool) *ChainUpdate {
+	if b != nil {
+		cu.SetIsFeegrantUsed(*b)
+	}
+	return cu
+}
+
 // AddProposalIDs adds the "proposals" edge to the Proposal entity by IDs.
 func (cu *ChainUpdate) AddProposalIDs(ids ...int) *ChainUpdate {
 	cu.mutation.AddProposalIDs(ids...)
@@ -383,6 +411,20 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeBool,
 			Value:  value,
 			Column: chain.FieldIsEnabled,
+		})
+	}
+	if value, ok := cu.mutation.IsVotingEnabled(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: chain.FieldIsVotingEnabled,
+		})
+	}
+	if value, ok := cu.mutation.IsFeegrantUsed(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: chain.FieldIsFeegrantUsed,
 		})
 	}
 	if cu.mutation.ProposalsCleared() {
@@ -718,6 +760,34 @@ func (cuo *ChainUpdateOne) SetNillableIsEnabled(b *bool) *ChainUpdateOne {
 	return cuo
 }
 
+// SetIsVotingEnabled sets the "is_voting_enabled" field.
+func (cuo *ChainUpdateOne) SetIsVotingEnabled(b bool) *ChainUpdateOne {
+	cuo.mutation.SetIsVotingEnabled(b)
+	return cuo
+}
+
+// SetNillableIsVotingEnabled sets the "is_voting_enabled" field if the given value is not nil.
+func (cuo *ChainUpdateOne) SetNillableIsVotingEnabled(b *bool) *ChainUpdateOne {
+	if b != nil {
+		cuo.SetIsVotingEnabled(*b)
+	}
+	return cuo
+}
+
+// SetIsFeegrantUsed sets the "is_feegrant_used" field.
+func (cuo *ChainUpdateOne) SetIsFeegrantUsed(b bool) *ChainUpdateOne {
+	cuo.mutation.SetIsFeegrantUsed(b)
+	return cuo
+}
+
+// SetNillableIsFeegrantUsed sets the "is_feegrant_used" field if the given value is not nil.
+func (cuo *ChainUpdateOne) SetNillableIsFeegrantUsed(b *bool) *ChainUpdateOne {
+	if b != nil {
+		cuo.SetIsFeegrantUsed(*b)
+	}
+	return cuo
+}
+
 // AddProposalIDs adds the "proposals" edge to the Proposal entity by IDs.
 func (cuo *ChainUpdateOne) AddProposalIDs(ids ...int) *ChainUpdateOne {
 	cuo.mutation.AddProposalIDs(ids...)
@@ -1048,6 +1118,20 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 			Type:   field.TypeBool,
 			Value:  value,
 			Column: chain.FieldIsEnabled,
+		})
+	}
+	if value, ok := cuo.mutation.IsVotingEnabled(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: chain.FieldIsVotingEnabled,
+		})
+	}
+	if value, ok := cuo.mutation.IsFeegrantUsed(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: chain.FieldIsFeegrantUsed,
 		})
 	}
 	if cuo.mutation.ProposalsCleared() {

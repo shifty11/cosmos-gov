@@ -25,6 +25,10 @@ const (
 	FieldDisplayName = "display_name"
 	// FieldIsEnabled holds the string denoting the is_enabled field in the database.
 	FieldIsEnabled = "is_enabled"
+	// FieldIsVotingEnabled holds the string denoting the is_voting_enabled field in the database.
+	FieldIsVotingEnabled = "is_voting_enabled"
+	// FieldIsFeegrantUsed holds the string denoting the is_feegrant_used field in the database.
+	FieldIsFeegrantUsed = "is_feegrant_used"
 	// EdgeProposals holds the string denoting the proposals edge name in mutations.
 	EdgeProposals = "proposals"
 	// EdgeTelegramChats holds the string denoting the telegram_chats edge name in mutations.
@@ -80,6 +84,8 @@ var Columns = []string{
 	FieldName,
 	FieldDisplayName,
 	FieldIsEnabled,
+	FieldIsVotingEnabled,
+	FieldIsFeegrantUsed,
 }
 
 var (
@@ -110,4 +116,8 @@ var (
 	UpdateDefaultUpdateTime func() time.Time
 	// DefaultIsEnabled holds the default value on creation for the "is_enabled" field.
 	DefaultIsEnabled bool
+	// DefaultIsVotingEnabled holds the default value on creation for the "is_voting_enabled" field.
+	DefaultIsVotingEnabled bool
+	// DefaultIsFeegrantUsed holds the default value on creation for the "is_feegrant_used" field.
+	DefaultIsFeegrantUsed bool
 )
