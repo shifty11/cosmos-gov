@@ -5,7 +5,9 @@ import (
 	"github.com/shifty11/cosmos-gov/ent"
 	"github.com/shifty11/cosmos-gov/ent/chain"
 	"github.com/shifty11/cosmos-gov/ent/grant"
+	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/ent/wallet"
+	"github.com/shifty11/cosmos-gov/log"
 	"time"
 )
 
@@ -43,6 +45,44 @@ func (manager *WalletManager) ByUserAndChain(entUser *ent.User, entChain *ent.Ch
 		WithChain().
 		Where(wallet.HasChainWith(chain.ChainID(entChain.ChainID))).
 		All(manager.ctx)
+}
+
+func (manager *WalletManager) ByUserAndAddress(entUser *ent.User, address string) (*ent.Wallet, error) {
+	return entUser.
+		QueryWallets().
+		WithGrants().
+		WithChain(func(q *ent.ChainQuery) {
+			q.WithRPCEndpoints()
+		}).
+		Where(wallet.And(
+			wallet.HasUsersWith(user.IDEQ(entUser.ID)),
+			wallet.AddressEQ(address),
+		)).
+		Only(manager.ctx)
+}
+
+func (manager *WalletManager) Exists(entUser *ent.User, entChain *ent.Chain, address string) bool {
+	exists, err := manager.client.Wallet.
+		Query().
+		Where(wallet.And(
+			wallet.HasUsersWith(user.IDEQ(entUser.ID)),
+			wallet.HasChainWith(chain.IDEQ(entChain.ID)),
+			wallet.AddressEQ(address),
+		)).
+		Exist(manager.ctx)
+	if err != nil {
+		log.Sugar.Panicf("while querying wallet of user %v (%v)", entUser.Name, entUser.UserID)
+	}
+	return exists
+}
+
+func (manager *WalletManager) Create(entUser *ent.User, entChain *ent.Chain, address string) (*ent.Wallet, error) {
+	return manager.client.Wallet.
+		Create().
+		SetAddress(address).
+		SetChain(entChain).
+		AddUsers(entUser).
+		Save(manager.ctx)
 }
 
 type GrantData struct {
@@ -131,5 +171,15 @@ func (manager *WalletManager) DeleteGrant(chainName string, granter string, gran
 				wallet.AddressEQ(granter),
 				wallet.HasChainWith(chain.NameEQ(chainName)),
 			))).
+		Exec(manager.ctx)
+}
+
+func (manager *WalletManager) Delete(entUser *ent.User, address string) (int, error) {
+	return manager.client.Wallet.
+		Delete().
+		Where(wallet.And(
+			wallet.AddressEQ(address),
+			wallet.HasUsersWith(user.IDEQ(entUser.ID)),
+		)).
 		Exec(manager.ctx)
 }

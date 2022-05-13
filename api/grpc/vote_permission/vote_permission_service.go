@@ -2,6 +2,7 @@ package vote_permission
 
 import (
 	"context"
+	"fmt"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	pb "github.com/shifty11/cosmos-gov/api/grpc/protobuf/go/vote_permission_service"
 	"github.com/shifty11/cosmos-gov/authz"
@@ -48,14 +49,35 @@ func chainToProtobuf(c *ent.Chain) (*pb.Chain, error) {
 		return nil, err
 	}
 	return &pb.Chain{
-		ChainId:        c.ChainID,
-		Name:           c.Name,
-		DisplayName:    c.DisplayName,
-		RpcAddress:     c.Edges.RPCEndpoints[0].Endpoint,
+		ChainId:     c.ChainID,
+		Name:        c.Name,
+		DisplayName: c.DisplayName,
+		//RpcAddress:     c.Edges.RPCEndpoints[0].Endpoint,
+		RpcAddress:     fmt.Sprintf("https://rpc.cosmos.directory/%v", c.Name),
 		Grantee:        grantee,
 		Denom:          "u" + c.AccountPrefix,
 		AccountPrefix:  c.AccountPrefix,
 		IsFeegrantUsed: c.IsFeegrantUsed,
+	}, nil
+}
+
+func walletToProtobuf(wallet *ent.Wallet) (*pb.Wallet, error) {
+	pbChain, err := chainToProtobuf(wallet.Edges.Chain)
+	if err != nil {
+		return nil, err
+	}
+	var vperms []*pb.VotePermission
+	for _, g := range wallet.Edges.Grants {
+		vperms = append(vperms, &pb.VotePermission{
+			ExpiresAt: &timestamppb.Timestamp{
+				Seconds: g.ExpiresAt.Unix(),
+			},
+		})
+	}
+	return &pb.Wallet{
+		Chain:           pbChain,
+		Address:         wallet.Address,
+		VotePermissions: vperms,
 	}, nil
 }
 
@@ -76,51 +98,83 @@ func (server *VotePermissionServer) GetSupportedChains(context.Context, *emptypb
 	return &pb.GetSupportedChainsResponse{Chains: chains}, nil
 }
 
-func (server *VotePermissionServer) CreateVotePermission(ctx context.Context, req *pb.CreateVotePermissionRequest) (*pb.CreateVotePermissionResponse, error) {
+func (server *VotePermissionServer) RegisterWallet(ctx context.Context, req *pb.RegisterWalletRequest) (*emptypb.Empty, error) {
 	entUser, ok := ctx.Value("user").(*ent.User)
 	if !ok {
 		log.Sugar.Error("invalid user")
 		return nil, status.Errorf(codes.Internal, "invalid user")
 	}
 
-	if req.VotePermission == nil ||
-		req.VotePermission.Chain.Name == "" ||
-		req.VotePermission.Chain.DisplayName == "" ||
-		req.VotePermission.Chain.ChainId == "" ||
-		req.VotePermission.Chain.Grantee == "" ||
-		req.VotePermission.Granter == "" {
-		log.Sugar.Errorf("CreateVotePermission request doesn't have all the necessary arguments: %v", req.VotePermission.String())
+	if req.ChainName == "" || req.WalletAddress == "" {
+		log.Sugar.Errorf("RegisterWallet request doesn't have all the necessary arguments: %v", req.String())
 		return nil, status.Errorf(codes.InvalidArgument, "arguments are missing")
 	}
 
-	grant, err := server.authzClient.GetGrant(req.VotePermission.Chain.Name, req.VotePermission.Granter, req.VotePermission.Chain.Grantee)
+	//TODO: make this with streaming -> client opens request -> gets a random token -> sends token as memo -> sends response that it's done -> server checks and creates wallet if successful
+	entChain, err := server.chainManager.ByName(req.ChainName)
 	if err != nil {
-		log.Sugar.Errorf("Error while getting grants for user %v (%v): %v", entUser.Name, entUser.ID, err)
-		return nil, status.Errorf(codes.Internal, "bad request")
-	}
-	if grant == nil {
-		log.Sugar.Errorf("Grant for user %v (%v) was not found", entUser.Name, entUser.ID)
-		return nil, status.Errorf(codes.NotFound, "grant was not found")
+		log.Sugar.Errorf("Error while getting chain %v for user %v (%v): %v", req.ChainName, entUser.Name, entUser.ID, err)
+		return nil, status.Errorf(codes.Internal, "unknown error")
 	}
 
-	entGrant, err := server.walletManager.SaveGrant(entUser, req.VotePermission.Chain.Name, grant)
+	if server.walletManager.Exists(entUser, entChain, req.WalletAddress) {
+		return &emptypb.Empty{}, nil
+	}
+
+	_, err = server.walletManager.Create(entUser, entChain, req.WalletAddress)
 	if err != nil {
-		log.Sugar.Errorf("Error while saving grants for user %v (%v): %v", entUser.Name, entUser.ID, err)
+		log.Sugar.Errorf("Error while creating wallet for user %v (%v): %v", entUser.Name, entUser.ID, err)
+		return nil, status.Errorf(codes.Internal, "unknown error")
+	}
+
+	grantee, err := getGranteeAddress(entChain)
+	if err != nil {
+		log.Sugar.Errorf("Error while getting grantee address for user %v (%v): %v", entUser.Name, entUser.ID, err)
+		return nil, status.Errorf(codes.Internal, "bad request")
+	}
+
+	grant, err := server.authzClient.GetGrant(req.ChainName, req.WalletAddress, grantee)
+	if err != nil {
+		log.Sugar.Errorf("Error while getting grants for user %v (%v): %v", entUser.Name, entUser.ID, err)
+		//return nil, status.Errorf(codes.Internal, "bad request")
+		//TODO: check if this is proper
+		return &emptypb.Empty{}, nil
+	}
+
+	if grant == nil {
+		return &emptypb.Empty{}, nil
+	}
+	_, err = server.walletManager.SaveGrant(entUser, req.ChainName, grant)
+	if err != nil {
+		log.Sugar.Errorf("Error while saving grant for user %v (%v): %v", entUser.Name, entUser.ID, err)
 		return nil, status.Errorf(codes.Internal, "could not save grant")
 	}
 
-	var votePerm = &pb.VotePermission{
-		Chain:   req.VotePermission.Chain,
-		Granter: req.VotePermission.Granter,
-		ExpiresAt: &timestamppb.Timestamp{
-			Seconds: entGrant.ExpiresAt.Unix(),
-		},
-	}
-	var res = &pb.CreateVotePermissionResponse{VotePermission: votePerm}
-	return res, nil
+	return &emptypb.Empty{}, nil
 }
 
-func (server *VotePermissionServer) GetVotePermissions(ctx context.Context, _ *emptypb.Empty) (*pb.GetVotePermissionsResponse, error) {
+func (server *VotePermissionServer) RemoveWallet(ctx context.Context, req *pb.RemoveWalletRequest) (*emptypb.Empty, error) {
+	entUser, ok := ctx.Value("user").(*ent.User)
+	if !ok {
+		log.Sugar.Error("invalid user")
+		return nil, status.Errorf(codes.Internal, "invalid user")
+	}
+
+	if req.WalletAddress == "" {
+		log.Sugar.Errorf("RemoveWallet request doesn't have all the necessary arguments: %v", req.String())
+		return nil, status.Errorf(codes.InvalidArgument, "arguments are missing")
+	}
+
+	_, err := server.walletManager.Delete(entUser, req.WalletAddress)
+	if err != nil {
+		log.Sugar.Errorf("Error while deleting wallet of user %v (%v): %v", entUser.Name, entUser.ID, err)
+		return nil, status.Errorf(codes.InvalidArgument, "arguments are missing")
+	}
+
+	return &emptypb.Empty{}, nil
+}
+
+func (server *VotePermissionServer) GetWallets(ctx context.Context, _ *emptypb.Empty) (*pb.GetWalletsResponse, error) {
 	entUser, ok := ctx.Value("user").(*ent.User)
 	if !ok {
 		log.Sugar.Error("invalid user")
@@ -133,23 +187,15 @@ func (server *VotePermissionServer) GetVotePermissions(ctx context.Context, _ *e
 		return nil, status.Errorf(codes.Internal, "unknown error")
 	}
 
-	var vperms []*pb.VotePermission
+	var pbWallets []*pb.Wallet
 	for _, w := range wallets {
-		for _, g := range w.Edges.Grants {
-			pbChain, err := chainToProtobuf(w.Edges.Chain)
-			if err != nil {
-				return nil, status.Errorf(codes.Internal, "unknown error")
-			}
-			vperms = append(vperms, &pb.VotePermission{
-				Chain:   pbChain,
-				Granter: w.Address,
-				ExpiresAt: &timestamppb.Timestamp{
-					Seconds: g.ExpiresAt.Unix(),
-				},
-			})
+		pbWallet, err := walletToProtobuf(w)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "unknown error")
 		}
+		pbWallets = append(pbWallets, pbWallet)
 	}
-	var res = &pb.GetVotePermissionsResponse{VotePermissions: vperms}
+	var res = &pb.GetWalletsResponse{Wallets: pbWallets}
 	return res, nil
 }
 
@@ -160,18 +206,34 @@ func (server *VotePermissionServer) RefreshVotePermission(ctx context.Context, r
 		return nil, status.Errorf(codes.Internal, "invalid user")
 	}
 
-	grant, err := server.authzClient.GetGrant(req.VotePermission.Chain.Name, req.VotePermission.Granter, req.VotePermission.Chain.Grantee)
+	wallet, err := server.walletManager.ByUserAndAddress(entUser, req.Granter)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "unknown error")
+	}
+
+	grant, err := server.authzClient.GetGrant(req.ChainName, req.Granter, req.Grantee)
 	if grant == nil && err != nil {
-		_, err = server.walletManager.DeleteGrant(req.VotePermission.Chain.Name, req.VotePermission.Granter, req.VotePermission.Chain.Grantee)
+		_, err = server.walletManager.DeleteGrant(req.ChainName, req.Granter, req.Grantee)
 		if err != nil {
 			log.Sugar.Errorf("Error while deleting grants for user %v (%v): %v", entUser.Name, entUser.ID, err)
 			return nil, status.Errorf(codes.Internal, "bad request")
 		}
 		return &pb.RefreshVotePermissionResponse{}, nil
+	} else if grant != nil && err == nil {
+		_, err := server.walletManager.SaveGrant(entUser, req.ChainName, grant)
+		if err != nil {
+			return nil, err
+		}
+		if err != nil {
+			log.Sugar.Errorf("Error while creating grants for user %v (%v): %v", entUser.Name, entUser.ID, err)
+			return nil, status.Errorf(codes.Internal, "bad request")
+		}
 	}
-	return &pb.RefreshVotePermissionResponse{VotePermission: &pb.VotePermission{
-		Chain:     req.VotePermission.Chain,
-		Granter:   grant.Granter,
-		ExpiresAt: &timestamppb.Timestamp{Seconds: grant.ExpiresAt.Unix()},
-	}}, nil
+
+	pbWallet, err := walletToProtobuf(wallet)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "unknown error")
+	}
+
+	return &pb.RefreshVotePermissionResponse{Wallet: pbWallet}, nil
 }
