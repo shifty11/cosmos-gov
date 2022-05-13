@@ -7,6 +7,7 @@ import (
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/ent"
+	"github.com/shifty11/cosmos-gov/log"
 )
 
 //goland:noinspection GoNameStartsWithPackageName
@@ -106,6 +107,8 @@ func (client AuthzClient) GetVoteStatus(entUser *ent.User, chainName string, pro
 		return govtypes.OptionEmpty, nil
 	}
 
+	log.Sugar.Debugf("Query vote for Proposal %v on %v for user %v (%v)", proposalId, chainName, entUser.Name, entUser.UserID)
+
 	vote, err := lensClient.QueryGovVote(client.ctx, proposalId, wallets[0].Address)
 	if err != nil {
 		return govtypes.OptionEmpty, err
@@ -145,6 +148,8 @@ func (client AuthzClient) ExecAuthzVote(entUser *ent.User, voteData *VoteData) e
 	if len(addresses) == 0 {
 		return nil
 	}
+
+	log.Sugar.Debugf("Execute vote for Proposal %v on %v for user %v (%v)", voteData.ProposalId, voteData.ChainName, entUser.Name, entUser.UserID)
 
 	result, err := lensClient.ExecAuthzVote(client.ctx, addresses, grantee, voteData.ProposalId, voteData.Vote, 200000)
 	if err != nil {
