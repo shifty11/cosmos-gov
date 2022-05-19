@@ -24,6 +24,15 @@ import (
 var json = jsontime.ConfigWithCustomTimeFormat
 var stripPolicy = bluemonday.StrictPolicy()
 
+func sanitizeTitle(title string) string { // Removes first character if it is not a letter
+	r := regexp.MustCompile("[a-zA-Z]+")
+	result := r.FindString(string(title[0]))
+	if result == "" {
+		return title[1:]
+	}
+	return title
+}
+
 func extractContentByRegEx(value []byte) (*database.ProposalContent, error) {
 	r := regexp.MustCompile("[ -~]+") // search for all printable characters
 	result := r.FindAll(value[1:], -1)
@@ -31,7 +40,7 @@ func extractContentByRegEx(value []byte) (*database.ProposalContent, error) {
 		description := strings.Replace(string(result[1]), "\\n", "\n", -1)
 		description = stripPolicy.Sanitize(description)
 		return &database.ProposalContent{
-			Title:       string(result[0])[1:],
+			Title:       sanitizeTitle(string(result[0])),
 			Description: description,
 		}, nil
 	}
@@ -220,6 +229,9 @@ func (ds Datasource) FetchProposals() {
 	log.Sugar.Info("Fetch proposals")
 	chains := ds.chainManager.All()
 	for _, c := range chains {
+		//if c.Name != "crescent" {
+		//	continue
+		//}
 		client, err := ds.chainManager.BuildLensClient(c)
 		if err != nil {
 			log.Sugar.Errorf("Could not get client for chain %v. It's probably not saved into the db.", c.Name)
