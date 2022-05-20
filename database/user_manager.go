@@ -33,7 +33,7 @@ func (manager *UserManager) ByToken(userId int64, userType user.Type, token stri
 		Where(user.And(
 			user.UserIDEQ(userId),
 			user.TypeEQ(userType),
-			//user.LogingTokenEQ(token),	//TODO: add this line
+			user.LoginTokenEQ(token),
 		)).
 		Only(manager.ctx)
 }
