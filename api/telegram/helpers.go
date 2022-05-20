@@ -297,8 +297,12 @@ func getBotAdminMenuButtonRow(config BotAdminMenuButtonConfig) []Button {
 		button.WebApp = &tgbotapi.WebAppInfo{URL: os.Getenv("WEB_APP_URL")}
 		buttonRow = append(buttonRow, button)
 
+		url := os.Getenv("WEB_APP_URL")
+		if url == "" {
+			url = os.Getenv("WEB_APP_EXTERNAL_URL")
+		}
 		button = NewButton("⚙️Login", nil)
-		button.LoginURL = &tgbotapi.LoginURL{URL: os.Getenv("WEB_APP_URL")}
+		button.LoginURL = &tgbotapi.LoginURL{URL: url}
 		buttonRow = append(buttonRow, button)
 	}
 	return buttonRow
