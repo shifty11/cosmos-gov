@@ -19,12 +19,15 @@ func getApi() *tgbotapi.BotAPI {
 		if telegramToken == "" {
 			log.Sugar.Panic("you must provide a telegram token as env variable")
 		}
-		botApi, err := tgbotapi.NewBotAPI(telegramToken)
+		telegramEndpoint := os.Getenv("TELEGRAM_ENDPOINT")
+		if telegramEndpoint == "" {
+			telegramEndpoint = tgbotapi.APIEndpoint
+		}
+		botApi, err := tgbotapi.NewBotAPIWithAPIEndpoint(telegramToken, telegramEndpoint)
 		if err != nil {
 			log.Sugar.Panic(err)
 		}
 		_api = botApi
-		//_api.Debug = os.Getenv("DEBUG") == "true"
 	}
 	return _api
 }
