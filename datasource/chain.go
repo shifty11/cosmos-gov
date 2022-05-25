@@ -118,17 +118,12 @@ func (ds Datasource) AddNewChains() {
 				log.Sugar.Debugf("Chain '%v' has %v errors", chainName, err)
 				lensChainManager.AddErrorToLensChainInfo(chainName)
 			} else {
-				if len(proposals.Proposals) >= 1 {
-					chainEnt := chainManager.Create(chainInfo.ChainID, chainName, chainInfo.Bech32Prefix, rpcs)
-					for _, prop := range proposals.Proposals {
-						propManager.CreateOrUpdateProposal(&prop, chainEnt)
-					}
-					lensChainManager.DeleteLensChainInfo(chainName)
-					message += fmt.Sprintf("Added chain '%v' including %v proposals\n", chainName, len(proposals.Proposals))
-				} else {
-					log.Sugar.Debugf("Chain '%v' has no proposals", chainName)
-					lensChainManager.AddErrorToLensChainInfo(chainName)
+				chainEnt := chainManager.Create(chainInfo.ChainID, chainName, chainInfo.Bech32Prefix, rpcs)
+				for _, prop := range proposals.Proposals {
+					propManager.CreateOrUpdateProposal(&prop, chainEnt)
 				}
+				lensChainManager.DeleteLensChainInfo(chainName)
+				message += fmt.Sprintf("Added chain '%v' including %v proposals\n", chainName, len(proposals.Proposals))
 			}
 		}
 	}
