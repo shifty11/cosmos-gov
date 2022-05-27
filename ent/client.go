@@ -11,6 +11,7 @@ import (
 
 	"github.com/shifty11/cosmos-gov/ent/chain"
 	"github.com/shifty11/cosmos-gov/ent/discordchannel"
+	"github.com/shifty11/cosmos-gov/ent/draftproposal"
 	"github.com/shifty11/cosmos-gov/ent/grant"
 	"github.com/shifty11/cosmos-gov/ent/lenschaininfo"
 	"github.com/shifty11/cosmos-gov/ent/proposal"
@@ -33,6 +34,8 @@ type Client struct {
 	Chain *ChainClient
 	// DiscordChannel is the client for interacting with the DiscordChannel builders.
 	DiscordChannel *DiscordChannelClient
+	// DraftProposal is the client for interacting with the DraftProposal builders.
+	DraftProposal *DraftProposalClient
 	// Grant is the client for interacting with the Grant builders.
 	Grant *GrantClient
 	// LensChainInfo is the client for interacting with the LensChainInfo builders.
@@ -62,6 +65,7 @@ func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Chain = NewChainClient(c.config)
 	c.DiscordChannel = NewDiscordChannelClient(c.config)
+	c.DraftProposal = NewDraftProposalClient(c.config)
 	c.Grant = NewGrantClient(c.config)
 	c.LensChainInfo = NewLensChainInfoClient(c.config)
 	c.Proposal = NewProposalClient(c.config)
@@ -104,6 +108,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		config:         cfg,
 		Chain:          NewChainClient(cfg),
 		DiscordChannel: NewDiscordChannelClient(cfg),
+		DraftProposal:  NewDraftProposalClient(cfg),
 		Grant:          NewGrantClient(cfg),
 		LensChainInfo:  NewLensChainInfoClient(cfg),
 		Proposal:       NewProposalClient(cfg),
@@ -132,6 +137,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		config:         cfg,
 		Chain:          NewChainClient(cfg),
 		DiscordChannel: NewDiscordChannelClient(cfg),
+		DraftProposal:  NewDraftProposalClient(cfg),
 		Grant:          NewGrantClient(cfg),
 		LensChainInfo:  NewLensChainInfoClient(cfg),
 		Proposal:       NewProposalClient(cfg),
@@ -170,6 +176,7 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	c.Chain.Use(hooks...)
 	c.DiscordChannel.Use(hooks...)
+	c.DraftProposal.Use(hooks...)
 	c.Grant.Use(hooks...)
 	c.LensChainInfo.Use(hooks...)
 	c.Proposal.Use(hooks...)
@@ -273,6 +280,22 @@ func (c *ChainClient) QueryProposals(ch *Chain) *ProposalQuery {
 			sqlgraph.From(chain.Table, chain.FieldID, id),
 			sqlgraph.To(proposal.Table, proposal.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, chain.ProposalsTable, chain.ProposalsColumn),
+		)
+		fromV = sqlgraph.Neighbors(ch.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDraftProposals queries the draft_proposals edge of a Chain.
+func (c *ChainClient) QueryDraftProposals(ch *Chain) *DraftProposalQuery {
+	query := &DraftProposalQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ch.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(chain.Table, chain.FieldID, id),
+			sqlgraph.To(draftproposal.Table, draftproposal.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, chain.DraftProposalsTable, chain.DraftProposalsColumn),
 		)
 		fromV = sqlgraph.Neighbors(ch.driver.Dialect(), step)
 		return fromV, nil
@@ -469,6 +492,112 @@ func (c *DiscordChannelClient) QueryChains(dc *DiscordChannel) *ChainQuery {
 // Hooks returns the client hooks.
 func (c *DiscordChannelClient) Hooks() []Hook {
 	return c.hooks.DiscordChannel
+}
+
+// DraftProposalClient is a client for the DraftProposal schema.
+type DraftProposalClient struct {
+	config
+}
+
+// NewDraftProposalClient returns a client for the DraftProposal from the given config.
+func NewDraftProposalClient(c config) *DraftProposalClient {
+	return &DraftProposalClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `draftproposal.Hooks(f(g(h())))`.
+func (c *DraftProposalClient) Use(hooks ...Hook) {
+	c.hooks.DraftProposal = append(c.hooks.DraftProposal, hooks...)
+}
+
+// Create returns a create builder for DraftProposal.
+func (c *DraftProposalClient) Create() *DraftProposalCreate {
+	mutation := newDraftProposalMutation(c.config, OpCreate)
+	return &DraftProposalCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of DraftProposal entities.
+func (c *DraftProposalClient) CreateBulk(builders ...*DraftProposalCreate) *DraftProposalCreateBulk {
+	return &DraftProposalCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for DraftProposal.
+func (c *DraftProposalClient) Update() *DraftProposalUpdate {
+	mutation := newDraftProposalMutation(c.config, OpUpdate)
+	return &DraftProposalUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *DraftProposalClient) UpdateOne(dp *DraftProposal) *DraftProposalUpdateOne {
+	mutation := newDraftProposalMutation(c.config, OpUpdateOne, withDraftProposal(dp))
+	return &DraftProposalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *DraftProposalClient) UpdateOneID(id int) *DraftProposalUpdateOne {
+	mutation := newDraftProposalMutation(c.config, OpUpdateOne, withDraftProposalID(id))
+	return &DraftProposalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for DraftProposal.
+func (c *DraftProposalClient) Delete() *DraftProposalDelete {
+	mutation := newDraftProposalMutation(c.config, OpDelete)
+	return &DraftProposalDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *DraftProposalClient) DeleteOne(dp *DraftProposal) *DraftProposalDeleteOne {
+	return c.DeleteOneID(dp.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *DraftProposalClient) DeleteOneID(id int) *DraftProposalDeleteOne {
+	builder := c.Delete().Where(draftproposal.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &DraftProposalDeleteOne{builder}
+}
+
+// Query returns a query builder for DraftProposal.
+func (c *DraftProposalClient) Query() *DraftProposalQuery {
+	return &DraftProposalQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a DraftProposal entity by its id.
+func (c *DraftProposalClient) Get(ctx context.Context, id int) (*DraftProposal, error) {
+	return c.Query().Where(draftproposal.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *DraftProposalClient) GetX(ctx context.Context, id int) *DraftProposal {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryChain queries the chain edge of a DraftProposal.
+func (c *DraftProposalClient) QueryChain(dp *DraftProposal) *ChainQuery {
+	query := &ChainQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := dp.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(draftproposal.Table, draftproposal.FieldID, id),
+			sqlgraph.To(chain.Table, chain.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, draftproposal.ChainTable, draftproposal.ChainColumn),
+		)
+		fromV = sqlgraph.Neighbors(dp.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *DraftProposalClient) Hooks() []Hook {
+	return c.hooks.DraftProposal
 }
 
 // GrantClient is a client for the Grant schema.

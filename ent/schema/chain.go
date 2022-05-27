@@ -46,6 +46,10 @@ func (Chain) Edges() []ent.Edge {
 			Annotations(entsql.Annotation{
 				OnDelete: entsql.Cascade,
 			}),
+		edge.To("draft_proposals", DraftProposal.Type).
+			Annotations(entsql.Annotation{
+				OnDelete: entsql.Cascade,
+			}),
 		edge.From("telegram_chats", TelegramChat.Type).
 			Ref("chains").
 			Annotations(entsql.Annotation{

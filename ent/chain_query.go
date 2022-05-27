@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/shifty11/cosmos-gov/ent/chain"
 	"github.com/shifty11/cosmos-gov/ent/discordchannel"
+	"github.com/shifty11/cosmos-gov/ent/draftproposal"
 	"github.com/shifty11/cosmos-gov/ent/predicate"
 	"github.com/shifty11/cosmos-gov/ent/proposal"
 	"github.com/shifty11/cosmos-gov/ent/rpcendpoint"
@@ -32,6 +33,7 @@ type ChainQuery struct {
 	predicates []predicate.Chain
 	// eager-loading edges.
 	withProposals       *ProposalQuery
+	withDraftProposals  *DraftProposalQuery
 	withTelegramChats   *TelegramChatQuery
 	withDiscordChannels *DiscordChannelQuery
 	withRPCEndpoints    *RpcEndpointQuery
@@ -87,6 +89,28 @@ func (cq *ChainQuery) QueryProposals() *ProposalQuery {
 			sqlgraph.From(chain.Table, chain.FieldID, selector),
 			sqlgraph.To(proposal.Table, proposal.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, chain.ProposalsTable, chain.ProposalsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryDraftProposals chains the current query on the "draft_proposals" edge.
+func (cq *ChainQuery) QueryDraftProposals() *DraftProposalQuery {
+	query := &DraftProposalQuery{config: cq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := cq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := cq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(chain.Table, chain.FieldID, selector),
+			sqlgraph.To(draftproposal.Table, draftproposal.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, chain.DraftProposalsTable, chain.DraftProposalsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
 		return fromU, nil
@@ -364,6 +388,7 @@ func (cq *ChainQuery) Clone() *ChainQuery {
 		order:               append([]OrderFunc{}, cq.order...),
 		predicates:          append([]predicate.Chain{}, cq.predicates...),
 		withProposals:       cq.withProposals.Clone(),
+		withDraftProposals:  cq.withDraftProposals.Clone(),
 		withTelegramChats:   cq.withTelegramChats.Clone(),
 		withDiscordChannels: cq.withDiscordChannels.Clone(),
 		withRPCEndpoints:    cq.withRPCEndpoints.Clone(),
@@ -383,6 +408,17 @@ func (cq *ChainQuery) WithProposals(opts ...func(*ProposalQuery)) *ChainQuery {
 		opt(query)
 	}
 	cq.withProposals = query
+	return cq
+}
+
+// WithDraftProposals tells the query-builder to eager-load the nodes that are connected to
+// the "draft_proposals" edge. The optional arguments are used to configure the query builder of the edge.
+func (cq *ChainQuery) WithDraftProposals(opts ...func(*DraftProposalQuery)) *ChainQuery {
+	query := &DraftProposalQuery{config: cq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	cq.withDraftProposals = query
 	return cq
 }
 
@@ -495,8 +531,9 @@ func (cq *ChainQuery) sqlAll(ctx context.Context) ([]*Chain, error) {
 	var (
 		nodes       = []*Chain{}
 		_spec       = cq.querySpec()
-		loadedTypes = [5]bool{
+		loadedTypes = [6]bool{
 			cq.withProposals != nil,
+			cq.withDraftProposals != nil,
 			cq.withTelegramChats != nil,
 			cq.withDiscordChannels != nil,
 			cq.withRPCEndpoints != nil,
@@ -549,6 +586,35 @@ func (cq *ChainQuery) sqlAll(ctx context.Context) ([]*Chain, error) {
 				return nil, fmt.Errorf(`unexpected foreign-key "chain_proposals" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Proposals = append(node.Edges.Proposals, n)
+		}
+	}
+
+	if query := cq.withDraftProposals; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*Chain)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.DraftProposals = []*DraftProposal{}
+		}
+		query.withFKs = true
+		query.Where(predicate.DraftProposal(func(s *sql.Selector) {
+			s.Where(sql.InValues(chain.DraftProposalsColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.chain_draft_proposals
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "chain_draft_proposals" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "chain_draft_proposals" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.DraftProposals = append(node.Edges.DraftProposals, n)
 		}
 	}
 

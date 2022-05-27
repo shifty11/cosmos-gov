@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/shifty11/cosmos-gov/ent/chain"
 	"github.com/shifty11/cosmos-gov/ent/discordchannel"
+	"github.com/shifty11/cosmos-gov/ent/draftproposal"
 	"github.com/shifty11/cosmos-gov/ent/predicate"
 	"github.com/shifty11/cosmos-gov/ent/proposal"
 	"github.com/shifty11/cosmos-gov/ent/rpcendpoint"
@@ -120,6 +121,21 @@ func (cu *ChainUpdate) AddProposals(p ...*Proposal) *ChainUpdate {
 	return cu.AddProposalIDs(ids...)
 }
 
+// AddDraftProposalIDs adds the "draft_proposals" edge to the DraftProposal entity by IDs.
+func (cu *ChainUpdate) AddDraftProposalIDs(ids ...int) *ChainUpdate {
+	cu.mutation.AddDraftProposalIDs(ids...)
+	return cu
+}
+
+// AddDraftProposals adds the "draft_proposals" edges to the DraftProposal entity.
+func (cu *ChainUpdate) AddDraftProposals(d ...*DraftProposal) *ChainUpdate {
+	ids := make([]int, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return cu.AddDraftProposalIDs(ids...)
+}
+
 // AddTelegramChatIDs adds the "telegram_chats" edge to the TelegramChat entity by IDs.
 func (cu *ChainUpdate) AddTelegramChatIDs(ids ...int) *ChainUpdate {
 	cu.mutation.AddTelegramChatIDs(ids...)
@@ -204,6 +220,27 @@ func (cu *ChainUpdate) RemoveProposals(p ...*Proposal) *ChainUpdate {
 		ids[i] = p[i].ID
 	}
 	return cu.RemoveProposalIDs(ids...)
+}
+
+// ClearDraftProposals clears all "draft_proposals" edges to the DraftProposal entity.
+func (cu *ChainUpdate) ClearDraftProposals() *ChainUpdate {
+	cu.mutation.ClearDraftProposals()
+	return cu
+}
+
+// RemoveDraftProposalIDs removes the "draft_proposals" edge to DraftProposal entities by IDs.
+func (cu *ChainUpdate) RemoveDraftProposalIDs(ids ...int) *ChainUpdate {
+	cu.mutation.RemoveDraftProposalIDs(ids...)
+	return cu
+}
+
+// RemoveDraftProposals removes "draft_proposals" edges to DraftProposal entities.
+func (cu *ChainUpdate) RemoveDraftProposals(d ...*DraftProposal) *ChainUpdate {
+	ids := make([]int, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return cu.RemoveDraftProposalIDs(ids...)
 }
 
 // ClearTelegramChats clears all "telegram_chats" edges to the TelegramChat entity.
@@ -473,6 +510,60 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: proposal.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if cu.mutation.DraftProposalsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.DraftProposalsTable,
+			Columns: []string{chain.DraftProposalsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: draftproposal.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.RemovedDraftProposalsIDs(); len(nodes) > 0 && !cu.mutation.DraftProposalsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.DraftProposalsTable,
+			Columns: []string{chain.DraftProposalsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: draftproposal.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.DraftProposalsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.DraftProposalsTable,
+			Columns: []string{chain.DraftProposalsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: draftproposal.FieldID,
 				},
 			},
 		}
@@ -803,6 +894,21 @@ func (cuo *ChainUpdateOne) AddProposals(p ...*Proposal) *ChainUpdateOne {
 	return cuo.AddProposalIDs(ids...)
 }
 
+// AddDraftProposalIDs adds the "draft_proposals" edge to the DraftProposal entity by IDs.
+func (cuo *ChainUpdateOne) AddDraftProposalIDs(ids ...int) *ChainUpdateOne {
+	cuo.mutation.AddDraftProposalIDs(ids...)
+	return cuo
+}
+
+// AddDraftProposals adds the "draft_proposals" edges to the DraftProposal entity.
+func (cuo *ChainUpdateOne) AddDraftProposals(d ...*DraftProposal) *ChainUpdateOne {
+	ids := make([]int, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return cuo.AddDraftProposalIDs(ids...)
+}
+
 // AddTelegramChatIDs adds the "telegram_chats" edge to the TelegramChat entity by IDs.
 func (cuo *ChainUpdateOne) AddTelegramChatIDs(ids ...int) *ChainUpdateOne {
 	cuo.mutation.AddTelegramChatIDs(ids...)
@@ -887,6 +993,27 @@ func (cuo *ChainUpdateOne) RemoveProposals(p ...*Proposal) *ChainUpdateOne {
 		ids[i] = p[i].ID
 	}
 	return cuo.RemoveProposalIDs(ids...)
+}
+
+// ClearDraftProposals clears all "draft_proposals" edges to the DraftProposal entity.
+func (cuo *ChainUpdateOne) ClearDraftProposals() *ChainUpdateOne {
+	cuo.mutation.ClearDraftProposals()
+	return cuo
+}
+
+// RemoveDraftProposalIDs removes the "draft_proposals" edge to DraftProposal entities by IDs.
+func (cuo *ChainUpdateOne) RemoveDraftProposalIDs(ids ...int) *ChainUpdateOne {
+	cuo.mutation.RemoveDraftProposalIDs(ids...)
+	return cuo
+}
+
+// RemoveDraftProposals removes "draft_proposals" edges to DraftProposal entities.
+func (cuo *ChainUpdateOne) RemoveDraftProposals(d ...*DraftProposal) *ChainUpdateOne {
+	ids := make([]int, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return cuo.RemoveDraftProposalIDs(ids...)
 }
 
 // ClearTelegramChats clears all "telegram_chats" edges to the TelegramChat entity.
@@ -1180,6 +1307,60 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: proposal.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if cuo.mutation.DraftProposalsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.DraftProposalsTable,
+			Columns: []string{chain.DraftProposalsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: draftproposal.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.RemovedDraftProposalsIDs(); len(nodes) > 0 && !cuo.mutation.DraftProposalsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.DraftProposalsTable,
+			Columns: []string{chain.DraftProposalsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: draftproposal.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.DraftProposalsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.DraftProposalsTable,
+			Columns: []string{chain.DraftProposalsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: draftproposal.FieldID,
 				},
 			},
 		}

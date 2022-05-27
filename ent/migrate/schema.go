@@ -66,6 +66,37 @@ var (
 			},
 		},
 	}
+	// DraftProposalsColumns holds the columns for the "draft_proposals" table.
+	DraftProposalsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+		{Name: "draft_proposal_id", Type: field.TypeInt64},
+		{Name: "title", Type: field.TypeString},
+		{Name: "url", Type: field.TypeString},
+		{Name: "chain_draft_proposals", Type: field.TypeInt, Nullable: true},
+	}
+	// DraftProposalsTable holds the schema information for the "draft_proposals" table.
+	DraftProposalsTable = &schema.Table{
+		Name:       "draft_proposals",
+		Columns:    DraftProposalsColumns,
+		PrimaryKey: []*schema.Column{DraftProposalsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "draft_proposals_chains_draft_proposals",
+				Columns:    []*schema.Column{DraftProposalsColumns[6]},
+				RefColumns: []*schema.Column{ChainsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "draftproposal_draft_proposal_id_chain_draft_proposals",
+				Unique:  true,
+				Columns: []*schema.Column{DraftProposalsColumns[3], DraftProposalsColumns[6]},
+			},
+		},
+	}
 	// GrantsColumns holds the columns for the "grants" table.
 	GrantsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -341,6 +372,7 @@ var (
 	Tables = []*schema.Table{
 		ChainsTable,
 		DiscordChannelsTable,
+		DraftProposalsTable,
 		GrantsTable,
 		LensChainInfosTable,
 		ProposalsTable,
@@ -356,6 +388,7 @@ var (
 
 func init() {
 	DiscordChannelsTable.ForeignKeys[0].RefTable = UsersTable
+	DraftProposalsTable.ForeignKeys[0].RefTable = ChainsTable
 	GrantsTable.ForeignKeys[0].RefTable = WalletsTable
 	ProposalsTable.ForeignKeys[0].RefTable = ChainsTable
 	RPCEndpointsTable.ForeignKeys[0].RefTable = ChainsTable

@@ -822,6 +822,34 @@ func HasProposalsWith(preds ...predicate.Proposal) predicate.Chain {
 	})
 }
 
+// HasDraftProposals applies the HasEdge predicate on the "draft_proposals" edge.
+func HasDraftProposals() predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(DraftProposalsTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, DraftProposalsTable, DraftProposalsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasDraftProposalsWith applies the HasEdge predicate on the "draft_proposals" edge with a given conditions (other predicates).
+func HasDraftProposalsWith(preds ...predicate.DraftProposal) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(DraftProposalsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, DraftProposalsTable, DraftProposalsColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasTelegramChats applies the HasEdge predicate on the "telegram_chats" edge.
 func HasTelegramChats() predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {

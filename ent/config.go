@@ -26,6 +26,7 @@ type config struct {
 type hooks struct {
 	Chain          []ent.Hook
 	DiscordChannel []ent.Hook
+	DraftProposal  []ent.Hook
 	Grant          []ent.Hook
 	LensChainInfo  []ent.Hook
 	Proposal       []ent.Hook

@@ -43,6 +43,8 @@ type Chain struct {
 type ChainEdges struct {
 	// Proposals holds the value of the proposals edge.
 	Proposals []*Proposal `json:"proposals,omitempty"`
+	// DraftProposals holds the value of the draft_proposals edge.
+	DraftProposals []*DraftProposal `json:"draft_proposals,omitempty"`
 	// TelegramChats holds the value of the telegram_chats edge.
 	TelegramChats []*TelegramChat `json:"telegram_chats,omitempty"`
 	// DiscordChannels holds the value of the discord_channels edge.
@@ -53,7 +55,7 @@ type ChainEdges struct {
 	Wallets []*Wallet `json:"wallets,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [5]bool
+	loadedTypes [6]bool
 }
 
 // ProposalsOrErr returns the Proposals value or an error if the edge
@@ -65,10 +67,19 @@ func (e ChainEdges) ProposalsOrErr() ([]*Proposal, error) {
 	return nil, &NotLoadedError{edge: "proposals"}
 }
 
+// DraftProposalsOrErr returns the DraftProposals value or an error if the edge
+// was not loaded in eager-loading.
+func (e ChainEdges) DraftProposalsOrErr() ([]*DraftProposal, error) {
+	if e.loadedTypes[1] {
+		return e.DraftProposals, nil
+	}
+	return nil, &NotLoadedError{edge: "draft_proposals"}
+}
+
 // TelegramChatsOrErr returns the TelegramChats value or an error if the edge
 // was not loaded in eager-loading.
 func (e ChainEdges) TelegramChatsOrErr() ([]*TelegramChat, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[2] {
 		return e.TelegramChats, nil
 	}
 	return nil, &NotLoadedError{edge: "telegram_chats"}
@@ -77,7 +88,7 @@ func (e ChainEdges) TelegramChatsOrErr() ([]*TelegramChat, error) {
 // DiscordChannelsOrErr returns the DiscordChannels value or an error if the edge
 // was not loaded in eager-loading.
 func (e ChainEdges) DiscordChannelsOrErr() ([]*DiscordChannel, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[3] {
 		return e.DiscordChannels, nil
 	}
 	return nil, &NotLoadedError{edge: "discord_channels"}
@@ -86,7 +97,7 @@ func (e ChainEdges) DiscordChannelsOrErr() ([]*DiscordChannel, error) {
 // RPCEndpointsOrErr returns the RPCEndpoints value or an error if the edge
 // was not loaded in eager-loading.
 func (e ChainEdges) RPCEndpointsOrErr() ([]*RpcEndpoint, error) {
-	if e.loadedTypes[3] {
+	if e.loadedTypes[4] {
 		return e.RPCEndpoints, nil
 	}
 	return nil, &NotLoadedError{edge: "rpc_endpoints"}
@@ -95,7 +106,7 @@ func (e ChainEdges) RPCEndpointsOrErr() ([]*RpcEndpoint, error) {
 // WalletsOrErr returns the Wallets value or an error if the edge
 // was not loaded in eager-loading.
 func (e ChainEdges) WalletsOrErr() ([]*Wallet, error) {
-	if e.loadedTypes[4] {
+	if e.loadedTypes[5] {
 		return e.Wallets, nil
 	}
 	return nil, &NotLoadedError{edge: "wallets"}
@@ -197,6 +208,11 @@ func (c *Chain) assignValues(columns []string, values []interface{}) error {
 // QueryProposals queries the "proposals" edge of the Chain entity.
 func (c *Chain) QueryProposals() *ProposalQuery {
 	return (&ChainClient{config: c.config}).QueryProposals(c)
+}
+
+// QueryDraftProposals queries the "draft_proposals" edge of the Chain entity.
+func (c *Chain) QueryDraftProposals() *DraftProposalQuery {
+	return (&ChainClient{config: c.config}).QueryDraftProposals(c)
 }
 
 // QueryTelegramChats queries the "telegram_chats" edge of the Chain entity.

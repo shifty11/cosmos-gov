@@ -35,6 +35,19 @@ func (f DiscordChannelFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Val
 	return f(ctx, mv)
 }
 
+// The DraftProposalFunc type is an adapter to allow the use of ordinary
+// function as DraftProposal mutator.
+type DraftProposalFunc func(context.Context, *ent.DraftProposalMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f DraftProposalFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.DraftProposalMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DraftProposalMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The GrantFunc type is an adapter to allow the use of ordinary
 // function as Grant mutator.
 type GrantFunc func(context.Context, *ent.GrantMutation) (ent.Value, error)

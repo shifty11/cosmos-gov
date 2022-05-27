@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/shifty11/cosmos-gov/ent/chain"
 	"github.com/shifty11/cosmos-gov/ent/discordchannel"
+	"github.com/shifty11/cosmos-gov/ent/draftproposal"
 	"github.com/shifty11/cosmos-gov/ent/proposal"
 	"github.com/shifty11/cosmos-gov/ent/rpcendpoint"
 	"github.com/shifty11/cosmos-gov/ent/telegramchat"
@@ -132,6 +133,21 @@ func (cc *ChainCreate) AddProposals(p ...*Proposal) *ChainCreate {
 		ids[i] = p[i].ID
 	}
 	return cc.AddProposalIDs(ids...)
+}
+
+// AddDraftProposalIDs adds the "draft_proposals" edge to the DraftProposal entity by IDs.
+func (cc *ChainCreate) AddDraftProposalIDs(ids ...int) *ChainCreate {
+	cc.mutation.AddDraftProposalIDs(ids...)
+	return cc
+}
+
+// AddDraftProposals adds the "draft_proposals" edges to the DraftProposal entity.
+func (cc *ChainCreate) AddDraftProposals(d ...*DraftProposal) *ChainCreate {
+	ids := make([]int, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return cc.AddDraftProposalIDs(ids...)
 }
 
 // AddTelegramChatIDs adds the "telegram_chats" edge to the TelegramChat entity by IDs.
@@ -426,6 +442,25 @@ func (cc *ChainCreate) createSpec() (*Chain, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: proposal.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := cc.mutation.DraftProposalsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.DraftProposalsTable,
+			Columns: []string{chain.DraftProposalsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: draftproposal.FieldID,
 				},
 			},
 		}

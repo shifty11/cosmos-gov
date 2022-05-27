@@ -12,6 +12,9 @@ type Chain func(*sql.Selector)
 // DiscordChannel is the predicate function for discordchannel builders.
 type DiscordChannel func(*sql.Selector)
 
+// DraftProposal is the predicate function for draftproposal builders.
+type DraftProposal func(*sql.Selector)
+
 // Grant is the predicate function for grant builders.
 type Grant func(*sql.Selector)
 

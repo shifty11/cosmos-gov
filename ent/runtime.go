@@ -7,6 +7,7 @@ import (
 
 	"github.com/shifty11/cosmos-gov/ent/chain"
 	"github.com/shifty11/cosmos-gov/ent/discordchannel"
+	"github.com/shifty11/cosmos-gov/ent/draftproposal"
 	"github.com/shifty11/cosmos-gov/ent/grant"
 	"github.com/shifty11/cosmos-gov/ent/lenschaininfo"
 	"github.com/shifty11/cosmos-gov/ent/proposal"
@@ -67,6 +68,21 @@ func init() {
 	discordchannelDescRoles := discordchannelFields[3].Descriptor()
 	// discordchannel.DefaultRoles holds the default value on creation for the roles field.
 	discordchannel.DefaultRoles = discordchannelDescRoles.Default.(string)
+	draftproposalMixin := schema.DraftProposal{}.Mixin()
+	draftproposalMixinFields0 := draftproposalMixin[0].Fields()
+	_ = draftproposalMixinFields0
+	draftproposalFields := schema.DraftProposal{}.Fields()
+	_ = draftproposalFields
+	// draftproposalDescCreateTime is the schema descriptor for create_time field.
+	draftproposalDescCreateTime := draftproposalMixinFields0[0].Descriptor()
+	// draftproposal.DefaultCreateTime holds the default value on creation for the create_time field.
+	draftproposal.DefaultCreateTime = draftproposalDescCreateTime.Default.(func() time.Time)
+	// draftproposalDescUpdateTime is the schema descriptor for update_time field.
+	draftproposalDescUpdateTime := draftproposalMixinFields0[1].Descriptor()
+	// draftproposal.DefaultUpdateTime holds the default value on creation for the update_time field.
+	draftproposal.DefaultUpdateTime = draftproposalDescUpdateTime.Default.(func() time.Time)
+	// draftproposal.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
+	draftproposal.UpdateDefaultUpdateTime = draftproposalDescUpdateTime.UpdateDefault.(func() time.Time)
 	grantMixin := schema.Grant{}.Mixin()
 	grantMixinFields0 := grantMixin[0].Fields()
 	_ = grantMixinFields0

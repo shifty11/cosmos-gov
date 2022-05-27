@@ -31,6 +31,8 @@ const (
 	FieldIsFeegrantUsed = "is_feegrant_used"
 	// EdgeProposals holds the string denoting the proposals edge name in mutations.
 	EdgeProposals = "proposals"
+	// EdgeDraftProposals holds the string denoting the draft_proposals edge name in mutations.
+	EdgeDraftProposals = "draft_proposals"
 	// EdgeTelegramChats holds the string denoting the telegram_chats edge name in mutations.
 	EdgeTelegramChats = "telegram_chats"
 	// EdgeDiscordChannels holds the string denoting the discord_channels edge name in mutations.
@@ -48,6 +50,13 @@ const (
 	ProposalsInverseTable = "proposals"
 	// ProposalsColumn is the table column denoting the proposals relation/edge.
 	ProposalsColumn = "chain_proposals"
+	// DraftProposalsTable is the table that holds the draft_proposals relation/edge.
+	DraftProposalsTable = "draft_proposals"
+	// DraftProposalsInverseTable is the table name for the DraftProposal entity.
+	// It exists in this package in order to avoid circular dependency with the "draftproposal" package.
+	DraftProposalsInverseTable = "draft_proposals"
+	// DraftProposalsColumn is the table column denoting the draft_proposals relation/edge.
+	DraftProposalsColumn = "chain_draft_proposals"
 	// TelegramChatsTable is the table that holds the telegram_chats relation/edge. The primary key declared below.
 	TelegramChatsTable = "telegram_chat_chains"
 	// TelegramChatsInverseTable is the table name for the TelegramChat entity.

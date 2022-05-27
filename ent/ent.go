@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/shifty11/cosmos-gov/ent/chain"
 	"github.com/shifty11/cosmos-gov/ent/discordchannel"
+	"github.com/shifty11/cosmos-gov/ent/draftproposal"
 	"github.com/shifty11/cosmos-gov/ent/grant"
 	"github.com/shifty11/cosmos-gov/ent/lenschaininfo"
 	"github.com/shifty11/cosmos-gov/ent/proposal"
@@ -39,6 +40,7 @@ func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
 		chain.Table:          chain.ValidColumn,
 		discordchannel.Table: discordchannel.ValidColumn,
+		draftproposal.Table:  draftproposal.ValidColumn,
 		grant.Table:          grant.ValidColumn,
 		lenschaininfo.Table:  lenschaininfo.ValidColumn,
 		proposal.Table:       proposal.ValidColumn,
