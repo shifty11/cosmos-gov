@@ -19,6 +19,7 @@ type Datasource struct {
 	telegramChatManager   *database.TelegramChatManager
 	discordChannelManager *database.DiscordChannelManager
 	proposalManager       *database.ProposalManager
+	draftProposalManager  *database.DraftProposalManager
 	lensChainInfoManager  *database.LensChainInfoManager
 	state                 *State
 }
@@ -40,6 +41,7 @@ func NewDatasource(
 		chainRegistry:         chainRegistry,
 		chainManager:          managers.ChainManager,
 		proposalManager:       managers.ProposalManager,
+		draftProposalManager:  managers.DraftProposalManager,
 		lensChainInfoManager:  managers.LensChainInfoManager,
 		telegramChatManager:   managers.TelegramChatManager,
 		discordChannelManager: managers.DiscordChannelManager,

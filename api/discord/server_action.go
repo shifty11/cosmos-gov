@@ -72,3 +72,29 @@ func SendProposals(entProp *ent.Proposal, entChain *ent.Chain) []int64 {
 	}
 	return errIds
 }
+
+func SendDraftProposals(entProp *ent.DraftProposal, entChain *ent.Chain) []int64 {
+	session := startSession()
+	defer closeSession(session)
+
+	text := fmt.Sprintf("💬  **%v - New pre-vote proposal\n\n%v**\n<%v>", entChain.DisplayName, entProp.Title, entProp.URL)
+
+	mHack = database.NewDefaultDbManagers() //TODO: remove
+
+	var errIds []int64
+	channelIds := mHack.DiscordChannelManager.GetChannelIds(entChain)
+	for _, channelId := range channelIds {
+		log.Sugar.Debugf("Send draft proposal #%v on %v to discord chat #%v", entProp.DraftProposalID, entChain.DisplayName, channelId)
+		var _, err = session.ChannelMessageSendComplex(strconv.Itoa(channelId), &discordgo.MessageSend{
+			Content: text,
+		})
+		if err != nil {
+			if shouldDeleteUser(err) {
+				errIds = append(errIds, int64(channelId))
+			} else {
+				log.Sugar.Errorf("Error while sending proposal to discord chat #%v: %v", channelId, err)
+			}
+		}
+	}
+	return errIds
+}

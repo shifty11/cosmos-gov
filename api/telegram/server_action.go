@@ -65,14 +65,14 @@ func SendProposals(entProp *ent.Proposal, entChain *ent.Chain) []int64 {
 
 	allTgChats := mHack.TelegramChatManager.GetChatIds(entChain)
 	tgChatsWithGrants := mHack.TelegramChatManager.GetChatIdsWithGrants(entChain)
-	for _, chatId := range allTgChats {
-		log.Sugar.Debugf("Send proposal #%v on %v to telegram chat #%v", entProp.ProposalID, entChain.DisplayName, chatId)
+	for _, chat := range allTgChats {
+		log.Sugar.Debugf("Send proposal #%v on %v to telegram chat #%v", entProp.ProposalID, entChain.DisplayName, chat.ChatId)
 
-		msg := tgbotapi.NewMessage(chatId.ChatId, text)
+		msg := tgbotapi.NewMessage(chat.ChatId, text)
 		msg.ParseMode = "html"
 		msg.DisableWebPagePreview = true
 
-		if slices.Contains(toSlice(tgChatsWithGrants), chatId.ChatId) {
+		if slices.Contains(toSlice(tgChatsWithGrants), chat.ChatId) {
 			voteData := authz.ToVoteData(entChain.Name, entProp.ProposalID, govtypes.OptionEmpty, authz.NotVoted)
 			msg.ReplyMarkup = createKeyboard(getVoteButtons(&voteData))
 		}
@@ -80,9 +80,35 @@ func SendProposals(entProp *ent.Proposal, entChain *ent.Chain) []int64 {
 		err := sendMessage(msg)
 		if err != nil {
 			if shouldDeleteUser(err) {
-				errIds = append(errIds, chatId.ChatId)
+				errIds = append(errIds, chat.ChatId)
 			} else {
-				log.Sugar.Errorf("Error while sending message to telegram chat #%v: %v", chatId, err)
+				log.Sugar.Errorf("Error while sending message to telegram chat #%v: %v", chat, err)
+			}
+		}
+	}
+	return errIds
+}
+
+func SendDraftProposals(entProp *ent.DraftProposal, entChain *ent.Chain) []int64 {
+	text := fmt.Sprintf("💬  <b>%v - New pre-vote proposal\n\n%v</b>\n%v", entChain.DisplayName, entProp.Title, entProp.URL)
+
+	var errIds []int64
+	mHack = database.NewDefaultDbManagers() //TODO: remove
+
+	allTgChats := mHack.TelegramChatManager.GetChatIds(entChain)
+	for _, chat := range allTgChats {
+		log.Sugar.Debugf("Send draft proposal #%v on %v to telegram chat #%v", entProp.DraftProposalID, entChain.DisplayName, chat.ChatId)
+
+		msg := tgbotapi.NewMessage(chat.ChatId, text)
+		msg.ParseMode = "html"
+		msg.DisableWebPagePreview = true
+
+		err := sendMessage(msg)
+		if err != nil {
+			if shouldDeleteUser(err) {
+				errIds = append(errIds, chat.ChatId)
+			} else {
+				log.Sugar.Errorf("Error while sending message to telegram chat #%v: %v", chat, err)
 			}
 		}
 	}

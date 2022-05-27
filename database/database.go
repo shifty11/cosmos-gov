@@ -82,6 +82,7 @@ type DbManagers struct {
 	TelegramChatManager         *TelegramChatManager
 	DiscordChannelManager       *DiscordChannelManager
 	ProposalManager             *ProposalManager
+	DraftProposalManager        *DraftProposalManager
 	SubscriptionManager         *SubscriptionManager
 	TelegramSubscriptionManager *TelegramSubscriptionManager
 	DiscordSubscriptionManager  *DiscordSubscriptionManager
@@ -110,6 +111,7 @@ func NewCustomDbManagers(client *ent.Client, ctx context.Context) DbManagers {
 		TelegramChatManager:         telegramChatManager,
 		DiscordChannelManager:       discordChannelManager,
 		ProposalManager:             NewProposalManager(client, ctx),
+		DraftProposalManager:        NewDraftProposalManager(client, ctx),
 		SubscriptionManager:         NewSubscriptionManager(client, ctx, userManager, chainManager, telegramChatManager, discordChannelManager),
 		TelegramSubscriptionManager: NewTelegramSubscriptionManager(client, ctx, telegramUserManager, chainManager, telegramChatManager),
 		DiscordSubscriptionManager:  NewDiscordSubscriptionManager(client, ctx, discordUserManager, chainManager, discordChannelManager),

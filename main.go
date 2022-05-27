@@ -35,6 +35,18 @@ func startProposalFetching(ds *datasource.Datasource) {
 	}()
 }
 
+func startDraftProposalFetching(ds *datasource.Datasource) {
+	go func() {
+		ds.FetchDraftProposals() // start immediately and then every 15 minutes
+		c := cron.New()
+		_, err := c.AddFunc("@every 15m", func() { ds.FetchDraftProposals() })
+		if err != nil {
+			log.Sugar.Errorf("while executing 'datasource.FetchDraftProposals()' via cron: %v", err)
+		}
+		c.Start()
+	}()
+}
+
 func startNewChainFetching(ds *datasource.Datasource) {
 	c := cron.New()
 	_, err := c.AddFunc("0 10 * * *", func() { ds.AddNewChains() }) // execute every day at 10.00
@@ -81,6 +93,7 @@ func main() {
 	if len(args) > 0 && args[0] == "fetching" {
 		initDatabase(ds, managers.ChainManager)
 		startProposalFetching(ds)
+		startDraftProposalFetching(ds)
 		startNewChainFetching(ds)
 		startProposalUpdating(ds)
 	} else if len(args) > 0 && args[0] == "telegram" {
@@ -92,6 +105,7 @@ func main() {
 	} else {
 		initDatabase(nil, nil)
 		startProposalFetching(ds)
+		startDraftProposalFetching(ds)
 		startNewChainFetching(ds)
 		startProposalUpdating(ds)
 		startTelegramServer()
