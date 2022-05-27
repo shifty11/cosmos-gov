@@ -246,30 +246,46 @@ func isUpdateFromCreatorOrAdministrator(update *tgbotapi.Update) bool {
 }
 
 type MenuButtonConfig struct {
-	ShowSubscriptions bool
-	ShowProposals     bool
-	ShowHelp          bool
-	ShowSupport       bool
+	ShowSubscriptions  bool
+	ShowProposals      bool
+	ShowHelp           bool
+	ShowSupport        bool
+	ShowInlineWebApp   bool
+	ShowExternalWebApp bool
 }
 
 func createMenuButtonConfig() MenuButtonConfig {
-	return MenuButtonConfig{ShowSubscriptions: true, ShowProposals: true, ShowHelp: true, ShowSupport: true}
+	return MenuButtonConfig{ShowSubscriptions: true, ShowProposals: true, ShowHelp: true, ShowSupport: true, ShowInlineWebApp: true, ShowExternalWebApp: true}
 }
 
 func getMenuButtonRow(config MenuButtonConfig) []Button {
 	var buttonRow []Button
-	if config.ShowSubscriptions {
-		buttonRow = append(buttonRow, NewButton("🔔 Subscriptions", &CallbackData{Command: CallbackCmdShowSubscriptions}))
-	}
-	if config.ShowProposals {
-		buttonRow = append(buttonRow, NewButton("🗳 Proposals", &CallbackData{Command: CallbackCmdShowProposals}))
-	}
+	//if config.ShowSubscriptions {
+	//	buttonRow = append(buttonRow, NewButton("🔔 Subscriptions", &CallbackData{Command: CallbackCmdShowSubscriptions}))
+	//}
+	//if config.ShowProposals {
+	//	buttonRow = append(buttonRow, NewButton("🗳 Proposals", &CallbackData{Command: CallbackCmdShowProposals}))
+	//}
 	//if config.ShowHelp {
 	//	buttonRow = append(buttonRow, NewButton("🆘 Help", CallbackData{Command: CallbackCmdShowHelp}))
 	//}
 	//if config.ShowSupport {
 	//	buttonRow = append(buttonRow, NewButton("💰 Support", CallbackData{Command: CallbackCmdShowSupport}))
 	//}
+	if config.ShowInlineWebApp {
+		button := NewButton("🔔 Subscriptions", nil)
+		button.WebApp = &tgbotapi.WebAppInfo{URL: os.Getenv("WEB_APP_URL")}
+		buttonRow = append(buttonRow, button)
+	}
+	if config.ShowInlineWebApp {
+		url := os.Getenv("WEB_APP_EXTERNAL_URL")
+		if url == "" {
+			url = os.Getenv("WEB_APP_URL")
+		}
+		button := NewButton("🌐 Subscriptions (browser)", nil)
+		button.LoginURL = &tgbotapi.LoginURL{URL: url}
+		buttonRow = append(buttonRow, button)
+	}
 	return buttonRow
 }
 
@@ -295,19 +311,6 @@ func getBotAdminMenuButtonRow(config BotAdminMenuButtonConfig) []Button {
 	//if config.ShowBroadcast {
 	//	buttonRow = append(buttonRow, NewButton("🔊 Broadcast", CallbackData{Command: CallbackCmdBroadcast}))
 	//}
-	if config.ShowWebAppLogin {
-		button := NewButton("🌎 Web app", nil)
-		button.WebApp = &tgbotapi.WebAppInfo{URL: os.Getenv("WEB_APP_URL")}
-		buttonRow = append(buttonRow, button)
-
-		url := os.Getenv("WEB_APP_URL")
-		if url == "" {
-			url = os.Getenv("WEB_APP_EXTERNAL_URL")
-		}
-		button = NewButton("⚙️Login", nil)
-		button.LoginURL = &tgbotapi.LoginURL{URL: url}
-		buttonRow = append(buttonRow, button)
-	}
 	return buttonRow
 }
 
