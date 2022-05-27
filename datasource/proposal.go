@@ -229,9 +229,6 @@ func (ds Datasource) FetchProposals() {
 	log.Sugar.Info("Fetch proposals")
 	chains := ds.chainManager.All()
 	for _, c := range chains {
-		//if c.Name != "crescent" {
-		//	continue
-		//}
 		client, err := ds.chainManager.BuildLensClient(c)
 		if err != nil {
 			log.Sugar.Errorf("Could not get client for chain %v. It's probably not saved into the db.", c.Name)

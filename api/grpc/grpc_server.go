@@ -30,6 +30,12 @@ func Start() {
 	if jwtSecretKey == "" {
 		log.Sugar.Panic("JWT_SECRET_KEY must be set")
 	}
+
+	telegramToken := os.Getenv("TELEGRAM_TOKEN")
+	if telegramToken == "" {
+		log.Sugar.Panic("TELEGRAM_TOKEN must be set")
+	}
+
 	managers := database.NewDefaultDbManagers()
 
 	jwtManager := auth.NewJWTManager([]byte(jwtSecretKey), accessTokenDuration, refreshTokenDuration)
@@ -37,7 +43,7 @@ func Start() {
 
 	authzClient := authz.NewAuthzClient(managers.ChainManager, managers.WalletManager)
 
-	authServer := auth.NewAuthServer(managers.UserManager, jwtManager)
+	authServer := auth.NewAuthServer(managers.UserManager, jwtManager, telegramToken)
 	subscriptionServer := subscription.NewSubscriptionsServer(managers.SubscriptionManager)
 	votePermissionServer := vote_permission.NewVotePermissionsServer(authzClient, managers.ChainManager, managers.WalletManager)
 	adminServer := admin.NewAdminServer(managers.ChainManager)

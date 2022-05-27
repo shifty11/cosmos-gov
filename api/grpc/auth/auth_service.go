@@ -10,33 +10,45 @@ import (
 	"github.com/shifty11/cosmos-gov/ent/user"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"os"
 	"time"
 )
 
 //goland:noinspection GoNameStartsWithPackageName
 type AuthServer struct {
 	pb.UnimplementedAuthServiceServer
-	userManager *database.UserManager
-	jwtManager  *JWTManager
+	userManager   *database.UserManager
+	jwtManager    *JWTManager
+	telegramToken string
 }
 
-func NewAuthServer(userManager *database.UserManager, jwtManager *JWTManager) pb.AuthServiceServer {
-	return &AuthServer{userManager: userManager, jwtManager: jwtManager}
+func NewAuthServer(userManager *database.UserManager, jwtManager *JWTManager, telegramToken string) pb.AuthServiceServer {
+	return &AuthServer{userManager: userManager, jwtManager: jwtManager, telegramToken: telegramToken}
+}
+
+func (server *AuthServer) secretKey1() []byte {
+	s := sha256.New()
+	s.Write([]byte(server.telegramToken))
+	secretKey := s.Sum(nil)
+	return secretKey
+}
+
+func (server *AuthServer) secretKey2() []byte {
+	h1 := hmac.New(sha256.New, []byte("WebAppData"))
+	h1.Write([]byte(server.telegramToken))
+	secretKey := h1.Sum(nil)
+	return secretKey
+}
+
+func (server *AuthServer) isValid(dataStr string, secretKey []byte, hash string) bool {
+	h := hmac.New(sha256.New, secretKey)
+	h.Write([]byte(dataStr))
+	hh := h.Sum(nil)
+	resultHash := hex.EncodeToString(hh)
+	return resultHash == hash
 }
 
 func (server *AuthServer) TelegramLogin(_ context.Context, req *pb.TelegramLoginRequest) (*pb.LoginResponse, error) {
-	telegramToken := os.Getenv("TELEGRAM_TOKEN")
-
-	s := sha256.New()
-	s.Write([]byte(telegramToken))
-	secretKey := s.Sum(nil)
-
-	h := hmac.New(sha256.New, secretKey)
-	h.Write([]byte(req.DataStr))
-	hh := h.Sum(nil)
-	hash := hex.EncodeToString(hh)
-	if hash != req.Hash {
+	if !server.isValid(req.DataStr, server.secretKey1(), req.Hash) && !server.isValid(req.DataStr, server.secretKey2(), req.Hash) {
 		return nil, status.Errorf(codes.Unauthenticated, "telegram data invalid")
 	}
 
