@@ -61,6 +61,7 @@ func sendSubscriptions(update *tgbotapi.Update) {
 	}
 	config := createMenuButtonConfig()
 	config.ShowSubscriptions = false
+	config.ShowInlineWebApp = !isGroup
 	buttons = append(buttons, getMenuButtonRow(config))
 	if isBotAdmin(update) {
 		botAdminConfig := createBotAdminMenuButtonConfig()

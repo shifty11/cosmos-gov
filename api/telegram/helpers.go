@@ -277,7 +277,7 @@ func getMenuButtonRow(config MenuButtonConfig) []Button {
 		button.WebApp = &tgbotapi.WebAppInfo{URL: os.Getenv("WEB_APP_URL")}
 		buttonRow = append(buttonRow, button)
 	}
-	if config.ShowInlineWebApp {
+	if config.ShowExternalWebApp {
 		url := os.Getenv("WEB_APP_EXTERNAL_URL")
 		if url == "" {
 			url = os.Getenv("WEB_APP_URL")
