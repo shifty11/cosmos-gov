@@ -74,9 +74,6 @@ func (client TelegramClient) handleCommand(update *tgbotapi.Update) {
 			case MessageCmdBroadcast:
 				sendBroadcastStart(update)
 				client.setState(update, StateStartBroadcast, nil)
-			case MessageCmdChains:
-				sendChains(update)
-				client.setState(update, StateNil, nil)
 			}
 		}
 	}
@@ -128,9 +125,6 @@ func (client TelegramClient) handleCallbackQuery(update *tgbotapi.Update) {
 			switch callbackData.Command {
 			case CallbackCmdStats:
 				sendUserStatistics(update)
-			case CallbackCmdEnableChains:
-				performToggleChain(callbackData.Data)
-				sendChains(update)
 			default:
 				sendError(update)
 				sendHelp(update)
@@ -243,6 +237,8 @@ func NewTelegramClient() *TelegramClient {
 
 func (client TelegramClient) Start() {
 	log.Sugar.Info("Start telegram bot")
+
+	mHack = database.NewDefaultDbManagers()
 
 	updateConfig := tgbotapi.NewUpdate(0)
 	updates := client.api.GetUpdatesChan(updateConfig)

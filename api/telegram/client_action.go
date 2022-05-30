@@ -10,18 +10,6 @@ import (
 	"github.com/shifty11/cosmos-gov/log"
 )
 
-// Enables or disables a chain for all users. Can only be performed by botadmins.
-func performToggleChain(chainName string) {
-	if chainName == "" {
-		return
-	}
-	log.Sugar.Debugf("Enable/disable chain %v", chainName)
-	_, err := mHack.ChainManager.EnableOrDisableChain(chainName)
-	if err != nil {
-		log.Sugar.Error("Error while toggle chain %v", chainName)
-	}
-}
-
 // performUpdateSubscription toggles the subscription for a chain
 func performUpdateSubscription(update *tgbotapi.Update, chainName string) {
 	if chainName == "" {
