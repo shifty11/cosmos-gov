@@ -57,7 +57,7 @@ func startProposalUpdating(ds *datasource.Datasource) {
 }
 
 func startTelegramServer() {
-	go telegram.Start()
+	go telegram.NewTelegramClient().Start()
 }
 
 func startDiscordServer() {

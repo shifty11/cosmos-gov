@@ -19,9 +19,6 @@ const (
 
 var MessageStates = [...]State{StateStartBroadcast, StateConfirmBroadcast}
 
-var state = make(map[int64]State)
-var stateData = make(map[int64]StateData)
-
 type BroadcastStateData struct {
 	Message string
 }
