@@ -8,6 +8,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/liamylian/jsontime"
 	"github.com/microcosm-cc/bluemonday"
+	"github.com/shifty11/cosmos-gov/api/discord"
+	"github.com/shifty11/cosmos-gov/api/telegram"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/ent"
 	"github.com/shifty11/cosmos-gov/ent/chain"
@@ -21,6 +23,52 @@ import (
 
 var json = jsontime.ConfigWithCustomTimeFormat
 var stripPolicy = bluemonday.StrictPolicy()
+
+type State struct {
+	fetchErrors                     map[int]int
+	maxFetchErrorsUntilAttemptToFix int // max fetch errors until attempt to fix it will start
+	maxFetchErrorsUntilReport       int // max fetch errors until fetching will be reported
+}
+
+type ProposalDatasource struct {
+	ctx                   context.Context
+	chainRegistry         registry.CosmosGithubRegistry
+	chainManager          *database.ChainManager
+	telegramChatManager   *database.TelegramChatManager
+	discordChannelManager *database.DiscordChannelManager
+	proposalManager       *database.ProposalManager
+	state                 *State
+	tgClient              *telegram.TelegramLightClient
+	discordClient         *discord.DiscordLightClient
+}
+
+func NewProposalDatasource(
+	ctx context.Context,
+	managers database.DbManagers,
+	chainRegistry registry.CosmosGithubRegistry,
+	state *State,
+	tgClient *telegram.TelegramLightClient,
+	discordClient *discord.DiscordLightClient,
+) *ProposalDatasource {
+	if state == nil {
+		state = &State{
+			fetchErrors:                     make(map[int]int),
+			maxFetchErrorsUntilAttemptToFix: 10,
+			maxFetchErrorsUntilReport:       20,
+		}
+	}
+	return &ProposalDatasource{
+		ctx:                   ctx,
+		chainRegistry:         chainRegistry,
+		chainManager:          managers.ChainManager,
+		proposalManager:       managers.ProposalManager,
+		telegramChatManager:   managers.TelegramChatManager,
+		discordChannelManager: managers.DiscordChannelManager,
+		state:                 state,
+		tgClient:              tgClient,
+		discordClient:         discordClient,
+	}
+}
 
 func sanitizeTitle(title string) string { // Removes first character if it is not a letter
 	r := regexp.MustCompile("[a-zA-Z]+")
@@ -105,8 +153,8 @@ func fetchProposals(chainId string, proposalStatus types.ProposalStatus, pageReq
 	return &proposals, nil
 }
 
-func (ds Datasource) getChainInfo(chainName string) (*lens.ChainClient, *registry.ChainInfo, []string, error) {
-	chainInfo, err := ds.chainRegistry.GetChain(context.Background(), chainName)
+func getChainInfo(chainName string, chainRegistry registry.CosmosGithubRegistry) (*lens.ChainClient, *registry.ChainInfo, []string, error) {
+	chainInfo, err := chainRegistry.GetChain(context.Background(), chainName)
 	if err != nil {
 		log.Sugar.Debugf("Failed to get chain client on %v: %v \n", chainName, err)
 		return nil, nil, nil, err
@@ -145,7 +193,7 @@ func (ds Datasource) getChainInfo(chainName string) (*lens.ChainClient, *registr
 	return chainClient, &chainInfo, rpcs, nil
 }
 
-func (ds Datasource) saveAndSendProposals(props *database.Proposals, entChain *ent.Chain) {
+func (ds ProposalDatasource) saveAndSendProposals(props *database.Proposals, entChain *ent.Chain) {
 	for _, prop := range props.Proposals {
 		entProp := ds.proposalManager.CreateIfNotExists(&prop, entChain)
 		if entProp != nil && entChain.IsEnabled {
@@ -162,7 +210,22 @@ func (ds Datasource) saveAndSendProposals(props *database.Proposals, entChain *e
 	}
 }
 
-func (ds Datasource) handleFetchError(chain *ent.Chain, err error) {
+func (ds ProposalDatasource) updateRpcs(chainName string) {
+	_, _, rpcs, err := getChainInfo(chainName, ds.chainRegistry)
+	if err != nil {
+		log.Sugar.Errorf("Error getting RPC's for chain %v: %v", chainName, err)
+	}
+	if len(rpcs) == 0 {
+		log.Sugar.Errorf("Found no RPC's for chain %v: %v", chainName, err)
+		return
+	}
+	err = ds.chainManager.UpdateRpcs(chainName, rpcs)
+	if err != nil {
+		log.Sugar.Errorf("Error while updating RPC's for chain %v: %v", chainName, err)
+	}
+}
+
+func (ds ProposalDatasource) handleFetchError(chain *ent.Chain, err error) {
 	if err != nil {
 		ds.state.fetchErrors[chain.ID] += 1
 		if ds.state.fetchErrors[chain.ID] >= ds.state.maxFetchErrorsUntilAttemptToFix {
@@ -176,7 +239,7 @@ func (ds Datasource) handleFetchError(chain *ent.Chain, err error) {
 	}
 }
 
-func (ds Datasource) updateProposal(entProp *ent.Proposal, status types.ProposalStatus) bool {
+func (ds ProposalDatasource) updateProposal(entProp *ent.Proposal, status types.ProposalStatus) bool {
 	pageRequest := querytypes.PageRequest{
 		Key:        nil,
 		Offset:     0,
@@ -203,7 +266,7 @@ func (ds Datasource) updateProposal(entProp *ent.Proposal, status types.Proposal
 }
 
 // CheckForUpdates checks if proposal that are in voting period need to be updated
-func (ds Datasource) CheckForUpdates() {
+func (ds ProposalDatasource) CheckForUpdates() {
 	votingProposals := ds.proposalManager.GetFinishedProposalsInVotingPeriod()
 	if len(votingProposals) == 0 { // do nothing if there is no finished votingProposal
 		return
@@ -223,7 +286,7 @@ func (ds Datasource) CheckForUpdates() {
 	}
 }
 
-func (ds Datasource) FetchProposals() {
+func (ds ProposalDatasource) FetchProposals() {
 	log.Sugar.Info("Fetch proposals")
 	chains := ds.chainManager.All()
 	for _, c := range chains {

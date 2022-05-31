@@ -107,7 +107,7 @@ func (dc DiscourseCrawler) FetchDraftProposals() {
 	chains := dc.chainManager.All()
 	for _, c := range chains {
 		if c.Name == "cosmoshub" {
-			database.DeleteAllDrafts()
+			//database.DeleteAllDrafts()
 
 			url := "https://forum.cosmos.network"
 			topics, err := dc.getDraftProposals(url)

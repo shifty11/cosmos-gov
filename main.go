@@ -16,15 +16,15 @@ import (
 	"time"
 )
 
-func initDatabase(ds *datasource.Datasource, chainManager *database.ChainManager) {
+func initDatabase(cd *datasource.ChainDatasource, chainManager *database.ChainManager) {
 	database.MigrateDatabase()
 
 	if len(chainManager.All()) == 0 { // Add chains after DB has been newly created
-		ds.AddNewChains()
+		cd.AddNewChains()
 	}
 }
 
-func startProposalFetching(ds *datasource.Datasource) {
+func startProposalFetching(ds *datasource.ProposalDatasource) {
 	go func() {
 		ds.FetchProposals() // start immediately and then every 5 minutes
 		c := cron.New()
@@ -48,16 +48,16 @@ func startDraftProposalFetching(dc *datasource.DiscourseCrawler) {
 	}()
 }
 
-func startNewChainFetching(ds *datasource.Datasource) {
+func startNewChainFetching(cd *datasource.ChainDatasource) {
 	c := cron.New()
-	_, err := c.AddFunc("0 10 * * *", func() { ds.AddNewChains() }) // execute every day at 10.00
+	_, err := c.AddFunc("0 10 * * *", func() { cd.AddNewChains() }) // execute every day at 10.00
 	if err != nil {
 		log.Sugar.Errorf("while executing 'datasource.AddNewChains()' via cron: %v", err)
 	}
 	c.Start()
 }
 
-func startProposalUpdating(ds *datasource.Datasource) {
+func startProposalUpdating(ds *datasource.ProposalDatasource) {
 	go func() {
 		ds.CheckForUpdates() // start immediately and then every hour
 		c := cron.New()
@@ -93,15 +93,16 @@ func main() {
 	discordClient := discord.NewDiscordClient(managers)
 	discordLightClient := discord.NewDiscordLightClient(managers)
 	reg := registry.NewCosmosGithubRegistry(log.Sugar.Desugar())
-	ds := datasource.NewDatasource(context.Background(), managers, reg, nil, tgLightClient, discordLightClient)
+	cd := datasource.NewChainDatasource(context.Background(), managers, reg, tgLightClient, discordLightClient)
+	ds := datasource.NewProposalDatasource(context.Background(), managers, reg, nil, tgLightClient, discordLightClient)
 	dc := datasource.NewDiscourseCrawler(context.Background(), managers, tgLightClient, discordLightClient)
 
 	args := os.Args[1:]
 	if len(args) > 0 && args[0] == "fetching" {
-		initDatabase(ds, managers.ChainManager)
+		initDatabase(cd, managers.ChainManager)
 		startProposalFetching(ds)
 		startDraftProposalFetching(dc)
-		startNewChainFetching(ds)
+		startNewChainFetching(cd)
 		startProposalUpdating(ds)
 	} else if len(args) > 0 && args[0] == "telegram" {
 		startTelegramServer(tgClient)
@@ -110,10 +111,10 @@ func main() {
 	} else if len(args) > 0 && args[0] == "grpc" {
 		startGrpcServer()
 	} else {
-		initDatabase(ds, managers.ChainManager)
+		initDatabase(cd, managers.ChainManager)
 		startProposalFetching(ds)
 		startDraftProposalFetching(dc)
-		startNewChainFetching(ds)
+		startNewChainFetching(cd)
 		startProposalUpdating(ds)
 		startTelegramServer(tgClient)
 		startDiscordServer(discordClient)

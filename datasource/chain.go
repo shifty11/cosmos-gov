@@ -1,16 +1,49 @@
 package datasource
 
 import (
+	"context"
 	"fmt"
 	"github.com/cosmos/cosmos-sdk/x/gov/types"
+	"github.com/shifty11/cosmos-gov/api/discord"
+	"github.com/shifty11/cosmos-gov/api/telegram"
+	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/log"
+	registry "github.com/strangelove-ventures/lens/client/chain_registry"
 	"golang.org/x/exp/slices"
 	"sort"
 	"strings"
 )
 
-func (ds Datasource) getChainsFromRegistry() ([]string, error) {
-	chains, err := ds.chainRegistry.ListChains(ds.ctx)
+type ChainDatasource struct {
+	ctx                  context.Context
+	chainRegistry        registry.CosmosGithubRegistry
+	chainManager         *database.ChainManager
+	proposalManager      *database.ProposalManager
+	lensChainInfoManager *database.LensChainInfoManager
+	tgClient             *telegram.TelegramLightClient
+	discordClient        *discord.DiscordLightClient
+}
+
+func NewChainDatasource(
+	ctx context.Context,
+	managers database.DbManagers,
+	chainRegistry registry.CosmosGithubRegistry,
+	tgClient *telegram.TelegramLightClient,
+	discordClient *discord.DiscordLightClient,
+) *ChainDatasource {
+	return &ChainDatasource{
+		ctx:                  ctx,
+		chainRegistry:        chainRegistry,
+		chainManager:         managers.ChainManager,
+		proposalManager:      managers.ProposalManager,
+		lensChainInfoManager: managers.LensChainInfoManager,
+		tgClient:             tgClient,
+		discordClient:        discordClient,
+	}
+}
+
+func (cd ChainDatasource) getChainsFromRegistry() ([]string, error) {
+	chains, err := cd.chainRegistry.ListChains(cd.ctx)
 	if err != nil {
 		log.Sugar.Errorf("Error calling reg.ListChains: %v", err)
 		return nil, err
@@ -24,8 +57,8 @@ func (ds Datasource) getChainsFromRegistry() ([]string, error) {
 	return filteredChains, nil
 }
 
-func (ds Datasource) orderChainsByErrorCnt(chains []string) []string {
-	chainInfo := ds.lensChainInfoManager.GetLensChainInfos()
+func (cd ChainDatasource) orderChainsByErrorCnt(chains []string) []string {
+	chainInfo := cd.lensChainInfoManager.GetLensChainInfos()
 	var chainsWithErrors = make(map[int][]string)
 	chainsWithErrors[0] = []string{}
 	for _, chainName := range chains {
@@ -62,13 +95,13 @@ func (ds Datasource) orderChainsByErrorCnt(chains []string) []string {
 	return orderedChains
 }
 
-func (ds Datasource) getNewChains() []string {
-	chainsInRegistry, err := ds.getChainsFromRegistry()
+func (cd ChainDatasource) getNewChains() []string {
+	chainsInRegistry, err := cd.getChainsFromRegistry()
 	if err != nil {
 		return nil
 	}
 
-	chains := ds.chainManager.All()
+	chains := cd.chainManager.All()
 	var chainNames []string
 	for _, chain := range chains {
 		chainNames = append(chainNames, chain.Name)
@@ -80,34 +113,19 @@ func (ds Datasource) getNewChains() []string {
 			newChains = append(newChains, chain)
 		}
 	}
-	return ds.orderChainsByErrorCnt(newChains)
+	return cd.orderChainsByErrorCnt(newChains)
 }
 
-func (ds Datasource) updateRpcs(chainName string) {
-	_, _, rpcs, err := ds.getChainInfo(chainName)
-	if err != nil {
-		log.Sugar.Errorf("Error getting RPC's for chain %v: %v", chainName, err)
-	}
-	if len(rpcs) == 0 {
-		log.Sugar.Errorf("Found no RPC's for chain %v: %v", chainName, err)
-		return
-	}
-	err = ds.chainManager.UpdateRpcs(chainName, rpcs)
-	if err != nil {
-		log.Sugar.Errorf("Error while updating RPC's for chain %v: %v", chainName, err)
-	}
-}
-
-func (ds Datasource) AddNewChains() {
+func (cd ChainDatasource) AddNewChains() {
 	log.Sugar.Info("Add new chains")
-	chains := ds.getNewChains()
+	chains := cd.getNewChains()
 	message := ""
-	chainManager := ds.chainManager
-	propManager := ds.proposalManager
-	lensChainManager := ds.lensChainInfoManager
+	chainManager := cd.chainManager
+	propManager := cd.proposalManager
+	lensChainManager := cd.lensChainInfoManager
 
 	for _, chainName := range chains {
-		client, chainInfo, rpcs, err := ds.getChainInfo(chainName)
+		client, chainInfo, rpcs, err := getChainInfo(chainName, cd.chainRegistry)
 		if err != nil {
 			log.Sugar.Debugf("Chain '%v' has %v errors", chainName, err)
 			lensChainManager.AddErrorToLensChainInfo(chainName)
@@ -128,6 +146,6 @@ func (ds Datasource) AddNewChains() {
 	}
 	if message != "" {
 		intro := "<b>New chain update info</b>\n"
-		ds.tgClient.SendMessageToBotAdmins(intro + message)
+		cd.tgClient.SendMessageToBotAdmins(intro + message)
 	}
 }
