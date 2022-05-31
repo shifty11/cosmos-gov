@@ -243,7 +243,7 @@ func (ds ProposalDatasource) updateProposal(entProp *ent.Proposal, status types.
 	pageRequest := querytypes.PageRequest{
 		Key:        nil,
 		Offset:     0,
-		Limit:      100,
+		Limit:      1000,
 		CountTotal: false,
 		Reverse:    true,
 	}
