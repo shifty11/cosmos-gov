@@ -42,7 +42,6 @@ const (
 	MessageCmdSupport       MessageCommand = "support"
 
 	MessageCmdStats     MessageCommand = "stats"     // admin command
-	MessageCmdChains    MessageCommand = "chains"    // admin command
 	MessageCmdBroadcast MessageCommand = "broadcast" // admin command
 )
 
@@ -54,9 +53,8 @@ const (
 	CallbackCmdShowHelp          CallbackCommand = "SHOW_HELP"
 	CallbackCmdShowSupport       CallbackCommand = "SHOW_SUPPORT"
 
-	CallbackCmdStats        CallbackCommand = "STATS"         // admin command
-	CallbackCmdEnableChains CallbackCommand = "ENABLE_CHAINS" // admin command
-	CallbackCmdVote         CallbackCommand = "VOTE"
+	CallbackCmdStats CallbackCommand = "STATS" // admin command
+	CallbackCmdVote  CallbackCommand = "VOTE"
 	//CallbackCmdBroadcast    CallbackCommand = "BROADCAST"     // admin command
 )
 
@@ -254,11 +252,11 @@ type MenuButtonConfig struct {
 	ShowExternalWebApp bool
 }
 
-func createMenuButtonConfig() MenuButtonConfig {
-	return MenuButtonConfig{ShowSubscriptions: true, ShowProposals: true, ShowHelp: true, ShowSupport: true, ShowInlineWebApp: true, ShowExternalWebApp: true}
+func createMenuButtonConfig(update *tgbotapi.Update) MenuButtonConfig {
+	return MenuButtonConfig{ShowSubscriptions: true, ShowProposals: true, ShowHelp: true, ShowSupport: true, ShowInlineWebApp: !isGroupX(update), ShowExternalWebApp: true}
 }
 
-func getMenuButtonRow(config MenuButtonConfig) []Button {
+func getMenuButtonRow(config MenuButtonConfig, update *tgbotapi.Update) []Button {
 	var buttonRow []Button
 	//if config.ShowSubscriptions {
 	//	buttonRow = append(buttonRow, NewButton("🔔 Subscriptions", &CallbackData{Command: CallbackCmdShowSubscriptions}))
@@ -274,7 +272,7 @@ func getMenuButtonRow(config MenuButtonConfig) []Button {
 	//}
 	if config.ShowInlineWebApp {
 		button := NewButton("🔔 Subscriptions", nil)
-		button.WebApp = &tgbotapi.WebAppInfo{URL: os.Getenv("WEB_APP_URL")}
+		button.WebApp = &tgbotapi.WebAppInfo{URL: fmt.Sprintf("%v?chat_id=%v", os.Getenv("WEB_APP_URL"), getChatIdX(update))}
 		buttonRow = append(buttonRow, button)
 	}
 	if config.ShowExternalWebApp {
@@ -283,21 +281,18 @@ func getMenuButtonRow(config MenuButtonConfig) []Button {
 			url = os.Getenv("WEB_APP_URL")
 		}
 		button := NewButton("🌐 Subscriptions (browser)", nil)
-		button.LoginURL = &tgbotapi.LoginURL{URL: url}
+		button.LoginURL = &tgbotapi.LoginURL{URL: fmt.Sprintf("%v?chat_id=%v", url, getChatIdX(update)), RequestWriteAccess: true}
 		buttonRow = append(buttonRow, button)
 	}
 	return buttonRow
 }
 
 type BotAdminMenuButtonConfig struct {
-	ShowStats  bool
-	ShowChains bool
-	//ShowBroadcast bool
-	ShowWebAppLogin bool
+	ShowStats bool
 }
 
 func createBotAdminMenuButtonConfig() BotAdminMenuButtonConfig {
-	return BotAdminMenuButtonConfig{ShowStats: true, ShowChains: true, ShowWebAppLogin: true}
+	return BotAdminMenuButtonConfig{ShowStats: true}
 }
 
 func getBotAdminMenuButtonRow(config BotAdminMenuButtonConfig) []Button {
@@ -305,12 +300,6 @@ func getBotAdminMenuButtonRow(config BotAdminMenuButtonConfig) []Button {
 	if config.ShowStats {
 		buttonRow = append(buttonRow, NewButton("📈 Stats", &CallbackData{Command: CallbackCmdStats}))
 	}
-	if config.ShowChains {
-		buttonRow = append(buttonRow, NewButton("🔗 Chains", &CallbackData{Command: CallbackCmdEnableChains}))
-	}
-	//if config.ShowBroadcast {
-	//	buttonRow = append(buttonRow, NewButton("🔊 Broadcast", CallbackData{Command: CallbackCmdBroadcast}))
-	//}
 	return buttonRow
 }
 

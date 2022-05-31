@@ -67,8 +67,8 @@ func sendUserStatistics(update *tgbotapi.Update) {
 
 	text := chainMsg + "\n\n" + telegramMsg + "\n\n" + discordMsg
 
-	config := createMenuButtonConfig()
-	buttons := [][]Button{getMenuButtonRow(config)}
+	config := createMenuButtonConfig(update)
+	buttons := [][]Button{getMenuButtonRow(config, update)}
 	if isBotAdmin(update) {
 		botAdminConfig := createBotAdminMenuButtonConfig()
 		buttons = append(buttons, getBotAdminMenuButtonRow(botAdminConfig))
@@ -135,52 +135,6 @@ func sendBroadcastEndInfoMessage(update *tgbotapi.Update, success bool) {
 	}
 	msg := tgbotapi.NewMessage(chatId, text)
 	sendMessageX(msg)
-}
-
-func sendChains(update *tgbotapi.Update) {
-	chatId := getChatIdX(update)
-	chains := mHack.ChainManager.All()
-
-	var buttons [][]Button
-	var buttonRow []Button
-	for ix, c := range chains {
-		symbol := "🔴️ "
-		if c.IsEnabled {
-			symbol = "\U0001F7E2 "
-		}
-		callbackData := &CallbackData{Command: CallbackCmdEnableChains, Data: c.Name}
-		buttonRow = append(buttonRow, NewButton(symbol+c.DisplayName, callbackData))
-		if (ix+1)%NbrOfButtonsPerRow == 0 || ix == len(chains)-1 {
-			buttons = append(buttons, buttonRow)
-			buttonRow = []Button{}
-		}
-	}
-
-	config := createMenuButtonConfig()
-	buttons = append(buttons, getMenuButtonRow(config))
-	if isBotAdmin(update) {
-		botAdminConfig := createBotAdminMenuButtonConfig()
-		botAdminConfig.ShowChains = false
-		buttons = append(buttons, getBotAdminMenuButtonRow(botAdminConfig))
-	}
-	replyMarkup := createKeyboard(buttons)
-
-	if update.CallbackQuery == nil {
-		msg := tgbotapi.NewMessage(chatId, newChainsMsg)
-		msg.ReplyMarkup = replyMarkup
-		err := sendMessage(msg)
-		if err != nil {
-			log.Sugar.Errorf("Error while sendChains for user #%v: %v", chatId, err)
-		}
-	} else {
-		msg := tgbotapi.NewEditMessageText(chatId, update.CallbackQuery.Message.MessageID, newChainsMsg)
-		msg.ReplyMarkup = replyMarkup
-		answerCallbackQuery(update)
-		err := sendMessage(msg)
-		if err != nil {
-			log.Sugar.Debugf("Error while sendChains for user #%v: %v", chatId, err)
-		}
-	}
 }
 
 func SendMessageToBotAdmins(message string) {

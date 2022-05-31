@@ -19,9 +19,6 @@ const (
 
 var MessageStates = [...]State{StateStartBroadcast, StateConfirmBroadcast}
 
-var state = make(map[int64]State)
-var stateData = make(map[int64]StateData)
-
 type BroadcastStateData struct {
 	Message string
 }
@@ -59,10 +56,9 @@ func sendSubscriptions(update *tgbotapi.Update) {
 			buttonRow = []Button{}
 		}
 	}
-	config := createMenuButtonConfig()
+	config := createMenuButtonConfig(update)
 	config.ShowSubscriptions = false
-	config.ShowInlineWebApp = !isGroup
-	buttons = append(buttons, getMenuButtonRow(config))
+	buttons = append(buttons, getMenuButtonRow(config, update))
 	if isBotAdmin(update) {
 		botAdminConfig := createBotAdminMenuButtonConfig()
 		buttons = append(buttons, getBotAdminMenuButtonRow(botAdminConfig))
@@ -115,9 +111,9 @@ func sendCurrentProposals(update *tgbotapi.Update) {
 
 	text := getOngoingProposalsText(chatId)
 
-	config := createMenuButtonConfig()
+	config := createMenuButtonConfig(update)
 	config.ShowProposals = false
-	buttons := [][]Button{getMenuButtonRow(config)}
+	buttons := [][]Button{getMenuButtonRow(config, update)}
 	if isBotAdmin(update) {
 		botAdminConfig := createBotAdminMenuButtonConfig()
 		buttons = append(buttons, getBotAdminMenuButtonRow(botAdminConfig))
@@ -152,9 +148,9 @@ func sendHelp(update *tgbotapi.Update) {
 		text += "\n\n" + adminHelpMsg
 	}
 
-	config := createMenuButtonConfig()
+	config := createMenuButtonConfig(update)
 	config.ShowHelp = false
-	buttons := [][]Button{getMenuButtonRow(config)}
+	buttons := [][]Button{getMenuButtonRow(config, update)}
 	if isBotAdmin(update) {
 		botAdminConfig := createBotAdminMenuButtonConfig()
 		buttons = append(buttons, getBotAdminMenuButtonRow(botAdminConfig))
@@ -185,9 +181,9 @@ func sendSupport(update *tgbotapi.Update) {
 	chatId := getChatIdX(update)
 	log.Sugar.Debugf("Send support message to user #%v", chatId)
 
-	config := createMenuButtonConfig()
+	config := createMenuButtonConfig(update)
 	config.ShowSupport = false
-	buttons := [][]Button{getMenuButtonRow(config)}
+	buttons := [][]Button{getMenuButtonRow(config, update)}
 	if isBotAdmin(update) {
 		botAdminConfig := createBotAdminMenuButtonConfig()
 		buttons = append(buttons, getBotAdminMenuButtonRow(botAdminConfig))
