@@ -27,7 +27,7 @@ type StateData struct {
 	BroadcastStateData *BroadcastStateData
 }
 
-func sendSubscriptions(update *tgbotapi.Update) {
+func (client TelegramClient) sendSubscriptions(update *tgbotapi.Update) {
 	userId := getUserIdX(update)
 	userName := getUserName(update)
 	chatId := getChatIdX(update)
@@ -40,7 +40,7 @@ func sendSubscriptions(update *tgbotapi.Update) {
 		log.Sugar.Debugf("Send subscriptions to user #%v", chatId)
 	}
 
-	chains := mHack.TelegramSubscriptionManager.GetOrCreateSubscriptions(userId, userName, chatId, chatName, isGroup)
+	chains := client.TelegramSubscriptionManager.GetOrCreateSubscriptions(userId, userName, chatId, chatName, isGroup)
 
 	var buttons [][]Button
 	var buttonRow []Button
@@ -87,9 +87,9 @@ func sendSubscriptions(update *tgbotapi.Update) {
 	}
 }
 
-func getOngoingProposalsText(chatId int64) string {
+func (client TelegramClient) getOngoingProposalsText(chatId int64) string {
 	text := messages.ProposalsMsg
-	chains := mHack.ProposalManager.GetProposalsInVotingPeriod(chatId, user.TypeTelegram)
+	chains := client.ProposalManager.GetProposalsInVotingPeriod(chatId, user.TypeTelegram)
 	if len(chains) == 0 {
 		text = messages.NoSubscriptionsMsg
 	} else {
@@ -105,11 +105,11 @@ func getOngoingProposalsText(chatId int64) string {
 	return text
 }
 
-func sendCurrentProposals(update *tgbotapi.Update) {
+func (client TelegramClient) sendCurrentProposals(update *tgbotapi.Update) {
 	chatId := getChatIdX(update)
 	log.Sugar.Debugf("Send current proposals to user #%v", chatId)
 
-	text := getOngoingProposalsText(chatId)
+	text := client.getOngoingProposalsText(chatId)
 
 	config := createMenuButtonConfig(update)
 	config.ShowProposals = false
@@ -140,7 +140,7 @@ func sendCurrentProposals(update *tgbotapi.Update) {
 	}
 }
 
-func sendHelp(update *tgbotapi.Update) {
+func (client TelegramClient) sendHelp(update *tgbotapi.Update) {
 	chatId := getChatIdX(update)
 	log.Sugar.Debugf("Send help to user #%v", chatId)
 	text := helpMsg
@@ -177,7 +177,7 @@ func sendHelp(update *tgbotapi.Update) {
 	}
 }
 
-func sendSupport(update *tgbotapi.Update) {
+func (client TelegramClient) sendSupport(update *tgbotapi.Update) {
 	chatId := getChatIdX(update)
 	log.Sugar.Debugf("Send support message to user #%v", chatId)
 
@@ -213,7 +213,7 @@ func sendSupport(update *tgbotapi.Update) {
 	}
 }
 
-func sendError(update *tgbotapi.Update) {
+func (client TelegramClient) sendError(update *tgbotapi.Update) {
 	chatId := getChatIdX(update)
 	log.Sugar.Debugf("Send error msg to user #%v", chatId)
 	text := errMsg
@@ -227,9 +227,9 @@ func sendError(update *tgbotapi.Update) {
 	}
 }
 
-func editSentProposal(update *tgbotapi.Update, voteData *authz.VoteData) {
+func (client TelegramClient) editSentProposal(update *tgbotapi.Update, voteData *authz.VoteData) {
 	chatId := getChatIdX(update)
-	prop, err := mHack.ProposalManager.Get(voteData.ChainName, voteData.ProposalId)
+	prop, err := client.ProposalManager.Get(voteData.ChainName, voteData.ProposalId)
 
 	text := fmt.Sprintf("🎉  <b>%v - Proposal %v\n\n%v</b>\n\n<i>%v</i>", prop.Edges.Chain.DisplayName, prop.ProposalID, prop.Title, prop.Description)
 	if len(text) > 4096 {

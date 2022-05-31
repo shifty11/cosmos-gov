@@ -1,7 +1,6 @@
 package telegram
 
 import (
-	"errors"
 	"fmt"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -10,18 +9,33 @@ import (
 	"github.com/shifty11/cosmos-gov/ent"
 	"github.com/shifty11/cosmos-gov/log"
 	"golang.org/x/exp/slices"
+	"os"
 	"strconv"
 	"strings"
 )
 
-func shouldDeleteUser(err error) bool {
+//goland:noinspection GoNameStartsWithPackageName
+type TelegramLightClient struct {
+	api                 *tgbotapi.BotAPI
+	TelegramChatManager *database.TelegramChatManager
+}
+
+func NewTelegramLightClient(managers database.DbManagers) *TelegramLightClient {
+	return &TelegramLightClient{
+		api: getApi(),
+
+		TelegramChatManager: managers.TelegramChatManager,
+	}
+}
+
+func (client TelegramLightClient) shouldDeleteUser(err error) bool {
 	if err != nil {
 		return slices.Contains(forbiddenErrors, err.Error())
 	}
 	return false
 }
 
-func toSlice(res []database.TgChatQueryResult) []int64 {
+func (client TelegramLightClient) toSlice(res []database.TgChatQueryResult) []int64 {
 	var ints []int64
 	for _, entry := range res {
 		ints = append(ints, entry.ChatId)
@@ -29,42 +43,15 @@ func toSlice(res []database.TgChatQueryResult) []int64 {
 	return ints
 }
 
-func unpackVoteData(voteDataStr string) (*authz.VoteData, error) {
-	var parts = strings.Split(voteDataStr, ":")
-	if len(parts) != 4 {
-		return nil, errors.New(fmt.Sprintf("expected 3 parts but got %v", len(parts)))
-	}
-	proposalId, err := strconv.ParseUint(parts[1], 10, 64)
-	if err != nil {
-		return nil, errors.New(fmt.Sprintf("%d of type %T", proposalId, proposalId))
-	}
-	voteOption, err := strconv.ParseUint(parts[2], 10, 64)
-	if err != nil {
-		return nil, errors.New(fmt.Sprintf("%d of type %T", voteOption, voteOption))
-	}
-	voteState, err := strconv.ParseInt(parts[3], 10, 64)
-	if err != nil {
-		return nil, errors.New(fmt.Sprintf("%d of type %T", voteState, voteState))
-	}
-	return &authz.VoteData{
-		ChainName:  parts[0],
-		ProposalId: proposalId,
-		Vote:       govtypes.VoteOption(voteOption),
-		State:      authz.VoteState(voteState),
-	}, nil
-}
-
-func SendProposals(entProp *ent.Proposal, entChain *ent.Chain) []int64 {
+func (client TelegramLightClient) SendProposals(entProp *ent.Proposal, entChain *ent.Chain) []int64 {
 	text := fmt.Sprintf("🎉  <b>%v - Proposal %v\n\n%v</b>\n\n<i>%v</i>", entChain.DisplayName, entProp.ProposalID, entProp.Title, entProp.Description)
 	if len(text) > 4096 {
 		text = text[:4088] + "</i> ..."
 	}
 
 	var errIds []int64
-	mHack = database.NewDefaultDbManagers() //TODO: remove
-
-	allTgChats := mHack.TelegramChatManager.GetChatIds(entChain)
-	tgChatsWithGrants := mHack.TelegramChatManager.GetChatIdsWithGrants(entChain)
+	allTgChats := client.TelegramChatManager.GetChatIds(entChain)
+	tgChatsWithGrants := client.TelegramChatManager.GetChatIdsWithGrants(entChain)
 	for _, chat := range allTgChats {
 		log.Sugar.Debugf("Send proposal #%v on %v to telegram chat #%v", entProp.ProposalID, entChain.DisplayName, chat.ChatId)
 
@@ -72,14 +59,14 @@ func SendProposals(entProp *ent.Proposal, entChain *ent.Chain) []int64 {
 		msg.ParseMode = "html"
 		msg.DisableWebPagePreview = true
 
-		if slices.Contains(toSlice(tgChatsWithGrants), chat.ChatId) {
+		if slices.Contains(client.toSlice(tgChatsWithGrants), chat.ChatId) {
 			voteData := authz.ToVoteData(entChain.Name, entProp.ProposalID, govtypes.OptionEmpty, authz.NotVoted)
 			msg.ReplyMarkup = createKeyboard(getVoteButtons(&voteData))
 		}
 
 		err := sendMessage(msg)
 		if err != nil {
-			if shouldDeleteUser(err) {
+			if client.shouldDeleteUser(err) {
 				errIds = append(errIds, chat.ChatId)
 			} else {
 				log.Sugar.Errorf("Error while sending message to telegram chat #%v: %v", chat, err)
@@ -89,13 +76,11 @@ func SendProposals(entProp *ent.Proposal, entChain *ent.Chain) []int64 {
 	return errIds
 }
 
-func SendDraftProposals(entProp *ent.DraftProposal, entChain *ent.Chain) []int64 {
+func (client TelegramLightClient) SendDraftProposals(entProp *ent.DraftProposal, entChain *ent.Chain) []int64 {
 	text := fmt.Sprintf("💬  <b>%v - New pre-vote proposal\n\n%v</b>\n%v", entChain.DisplayName, entProp.Title, entProp.URL)
 
 	var errIds []int64
-	mHack = database.NewDefaultDbManagers() //TODO: remove
-
-	allTgChats := mHack.TelegramChatManager.GetChatIds(entChain)
+	allTgChats := client.TelegramChatManager.GetChatIds(entChain)
 	for _, chat := range allTgChats {
 		log.Sugar.Debugf("Send draft proposal #%v on %v to telegram chat #%v", entProp.DraftProposalID, entChain.DisplayName, chat.ChatId)
 
@@ -105,7 +90,7 @@ func SendDraftProposals(entProp *ent.DraftProposal, entChain *ent.Chain) []int64
 
 		err := sendMessage(msg)
 		if err != nil {
-			if shouldDeleteUser(err) {
+			if client.shouldDeleteUser(err) {
 				errIds = append(errIds, chat.ChatId)
 			} else {
 				log.Sugar.Errorf("Error while sending message to telegram chat #%v: %v", chat, err)
@@ -113,4 +98,19 @@ func SendDraftProposals(entProp *ent.DraftProposal, entChain *ent.Chain) []int64
 		}
 	}
 	return errIds
+}
+
+func (client TelegramLightClient) SendMessageToBotAdmins(message string) {
+	admins := strings.Split(strings.Trim(os.Getenv("ADMIN_IDS"), " "), ",")
+	for _, chatIdStr := range admins {
+		chatId, err := strconv.Atoi(chatIdStr)
+		if err != nil {
+			log.Sugar.Error(err)
+		}
+		msg := tgbotapi.NewMessage(int64(chatId), message)
+		msg.ParseMode = "html"
+		msg.DisableWebPagePreview = true
+		err = sendMessage(msg)
+		handleError(chatId, err, client.TelegramChatManager)
+	}
 }

@@ -1,6 +1,7 @@
 package telegram
 
 import (
+	"errors"
 	"fmt"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -8,10 +9,12 @@ import (
 	"github.com/shifty11/cosmos-gov/ent"
 	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/log"
+	"strconv"
+	"strings"
 )
 
 // performUpdateSubscription toggles the subscription for a chain
-func performUpdateSubscription(update *tgbotapi.Update, chainName string) {
+func (client TelegramClient) performUpdateSubscription(update *tgbotapi.Update, chainName string) {
 	if chainName == "" {
 		return
 	}
@@ -19,19 +22,18 @@ func performUpdateSubscription(update *tgbotapi.Update, chainName string) {
 	chatName := getChatName(update)
 	log.Sugar.Debugf("Toggle subscription %v for Telegram chat %v (%v)", chainName, chatName, tgChatId)
 
-	_, err := mHack.TelegramChatManager.AddOrRemoveChain(tgChatId, chainName)
+	_, err := client.TelegramChatManager.AddOrRemoveChain(tgChatId, chainName)
 	if err != nil {
 		log.Sugar.Errorf("Error while toggle subscription %v for Telegram chat %v (%v)", chainName, chatName, tgChatId)
 	}
 }
 
-func executeVote(update *tgbotapi.Update, entUser *ent.User, voteData *authz.VoteData) {
-	authzClient := authz.NewAuthzClient(mHack.ChainManager, mHack.WalletManager)
-	err := authzClient.ExecAuthzVote(entUser, voteData)
+func (client TelegramClient) executeVote(update *tgbotapi.Update, entUser *ent.User, voteData *authz.VoteData) {
+	err := client.AuthzClient.ExecAuthzVote(entUser, voteData)
 	if err != nil {
 		log.Sugar.Errorf("while getting executing vote per authz %v", err)
 		errMsg := err.Error()
-		vote, err := authzClient.GetVoteStatus(entUser, voteData.ChainName, voteData.ProposalId)
+		vote, err := client.AuthzClient.GetVoteStatus(entUser, voteData.ChainName, voteData.ProposalId)
 		if err != nil {
 			log.Sugar.Errorf("Could not get vote of proposal %v on %v for user %v (%v)",
 				voteData.ProposalId, voteData.ChainName, entUser.Name, entUser.UserID)
@@ -42,7 +44,7 @@ func executeVote(update *tgbotapi.Update, entUser *ent.User, voteData *authz.Vot
 			voteData.State = authz.Voted
 			voteData.Vote = vote
 		}
-		editSentProposal(update, voteData)
+		client.editSentProposal(update, voteData)
 
 		text := fmt.Sprintf("🤯 <b>Error</b>\n\nThere was an error while performing your vote. Please try again or vote with another tool.\n\nThe error was: %v", errMsg)
 		msg := tgbotapi.NewMessage(getChatIdX(update), text)
@@ -53,21 +55,46 @@ func executeVote(update *tgbotapi.Update, entUser *ent.User, voteData *authz.Vot
 		}
 	} else {
 		voteData.State = authz.Voted
-		editSentProposal(update, voteData)
+		client.editSentProposal(update, voteData)
 	}
 }
 
-func performVote(update *tgbotapi.Update, data string) {
-	voteData, err := unpackVoteData(data)
+func (client TelegramClient) performVote(update *tgbotapi.Update, data string) {
+	voteData, err := client.unpackVoteData(data)
 	if err != nil {
 		log.Sugar.Errorf("while unpacking VoteData: %v", err)
 	}
-	entUser, err := mHack.UserManager.Get(getUserIdX(update), user.TypeTelegram)
+	entUser, err := client.UserManager.Get(getUserIdX(update), user.TypeTelegram)
 	if err != nil {
 		log.Sugar.Errorf("while getting user %v", err)
 	}
 	voteData.State = authz.Voting
 
-	go executeVote(update, entUser, voteData)
-	editSentProposal(update, voteData)
+	go client.executeVote(update, entUser, voteData)
+	client.editSentProposal(update, voteData)
+}
+
+func (client TelegramClient) unpackVoteData(voteDataStr string) (*authz.VoteData, error) {
+	var parts = strings.Split(voteDataStr, ":")
+	if len(parts) != 4 {
+		return nil, errors.New(fmt.Sprintf("expected 3 parts but got %v", len(parts)))
+	}
+	proposalId, err := strconv.ParseUint(parts[1], 10, 64)
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("%d of type %T", proposalId, proposalId))
+	}
+	voteOption, err := strconv.ParseUint(parts[2], 10, 64)
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("%d of type %T", voteOption, voteOption))
+	}
+	voteState, err := strconv.ParseInt(parts[3], 10, 64)
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("%d of type %T", voteState, voteState))
+	}
+	return &authz.VoteData{
+		ChainName:  parts[0],
+		ProposalId: proposalId,
+		Vote:       govtypes.VoteOption(voteOption),
+		State:      authz.VoteState(voteState),
+	}, nil
 }

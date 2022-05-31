@@ -1,6 +1,7 @@
 package datasource
 
 import (
+	"context"
 	"fmt"
 	"github.com/FrenchBen/godisco"
 	_ "github.com/lib/pq"
@@ -11,6 +12,32 @@ import (
 	"github.com/shifty11/cosmos-gov/log"
 	"golang.org/x/exp/slices"
 )
+
+type DiscourseCrawler struct {
+	ctx                   context.Context
+	chainManager          *database.ChainManager
+	telegramChatManager   *database.TelegramChatManager
+	discordChannelManager *database.DiscordChannelManager
+	proposalManager       *database.ProposalManager
+	draftProposalManager  *database.DraftProposalManager
+	lensChainInfoManager  *database.LensChainInfoManager
+	tgClient              *telegram.TelegramLightClient
+	discordClient         *discord.DiscordLightClient
+}
+
+func NewDiscourseCrawler(ctx context.Context, managers database.DbManagers, tgClient *telegram.TelegramLightClient, discordClient *discord.DiscordLightClient) *DiscourseCrawler {
+	return &DiscourseCrawler{
+		ctx:                   ctx,
+		chainManager:          managers.ChainManager,
+		proposalManager:       managers.ProposalManager,
+		draftProposalManager:  managers.DraftProposalManager,
+		lensChainInfoManager:  managers.LensChainInfoManager,
+		telegramChatManager:   managers.TelegramChatManager,
+		discordChannelManager: managers.DiscordChannelManager,
+		tgClient:              tgClient,
+		discordClient:         discordClient,
+	}
+}
 
 type Topic struct {
 	Id    int      `json:"id"`
@@ -31,7 +58,7 @@ type TopicResponse struct {
 	TopicList TopicList `json:"topic_list"`
 }
 
-func getDraftProposals(url string) ([]Topic, error) {
+func (dc DiscourseCrawler) getDraftProposals(url string) ([]Topic, error) {
 	discourseClient, err := godisco.NewClient(url, "", "")
 	if err != nil {
 		log.Sugar.Fatal(err)
@@ -56,39 +83,39 @@ func getDraftProposals(url string) ([]Topic, error) {
 	return topics, nil
 }
 
-func (ds Datasource) saveAndSendDraftProposal(topic Topic, entChain *ent.Chain, url string) {
-	prop, err := ds.draftProposalManager.Create(entChain, int64(topic.Id), topic.Title, topic.url(url))
+func (dc DiscourseCrawler) saveAndSendDraftProposal(topic Topic, entChain *ent.Chain, url string) {
+	prop, err := dc.draftProposalManager.Create(entChain, int64(topic.Id), topic.Title, topic.url(url))
 	if err != nil {
 		log.Sugar.Errorf("while creating draft proposal: %v", err)
 		return
 	}
 	if entChain.IsEnabled {
-		errIds := telegram.SendDraftProposals(prop, entChain)
+		errIds := dc.tgClient.SendDraftProposals(prop, entChain)
 		if len(errIds) > 0 {
-			ds.telegramChatManager.DeleteMultiple(errIds)
+			dc.telegramChatManager.DeleteMultiple(errIds)
 		}
 
-		errIds = discord.SendDraftProposals(prop, entChain)
+		errIds = dc.discordClient.SendDraftProposals(prop, entChain)
 		if len(errIds) > 0 {
-			ds.telegramChatManager.DeleteMultiple(errIds)
+			dc.telegramChatManager.DeleteMultiple(errIds)
 		}
 	}
 }
 
-func (ds Datasource) FetchDraftProposals() {
+func (dc DiscourseCrawler) FetchDraftProposals() {
 	log.Sugar.Info("Fetch draft proposals")
-	chains := ds.chainManager.All()
+	chains := dc.chainManager.All()
 	for _, c := range chains {
 		if c.Name == "cosmoshub" {
 			database.DeleteAllDrafts()
 
 			url := "https://forum.cosmos.network"
-			topics, err := getDraftProposals(url)
+			topics, err := dc.getDraftProposals(url)
 			if err != nil {
 				log.Sugar.Errorf("while fetching draft proposals from %v", c.DisplayName)
 			}
 
-			props, err := ds.draftProposalManager.ByChain(c.Name)
+			props, err := dc.draftProposalManager.ByChain(c.Name)
 			if err != nil {
 				log.Sugar.Errorf("while querying draft proposals from %v", c.DisplayName)
 			}
@@ -101,7 +128,7 @@ func (ds Datasource) FetchDraftProposals() {
 					}
 				}
 				if !found {
-					ds.saveAndSendDraftProposal(t, c, url)
+					dc.saveAndSendDraftProposal(t, c, url)
 				}
 			}
 		}

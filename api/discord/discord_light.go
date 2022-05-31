@@ -11,7 +11,18 @@ import (
 	"strings"
 )
 
-func startSession() *discordgo.Session {
+//goland:noinspection GoNameStartsWithPackageName
+type DiscordLightClient struct {
+	DiscordChannelManager *database.DiscordChannelManager
+}
+
+func NewDiscordLightClient(managers database.DbManagers) *DiscordLightClient {
+	return &DiscordLightClient{
+		DiscordChannelManager: managers.DiscordChannelManager,
+	}
+}
+
+func (dc DiscordLightClient) startSession() *discordgo.Session {
 	var err error
 	session, err := discordgo.New("Bot " + os.Getenv("DISCORD_TOKEN"))
 	if err != nil {
@@ -25,14 +36,14 @@ func startSession() *discordgo.Session {
 	return session
 }
 
-func closeSession(session *discordgo.Session) {
+func (dc DiscordLightClient) closeSession(session *discordgo.Session) {
 	err := session.Close()
 	if err != nil {
 		log.Sugar.Errorf("Error while closing discord s: %v", err)
 	}
 }
 
-func shouldDeleteUser(err error) bool {
+func (dc DiscordLightClient) shouldDeleteUser(err error) bool {
 	if restErr, ok := err.(*discordgo.RESTError); ok {
 		return restErr.Response.StatusCode == 403 || restErr.Response.StatusCode == 404
 	} else {
@@ -40,9 +51,9 @@ func shouldDeleteUser(err error) bool {
 	}
 }
 
-func SendProposals(entProp *ent.Proposal, entChain *ent.Chain) []int64 {
-	session := startSession()
-	defer closeSession(session)
+func (dc DiscordLightClient) SendProposals(entProp *ent.Proposal, entChain *ent.Chain) []int64 {
+	session := dc.startSession()
+	defer dc.closeSession(session)
 
 	// Remove bold text inside of description
 	description := strings.Replace(entProp.Description, "*", "", -1)
@@ -53,17 +64,15 @@ func SendProposals(entProp *ent.Proposal, entChain *ent.Chain) []int64 {
 		text = text[:1997] + "..."
 	}
 
-	mHack = database.NewDefaultDbManagers() //TODO: remove
-
 	var errIds []int64
-	channelIds := mHack.DiscordChannelManager.GetChannelIds(entChain)
+	channelIds := dc.DiscordChannelManager.GetChannelIds(entChain)
 	for _, channelId := range channelIds {
 		log.Sugar.Debugf("Send proposal #%v on %v to discord chat #%v", entProp.ProposalID, entChain.DisplayName, channelId)
 		var _, err = session.ChannelMessageSendComplex(strconv.Itoa(channelId), &discordgo.MessageSend{
 			Content: text,
 		})
 		if err != nil {
-			if shouldDeleteUser(err) {
+			if dc.shouldDeleteUser(err) {
 				errIds = append(errIds, int64(channelId))
 			} else {
 				log.Sugar.Errorf("Error while sending proposal to discord chat #%v: %v", channelId, err)
@@ -73,23 +82,21 @@ func SendProposals(entProp *ent.Proposal, entChain *ent.Chain) []int64 {
 	return errIds
 }
 
-func SendDraftProposals(entProp *ent.DraftProposal, entChain *ent.Chain) []int64 {
-	session := startSession()
-	defer closeSession(session)
+func (dc DiscordLightClient) SendDraftProposals(entProp *ent.DraftProposal, entChain *ent.Chain) []int64 {
+	session := dc.startSession()
+	defer dc.closeSession(session)
 
 	text := fmt.Sprintf("💬  **%v - New pre-vote proposal\n\n%v**\n<%v>", entChain.DisplayName, entProp.Title, entProp.URL)
 
-	mHack = database.NewDefaultDbManagers() //TODO: remove
-
 	var errIds []int64
-	channelIds := mHack.DiscordChannelManager.GetChannelIds(entChain)
+	channelIds := dc.DiscordChannelManager.GetChannelIds(entChain)
 	for _, channelId := range channelIds {
 		log.Sugar.Debugf("Send draft proposal #%v on %v to discord chat #%v", entProp.DraftProposalID, entChain.DisplayName, channelId)
 		var _, err = session.ChannelMessageSendComplex(strconv.Itoa(channelId), &discordgo.MessageSend{
 			Content: text,
 		})
 		if err != nil {
-			if shouldDeleteUser(err) {
+			if dc.shouldDeleteUser(err) {
 				errIds = append(errIds, int64(channelId))
 			} else {
 				log.Sugar.Errorf("Error while sending proposal to discord chat #%v: %v", channelId, err)

@@ -8,8 +8,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/liamylian/jsontime"
 	"github.com/microcosm-cc/bluemonday"
-	"github.com/shifty11/cosmos-gov/api/discord"
-	"github.com/shifty11/cosmos-gov/api/telegram"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/ent"
 	"github.com/shifty11/cosmos-gov/ent/chain"
@@ -151,12 +149,12 @@ func (ds Datasource) saveAndSendProposals(props *database.Proposals, entChain *e
 	for _, prop := range props.Proposals {
 		entProp := ds.proposalManager.CreateIfNotExists(&prop, entChain)
 		if entProp != nil && entChain.IsEnabled {
-			errIds := telegram.SendProposals(entProp, entChain)
+			errIds := ds.tgClient.SendProposals(entProp, entChain)
 			if len(errIds) > 0 {
 				ds.telegramChatManager.DeleteMultiple(errIds)
 			}
 
-			errIds = discord.SendProposals(entProp, entChain)
+			errIds = ds.discordClient.SendProposals(entProp, entChain)
 			if len(errIds) > 0 {
 				ds.discordChannelManager.DeleteMultiple(errIds)
 			}

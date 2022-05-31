@@ -7,6 +7,7 @@ import (
 	"github.com/shifty11/cosmos-gov/api/discord"
 	"github.com/shifty11/cosmos-gov/api/grpc"
 	"github.com/shifty11/cosmos-gov/api/telegram"
+	"github.com/shifty11/cosmos-gov/authz"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/datasource"
 	"github.com/shifty11/cosmos-gov/log"
@@ -35,11 +36,11 @@ func startProposalFetching(ds *datasource.Datasource) {
 	}()
 }
 
-func startDraftProposalFetching(ds *datasource.Datasource) {
+func startDraftProposalFetching(dc *datasource.DiscourseCrawler) {
 	go func() {
-		ds.FetchDraftProposals() // start immediately and then every 15 minutes
+		dc.FetchDraftProposals() // start immediately and then every 15 minutes
 		c := cron.New()
-		_, err := c.AddFunc("@every 15m", func() { ds.FetchDraftProposals() })
+		_, err := c.AddFunc("@every 15m", func() { dc.FetchDraftProposals() })
 		if err != nil {
 			log.Sugar.Errorf("while executing 'datasource.FetchDraftProposals()' via cron: %v", err)
 		}
@@ -68,12 +69,12 @@ func startProposalUpdating(ds *datasource.Datasource) {
 	}()
 }
 
-func startTelegramServer() {
-	go telegram.NewTelegramClient().Start()
+func startTelegramServer(tgClient *telegram.TelegramClient) {
+	go tgClient.Start()
 }
 
-func startDiscordServer() {
-	go discord.Start()
+func startDiscordServer(discordClient *discord.DiscordClient) {
+	go discordClient.Start()
 }
 
 func startGrpcServer() {
@@ -86,30 +87,36 @@ func main() {
 	defer database.Close()
 
 	managers := database.NewDefaultDbManagers()
+	authzClient := authz.NewAuthzClient(managers.ChainManager, managers.WalletManager)
+	tgClient := telegram.NewTelegramClient(managers, authzClient)
+	tgLightClient := telegram.NewTelegramLightClient(managers)
+	discordClient := discord.NewDiscordClient(managers)
+	discordLightClient := discord.NewDiscordLightClient(managers)
 	reg := registry.NewCosmosGithubRegistry(log.Sugar.Desugar())
-	ds := datasource.NewDatasource(context.Background(), managers, reg, nil)
+	ds := datasource.NewDatasource(context.Background(), managers, reg, nil, tgLightClient, discordLightClient)
+	dc := datasource.NewDiscourseCrawler(context.Background(), managers, tgLightClient, discordLightClient)
 
 	args := os.Args[1:]
 	if len(args) > 0 && args[0] == "fetching" {
 		initDatabase(ds, managers.ChainManager)
 		startProposalFetching(ds)
-		startDraftProposalFetching(ds)
+		startDraftProposalFetching(dc)
 		startNewChainFetching(ds)
 		startProposalUpdating(ds)
 	} else if len(args) > 0 && args[0] == "telegram" {
-		startTelegramServer()
+		startTelegramServer(tgClient)
 	} else if len(args) > 0 && args[0] == "discord" {
-		startDiscordServer()
+		startDiscordServer(discordClient)
 	} else if len(args) > 0 && args[0] == "grpc" {
 		startGrpcServer()
 	} else {
-		initDatabase(nil, nil)
+		initDatabase(ds, managers.ChainManager)
 		startProposalFetching(ds)
-		startDraftProposalFetching(ds)
+		startDraftProposalFetching(dc)
 		startNewChainFetching(ds)
 		startProposalUpdating(ds)
-		startTelegramServer()
-		startDiscordServer()
+		startTelegramServer(tgClient)
+		startDiscordServer(discordClient)
 	}
 
 	time.Sleep(time.Duration(1<<63 - 1))

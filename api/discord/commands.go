@@ -65,9 +65,9 @@ func getSpecificChunk(chunks [][]*database.Subscription, name string) []*databas
 	return nil
 }
 
-func getOngoingProposalsText(chatId int64) string {
+func (dc DiscordClient) getOngoingProposalsText(chatId int64) string {
 	text := messages.ProposalsMsg
-	chains := mHack.ProposalManager.GetProposalsInVotingPeriod(chatId, user.TypeDiscord)
+	chains := dc.ProposalManager.GetProposalsInVotingPeriod(chatId, user.TypeDiscord)
 	if len(chains) == 0 {
 		text = messages.NoSubscriptionsMsg
 	} else {
@@ -85,6 +85,18 @@ func getOngoingProposalsText(chatId int64) string {
 	return text
 }
 
+// performUpdateSubscription toggles the subscription for a chain
+func (dc DiscordClient) performUpdateSubscription(channelId int64, chainName string) {
+	if chainName == "" {
+		return
+	}
+	log.Sugar.Debugf("Toggle subscription %v for Telegram chat #%v", chainName, channelId)
+	_, err := dc.DiscordChannelManager.AddOrRemoveChain(channelId, chainName)
+	if err != nil {
+		log.Sugar.Errorf("Error while toggle subscription %v for Telegram chat #%v", chainName, channelId)
+	}
+}
+
 var (
 	cmds = []*discordgo.ApplicationCommand{
 		{
@@ -100,8 +112,8 @@ var (
 		//	Description: "Show ongoing proposals",
 		//},
 	}
-	cmdHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
-		messages.SubscriptionCmd: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	cmdHandlers = map[string]func(dc DiscordClient, s *discordgo.Session, i *discordgo.InteractionCreate){
+		messages.SubscriptionCmd: func(dc DiscordClient, s *discordgo.Session, i *discordgo.InteractionCreate) {
 			if !canInteractWithBot(s, i) {
 				sendEmptyResponse(s, i)
 				return
@@ -110,10 +122,10 @@ var (
 			userId := getUserIdX(i)
 			userName := getUserName(i)
 			channelId := getChannelId(i)
-			channelName := getChannelName(i)
+			channelName := getChannelName(s, i)
 			isGroup := isGroup(i)
 
-			subs := mHack.DiscordSubscriptionManager.GetOrCreateSubscriptions(userId, userName, channelId, channelName, isGroup)
+			subs := dc.DiscordSubscriptionManager.GetOrCreateSubscriptions(userId, userName, channelId, channelName, isGroup)
 
 			chains := chunks(subs, 25)
 			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -138,7 +150,7 @@ var (
 				}
 			}
 		},
-		messages.ProposalsCmd: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		messages.ProposalsCmd: func(dc DiscordClient, s *discordgo.Session, i *discordgo.InteractionCreate) {
 			if !canInteractWithBot(s, i) {
 				sendEmptyResponse(s, i)
 				return
@@ -146,7 +158,7 @@ var (
 
 			channelId := getChannelId(i)
 
-			text := getOngoingProposalsText(channelId)
+			text := dc.getOngoingProposalsText(channelId)
 
 			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -158,7 +170,7 @@ var (
 				log.Sugar.Errorf("Error while sending subscriptions: %v", err)
 			}
 		},
-		messages.SupportCmd: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		messages.SupportCmd: func(dc DiscordClient, s *discordgo.Session, i *discordgo.InteractionCreate) {
 			if !canInteractWithBot(s, i) {
 				sendEmptyResponse(s, i)
 				return
@@ -181,8 +193,8 @@ var (
 )
 
 var (
-	actionHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate, action string){
-		messages.SubscriptionCmd: func(s *discordgo.Session, i *discordgo.InteractionCreate, action string) {
+	actionHandlers = map[string]func(dc DiscordClient, s *discordgo.Session, i *discordgo.InteractionCreate, action string){
+		messages.SubscriptionCmd: func(dc DiscordClient, s *discordgo.Session, i *discordgo.InteractionCreate, action string) {
 			if !canInteractWithBot(s, i) {
 				sendEmptyResponse(s, i)
 				return
@@ -191,12 +203,12 @@ var (
 			userId := getUserIdX(i)
 			userName := getUserName(i)
 			channelId := getChannelId(i)
-			channelName := getChannelName(i)
+			channelName := getChannelName(s, i)
 			isGroup := isGroup(i)
 
-			performUpdateSubscription(channelId, action)
+			dc.performUpdateSubscription(channelId, action)
 
-			subs := mHack.DiscordSubscriptionManager.GetOrCreateSubscriptions(userId, userName, channelId, channelName, isGroup)
+			subs := dc.DiscordSubscriptionManager.GetOrCreateSubscriptions(userId, userName, channelId, channelName, isGroup)
 
 			allChains := chunks(subs, 25)
 			chains := getSpecificChunk(allChains, action)

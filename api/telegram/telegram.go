@@ -2,13 +2,12 @@ package telegram
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/shifty11/cosmos-gov/authz"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/log"
 	"golang.org/x/exp/slices"
 	"strings"
 )
-
-var mHack database.DbManagers // TODO: get rid of this hack
 
 func (client TelegramClient) isExpectingMessage(update *tgbotapi.Update) bool {
 	currentState := client.getState(update)
@@ -54,25 +53,25 @@ func (client TelegramClient) getStateData(update *tgbotapi.Update) StateData {
 func (client TelegramClient) handleCommand(update *tgbotapi.Update) {
 	switch MessageCommand(update.Message.Command()) { // Check for non admin commands
 	case MessageCmdStart, MessageCmdSubscriptions:
-		sendSubscriptions(update)
+		client.sendSubscriptions(update)
 		client.setState(update, StateNil, nil)
 	case MessageCmdProposals:
-		sendCurrentProposals(update)
+		client.sendCurrentProposals(update)
 		client.setState(update, StateNil, nil)
 	case MessageCmdHelp:
-		sendHelp(update)
+		client.sendHelp(update)
 		client.setState(update, StateNil, nil)
 	case MessageCmdSupport:
-		sendSupport(update)
+		client.sendSupport(update)
 		client.setState(update, StateNil, nil)
 	default:
 		if isBotAdmin(update) { // Check for admin commands
 			switch MessageCommand(update.Message.Command()) {
 			case MessageCmdStats:
-				sendUserStatistics(update)
+				client.sendUserStatistics(update)
 				client.setState(update, StateNil, nil)
 			case MessageCmdBroadcast:
-				sendBroadcastStart(update)
+				client.sendBroadcastStart(update)
 				client.setState(update, StateStartBroadcast, nil)
 			}
 		}
@@ -83,7 +82,7 @@ func (client TelegramClient) handleMessage(update *tgbotapi.Update) {
 	switch client.getState(update) {
 	case StateStartBroadcast:
 		data := StateData{BroadcastStateData: &BroadcastStateData{Message: update.Message.Text}}
-		sendConfirmBroadcastMessage(update, data.BroadcastStateData.Message)
+		client.sendConfirmBroadcastMessage(update, data.BroadcastStateData.Message)
 		client.setState(update, StateConfirmBroadcast, &data)
 	case StateConfirmBroadcast:
 		yesOptions := []string{"yes", "y"}
@@ -93,14 +92,14 @@ func (client TelegramClient) handleMessage(update *tgbotapi.Update) {
 			if data.BroadcastStateData == nil || data.BroadcastStateData.Message == "" {
 				log.Sugar.Fatal("No message to broadcast. This should never happen!")
 			}
-			sendBroadcastMessage(data.BroadcastStateData.Message)
-			sendBroadcastEndInfoMessage(update, true)
+			client.sendBroadcastMessage(data.BroadcastStateData.Message)
+			client.sendBroadcastEndInfoMessage(update, true)
 			client.setState(update, StateNil, nil)
 		} else if slices.Contains(abortOptions, strings.ToLower(update.Message.Text)) {
-			sendBroadcastEndInfoMessage(update, false)
+			client.sendBroadcastEndInfoMessage(update, false)
 			client.setState(update, StateNil, nil)
 		} else {
-			sendBroadcastStart(update)
+			client.sendBroadcastStart(update)
 			client.setState(update, StateStartBroadcast, nil)
 		}
 	}
@@ -110,29 +109,29 @@ func (client TelegramClient) handleCallbackQuery(update *tgbotapi.Update) {
 	callbackData := ToCallbackData(update.CallbackQuery.Data)
 	switch callbackData.Command {
 	case CallbackCmdShowSubscriptions:
-		performUpdateSubscription(update, callbackData.Data)
-		sendSubscriptions(update)
+		client.performUpdateSubscription(update, callbackData.Data)
+		client.sendSubscriptions(update)
 	case CallbackCmdShowProposals:
-		sendCurrentProposals(update)
+		client.sendCurrentProposals(update)
 	case CallbackCmdShowHelp:
-		sendHelp(update)
+		client.sendHelp(update)
 	case CallbackCmdShowSupport:
-		sendSupport(update)
+		client.sendSupport(update)
 	case CallbackCmdVote:
-		performVote(update, callbackData.Data)
+		client.performVote(update, callbackData.Data)
 	default:
 		if isBotAdmin(update) { // Check for admin callbacks
 			switch callbackData.Command {
 			case CallbackCmdStats:
-				sendUserStatistics(update)
+				client.sendUserStatistics(update)
 			default:
-				sendError(update)
-				sendHelp(update)
+				client.sendError(update)
+				client.sendHelp(update)
 				client.setState(update, StateNil, nil)
 			}
 		} else {
-			sendError(update)
-			sendHelp(update)
+			client.sendError(update)
+			client.sendHelp(update)
 			client.setState(update, StateNil, nil)
 		}
 	}
@@ -212,7 +211,6 @@ func (client TelegramClient) manageUpdateChannels() {
 
 //goland:noinspection GoNameStartsWithPackageName
 type TelegramClient struct {
-	//userManager *database.UserManager
 	api *tgbotapi.BotAPI
 
 	// updateChannels contains one update channel for every user.
@@ -223,22 +221,36 @@ type TelegramClient struct {
 	updateCountChannel chan UpdateCount
 	state              map[int64]State
 	stateData          map[int64]StateData
+
+	UserManager                 *database.UserManager
+	TelegramChatManager         *database.TelegramChatManager
+	TelegramSubscriptionManager *database.TelegramSubscriptionManager
+	ProposalManager             *database.ProposalManager
+	StatsManager                *database.StatsManager
+
+	AuthzClient *authz.AuthzClient
 }
 
-func NewTelegramClient() *TelegramClient {
+func NewTelegramClient(managers database.DbManagers, authzClient *authz.AuthzClient) *TelegramClient {
 	return &TelegramClient{
 		api:                getApi(),
 		updateChannels:     make(map[int64]chan tgbotapi.Update),
 		updateCountChannel: make(chan UpdateCount),
 		state:              make(map[int64]State),
 		stateData:          make(map[int64]StateData),
+
+		UserManager:                 managers.UserManager,
+		TelegramChatManager:         managers.TelegramChatManager,
+		TelegramSubscriptionManager: managers.TelegramSubscriptionManager,
+		ProposalManager:             managers.ProposalManager,
+		StatsManager:                managers.StatsManager,
+
+		AuthzClient: authzClient,
 	}
 }
 
 func (client TelegramClient) Start() {
 	log.Sugar.Info("Start telegram bot")
-
-	mHack = database.NewDefaultDbManagers()
 
 	updateConfig := tgbotapi.NewUpdate(0)
 	updates := client.api.GetUpdatesChan(updateConfig)

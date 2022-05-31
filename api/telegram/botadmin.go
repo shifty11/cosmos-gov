@@ -3,6 +3,7 @@ package telegram
 import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/log"
 	"golang.org/x/exp/slices"
@@ -24,9 +25,20 @@ func isBotAdmin(update *tgbotapi.Update) bool {
 	return slices.Contains(admins, strconv.FormatInt(fromId, 10))
 }
 
-func sendUserStatistics(update *tgbotapi.Update) {
+func handleError(chatId int, err error, tgChatManager *database.TelegramChatManager) {
+	if err != nil {
+		if slices.Contains(forbiddenErrors, err.Error()) {
+			log.Sugar.Debugf("Delete user #%v", chatId)
+			tgChatManager.Delete(int64(chatId))
+		} else {
+			log.Sugar.Errorf("Error while sending message to chat #%v: %v", chatId, err)
+		}
+	}
+}
+
+func (client TelegramClient) sendUserStatistics(update *tgbotapi.Update) {
 	chatId := getChatIdX(update)
-	statsManager := mHack.StatsManager
+	statsManager := client.StatsManager
 	chainStatistics, err := statsManager.GetChainStats()
 	if err != nil {
 		log.Sugar.Error(err)
@@ -95,16 +107,16 @@ func sendUserStatistics(update *tgbotapi.Update) {
 	}
 }
 
-func sendBroadcastStart(update *tgbotapi.Update) {
+func (client TelegramClient) sendBroadcastStart(update *tgbotapi.Update) {
 	chatId := getChatIdX(update)
 	msg := tgbotapi.NewMessage(chatId, startBroadcastInfoMsg)
 	msg.DisableWebPagePreview = true
 	sendMessageX(msg)
 }
 
-func sendConfirmBroadcastMessage(update *tgbotapi.Update, text string) {
+func (client TelegramClient) sendConfirmBroadcastMessage(update *tgbotapi.Update, text string) {
 	chatId := getChatIdX(update)
-	cntUsers := mHack.TelegramChatManager.CountChats()
+	cntUsers := client.TelegramChatManager.CountChats()
 	broadcastMsg := tgbotapi.NewMessage(chatId, text)
 	broadcastMsg.DisableWebPagePreview = true
 	broadcastMsg.ParseMode = "html"
@@ -114,40 +126,25 @@ func sendConfirmBroadcastMessage(update *tgbotapi.Update, text string) {
 	sendMessageX(msg)
 }
 
-func sendBroadcastMessage(text string) {
-	chatIds := mHack.TelegramChatManager.GetAllChatIds()
+func (client TelegramClient) sendBroadcastMessage(text string) {
+	chatIds := client.TelegramChatManager.GetAllChatIds()
 	log.Sugar.Debugf("Broadcast message to %v users", len(chatIds))
 	for _, chatId := range chatIds {
 		broadcastMsg := tgbotapi.NewMessage(int64(chatId), text)
 		broadcastMsg.DisableWebPagePreview = true
 		broadcastMsg.ParseMode = "html"
 		err := sendMessage(broadcastMsg)
-		handleError(chatId, err)
+		handleError(chatId, err, client.TelegramChatManager)
 	}
 }
 
-func sendBroadcastEndInfoMessage(update *tgbotapi.Update, success bool) {
+func (client TelegramClient) sendBroadcastEndInfoMessage(update *tgbotapi.Update, success bool) {
 	chatId := getChatIdX(update)
 	text := abortBroadcastMsg
 	if success {
-		cntUsers := mHack.TelegramChatManager.CountChats()
+		cntUsers := client.TelegramChatManager.CountChats()
 		text = fmt.Sprintf(successBroadcastMsg, cntUsers)
 	}
 	msg := tgbotapi.NewMessage(chatId, text)
 	sendMessageX(msg)
-}
-
-func SendMessageToBotAdmins(message string) {
-	admins := strings.Split(strings.Trim(os.Getenv("ADMIN_IDS"), " "), ",")
-	for _, chatIdStr := range admins {
-		chatId, err := strconv.Atoi(chatIdStr)
-		if err != nil {
-			log.Sugar.Error(err)
-		}
-		msg := tgbotapi.NewMessage(int64(chatId), message)
-		msg.ParseMode = "html"
-		msg.DisableWebPagePreview = true
-		err = sendMessage(msg)
-		handleError(chatId, err)
-	}
 }

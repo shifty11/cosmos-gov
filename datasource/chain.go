@@ -3,7 +3,6 @@ package datasource
 import (
 	"fmt"
 	"github.com/cosmos/cosmos-sdk/x/gov/types"
-	"github.com/shifty11/cosmos-gov/api/telegram"
 	"github.com/shifty11/cosmos-gov/log"
 	"golang.org/x/exp/slices"
 	"sort"
@@ -129,6 +128,6 @@ func (ds Datasource) AddNewChains() {
 	}
 	if message != "" {
 		intro := "<b>New chain update info</b>\n"
-		telegram.SendMessageToBotAdmins(intro + message)
+		ds.tgClient.SendMessageToBotAdmins(intro + message)
 	}
 }

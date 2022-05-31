@@ -2,6 +2,8 @@ package datasource
 
 import (
 	"context"
+	"github.com/shifty11/cosmos-gov/api/discord"
+	"github.com/shifty11/cosmos-gov/api/telegram"
 	"github.com/shifty11/cosmos-gov/database"
 	registry "github.com/strangelove-ventures/lens/client/chain_registry"
 )
@@ -22,6 +24,8 @@ type Datasource struct {
 	draftProposalManager  *database.DraftProposalManager
 	lensChainInfoManager  *database.LensChainInfoManager
 	state                 *State
+	tgClient              *telegram.TelegramLightClient
+	discordClient         *discord.DiscordLightClient
 }
 
 func NewDatasource(
@@ -29,6 +33,8 @@ func NewDatasource(
 	managers database.DbManagers,
 	chainRegistry registry.CosmosGithubRegistry,
 	state *State,
+	tgClient *telegram.TelegramLightClient,
+	discordClient *discord.DiscordLightClient,
 ) *Datasource {
 	if state == nil {
 		state = &State{
@@ -37,7 +43,8 @@ func NewDatasource(
 			maxFetchErrorsUntilReport:       20,
 		}
 	}
-	return &Datasource{ctx: ctx,
+	return &Datasource{
+		ctx:                   ctx,
 		chainRegistry:         chainRegistry,
 		chainManager:          managers.ChainManager,
 		proposalManager:       managers.ProposalManager,
@@ -46,5 +53,7 @@ func NewDatasource(
 		telegramChatManager:   managers.TelegramChatManager,
 		discordChannelManager: managers.DiscordChannelManager,
 		state:                 state,
+		tgClient:              tgClient,
+		discordClient:         discordClient,
 	}
 }

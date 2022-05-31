@@ -209,17 +209,6 @@ var forbiddenErrors = []string{
 	"Bad Request: chat not found",
 }
 
-func handleError(chatId int, err error) {
-	if err != nil {
-		if slices.Contains(forbiddenErrors, err.Error()) {
-			log.Sugar.Debugf("Delete user #%v", chatId)
-			mHack.TelegramChatManager.Delete(int64(chatId))
-		} else {
-			log.Sugar.Errorf("Error while sending message to chat #%v: %v", chatId, err)
-		}
-	}
-}
-
 func isUpdateFromCreatorOrAdministrator(update *tgbotapi.Update) bool {
 	api := getApi()
 	chatId := getChatIdX(update)
