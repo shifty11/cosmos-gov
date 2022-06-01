@@ -43,6 +43,7 @@ var (
 		{Name: "name", Type: field.TypeString},
 		{Name: "is_group", Type: field.TypeBool},
 		{Name: "roles", Type: field.TypeString, Default: ""},
+		{Name: "wants_draft_proposals", Type: field.TypeBool, Default: false},
 		{Name: "discord_channel_user", Type: field.TypeInt, Nullable: true},
 	}
 	// DiscordChannelsTable holds the schema information for the "discord_channels" table.
@@ -53,7 +54,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "discord_channels_users_user",
-				Columns:    []*schema.Column{DiscordChannelsColumns[7]},
+				Columns:    []*schema.Column{DiscordChannelsColumns[8]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -152,7 +153,7 @@ var (
 		{Name: "description", Type: field.TypeString},
 		{Name: "voting_start_time", Type: field.TypeTime},
 		{Name: "voting_end_time", Type: field.TypeTime},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"PROPOSAL_STATUS_FAILED", "PROPOSAL_STATUS_UNSPECIFIED", "PROPOSAL_STATUS_DEPOSIT_PERIOD", "PROPOSAL_STATUS_VOTING_PERIOD", "PROPOSAL_STATUS_PASSED", "PROPOSAL_STATUS_REJECTED"}},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"PROPOSAL_STATUS_REJECTED", "PROPOSAL_STATUS_FAILED", "PROPOSAL_STATUS_UNSPECIFIED", "PROPOSAL_STATUS_DEPOSIT_PERIOD", "PROPOSAL_STATUS_VOTING_PERIOD", "PROPOSAL_STATUS_PASSED"}},
 		{Name: "chain_proposals", Type: field.TypeInt, Nullable: true},
 	}
 	// ProposalsTable holds the schema information for the "proposals" table.
@@ -213,6 +214,7 @@ var (
 		{Name: "chat_id", Type: field.TypeInt64, Unique: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "is_group", Type: field.TypeBool},
+		{Name: "wants_draft_proposals", Type: field.TypeBool, Default: false},
 		{Name: "telegram_chat_user", Type: field.TypeInt, Nullable: true},
 	}
 	// TelegramChatsTable holds the schema information for the "telegram_chats" table.
@@ -223,7 +225,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "telegram_chats_users_user",
-				Columns:    []*schema.Column{TelegramChatsColumns[6]},
+				Columns:    []*schema.Column{TelegramChatsColumns[7]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

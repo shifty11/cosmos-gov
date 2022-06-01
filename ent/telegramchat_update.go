@@ -55,6 +55,20 @@ func (tcu *TelegramChatUpdate) SetName(s string) *TelegramChatUpdate {
 	return tcu
 }
 
+// SetWantsDraftProposals sets the "wants_draft_proposals" field.
+func (tcu *TelegramChatUpdate) SetWantsDraftProposals(b bool) *TelegramChatUpdate {
+	tcu.mutation.SetWantsDraftProposals(b)
+	return tcu
+}
+
+// SetNillableWantsDraftProposals sets the "wants_draft_proposals" field if the given value is not nil.
+func (tcu *TelegramChatUpdate) SetNillableWantsDraftProposals(b *bool) *TelegramChatUpdate {
+	if b != nil {
+		tcu.SetWantsDraftProposals(*b)
+	}
+	return tcu
+}
+
 // SetUserID sets the "user" edge to the User entity by ID.
 func (tcu *TelegramChatUpdate) SetUserID(id int) *TelegramChatUpdate {
 	tcu.mutation.SetUserID(id)
@@ -230,6 +244,13 @@ func (tcu *TelegramChatUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: telegramchat.FieldName,
 		})
 	}
+	if value, ok := tcu.mutation.WantsDraftProposals(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: telegramchat.FieldWantsDraftProposals,
+		})
+	}
 	if tcu.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -360,6 +381,20 @@ func (tcuo *TelegramChatUpdateOne) AddChatID(i int64) *TelegramChatUpdateOne {
 // SetName sets the "name" field.
 func (tcuo *TelegramChatUpdateOne) SetName(s string) *TelegramChatUpdateOne {
 	tcuo.mutation.SetName(s)
+	return tcuo
+}
+
+// SetWantsDraftProposals sets the "wants_draft_proposals" field.
+func (tcuo *TelegramChatUpdateOne) SetWantsDraftProposals(b bool) *TelegramChatUpdateOne {
+	tcuo.mutation.SetWantsDraftProposals(b)
+	return tcuo
+}
+
+// SetNillableWantsDraftProposals sets the "wants_draft_proposals" field if the given value is not nil.
+func (tcuo *TelegramChatUpdateOne) SetNillableWantsDraftProposals(b *bool) *TelegramChatUpdateOne {
+	if b != nil {
+		tcuo.SetWantsDraftProposals(*b)
+	}
 	return tcuo
 }
 
@@ -560,6 +595,13 @@ func (tcuo *TelegramChatUpdateOne) sqlSave(ctx context.Context) (_node *Telegram
 			Type:   field.TypeString,
 			Value:  value,
 			Column: telegramchat.FieldName,
+		})
+	}
+	if value, ok := tcuo.mutation.WantsDraftProposals(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: telegramchat.FieldWantsDraftProposals,
 		})
 	}
 	if tcuo.mutation.UserCleared() {

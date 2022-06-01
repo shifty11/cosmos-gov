@@ -68,6 +68,10 @@ func init() {
 	discordchannelDescRoles := discordchannelFields[3].Descriptor()
 	// discordchannel.DefaultRoles holds the default value on creation for the roles field.
 	discordchannel.DefaultRoles = discordchannelDescRoles.Default.(string)
+	// discordchannelDescWantsDraftProposals is the schema descriptor for wants_draft_proposals field.
+	discordchannelDescWantsDraftProposals := discordchannelFields[4].Descriptor()
+	// discordchannel.DefaultWantsDraftProposals holds the default value on creation for the wants_draft_proposals field.
+	discordchannel.DefaultWantsDraftProposals = discordchannelDescWantsDraftProposals.Default.(bool)
 	draftproposalMixin := schema.DraftProposal{}.Mixin()
 	draftproposalMixinFields0 := draftproposalMixin[0].Fields()
 	_ = draftproposalMixinFields0
@@ -158,6 +162,10 @@ func init() {
 	telegramchat.DefaultUpdateTime = telegramchatDescUpdateTime.Default.(func() time.Time)
 	// telegramchat.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
 	telegramchat.UpdateDefaultUpdateTime = telegramchatDescUpdateTime.UpdateDefault.(func() time.Time)
+	// telegramchatDescWantsDraftProposals is the schema descriptor for wants_draft_proposals field.
+	telegramchatDescWantsDraftProposals := telegramchatFields[3].Descriptor()
+	// telegramchat.DefaultWantsDraftProposals holds the default value on creation for the wants_draft_proposals field.
+	telegramchat.DefaultWantsDraftProposals = telegramchatDescWantsDraftProposals.Default.(bool)
 	userMixin := schema.User{}.Mixin()
 	userMixinFields0 := userMixin[0].Fields()
 	_ = userMixinFields0

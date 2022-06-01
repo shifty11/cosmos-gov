@@ -23,6 +23,8 @@ const (
 	FieldIsGroup = "is_group"
 	// FieldRoles holds the string denoting the roles field in the database.
 	FieldRoles = "roles"
+	// FieldWantsDraftProposals holds the string denoting the wants_draft_proposals field in the database.
+	FieldWantsDraftProposals = "wants_draft_proposals"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// EdgeChains holds the string denoting the chains edge name in mutations.
@@ -52,6 +54,7 @@ var Columns = []string{
 	FieldName,
 	FieldIsGroup,
 	FieldRoles,
+	FieldWantsDraftProposals,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "discord_channels"
@@ -90,4 +93,6 @@ var (
 	UpdateDefaultUpdateTime func() time.Time
 	// DefaultRoles holds the default value on creation for the "roles" field.
 	DefaultRoles string
+	// DefaultWantsDraftProposals holds the default value on creation for the "wants_draft_proposals" field.
+	DefaultWantsDraftProposals bool
 )

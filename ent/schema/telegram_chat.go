@@ -27,6 +27,8 @@ func (TelegramChat) Fields() []ent.Field {
 		field.String("name"),
 		field.Bool("is_group").
 			Immutable(),
+		field.Bool("wants_draft_proposals").
+			Default(false),
 	}
 }
 

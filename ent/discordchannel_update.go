@@ -69,6 +69,20 @@ func (dcu *DiscordChannelUpdate) SetNillableRoles(s *string) *DiscordChannelUpda
 	return dcu
 }
 
+// SetWantsDraftProposals sets the "wants_draft_proposals" field.
+func (dcu *DiscordChannelUpdate) SetWantsDraftProposals(b bool) *DiscordChannelUpdate {
+	dcu.mutation.SetWantsDraftProposals(b)
+	return dcu
+}
+
+// SetNillableWantsDraftProposals sets the "wants_draft_proposals" field if the given value is not nil.
+func (dcu *DiscordChannelUpdate) SetNillableWantsDraftProposals(b *bool) *DiscordChannelUpdate {
+	if b != nil {
+		dcu.SetWantsDraftProposals(*b)
+	}
+	return dcu
+}
+
 // SetUserID sets the "user" edge to the User entity by ID.
 func (dcu *DiscordChannelUpdate) SetUserID(id int) *DiscordChannelUpdate {
 	dcu.mutation.SetUserID(id)
@@ -251,6 +265,13 @@ func (dcu *DiscordChannelUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Column: discordchannel.FieldRoles,
 		})
 	}
+	if value, ok := dcu.mutation.WantsDraftProposals(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: discordchannel.FieldWantsDraftProposals,
+		})
+	}
 	if dcu.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -394,6 +415,20 @@ func (dcuo *DiscordChannelUpdateOne) SetRoles(s string) *DiscordChannelUpdateOne
 func (dcuo *DiscordChannelUpdateOne) SetNillableRoles(s *string) *DiscordChannelUpdateOne {
 	if s != nil {
 		dcuo.SetRoles(*s)
+	}
+	return dcuo
+}
+
+// SetWantsDraftProposals sets the "wants_draft_proposals" field.
+func (dcuo *DiscordChannelUpdateOne) SetWantsDraftProposals(b bool) *DiscordChannelUpdateOne {
+	dcuo.mutation.SetWantsDraftProposals(b)
+	return dcuo
+}
+
+// SetNillableWantsDraftProposals sets the "wants_draft_proposals" field if the given value is not nil.
+func (dcuo *DiscordChannelUpdateOne) SetNillableWantsDraftProposals(b *bool) *DiscordChannelUpdateOne {
+	if b != nil {
+		dcuo.SetWantsDraftProposals(*b)
 	}
 	return dcuo
 }
@@ -602,6 +637,13 @@ func (dcuo *DiscordChannelUpdateOne) sqlSave(ctx context.Context) (_node *Discor
 			Type:   field.TypeString,
 			Value:  value,
 			Column: discordchannel.FieldRoles,
+		})
+	}
+	if value, ok := dcuo.mutation.WantsDraftProposals(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: discordchannel.FieldWantsDraftProposals,
 		})
 	}
 	if dcuo.mutation.UserCleared() {

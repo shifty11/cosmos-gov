@@ -1299,25 +1299,26 @@ func (m *ChainMutation) ResetEdge(name string) error {
 // DiscordChannelMutation represents an operation that mutates the DiscordChannel nodes in the graph.
 type DiscordChannelMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	create_time   *time.Time
-	update_time   *time.Time
-	channel_id    *int64
-	addchannel_id *int64
-	name          *string
-	is_group      *bool
-	roles         *string
-	clearedFields map[string]struct{}
-	user          *int
-	cleareduser   bool
-	chains        map[int]struct{}
-	removedchains map[int]struct{}
-	clearedchains bool
-	done          bool
-	oldValue      func(context.Context) (*DiscordChannel, error)
-	predicates    []predicate.DiscordChannel
+	op                    Op
+	typ                   string
+	id                    *int
+	create_time           *time.Time
+	update_time           *time.Time
+	channel_id            *int64
+	addchannel_id         *int64
+	name                  *string
+	is_group              *bool
+	roles                 *string
+	wants_draft_proposals *bool
+	clearedFields         map[string]struct{}
+	user                  *int
+	cleareduser           bool
+	chains                map[int]struct{}
+	removedchains         map[int]struct{}
+	clearedchains         bool
+	done                  bool
+	oldValue              func(context.Context) (*DiscordChannel, error)
+	predicates            []predicate.DiscordChannel
 }
 
 var _ ent.Mutation = (*DiscordChannelMutation)(nil)
@@ -1654,6 +1655,42 @@ func (m *DiscordChannelMutation) ResetRoles() {
 	m.roles = nil
 }
 
+// SetWantsDraftProposals sets the "wants_draft_proposals" field.
+func (m *DiscordChannelMutation) SetWantsDraftProposals(b bool) {
+	m.wants_draft_proposals = &b
+}
+
+// WantsDraftProposals returns the value of the "wants_draft_proposals" field in the mutation.
+func (m *DiscordChannelMutation) WantsDraftProposals() (r bool, exists bool) {
+	v := m.wants_draft_proposals
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWantsDraftProposals returns the old "wants_draft_proposals" field's value of the DiscordChannel entity.
+// If the DiscordChannel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DiscordChannelMutation) OldWantsDraftProposals(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWantsDraftProposals is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWantsDraftProposals requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWantsDraftProposals: %w", err)
+	}
+	return oldValue.WantsDraftProposals, nil
+}
+
+// ResetWantsDraftProposals resets all changes to the "wants_draft_proposals" field.
+func (m *DiscordChannelMutation) ResetWantsDraftProposals() {
+	m.wants_draft_proposals = nil
+}
+
 // SetUserID sets the "user" edge to the User entity by id.
 func (m *DiscordChannelMutation) SetUserID(id int) {
 	m.user = &id
@@ -1766,7 +1803,7 @@ func (m *DiscordChannelMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *DiscordChannelMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 7)
 	if m.create_time != nil {
 		fields = append(fields, discordchannel.FieldCreateTime)
 	}
@@ -1784,6 +1821,9 @@ func (m *DiscordChannelMutation) Fields() []string {
 	}
 	if m.roles != nil {
 		fields = append(fields, discordchannel.FieldRoles)
+	}
+	if m.wants_draft_proposals != nil {
+		fields = append(fields, discordchannel.FieldWantsDraftProposals)
 	}
 	return fields
 }
@@ -1805,6 +1845,8 @@ func (m *DiscordChannelMutation) Field(name string) (ent.Value, bool) {
 		return m.IsGroup()
 	case discordchannel.FieldRoles:
 		return m.Roles()
+	case discordchannel.FieldWantsDraftProposals:
+		return m.WantsDraftProposals()
 	}
 	return nil, false
 }
@@ -1826,6 +1868,8 @@ func (m *DiscordChannelMutation) OldField(ctx context.Context, name string) (ent
 		return m.OldIsGroup(ctx)
 	case discordchannel.FieldRoles:
 		return m.OldRoles(ctx)
+	case discordchannel.FieldWantsDraftProposals:
+		return m.OldWantsDraftProposals(ctx)
 	}
 	return nil, fmt.Errorf("unknown DiscordChannel field %s", name)
 }
@@ -1876,6 +1920,13 @@ func (m *DiscordChannelMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetRoles(v)
+		return nil
+	case discordchannel.FieldWantsDraftProposals:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWantsDraftProposals(v)
 		return nil
 	}
 	return fmt.Errorf("unknown DiscordChannel field %s", name)
@@ -1958,6 +2009,9 @@ func (m *DiscordChannelMutation) ResetField(name string) error {
 		return nil
 	case discordchannel.FieldRoles:
 		m.ResetRoles()
+		return nil
+	case discordchannel.FieldWantsDraftProposals:
+		m.ResetWantsDraftProposals()
 		return nil
 	}
 	return fmt.Errorf("unknown DiscordChannel field %s", name)
@@ -5087,24 +5141,25 @@ func (m *RpcEndpointMutation) ResetEdge(name string) error {
 // TelegramChatMutation represents an operation that mutates the TelegramChat nodes in the graph.
 type TelegramChatMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	create_time   *time.Time
-	update_time   *time.Time
-	chat_id       *int64
-	addchat_id    *int64
-	name          *string
-	is_group      *bool
-	clearedFields map[string]struct{}
-	user          *int
-	cleareduser   bool
-	chains        map[int]struct{}
-	removedchains map[int]struct{}
-	clearedchains bool
-	done          bool
-	oldValue      func(context.Context) (*TelegramChat, error)
-	predicates    []predicate.TelegramChat
+	op                    Op
+	typ                   string
+	id                    *int
+	create_time           *time.Time
+	update_time           *time.Time
+	chat_id               *int64
+	addchat_id            *int64
+	name                  *string
+	is_group              *bool
+	wants_draft_proposals *bool
+	clearedFields         map[string]struct{}
+	user                  *int
+	cleareduser           bool
+	chains                map[int]struct{}
+	removedchains         map[int]struct{}
+	clearedchains         bool
+	done                  bool
+	oldValue              func(context.Context) (*TelegramChat, error)
+	predicates            []predicate.TelegramChat
 }
 
 var _ ent.Mutation = (*TelegramChatMutation)(nil)
@@ -5405,6 +5460,42 @@ func (m *TelegramChatMutation) ResetIsGroup() {
 	m.is_group = nil
 }
 
+// SetWantsDraftProposals sets the "wants_draft_proposals" field.
+func (m *TelegramChatMutation) SetWantsDraftProposals(b bool) {
+	m.wants_draft_proposals = &b
+}
+
+// WantsDraftProposals returns the value of the "wants_draft_proposals" field in the mutation.
+func (m *TelegramChatMutation) WantsDraftProposals() (r bool, exists bool) {
+	v := m.wants_draft_proposals
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWantsDraftProposals returns the old "wants_draft_proposals" field's value of the TelegramChat entity.
+// If the TelegramChat object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TelegramChatMutation) OldWantsDraftProposals(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWantsDraftProposals is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWantsDraftProposals requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWantsDraftProposals: %w", err)
+	}
+	return oldValue.WantsDraftProposals, nil
+}
+
+// ResetWantsDraftProposals resets all changes to the "wants_draft_proposals" field.
+func (m *TelegramChatMutation) ResetWantsDraftProposals() {
+	m.wants_draft_proposals = nil
+}
+
 // SetUserID sets the "user" edge to the User entity by id.
 func (m *TelegramChatMutation) SetUserID(id int) {
 	m.user = &id
@@ -5517,7 +5608,7 @@ func (m *TelegramChatMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TelegramChatMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.create_time != nil {
 		fields = append(fields, telegramchat.FieldCreateTime)
 	}
@@ -5532,6 +5623,9 @@ func (m *TelegramChatMutation) Fields() []string {
 	}
 	if m.is_group != nil {
 		fields = append(fields, telegramchat.FieldIsGroup)
+	}
+	if m.wants_draft_proposals != nil {
+		fields = append(fields, telegramchat.FieldWantsDraftProposals)
 	}
 	return fields
 }
@@ -5551,6 +5645,8 @@ func (m *TelegramChatMutation) Field(name string) (ent.Value, bool) {
 		return m.Name()
 	case telegramchat.FieldIsGroup:
 		return m.IsGroup()
+	case telegramchat.FieldWantsDraftProposals:
+		return m.WantsDraftProposals()
 	}
 	return nil, false
 }
@@ -5570,6 +5666,8 @@ func (m *TelegramChatMutation) OldField(ctx context.Context, name string) (ent.V
 		return m.OldName(ctx)
 	case telegramchat.FieldIsGroup:
 		return m.OldIsGroup(ctx)
+	case telegramchat.FieldWantsDraftProposals:
+		return m.OldWantsDraftProposals(ctx)
 	}
 	return nil, fmt.Errorf("unknown TelegramChat field %s", name)
 }
@@ -5613,6 +5711,13 @@ func (m *TelegramChatMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetIsGroup(v)
+		return nil
+	case telegramchat.FieldWantsDraftProposals:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWantsDraftProposals(v)
 		return nil
 	}
 	return fmt.Errorf("unknown TelegramChat field %s", name)
@@ -5692,6 +5797,9 @@ func (m *TelegramChatMutation) ResetField(name string) error {
 		return nil
 	case telegramchat.FieldIsGroup:
 		m.ResetIsGroup()
+		return nil
+	case telegramchat.FieldWantsDraftProposals:
+		m.ResetWantsDraftProposals()
 		return nil
 	}
 	return fmt.Errorf("unknown TelegramChat field %s", name)

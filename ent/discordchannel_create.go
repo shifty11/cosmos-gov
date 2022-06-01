@@ -82,6 +82,20 @@ func (dcc *DiscordChannelCreate) SetNillableRoles(s *string) *DiscordChannelCrea
 	return dcc
 }
 
+// SetWantsDraftProposals sets the "wants_draft_proposals" field.
+func (dcc *DiscordChannelCreate) SetWantsDraftProposals(b bool) *DiscordChannelCreate {
+	dcc.mutation.SetWantsDraftProposals(b)
+	return dcc
+}
+
+// SetNillableWantsDraftProposals sets the "wants_draft_proposals" field if the given value is not nil.
+func (dcc *DiscordChannelCreate) SetNillableWantsDraftProposals(b *bool) *DiscordChannelCreate {
+	if b != nil {
+		dcc.SetWantsDraftProposals(*b)
+	}
+	return dcc
+}
+
 // SetUserID sets the "user" edge to the User entity by ID.
 func (dcc *DiscordChannelCreate) SetUserID(id int) *DiscordChannelCreate {
 	dcc.mutation.SetUserID(id)
@@ -199,6 +213,10 @@ func (dcc *DiscordChannelCreate) defaults() {
 		v := discordchannel.DefaultRoles
 		dcc.mutation.SetRoles(v)
 	}
+	if _, ok := dcc.mutation.WantsDraftProposals(); !ok {
+		v := discordchannel.DefaultWantsDraftProposals
+		dcc.mutation.SetWantsDraftProposals(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -220,6 +238,9 @@ func (dcc *DiscordChannelCreate) check() error {
 	}
 	if _, ok := dcc.mutation.Roles(); !ok {
 		return &ValidationError{Name: "roles", err: errors.New(`ent: missing required field "DiscordChannel.roles"`)}
+	}
+	if _, ok := dcc.mutation.WantsDraftProposals(); !ok {
+		return &ValidationError{Name: "wants_draft_proposals", err: errors.New(`ent: missing required field "DiscordChannel.wants_draft_proposals"`)}
 	}
 	return nil
 }
@@ -295,6 +316,14 @@ func (dcc *DiscordChannelCreate) createSpec() (*DiscordChannel, *sqlgraph.Create
 			Column: discordchannel.FieldRoles,
 		})
 		_node.Roles = value
+	}
+	if value, ok := dcc.mutation.WantsDraftProposals(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: discordchannel.FieldWantsDraftProposals,
+		})
+		_node.WantsDraftProposals = value
 	}
 	if nodes := dcc.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

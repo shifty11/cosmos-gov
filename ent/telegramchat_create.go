@@ -68,6 +68,20 @@ func (tcc *TelegramChatCreate) SetIsGroup(b bool) *TelegramChatCreate {
 	return tcc
 }
 
+// SetWantsDraftProposals sets the "wants_draft_proposals" field.
+func (tcc *TelegramChatCreate) SetWantsDraftProposals(b bool) *TelegramChatCreate {
+	tcc.mutation.SetWantsDraftProposals(b)
+	return tcc
+}
+
+// SetNillableWantsDraftProposals sets the "wants_draft_proposals" field if the given value is not nil.
+func (tcc *TelegramChatCreate) SetNillableWantsDraftProposals(b *bool) *TelegramChatCreate {
+	if b != nil {
+		tcc.SetWantsDraftProposals(*b)
+	}
+	return tcc
+}
+
 // SetUserID sets the "user" edge to the User entity by ID.
 func (tcc *TelegramChatCreate) SetUserID(id int) *TelegramChatCreate {
 	tcc.mutation.SetUserID(id)
@@ -181,6 +195,10 @@ func (tcc *TelegramChatCreate) defaults() {
 		v := telegramchat.DefaultUpdateTime()
 		tcc.mutation.SetUpdateTime(v)
 	}
+	if _, ok := tcc.mutation.WantsDraftProposals(); !ok {
+		v := telegramchat.DefaultWantsDraftProposals
+		tcc.mutation.SetWantsDraftProposals(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -199,6 +217,9 @@ func (tcc *TelegramChatCreate) check() error {
 	}
 	if _, ok := tcc.mutation.IsGroup(); !ok {
 		return &ValidationError{Name: "is_group", err: errors.New(`ent: missing required field "TelegramChat.is_group"`)}
+	}
+	if _, ok := tcc.mutation.WantsDraftProposals(); !ok {
+		return &ValidationError{Name: "wants_draft_proposals", err: errors.New(`ent: missing required field "TelegramChat.wants_draft_proposals"`)}
 	}
 	return nil
 }
@@ -266,6 +287,14 @@ func (tcc *TelegramChatCreate) createSpec() (*TelegramChat, *sqlgraph.CreateSpec
 			Column: telegramchat.FieldIsGroup,
 		})
 		_node.IsGroup = value
+	}
+	if value, ok := tcc.mutation.WantsDraftProposals(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: telegramchat.FieldWantsDraftProposals,
+		})
+		_node.WantsDraftProposals = value
 	}
 	if nodes := tcc.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

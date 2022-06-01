@@ -29,6 +29,8 @@ type DiscordChannel struct {
 	IsGroup bool `json:"is_group,omitempty"`
 	// Roles holds the value of the "roles" field.
 	Roles string `json:"roles,omitempty"`
+	// WantsDraftProposals holds the value of the "wants_draft_proposals" field.
+	WantsDraftProposals bool `json:"wants_draft_proposals,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the DiscordChannelQuery when eager-loading is set.
 	Edges                DiscordChannelEdges `json:"edges"`
@@ -74,7 +76,7 @@ func (*DiscordChannel) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case discordchannel.FieldIsGroup:
+		case discordchannel.FieldIsGroup, discordchannel.FieldWantsDraftProposals:
 			values[i] = new(sql.NullBool)
 		case discordchannel.FieldID, discordchannel.FieldChannelID:
 			values[i] = new(sql.NullInt64)
@@ -141,6 +143,12 @@ func (dc *DiscordChannel) assignValues(columns []string, values []interface{}) e
 			} else if value.Valid {
 				dc.Roles = value.String
 			}
+		case discordchannel.FieldWantsDraftProposals:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field wants_draft_proposals", values[i])
+			} else if value.Valid {
+				dc.WantsDraftProposals = value.Bool
+			}
 		case discordchannel.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field discord_channel_user", value)
@@ -198,6 +206,8 @@ func (dc *DiscordChannel) String() string {
 	builder.WriteString(fmt.Sprintf("%v", dc.IsGroup))
 	builder.WriteString(", roles=")
 	builder.WriteString(dc.Roles)
+	builder.WriteString(", wants_draft_proposals=")
+	builder.WriteString(fmt.Sprintf("%v", dc.WantsDraftProposals))
 	builder.WriteByte(')')
 	return builder.String()
 }

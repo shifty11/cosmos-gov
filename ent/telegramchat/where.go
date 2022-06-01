@@ -128,6 +128,13 @@ func IsGroup(v bool) predicate.TelegramChat {
 	})
 }
 
+// WantsDraftProposals applies equality check predicate on the "wants_draft_proposals" field. It's identical to WantsDraftProposalsEQ.
+func WantsDraftProposals(v bool) predicate.TelegramChat {
+	return predicate.TelegramChat(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldWantsDraftProposals), v))
+	})
+}
+
 // CreateTimeEQ applies the EQ predicate on the "create_time" field.
 func CreateTimeEQ(v time.Time) predicate.TelegramChat {
 	return predicate.TelegramChat(func(s *sql.Selector) {
@@ -478,6 +485,20 @@ func IsGroupEQ(v bool) predicate.TelegramChat {
 func IsGroupNEQ(v bool) predicate.TelegramChat {
 	return predicate.TelegramChat(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldIsGroup), v))
+	})
+}
+
+// WantsDraftProposalsEQ applies the EQ predicate on the "wants_draft_proposals" field.
+func WantsDraftProposalsEQ(v bool) predicate.TelegramChat {
+	return predicate.TelegramChat(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldWantsDraftProposals), v))
+	})
+}
+
+// WantsDraftProposalsNEQ applies the NEQ predicate on the "wants_draft_proposals" field.
+func WantsDraftProposalsNEQ(v bool) predicate.TelegramChat {
+	return predicate.TelegramChat(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldWantsDraftProposals), v))
 	})
 }
 

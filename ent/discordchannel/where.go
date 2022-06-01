@@ -135,6 +135,13 @@ func Roles(v string) predicate.DiscordChannel {
 	})
 }
 
+// WantsDraftProposals applies equality check predicate on the "wants_draft_proposals" field. It's identical to WantsDraftProposalsEQ.
+func WantsDraftProposals(v bool) predicate.DiscordChannel {
+	return predicate.DiscordChannel(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldWantsDraftProposals), v))
+	})
+}
+
 // CreateTimeEQ applies the EQ predicate on the "create_time" field.
 func CreateTimeEQ(v time.Time) predicate.DiscordChannel {
 	return predicate.DiscordChannel(func(s *sql.Selector) {
@@ -596,6 +603,20 @@ func RolesEqualFold(v string) predicate.DiscordChannel {
 func RolesContainsFold(v string) predicate.DiscordChannel {
 	return predicate.DiscordChannel(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldRoles), v))
+	})
+}
+
+// WantsDraftProposalsEQ applies the EQ predicate on the "wants_draft_proposals" field.
+func WantsDraftProposalsEQ(v bool) predicate.DiscordChannel {
+	return predicate.DiscordChannel(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldWantsDraftProposals), v))
+	})
+}
+
+// WantsDraftProposalsNEQ applies the NEQ predicate on the "wants_draft_proposals" field.
+func WantsDraftProposalsNEQ(v bool) predicate.DiscordChannel {
+	return predicate.DiscordChannel(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldWantsDraftProposals), v))
 	})
 }
 

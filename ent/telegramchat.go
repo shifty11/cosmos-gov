@@ -27,6 +27,8 @@ type TelegramChat struct {
 	Name string `json:"name,omitempty"`
 	// IsGroup holds the value of the "is_group" field.
 	IsGroup bool `json:"is_group,omitempty"`
+	// WantsDraftProposals holds the value of the "wants_draft_proposals" field.
+	WantsDraftProposals bool `json:"wants_draft_proposals,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TelegramChatQuery when eager-loading is set.
 	Edges              TelegramChatEdges `json:"edges"`
@@ -72,7 +74,7 @@ func (*TelegramChat) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case telegramchat.FieldIsGroup:
+		case telegramchat.FieldIsGroup, telegramchat.FieldWantsDraftProposals:
 			values[i] = new(sql.NullBool)
 		case telegramchat.FieldID, telegramchat.FieldChatID:
 			values[i] = new(sql.NullInt64)
@@ -133,6 +135,12 @@ func (tc *TelegramChat) assignValues(columns []string, values []interface{}) err
 			} else if value.Valid {
 				tc.IsGroup = value.Bool
 			}
+		case telegramchat.FieldWantsDraftProposals:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field wants_draft_proposals", values[i])
+			} else if value.Valid {
+				tc.WantsDraftProposals = value.Bool
+			}
 		case telegramchat.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field telegram_chat_user", value)
@@ -188,6 +196,8 @@ func (tc *TelegramChat) String() string {
 	builder.WriteString(tc.Name)
 	builder.WriteString(", is_group=")
 	builder.WriteString(fmt.Sprintf("%v", tc.IsGroup))
+	builder.WriteString(", wants_draft_proposals=")
+	builder.WriteString(fmt.Sprintf("%v", tc.WantsDraftProposals))
 	builder.WriteByte(')')
 	return builder.String()
 }

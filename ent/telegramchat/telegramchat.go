@@ -21,6 +21,8 @@ const (
 	FieldName = "name"
 	// FieldIsGroup holds the string denoting the is_group field in the database.
 	FieldIsGroup = "is_group"
+	// FieldWantsDraftProposals holds the string denoting the wants_draft_proposals field in the database.
+	FieldWantsDraftProposals = "wants_draft_proposals"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// EdgeChains holds the string denoting the chains edge name in mutations.
@@ -49,6 +51,7 @@ var Columns = []string{
 	FieldChatID,
 	FieldName,
 	FieldIsGroup,
+	FieldWantsDraftProposals,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "telegram_chats"
@@ -85,4 +88,6 @@ var (
 	DefaultUpdateTime func() time.Time
 	// UpdateDefaultUpdateTime holds the default value on update for the "update_time" field.
 	UpdateDefaultUpdateTime func() time.Time
+	// DefaultWantsDraftProposals holds the default value on creation for the "wants_draft_proposals" field.
+	DefaultWantsDraftProposals bool
 )
