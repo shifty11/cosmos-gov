@@ -11,6 +11,7 @@ import (
 	"strings"
 )
 
+// DiscordLightClient can just send stuff and not interact with users
 //goland:noinspection GoNameStartsWithPackageName
 type DiscordLightClient struct {
 	DiscordChannelManager *database.DiscordChannelManager

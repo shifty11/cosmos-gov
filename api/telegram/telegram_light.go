@@ -14,6 +14,7 @@ import (
 	"strings"
 )
 
+// TelegramLightClient can just send stuff and not interact with users
 //goland:noinspection GoNameStartsWithPackageName
 type TelegramLightClient struct {
 	api                 *tgbotapi.BotAPI
