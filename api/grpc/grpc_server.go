@@ -15,38 +15,36 @@ import (
 	"github.com/shifty11/cosmos-gov/log"
 	"google.golang.org/grpc"
 	"net"
-	"os"
 	"time"
 )
 
-const (
-	port                 = ":50051"
-	accessTokenDuration  = time.Minute * 15
-	refreshTokenDuration = time.Hour * 24
-)
+type Config struct {
+	Port                 string
+	AccessTokenDuration  time.Duration
+	RefreshTokenDuration time.Duration
+	JwtSecretKey         string
+	TelegramToken        string
+}
 
-func Start() {
-	jwtSecretKey := os.Getenv("JWT_SECRET_KEY")
-	if jwtSecretKey == "" {
-		log.Sugar.Panic("JWT_SECRET_KEY must be set")
-	}
+//goland:noinspection GoNameStartsWithPackageName
+type GRPCManager struct {
+	managers    *database.DbManagers
+	authzClient *authz.AuthzClient
+	config      *Config
+}
 
-	telegramToken := os.Getenv("TELEGRAM_TOKEN")
-	if telegramToken == "" {
-		log.Sugar.Panic("TELEGRAM_TOKEN must be set")
-	}
+func NewGRPCManager(managers *database.DbManagers, authzClient *authz.AuthzClient, config *Config) *GRPCManager {
+	return &GRPCManager{managers: managers, authzClient: authzClient, config: config}
+}
 
-	managers := database.NewDefaultDbManagers()
+func (m GRPCManager) Start() {
+	jwtManager := auth.NewJWTManager([]byte(m.config.JwtSecretKey), m.config.AccessTokenDuration, m.config.RefreshTokenDuration)
+	interceptor := auth.NewAuthInterceptor(jwtManager, m.managers.UserManager, auth.AccessibleRoles())
 
-	jwtManager := auth.NewJWTManager([]byte(jwtSecretKey), accessTokenDuration, refreshTokenDuration)
-	interceptor := auth.NewAuthInterceptor(jwtManager, managers.UserManager, auth.AccessibleRoles())
-
-	authzClient := authz.NewAuthzClient(managers.ChainManager, managers.WalletManager)
-
-	authServer := auth.NewAuthServer(managers.UserManager, jwtManager, telegramToken)
-	subscriptionServer := subscription.NewSubscriptionsServer(managers.SubscriptionManager)
-	votePermissionServer := vote_permission.NewVotePermissionsServer(authzClient, managers.ChainManager, managers.WalletManager)
-	adminServer := admin.NewAdminServer(managers.ChainManager)
+	authServer := auth.NewAuthServer(m.managers.UserManager, jwtManager, m.config.TelegramToken)
+	subscriptionServer := subscription.NewSubscriptionsServer(m.managers.SubscriptionManager)
+	votePermissionServer := vote_permission.NewVotePermissionsServer(m.authzClient, m.managers.ChainManager, m.managers.WalletManager)
+	adminServer := admin.NewAdminServer(m.managers.ChainManager)
 
 	server := grpc.NewServer(
 		grpc.UnaryInterceptor(interceptor.Unary()),
@@ -58,7 +56,7 @@ func Start() {
 	vote_permission_service.RegisterVotePermissionServiceServer(server, votePermissionServer)
 	admin_service.RegisterAdminServiceServer(server, adminServer)
 
-	lis, err := net.Listen("tcp", port)
+	lis, err := net.Listen("tcp", m.config.Port)
 	if err != nil {
 		log.Sugar.Fatalf("failed to listen: %v", err)
 	}

@@ -26,7 +26,7 @@ type ChainDatasource struct {
 
 func NewChainDatasource(
 	ctx context.Context,
-	managers database.DbManagers,
+	managers *database.DbManagers,
 	chainRegistry registry.CosmosGithubRegistry,
 	tgClient *telegram.TelegramLightClient,
 	discordClient *discord.DiscordLightClient,

@@ -91,19 +91,19 @@ type DbManagers struct {
 	WalletManager               *WalletManager
 }
 
-func NewDefaultDbManagers() DbManagers {
+func NewDefaultDbManagers() *DbManagers {
 	client, ctx := connect()
 	return NewCustomDbManagers(client, ctx)
 }
 
-func NewCustomDbManagers(client *ent.Client, ctx context.Context) DbManagers {
+func NewCustomDbManagers(client *ent.Client, ctx context.Context) *DbManagers {
 	chainManager := NewChainManager(client, ctx)
 	userManager := NewUserManager(client, ctx)
 	telegramChatManager := NewTelegramChatManager(client, ctx, chainManager)
 	discordChannelManager := NewDiscordChannelManager(client, ctx, chainManager)
 	telegramUserManager := NewTypedUserManager(client, ctx, user.TypeTelegram)
 	discordUserManager := NewTypedUserManager(client, ctx, user.TypeDiscord)
-	return DbManagers{
+	return &DbManagers{
 		ChainManager:                chainManager,
 		UserManager:                 userManager,
 		TelegramUserManager:         telegramUserManager,

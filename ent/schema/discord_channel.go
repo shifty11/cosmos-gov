@@ -29,6 +29,8 @@ func (DiscordChannel) Fields() []ent.Field {
 			Immutable(),
 		field.String("roles").
 			Default(""),
+		field.Bool("wants_draft_proposals").
+			Default(false),
 	}
 }
 

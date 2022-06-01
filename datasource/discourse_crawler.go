@@ -25,7 +25,7 @@ type DiscourseCrawler struct {
 	discordClient         *discord.DiscordLightClient
 }
 
-func NewDiscourseCrawler(ctx context.Context, managers database.DbManagers, tgClient *telegram.TelegramLightClient, discordClient *discord.DiscordLightClient) *DiscourseCrawler {
+func NewDiscourseCrawler(ctx context.Context, managers *database.DbManagers, tgClient *telegram.TelegramLightClient, discordClient *discord.DiscordLightClient) *DiscourseCrawler {
 	return &DiscourseCrawler{
 		ctx:                   ctx,
 		chainManager:          managers.ChainManager,

@@ -16,7 +16,7 @@ type DiscordLightClient struct {
 	DiscordChannelManager *database.DiscordChannelManager
 }
 
-func NewDiscordLightClient(managers database.DbManagers) *DiscordLightClient {
+func NewDiscordLightClient(managers *database.DbManagers) *DiscordLightClient {
 	return &DiscordLightClient{
 		DiscordChannelManager: managers.DiscordChannelManager,
 	}
@@ -89,7 +89,7 @@ func (dc DiscordLightClient) SendDraftProposals(entProp *ent.DraftProposal, entC
 	text := fmt.Sprintf("💬  **%v - New pre-vote proposal\n\n%v**\n<%v>", entChain.DisplayName, entProp.Title, entProp.URL)
 
 	var errIds []int64
-	channelIds := dc.DiscordChannelManager.GetChannelIds(entChain)
+	channelIds := dc.DiscordChannelManager.GetChannelIdsWithDraftPropsEnabled(entChain)
 	for _, channelId := range channelIds {
 		log.Sugar.Debugf("Send draft proposal #%v on %v to discord chat #%v", entProp.DraftProposalID, entChain.DisplayName, channelId)
 		var _, err = session.ChannelMessageSendComplex(strconv.Itoa(channelId), &discordgo.MessageSend{

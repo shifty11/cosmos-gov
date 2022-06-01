@@ -38,10 +38,11 @@ func convertSubscriptionToProtobuf(entUser *ent.User, subscriptions []*database.
 			roomType = pb.ChatRoom_DISCORD
 		}
 		rooms = append(rooms, &pb.ChatRoom{
-			Id:            chatRoom.Id,
-			Name:          chatRoom.Name,
-			TYPE:          roomType,
-			Subscriptions: subs,
+			Id:                  chatRoom.Id,
+			Name:                chatRoom.Name,
+			TYPE:                roomType,
+			Subscriptions:       subs,
+			WantsDraftProposals: chatRoom.WantsDraftProposals,
 		})
 	}
 	return rooms
@@ -75,8 +76,26 @@ func (server *SubscriptionServer) ToggleSubscription(ctx context.Context, req *p
 	isSubscribed, err := server.subscriptionManager.ToggleSubscription(entUser, req.ChatRoomId, req.Name)
 	if err != nil {
 		log.Sugar.Errorf("error while toggling subscription: %v", err)
-		return nil, status.Errorf(codes.Internal, "Unknown error occured")
+		return nil, status.Errorf(codes.Internal, "Unknown error occurred")
 	}
 	var res = &pb.ToggleSubscriptionResponse{IsSubscribed: isSubscribed}
 	return res, nil
+}
+
+func (server *SubscriptionServer) UpdateSettings(ctx context.Context, req *pb.UpdateSettingsRequest) (*pb.SettingsResponse, error) {
+	entUser, ok := ctx.Value("user").(*ent.User)
+	if !ok {
+		log.Sugar.Error("invalid user")
+		return nil, status.Errorf(codes.NotFound, "invalid user")
+	}
+
+	err := server.subscriptionManager.UpdateWantsDraftProposal(entUser, req.ChatRoomId, req.WantsDraftProposals)
+	if err != nil {
+		log.Sugar.Errorf("error while updating WantsDraftProposals: %v", err)
+		return nil, status.Errorf(codes.Internal, "Unknown error occurred")
+	}
+	return &pb.SettingsResponse{
+		ChatRoomId:          req.ChatRoomId,
+		WantsDraftProposals: req.WantsDraftProposals,
+	}, nil
 }

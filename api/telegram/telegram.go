@@ -231,7 +231,7 @@ type TelegramClient struct {
 	AuthzClient *authz.AuthzClient
 }
 
-func NewTelegramClient(managers database.DbManagers, authzClient *authz.AuthzClient) *TelegramClient {
+func NewTelegramClient(managers *database.DbManagers, authzClient *authz.AuthzClient) *TelegramClient {
 	return &TelegramClient{
 		api:                getApi(),
 		updateChannels:     make(map[int64]chan tgbotapi.Update),

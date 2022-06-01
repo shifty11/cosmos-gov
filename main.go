@@ -77,8 +77,8 @@ func startDiscordServer(discordClient *discord.DiscordClient) {
 	go discordClient.Start()
 }
 
-func startGrpcServer() {
-	go grpc.Start()
+func startGrpcServer(grpcManager *grpc.GRPCManager) {
+	go grpcManager.Start()
 }
 
 func main() {
@@ -87,37 +87,52 @@ func main() {
 	defer database.Close()
 
 	managers := database.NewDefaultDbManagers()
-	authzClient := authz.NewAuthzClient(managers.ChainManager, managers.WalletManager)
-	tgClient := telegram.NewTelegramClient(managers, authzClient)
-	tgLightClient := telegram.NewTelegramLightClient(managers)
-	discordClient := discord.NewDiscordClient(managers)
-	discordLightClient := discord.NewDiscordLightClient(managers)
-	reg := registry.NewCosmosGithubRegistry(log.Sugar.Desugar())
-	cd := datasource.NewChainDatasource(context.Background(), managers, reg, tgLightClient, discordLightClient)
-	ds := datasource.NewProposalDatasource(context.Background(), managers, reg, nil, tgLightClient, discordLightClient)
-	dc := datasource.NewDiscourseCrawler(context.Background(), managers, tgLightClient, discordLightClient)
 
 	args := os.Args[1:]
 	if len(args) > 0 && args[0] == "fetching" {
+		tgLightClient := telegram.NewTelegramLightClient(managers)
+		discordLightClient := discord.NewDiscordLightClient(managers)
+		reg := registry.NewCosmosGithubRegistry(log.Sugar.Desugar())
+		cd := datasource.NewChainDatasource(context.Background(), managers, reg, tgLightClient, discordLightClient)
+		ds := datasource.NewProposalDatasource(context.Background(), managers, reg, nil, tgLightClient, discordLightClient)
+		dc := datasource.NewDiscourseCrawler(context.Background(), managers, tgLightClient, discordLightClient)
+
 		initDatabase(cd, managers.ChainManager)
 		startProposalFetching(ds)
 		startDraftProposalFetching(dc)
 		startNewChainFetching(cd)
 		startProposalUpdating(ds)
 	} else if len(args) > 0 && args[0] == "telegram" {
+		authzClient := authz.NewAuthzClient(managers.ChainManager, managers.WalletManager)
+		tgClient := telegram.NewTelegramClient(managers, authzClient)
+
 		startTelegramServer(tgClient)
 	} else if len(args) > 0 && args[0] == "discord" {
+		discordClient := discord.NewDiscordClient(managers)
+
 		startDiscordServer(discordClient)
 	} else if len(args) > 0 && args[0] == "grpc" {
-		startGrpcServer()
-	} else {
-		initDatabase(cd, managers.ChainManager)
-		startProposalFetching(ds)
-		startDraftProposalFetching(dc)
-		startNewChainFetching(cd)
-		startProposalUpdating(ds)
-		startTelegramServer(tgClient)
-		startDiscordServer(discordClient)
+		jwtSecretKey := os.Getenv("JWT_SECRET_KEY")
+		if jwtSecretKey == "" {
+			log.Sugar.Panic("JWT_SECRET_KEY must be set")
+		}
+
+		telegramToken := os.Getenv("TELEGRAM_TOKEN")
+		if telegramToken == "" {
+			log.Sugar.Panic("TELEGRAM_TOKEN must be set")
+		}
+		authzClient := authz.NewAuthzClient(managers.ChainManager, managers.WalletManager)
+
+		var config = &grpc.Config{
+			Port:                 ":50051",
+			AccessTokenDuration:  time.Minute * 15,
+			RefreshTokenDuration: time.Hour * 24,
+			JwtSecretKey:         jwtSecretKey,
+			TelegramToken:        telegramToken,
+		}
+		grpcManager := grpc.NewGRPCManager(managers, authzClient, config)
+
+		startGrpcServer(grpcManager)
 	}
 
 	time.Sleep(time.Duration(1<<63 - 1))

@@ -40,6 +40,7 @@ func AccessibleRoles() map[string][]Role {
 		authService + "RefreshAccessToken":              {Unauthenticated, User, Admin},
 		subsService + "GetSubscriptions":                {User, Admin},
 		subsService + "ToggleSubscription":              {User, Admin},
+		subsService + "UpdateSettings":                  {User, Admin},
 		votePermissionService + "GetSupportedChains":    {User, Admin},
 		votePermissionService + "RegisterWallet":        {User, Admin},
 		votePermissionService + "RemoveWallet":          {User, Admin},

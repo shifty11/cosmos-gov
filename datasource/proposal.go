@@ -44,7 +44,7 @@ type ProposalDatasource struct {
 
 func NewProposalDatasource(
 	ctx context.Context,
-	managers database.DbManagers,
+	managers *database.DbManagers,
 	chainRegistry registry.CosmosGithubRegistry,
 	state *State,
 	tgClient *telegram.TelegramLightClient,

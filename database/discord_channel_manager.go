@@ -125,3 +125,15 @@ func (manager *DiscordChannelManager) GetChannelIds(entChain *ent.Chain) []int {
 	}
 	return channelIds
 }
+
+func (manager *DiscordChannelManager) GetChannelIdsWithDraftPropsEnabled(entChain *ent.Chain) []int {
+	channelIds, err := entChain.
+		QueryDiscordChannels().
+		Where(discordchannel.WantsDraftProposalsEQ(true)).
+		Select(discordchannel.FieldChannelID).
+		Ints(manager.ctx)
+	if err != nil {
+		log.Sugar.Panicf("Error while querying Discord channelIds for chain %v: %v", entChain.Name, err)
+	}
+	return channelIds
+}

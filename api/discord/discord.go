@@ -16,7 +16,7 @@ type DiscordClient struct {
 	ProposalManager            *database.ProposalManager
 }
 
-func NewDiscordClient(managers database.DbManagers) *DiscordClient {
+func NewDiscordClient(managers *database.DbManagers) *DiscordClient {
 	return &DiscordClient{
 		DiscordChannelManager:      managers.DiscordChannelManager,
 		DiscordSubscriptionManager: managers.DiscordSubscriptionManager,

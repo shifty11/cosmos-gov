@@ -3,6 +3,8 @@ package database
 import (
 	"context"
 	"github.com/shifty11/cosmos-gov/ent"
+	"github.com/shifty11/cosmos-gov/ent/discordchannel"
+	"github.com/shifty11/cosmos-gov/ent/telegramchat"
 	"github.com/shifty11/cosmos-gov/ent/user"
 	"github.com/shifty11/cosmos-gov/log"
 )
@@ -14,9 +16,10 @@ type Subscription struct {
 }
 
 type ChatRoom struct {
-	Id            int64
-	Name          string
-	Subscriptions []*Subscription
+	Id                  int64
+	Name                string
+	Subscriptions       []*Subscription
+	WantsDraftProposals bool
 }
 
 type SubscriptionManager struct {
@@ -69,6 +72,28 @@ func (manager *SubscriptionManager) ToggleSubscription(entUser *ent.User, chatRo
 	}
 }
 
+func (manager *SubscriptionManager) UpdateWantsDraftProposal(entUser *ent.User, chatRoomId int64, wantsDraftProposals bool) error {
+	if entUser.Type == user.TypeTelegram {
+		return manager.client.TelegramChat.
+			Update().
+			Where(telegramchat.And(
+				telegramchat.HasUserWith(user.IDEQ(entUser.ID)),
+				telegramchat.ChatIDEQ(chatRoomId),
+			)).
+			SetWantsDraftProposals(wantsDraftProposals).
+			Exec(manager.ctx)
+	} else {
+		return manager.client.DiscordChannel.
+			Update().
+			Where(discordchannel.And(
+				discordchannel.HasUserWith(user.IDEQ(entUser.ID)),
+				discordchannel.ChannelIDEQ(chatRoomId),
+			)).
+			SetWantsDraftProposals(wantsDraftProposals).
+			Exec(manager.ctx)
+	}
+}
+
 func (manager *SubscriptionManager) GetSubscriptions(entUser *ent.User) []*ChatRoom {
 	if entUser.Type == user.TypeTelegram {
 		tgChats, err := entUser.
@@ -82,9 +107,10 @@ func (manager *SubscriptionManager) GetSubscriptions(entUser *ent.User) []*ChatR
 		var chats []*ChatRoom
 		for _, tgChat := range tgChats {
 			chats = append(chats, &ChatRoom{
-				Id:            tgChat.ChatID,
-				Name:          tgChat.Name,
-				Subscriptions: getSubscriptions(manager.chainManager, tgChat.Edges.Chains),
+				Id:                  tgChat.ChatID,
+				Name:                tgChat.Name,
+				Subscriptions:       getSubscriptions(manager.chainManager, tgChat.Edges.Chains),
+				WantsDraftProposals: tgChat.WantsDraftProposals,
 			})
 		}
 		return chats
@@ -100,9 +126,10 @@ func (manager *SubscriptionManager) GetSubscriptions(entUser *ent.User) []*ChatR
 		var chats []*ChatRoom
 		for _, dChannel := range dChannels {
 			chats = append(chats, &ChatRoom{
-				Id:            dChannel.ChannelID,
-				Name:          dChannel.Name,
-				Subscriptions: getSubscriptions(manager.chainManager, dChannel.Edges.Chains),
+				Id:                  dChannel.ChannelID,
+				Name:                dChannel.Name,
+				Subscriptions:       getSubscriptions(manager.chainManager, dChannel.Edges.Chains),
+				WantsDraftProposals: dChannel.WantsDraftProposals,
 			})
 		}
 		return chats

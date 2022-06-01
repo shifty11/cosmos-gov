@@ -20,7 +20,7 @@ type TelegramLightClient struct {
 	TelegramChatManager *database.TelegramChatManager
 }
 
-func NewTelegramLightClient(managers database.DbManagers) *TelegramLightClient {
+func NewTelegramLightClient(managers *database.DbManagers) *TelegramLightClient {
 	return &TelegramLightClient{
 		api: getApi(),
 
@@ -80,8 +80,8 @@ func (client TelegramLightClient) SendDraftProposals(entProp *ent.DraftProposal,
 	text := fmt.Sprintf("💬  <b>%v - New pre-vote proposal\n\n%v</b>\n%v", entChain.DisplayName, entProp.Title, entProp.URL)
 
 	var errIds []int64
-	allTgChats := client.TelegramChatManager.GetChatIds(entChain)
-	for _, chat := range allTgChats {
+	tgChats := client.TelegramChatManager.GetChatIdsWithDraftPropsEnabled(entChain)
+	for _, chat := range tgChats {
 		log.Sugar.Debugf("Send draft proposal #%v on %v to telegram chat #%v", entProp.DraftProposalID, entChain.DisplayName, chat.ChatId)
 
 		msg := tgbotapi.NewMessage(chat.ChatId, text)

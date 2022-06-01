@@ -171,6 +171,19 @@ func (manager *TelegramChatManager) GetChatIdsWithGrants(entChain *ent.Chain) []
 	return v
 }
 
+func (manager *TelegramChatManager) GetChatIdsWithDraftPropsEnabled(entChain *ent.Chain) []TgChatQueryResult {
+	var v []TgChatQueryResult
+	err := entChain.
+		QueryTelegramChats().
+		Where(telegramchat.WantsDraftProposalsEQ(true)).
+		Select(telegramchat.FieldChatID, telegramchat.FieldName).
+		Scan(manager.ctx, &v)
+	if err != nil {
+		log.Sugar.Panicf("Error while querying Telegram chatIds for chain %v: %v", entChain.Name, err)
+	}
+	return v
+}
+
 func (manager *TelegramChatManager) GetAllChatIds() []int {
 	chatIds, err := manager.client.TelegramChat.
 		Query().
