@@ -75,7 +75,7 @@ func (dc DiscourseCrawler) getDraftProposals(url string) ([]Topic, error) {
 
 	var topics []Topic
 	for _, topic := range response.TopicList.Topics {
-		if slices.Contains(topic.Tags, "draft") {
+		if slices.Contains(topic.Tags, "last-call") {
 			topics = append(topics, topic)
 			log.Sugar.Infof("%v/t/%v/%v", url, topic.Slug, topic.Id)
 		}
@@ -84,12 +84,8 @@ func (dc DiscourseCrawler) getDraftProposals(url string) ([]Topic, error) {
 }
 
 func (dc DiscourseCrawler) saveAndSendDraftProposal(topic Topic, entChain *ent.Chain, url string) {
-	prop, err := dc.draftProposalManager.Create(entChain, int64(topic.Id), topic.Title, topic.url(url))
-	if err != nil {
-		log.Sugar.Errorf("while creating draft proposal: %v", err)
-		return
-	}
-	if entChain.IsEnabled {
+	prop := dc.draftProposalManager.CreateIfNotExists(entChain, int64(topic.Id), topic.Title, topic.url(url))
+	if prop != nil && entChain.IsEnabled {
 		errIds := dc.tgClient.SendDraftProposals(prop, entChain)
 		if len(errIds) > 0 {
 			dc.telegramChatManager.DeleteMultiple(errIds)
@@ -107,8 +103,6 @@ func (dc DiscourseCrawler) FetchDraftProposals() {
 	chains := dc.chainManager.All()
 	for _, c := range chains {
 		if c.Name == "cosmoshub" {
-			//database.DeleteAllDrafts()
-
 			url := "https://forum.cosmos.network"
 			topics, err := dc.getDraftProposals(url)
 			if err != nil {
