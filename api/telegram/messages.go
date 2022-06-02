@@ -40,22 +40,22 @@ func (client TelegramClient) sendSubscriptions(update *tgbotapi.Update) {
 		log.Sugar.Debugf("Send subscriptions to user #%v", chatId)
 	}
 
-	chains := client.TelegramSubscriptionManager.GetOrCreateSubscriptions(userId, userName, chatId, chatName, isGroup)
+	client.TelegramSubscriptionManager.GetOrCreateSubscriptions(userId, userName, chatId, chatName, isGroup)
 
 	var buttons [][]Button
-	var buttonRow []Button
-	for ix, c := range chains {
-		symbol := "❌ "
-		if c.Notify {
-			symbol = "✅ "
-		}
-		callbackData := &CallbackData{Command: CallbackCmdShowSubscriptions, Data: c.Name}
-		buttonRow = append(buttonRow, NewButton(symbol+c.DisplayName, callbackData))
-		if (ix+1)%NbrOfButtonsPerRow == 0 || ix == len(chains)-1 {
-			buttons = append(buttons, buttonRow)
-			buttonRow = []Button{}
-		}
-	}
+	//var buttonRow []Button
+	//for ix, c := range chains {
+	//	symbol := "❌ "
+	//	if c.Notify {
+	//		symbol = "✅ "
+	//	}
+	//	callbackData := &CallbackData{Command: CallbackCmdShowSubscriptions, Data: c.Name}
+	//	buttonRow = append(buttonRow, NewButton(symbol+c.DisplayName, callbackData))
+	//	if (ix+1)%NbrOfButtonsPerRow == 0 || ix == len(chains)-1 {
+	//		buttons = append(buttons, buttonRow)
+	//		buttonRow = []Button{}
+	//	}
+	//}
 	config := createMenuButtonConfig(update)
 	config.ShowSubscriptions = false
 	buttons = append(buttons, getMenuButtonRow(config, update))
