@@ -52,3 +52,8 @@ func (server *ChainServer) UpdateChain(_ context.Context, req *pb.UpdateChainReq
 	var res = &pb.UpdateChainResponse{Chain: chainToProtobuf(chain)}
 	return res, nil
 }
+
+func (server *ChainServer) ReportError(_ context.Context, req *pb.ReportErrorRequest) (*emptypb.Empty, error) {
+	log.Sugar.Infof("Frontend reported error: %v; data: %v", req.Error, req.Data)
+	return &emptypb.Empty{}, nil
+}

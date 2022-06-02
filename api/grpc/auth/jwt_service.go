@@ -48,6 +48,7 @@ func AccessibleRoles() map[string][]Role {
 		votePermissionService + "RefreshVotePermission": {User, Admin},
 		chainService + "GetChains":                      {Admin},
 		chainService + "UpdateChain":                    {Admin},
+		chainService + "ReportError":                    {Admin},
 	}
 }
 
