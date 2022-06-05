@@ -54,6 +54,12 @@ func (manager *UserManager) GenerateNewLoginToken(userId int64, userType user.Ty
 	return err
 }
 
+func (manager *UserManager) SetName(entUser *ent.User, name string) (*ent.User, error) {
+	return entUser.Update().
+		SetName(name).
+		Save(manager.ctx)
+}
+
 type TypedUserManager struct {
 	client   *ent.Client
 	ctx      context.Context

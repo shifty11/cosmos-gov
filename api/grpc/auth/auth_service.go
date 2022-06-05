@@ -8,6 +8,7 @@ import (
 	pb "github.com/shifty11/cosmos-gov/api/grpc/protobuf/go/auth_service"
 	"github.com/shifty11/cosmos-gov/database"
 	"github.com/shifty11/cosmos-gov/ent/user"
+	"github.com/shifty11/cosmos-gov/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"time"
@@ -69,6 +70,14 @@ func (server *AuthServer) TelegramLogin(_ context.Context, req *pb.TelegramLogin
 	refreshToken, err := server.jwtManager.GenerateToken(entUser, RefreshToken)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "cannot generate refreshToken: %v", err)
+	}
+
+	if req.Username != entUser.Name {
+		entUser, err = server.userManager.SetName(entUser, req.Username)
+		if err != nil {
+			log.Sugar.Errorf("Could not update username of user %v (%v): %v", entUser.Name, entUser.UserID, err)
+			return nil, status.Errorf(codes.Unauthenticated, "telegram login expired")
+		}
 	}
 
 	res := &pb.LoginResponse{AccessToken: accessToken, RefreshToken: refreshToken}
