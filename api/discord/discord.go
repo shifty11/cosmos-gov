@@ -24,15 +24,15 @@ func NewDiscordClient(managers *database.DbManagers) *DiscordClient {
 	}
 }
 
-func (dc DiscordClient) initDiscord() {
+func (dc DiscordClient) initDiscord() *discordgo.Session {
 	log.Sugar.Info("Init discord bot")
 
 	var err error
-	dc.s, err = discordgo.New("Bot " + os.Getenv("DISCORD_TOKEN"))
+	s, err := discordgo.New("Bot " + os.Getenv("DISCORD_TOKEN"))
 	if err != nil {
 		log.Sugar.Fatalf("Invalid bot parameters: %v", err)
 	}
-	dc.s.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	s.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		//TODO: make this multithreaded (see Telegram bot)
 		switch i.Type {
 		case discordgo.InteractionApplicationCommand:
@@ -46,6 +46,7 @@ func (dc DiscordClient) initDiscord() {
 			}
 		}
 	})
+	return s
 }
 
 func (dc DiscordClient) addCommands() {
@@ -71,7 +72,7 @@ func (dc DiscordClient) removeCommands() {
 }
 
 func (dc DiscordClient) Start() {
-	dc.initDiscord()
+	dc.s = dc.initDiscord()
 	log.Sugar.Info("Start discord bot")
 
 	err := dc.s.Open()
