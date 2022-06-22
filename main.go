@@ -2,6 +2,9 @@ package main
 
 import (
 	"context"
+	"os"
+	"time"
+
 	_ "github.com/lib/pq"
 	"github.com/robfig/cron/v3"
 	"github.com/shifty11/cosmos-gov/api/discord"
@@ -12,8 +15,6 @@ import (
 	"github.com/shifty11/cosmos-gov/datasource"
 	"github.com/shifty11/cosmos-gov/log"
 	registry "github.com/strangelove-ventures/lens/client/chain_registry"
-	"os"
-	"time"
 )
 
 func initDatabase(cd *datasource.ChainDatasource, chainManager *database.ChainManager) {
