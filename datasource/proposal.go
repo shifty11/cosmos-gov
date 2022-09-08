@@ -54,7 +54,7 @@ func NewProposalDatasource(
 		state = &State{
 			fetchErrors:                     make(map[int]int),
 			maxFetchErrorsUntilAttemptToFix: 10,
-			maxFetchErrorsUntilReport:       20,
+			maxFetchErrorsUntilReport:       200,
 		}
 	}
 	return &ProposalDatasource{
