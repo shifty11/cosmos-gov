@@ -7,7 +7,6 @@ COPY go.sum ./
 RUN go mod download
 
 COPY . .
-RUN rm Dockerfile
 
 RUN go build -o /cosmos-gov
 
