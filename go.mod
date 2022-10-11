@@ -156,3 +156,8 @@ replace github.com/strangelove-ventures/lens => github.com/shifty11/lens-gov v0.
 //replace github.com/strangelove-ventures/lens => /home/rapha/repos/lens-gov
 
 replace github.com/go-telegram-bot-api/telegram-bot-api/v5 => github.com/shifty11/telegram-bot-api/v5 v5.6.0
+
+replace github.com/shifty11/cosmos-gov/api/grpc/protobuf/go/admin_service => ./api/grpc/protobuf/go/admin_service
+replace github.com/shifty11/cosmos-gov/api/grpc/protobuf/go/auth_service => ./api/grpc/protobuf/go/auth_service
+replace github.com/shifty11/cosmos-gov/api/grpc/protobuf/go/subscription_service => ./api/grpc/protobuf/go/subscription_service
+replace github.com/shifty11/cosmos-gov/api/grpc/protobuf/go/vote_permission_service => ./api/grpc/protobuf/go/vote_permission_service
