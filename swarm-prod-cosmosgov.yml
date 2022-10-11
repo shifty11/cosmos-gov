@@ -1,0 +1,54 @@
+version: '3.9'
+
+services:
+  telegram:
+    image: ghcr.io/shifty11/cosmosgov-go:latest
+    working_dir: /app
+    secrets:
+      - cosmosgov-env
+    command: /bin/sh -c "source /run/secrets/cosmosgov-env && /cosmosgov telegram"
+    deploy:
+      placement:
+        constraints:
+          - node.role != manager
+
+  discord:
+    image: ghcr.io/shifty11/cosmosgov-go:latest
+    working_dir: /app
+    secrets:
+      - cosmosgov-env
+    command: /bin/sh -c "source /run/secrets/cosmosgov-env && /cosmosgov discord"
+    deploy:
+      placement:
+        constraints:
+          - node.role != manager
+
+  grpc:
+    image: ghcr.io/shifty11/cosmosgov-go:latest
+    working_dir: /app
+    secrets:
+      - cosmosgov-env
+    command: /bin/sh -c "source /run/secrets/cosmosgov-env && /cosmosgov grpc"
+    deploy:
+      placement:
+        constraints:
+          - node.role != manager
+
+  data:
+    image: ghcr.io/shifty11/cosmosgov-go:latest
+    working_dir: /app
+    secrets:
+      - cosmosgov-env
+    command: /bin/sh -c "source /run/secrets/cosmosgov-env && /cosmosgov fetching"
+    deploy:
+      placement:
+        constraints:
+          - node.role != manager
+
+networks:
+  caddy:
+    external: true
+
+secrets:
+  cosmosgov-env:
+    external: true
