@@ -35,7 +35,6 @@ jobs:
       - name: Build and push go Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
-          context: go/
           push: true
           tags: ${{ env.REGISTRY }}/${{ github.actor }}/cosmosgov-go:latest
           labels: ${{ steps.meta.outputs.labels }}
