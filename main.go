@@ -134,6 +134,8 @@ func main() {
 		grpcManager := grpc.NewGRPCManager(managers, authzClient, config)
 
 		startGrpcServer(grpcManager)
+	} else if len(args) > 0 && args[0] == "dump-db" {
+		managers.UserManager.DumpDb()
 	}
 
 	time.Sleep(time.Duration(1<<63 - 1))
