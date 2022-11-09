@@ -283,7 +283,7 @@ func writeToFile(thing any, fileName string) {
 		return
 	}
 
-	file, err := os.Create(fileName)
+	file, err := os.Create(fmt.Sprintf("%s/%s", os.Getenv("HOME"), fileName))
 	if err != nil {
 		log.Sugar.Errorf("Error creating file: %s", err)
 		return
